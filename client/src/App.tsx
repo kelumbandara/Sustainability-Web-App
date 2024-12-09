@@ -1,14 +1,16 @@
-import "./App.css";
-import SampleAddition from "./components/SampleAddition";
+import { BrowserRouter } from "react-router";
+import AppRoutes from "./Routes.tsx";
+import { CssBaseline, ThemeProvider } from "@mui/material";
+import theme from "./theme.ts";
 
 function App() {
   return (
-    <>
-      <h1>Sustainability Web App</h1>
-      <h4>Coming Soon...</h4>
-
-      <SampleAddition />
-    </>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 
