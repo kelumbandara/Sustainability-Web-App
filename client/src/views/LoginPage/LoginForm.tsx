@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import companyLogo from "../../assets/company-logo.jpg";
+import groupLogo from "../../assets/group-logo.png"
 import { useForm } from "react-hook-form";
 import CustomButton from "../../components/CustomButton";
 import LoginIcon from "@mui/icons-material/Login";
@@ -46,6 +47,7 @@ function LoginForm() {
     >
       <Box>
         <img src={companyLogo} alt="logo" height={"65em"} />
+        <img src={groupLogo} alt="logo" style={{marginLeft:'1rem'}} height={"45em"} />
       </Box>
       <Box>
         <Typography variant={"body2"}>
