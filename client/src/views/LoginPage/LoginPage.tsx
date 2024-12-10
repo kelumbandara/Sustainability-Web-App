@@ -62,7 +62,7 @@ function LoginPage() {
               textAlign: "center",
             }}
           >
-            copyright © 2024 Sky Smart Technology, All Rights Reserved
+            copyright © 2024 Chasseur-Dynamics, All Rights Reserved
           </Typography>
           <Typography
             variant="subtitle2"
