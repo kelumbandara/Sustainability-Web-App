@@ -1,5 +1,31 @@
+import { Box, Stack, Typography } from "@mui/material";
+import welcome from "../../assets/welcomeInsight.png";
+
 function Insight() {
-  return <div>Welcome Back User! </div>;
+  return (
+    <Stack>
+      <Typography
+        variant="h3"
+        align="center"
+        sx={{ mt: 2, mb: 2, fontWeight: "bold", color: "var(--pallet-orange)" }}
+      >
+        Welcome Back!
+      </Typography>
+      <Box
+        component="img"
+        src={welcome}
+        alt="Under Development"
+        sx={{ height: "50vh", width: "auto", objectFit: "contain" }}
+      />
+      <Typography
+        variant="body1"
+        align="center"
+        sx={{ mt: 2, color: "var(--pallet-main-blue)" }}
+      >
+        We are glad to have you back. Explore the insights and make informed
+      </Typography>
+    </Stack>
+  );
 }
 
 export default Insight;

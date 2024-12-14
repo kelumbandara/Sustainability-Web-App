@@ -451,8 +451,12 @@ export const LinkButton = React.memo(
           <div
             style={{
               marginRight: "0.4rem",
-              marginBottom: -4,
-              color: disabled ? "grey" : "#fff",
+              marginBottom: -5,
+              color: disabled
+                ? "grey"
+                : isMatch
+                ? "var(--pallet-orange)"
+                : "#fff",
             }}
           >
             {icon}
@@ -461,7 +465,11 @@ export const LinkButton = React.memo(
             variant="body2"
             sx={{
               textTransform: "capitalize",
-              color: disabled ? "grey" : "#fff",
+              color: disabled
+                ? "grey"
+                : isMatch
+                ? "var(--pallet-orange)"
+                : "#fff",
             }}
           >
             {title}
