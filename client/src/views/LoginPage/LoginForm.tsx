@@ -10,15 +10,23 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import companyLogo from "../../assets/company-logo.jpg";
-import groupLogo from "../../assets/group-logo.png"
+import groupLogo from "../../assets/group-logo.png";
 import { useForm } from "react-hook-form";
 import CustomButton from "../../components/CustomButton";
 import LoginIcon from "@mui/icons-material/Login";
 import ForgotPasswordDialog from "./ForgotPasswordDialog";
+import { useSnackbar } from "notistack";
+import { useNavigate } from "react-router";
+
+const sampleEmail = "admin@gmail.com";
+const samplePassword = "password";
 
 function LoginForm() {
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up(990));
+  const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate();
+
   const [showPassword, setShowPassword] = useState(false);
   const [openForgotPasswordDialog, setOpenForgotPasswordDialog] =
     useState(false);
@@ -29,10 +37,19 @@ function LoginForm() {
     formState: { errors },
   } = useForm({
     mode: "all",
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
 
-  const onLoginSubmit = (data: any) => {
-    console.log(data);
+  const onLoginSubmit = (data: { email: string; password: string }) => {
+    if (data.email === sampleEmail && data.password === samplePassword) {
+      navigate("/insights");
+      enqueueSnackbar("Welcome Back!", { variant: "success" });
+    } else {
+      enqueueSnackbar("Invalid email or password", { variant: "error" });
+    }
   };
 
   return (
@@ -47,7 +64,12 @@ function LoginForm() {
     >
       <Box>
         <img src={companyLogo} alt="logo" height={"65em"} />
-        <img src={groupLogo} alt="logo" style={{marginLeft:'1rem'}} height={"45em"} />
+        <img
+          src={groupLogo}
+          alt="logo"
+          style={{ marginLeft: "1rem" }}
+          height={"45em"}
+        />
       </Box>
       <Box>
         <Typography variant={"body2"}>
