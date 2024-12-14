@@ -15,7 +15,14 @@ function UnderDevelopment({ pageName }: { pageName: string }) {
         component="img"
         src={underDevPng}
         alt="Under Development"
-        sx={{ height: "50vh", width: "auto", objectFit: "contain" }}
+        sx={{
+          height: "auto",
+          width: "60vw",
+          maxHeight: "50vh",
+          objectFit: "contain",
+          justifySelf: "center",
+          alignSelf: "center",
+        }}
       />
       <Typography
         variant="h5"

@@ -15,7 +15,14 @@ function Insight() {
         component="img"
         src={welcome}
         alt="Under Development"
-        sx={{ height: "50vh", width: "auto", objectFit: "contain" }}
+        sx={{
+          height: "auto",
+          width: "60vw",
+          maxHeight: "50vh",
+          objectFit: "contain",
+          justifySelf: "center",
+          alignSelf: "center",
+        }}
       />
       <Typography
         variant="body1"
