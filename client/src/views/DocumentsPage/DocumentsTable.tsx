@@ -26,8 +26,10 @@ import { Document } from "../../api/documentApi";
 import { differenceInDays, format } from "date-fns";
 import ViewDocumentContent from "./ViewDocumentContent";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import { useSnackbar } from "notistack";
 
 function DocumentTable() {
+  const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<Document>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
@@ -194,9 +196,15 @@ function DocumentTable() {
               setDocuments(
                 documents.map((doc) => (doc.id === data.id ? data : doc))
               ); // Update the document in the list if it already exists
+              enqueueSnackbar("Document Details Updated Successfully!", {
+                variant: "success",
+              });
             } else {
               console.log("Adding new document", data);
               setDocuments([...documents, data]); // Add new document to the list
+              enqueueSnackbar("Document Created Successfully!", {
+                variant: "success",
+              });
             }
             setSelectedRow(null);
             setOpenViewDrawer(false);
@@ -225,6 +233,9 @@ function DocumentTable() {
             setOpenViewDrawer(false);
             setSelectedRow(null);
             setDeleteDialogOpen(false);
+            enqueueSnackbar("Document Deleted Successfully!", {
+              variant: "success",
+            });
           }}
           handleReject={() => {
             setOpenViewDrawer(false);
