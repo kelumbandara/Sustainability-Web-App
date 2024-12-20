@@ -45,7 +45,7 @@ function LoginForm() {
 
   const onLoginSubmit = (data: { email: string; password: string }) => {
     if (data.email === sampleEmail && data.password === samplePassword) {
-      navigate("/insights");
+      navigate("/home");
       enqueueSnackbar("Welcome Back!", { variant: "success" });
     } else {
       enqueueSnackbar("Invalid email or password", { variant: "error" });
@@ -132,16 +132,19 @@ function LoginForm() {
           <CustomButton
             type="submit"
             variant="contained"
-            color="primary"
+            sx={{
+              backgroundColor: "var(--pallet-blue)",
+            }}
             size="medium"
             startIcon={<LoginIcon />}
-            data-cy={"loginButton"}
           >
             Sign In
           </CustomButton>
           <CustomButton
             variant="text"
-            color="primary"
+            sx={{
+              color: "var(--pallet-orange)",
+            }}
             size="medium"
             onClick={() => setOpenForgotPasswordDialog(true)}
           >

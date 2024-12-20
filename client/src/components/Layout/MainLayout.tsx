@@ -122,9 +122,8 @@ interface Props {
 
 export default function MainLayout({ children }: Props) {
   const theme = useTheme();
-  const [open, setOpen] = React.useState(true);
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  console.log(open);
+  const [open, setOpen] = React.useState(isMobile ? false : true);
 
   const toggleDrawerOpen = () => {
     setOpen(!open);
@@ -335,7 +334,11 @@ const DrawerContent = ({
           if (item.nestedItems) {
             return (
               <Box sx={{ marginLeft: "1rem" }}>
-                <NestedItem key={i} item={item} />
+                <NestedItem
+                  key={i}
+                  item={item}
+                  handleDrawerClose={handleDrawerClose}
+                />
               </Box>
             );
           }
@@ -350,6 +353,7 @@ const DrawerContent = ({
                 icon={item.icon}
                 title={item.title}
                 disabled={item.disabled}
+                handleDrawerClose={handleDrawerClose}
               />
             </ListItem>
           );
@@ -359,92 +363,106 @@ const DrawerContent = ({
   );
 };
 
-const NestedItem = React.memo(({ item }: { item: SidebarItem }) => {
-  const [open, setOpen] = React.useState(item.open);
-  return (
-    <>
-      <Button
-        onClick={() => setOpen((o) => !o)}
-        endIcon={open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-        sx={{
-          fontSize: "0.8rem",
-          paddingY: "0.2rem",
-          alignItems: "center",
-          marginY: "0.1rem",
-        }}
-        disabled={item.disabled}
-      >
-        <div
-          style={{
-            marginRight: "0.5rem",
-            marginBottom: -4,
-            color: item.disabled ? "grey" : "#fff",
-          }}
-        >
-          {item.icon}
-        </div>
-        <Typography
-          variant="body2"
+const NestedItem = React.memo(
+  ({
+    item,
+    handleDrawerClose,
+  }: {
+    item: SidebarItem;
+    handleDrawerClose: () => void;
+  }) => {
+    const [open, setOpen] = React.useState(item.open);
+    return (
+      <>
+        <Button
+          onClick={() => setOpen((o) => !o)}
+          endIcon={open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           sx={{
-            textTransform: "capitalize",
-            color: item.disabled ? "grey" : "#fff",
+            fontSize: "0.8rem",
+            paddingY: "0.2rem",
+            alignItems: "center",
+            marginY: "0.1rem",
           }}
+          disabled={item.disabled}
         >
-          {item.title}
-        </Typography>
-      </Button>
-      <Collapse in={open} unmountOnExit>
-        <List>
-          {item.nestedItems.map((item) => {
-            if (item.nestedItems) {
-              return (
-                <Box key={item.href} sx={{ marginLeft: "0.5rem" }}>
-                  <NestedItem item={item} />
-                </Box>
-              );
-            }
+          <div
+            style={{
+              marginRight: "0.5rem",
+              marginBottom: -4,
+              color: item.disabled ? "grey" : "#fff",
+            }}
+          >
+            {item.icon}
+          </div>
+          <Typography
+            variant="body2"
+            sx={{
+              textTransform: "capitalize",
+              color: item.disabled ? "grey" : "#fff",
+            }}
+          >
+            {item.title}
+          </Typography>
+        </Button>
+        <Collapse in={open} unmountOnExit>
+          <List>
+            {item.nestedItems.map((item) => {
+              if (item.nestedItems) {
+                return (
+                  <Box key={item.href} sx={{ marginLeft: "0.5rem" }}>
+                    <NestedItem
+                      item={item}
+                      handleDrawerClose={handleDrawerClose}
+                    />
+                  </Box>
+                );
+              }
 
-            return (
-              <ListItem
-                disableGutters
-                key={item.title}
-                sx={{ paddingY: "3px", marginLeft: "0.5rem" }}
-              >
-                <LinkButton
-                  to={item.href}
-                  icon={item.icon}
-                  title={item.title}
-                  disabled={item.disabled}
-                />
-              </ListItem>
-            );
-          })}
-        </List>
-      </Collapse>
-    </>
-  );
-});
+              return (
+                <ListItem
+                  disableGutters
+                  key={item.title}
+                  sx={{ paddingY: "3px", marginLeft: "0.5rem" }}
+                >
+                  <LinkButton
+                    to={item.href}
+                    icon={item.icon}
+                    title={item.title}
+                    disabled={item.disabled}
+                    handleDrawerClose={handleDrawerClose}
+                  />
+                </ListItem>
+              );
+            })}
+          </List>
+        </Collapse>
+      </>
+    );
+  }
+);
 
 interface LinkButtonProps {
   to: string;
   icon: any;
   title: string;
   disabled?: boolean;
+  handleDrawerClose: () => void;
 }
 
 export const LinkButton = React.memo(
-  ({ to, icon, title, disabled }: LinkButtonProps) => {
+  ({ to, icon, title, disabled, handleDrawerClose }: LinkButtonProps) => {
     const { pathname } = useLocation();
 
     const isMatch = to === "/" ? pathname === to : pathname.startsWith(to);
 
     return (
-      <Link to={to} style={{ width: 220 }}>
+      <Link to={to} style={{ width: 220 }} onClick={handleDrawerClose}>
         <Button
           sx={{
             fontSize: "0.8rem",
             paddingY: "0.2rem",
             alignItems: "center",
+            borderLeft: isMatch ? "4px solid var(--pallet-orange)" : "none",
           }}
           disabled={disabled}
         >
