@@ -47,7 +47,7 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
   },
   {
     title: "Insight",
-    href: "/insights",
+    href: "/home",
     icon: <HomeIcon fontSize="small" />,
     // Add the data-cy attribute here
   },
@@ -315,18 +315,6 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
     title: "Document",
     href: "/document",
     icon: <FolderIcon fontSize="small" />,
-    nestedItems: [
-      {
-        title: "Register",
-        href: "/document/register",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-      },
-      {
-        title: "Create",
-        href: "/document/create",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-      },
-    ],
   },
   {
     title: "Equipment MNG",

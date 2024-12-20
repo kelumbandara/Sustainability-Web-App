@@ -7,6 +7,9 @@ const InsightsPage = React.lazy(() => import("./views/Insights/Insight"));
 const UnderDevelopment = React.lazy(
   () => import("./components/UnderDevelopment")
 );
+const DocumentRegister = React.lazy(
+  () => import("./views/DocumentsPage/DocumentsTable")
+);
 
 function withLayout(Layout: any, Component: any) {
   return (
@@ -43,7 +46,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={withoutLayout(LoginPage)} />
-      <Route path="/insights" element={withLayout(MainLayout, InsightsPage)} />
+      <Route path="/home" element={withLayout(MainLayout, InsightsPage)} />
       <Route
         path="/audit-inspection/dashboard"
         element={withLayout(MainLayout, () => (
@@ -69,16 +72,8 @@ const AppRoutes = () => {
         ))}
       />
       <Route
-        path="/document/register"
-        element={withLayout(MainLayout, () => (
-          <UnderDevelopment pageName="Document > Register" />
-        ))}
-      />
-      <Route
-        path="/document/create"
-        element={withLayout(MainLayout, () => (
-          <UnderDevelopment pageName="Document > Create" />
-        ))}
+        path="/document"
+        element={withLayout(MainLayout, DocumentRegister)}
       />
     </Routes>
   );
