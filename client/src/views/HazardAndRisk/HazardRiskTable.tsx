@@ -20,25 +20,26 @@ import Breadcrumb from "../../components/BreadCrumb";
 import { useState } from "react";
 import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import AddIcon from "@mui/icons-material/Add";
-import AddOrEditDocumentDialog from "./AddOrEditDocumentDialog";
-import { sampleDocuments } from "../../api/sampleData/documentData";
-import { Document } from "../../api/documentApi";
+import AddOrEditDocumentDialog from "./AddOrEditHazardRiskDialog";
 import { differenceInDays, format } from "date-fns";
-import ViewDocumentContent from "./ViewDocumentContent";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
+import { sampleHazardRiskData } from "../../api/sampleData/hazardRiskData";
+import { HazardAndRisk, HazardAndRiskStatus } from "../../api/hazardRiskApi";
+import ViewHazardOrRiskContent from "./ViewHazardRiskContent";
 
-function DocumentTable() {
+function HazardRiskTable() {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<Document>(null);
+  const [selectedRow, setSelectedRow] = useState<HazardAndRisk>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
-  const [documents, setDocuments] = useState<Document[]>(sampleDocuments);
+  const [riskData, setRiskData] =
+    useState<HazardAndRisk[]>(sampleHazardRiskData);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
-    { title: "Document Management" },
+    { title: "Hazard & Risk Management" },
   ];
 
   const isMobile = useMediaQuery((theme: Theme) =>
@@ -56,7 +57,7 @@ function DocumentTable() {
           overflowX: "hidden",
         }}
       >
-        <PageTitle title="Document Management" />
+        <PageTitle title="Hazard & Risk Management" />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
       <Stack sx={{ alignItems: "center" }}>
@@ -84,30 +85,28 @@ function DocumentTable() {
                 setOpenAddOrEditDialog(true);
               }}
             >
-              Add New Document
+              Report a Hazard or Risk
             </Button>
           </Box>
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
-                <TableCell>Document Number</TableCell>
-                <TableCell align="right">Version Number</TableCell>
-                <TableCell align="right">Document Type</TableCell>
-                <TableCell align="right">Title</TableCell>
+                <TableCell>Date</TableCell>
+                <TableCell align="right">Reference</TableCell>
+                <TableCell align="right">Category</TableCell>
                 <TableCell align="right">Division</TableCell>
-                <TableCell align="right">Issuing Authority</TableCell>
-                <TableCell align="right">Issued Date</TableCell>
-                <TableCell align="right">Expiry Date</TableCell>
-                <TableCell align="right">Notify Date</TableCell>
-                <TableCell align="right">Elapse Days</TableCell>
+                <TableCell align="right">Due Date</TableCell>
+                <TableCell align="right">Delayed Days</TableCell>
+                <TableCell align="right">Reporter</TableCell>
+                <TableCell align="right">Responsible</TableCell>
                 <TableCell align="right">Status</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {documents?.length > 0 ? (
-                documents.map((row) => (
+              {riskData?.length > 0 ? (
+                riskData?.map((row) => (
                   <TableRow
-                    key={`${row.documentNumber}${row.title}`}
+                    key={`${row.id}`}
                     sx={{
                       "&:last-child td, &:last-child th": { border: 0 },
                       cursor: "pointer",
@@ -118,40 +117,30 @@ function DocumentTable() {
                     }}
                   >
                     <TableCell component="th" scope="row">
-                      {row.documentNumber}
+                      {format(new Date(row.createdDate), "yyyy-MM-dd")}
                     </TableCell>
-                    <TableCell align="right">{row.versionNumber}</TableCell>
-                    <TableCell align="right">{row.documentType}</TableCell>
-                    <TableCell align="right">{row.title}</TableCell>
+                    <TableCell align="right">{row.id}</TableCell>
+                    <TableCell align="right">{row.category}</TableCell>
                     <TableCell align="right">{row.division}</TableCell>
-                    <TableCell align="right">{row.issuingAuthority}</TableCell>
                     <TableCell align="right">
-                      {format(new Date(row.issuedDate), "yyyy-MM-dd")}
+                      {format(new Date(row.dueDate), "yyyy-MM-dd")}
                     </TableCell>
                     <TableCell align="right">
-                      {row.expiryDate
-                        ? format(new Date(row.expiryDate), "yyyy-MM-dd")
+                      {row.dueDate
+                        ? differenceInDays(new Date(), row.dueDate)
                         : "--"}
                     </TableCell>
+                    <TableCell align="right">{row.createdByUser}</TableCell>
+                    <TableCell align="right">{row.assignee}</TableCell>
                     <TableCell align="right">
-                      {row.notifyDate
-                        ? format(new Date(row.notifyDate), "yyyy-MM-dd")
-                        : "--"}
-                    </TableCell>
-                    <TableCell align="right">
-                      {row.expiryDate
-                        ? differenceInDays(row.expiryDate, row.issuedDate)
-                        : "--"}
-                    </TableCell>
-                    <TableCell align="right">
-                      {differenceInDays(row.expiryDate, new Date()) > 10 ? (
-                        <Typography sx={{ color: "green" }}>Active</Typography>
-                      ) : differenceInDays(row.expiryDate, new Date()) > 0 ? (
-                        <Typography sx={{ color: "orange" }}>
-                          Expiring Soon
+                      {row.status === HazardAndRiskStatus.OPEN ? (
+                        <Typography sx={{ color: "var(--pallet-blue)" }}>
+                          Open
                         </Typography>
                       ) : (
-                        <Typography sx={{ color: "red" }}>Expired</Typography>
+                        <Typography sx={{ color: "var(--pallet-orange)" }}>
+                          Draft
+                        </Typography>
                       )}
                     </TableCell>
                   </TableRow>
@@ -159,7 +148,7 @@ function DocumentTable() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={11} align="center">
-                    <Typography variant="body2">No documents found</Typography>
+                    <Typography variant="body2">No Records found</Typography>
                   </TableCell>
                 </TableRow>
               )}
@@ -170,10 +159,11 @@ function DocumentTable() {
       <ViewDataDrawer
         open={openViewDrawer}
         handleClose={() => setOpenViewDrawer(false)}
+        fullScreen={true}
         drawerContent={
           <Stack spacing={1} sx={{ paddingX: theme.spacing(1) }}>
             <DrawerHeader
-              title="Document Details"
+              title="Hazard or Risk Details"
               handleClose={() => setOpenViewDrawer(false)}
               onEdit={() => {
                 setSelectedRow(selectedRow);
@@ -184,7 +174,7 @@ function DocumentTable() {
 
             {selectedRow && (
               <Stack>
-                <ViewDocumentContent document={selectedRow} />
+                <ViewHazardOrRiskContent hazardOrRisk={selectedRow} />
               </Stack>
             )}
           </Stack>
@@ -201,16 +191,16 @@ function DocumentTable() {
           onSubmit={(data) => {
             if (selectedRow) {
               console.log("Updating document", data);
-              setDocuments(
-                documents.map((doc) => (doc.id === data.id ? data : doc))
+              setRiskData(
+                riskData.map((risk) => (risk.id === data.id ? data : risk))
               ); // Update the document in the list if it already exists
               enqueueSnackbar("Document Details Updated Successfully!", {
                 variant: "success",
               });
             } else {
-              console.log("Adding new document", data);
-              setDocuments([...documents, data]); // Add new document to the list
-              enqueueSnackbar("Document Created Successfully!", {
+              console.log("Adding new hazard/risk", data);
+              setRiskData([...riskData, data]); // Add new document to the list
+              enqueueSnackbar("Hazard/Risk Created Successfully!", {
                 variant: "success",
               });
             }
@@ -224,10 +214,10 @@ function DocumentTable() {
       {deleteDialogOpen && (
         <DeleteConfirmationModal
           open={deleteDialogOpen}
-          title="Remove Document Confirmation"
+          title="Remove Hazard/Risk Confirmation"
           content={
             <>
-              Are you sure you want to remove this document?
+              Are you sure you want to remove this hazard or risk?
               <Alert severity="warning" style={{ marginTop: "1rem" }}>
                 This action is not reversible.
               </Alert>
@@ -235,7 +225,7 @@ function DocumentTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            setDocuments(documents.filter((doc) => doc.id !== selectedRow.id));
+            setRiskData(riskData.filter((doc) => doc.id !== selectedRow.id));
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);
@@ -256,4 +246,4 @@ function DocumentTable() {
   );
 }
 
-export default DocumentTable;
+export default HazardRiskTable;

@@ -2,6 +2,7 @@ import {
   Box,
   Drawer,
   IconButton,
+  SxProps,
   Theme,
   Typography,
   useMediaQuery,
@@ -14,10 +15,12 @@ function ViewDataDrawer({
   open,
   handleClose,
   drawerContent,
+  fullScreen,
 }: {
   open: boolean;
   handleClose: () => void;
   drawerContent: React.ReactNode;
+  fullScreen?: boolean;
 }) {
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("md")
@@ -30,7 +33,7 @@ function ViewDataDrawer({
       sx={{ zIndex: 1300 }}
       PaperProps={{
         sx: {
-          width: isMobile ? "100vw" : "30vw",
+          width: isMobile || fullScreen ? "100vw" : "30vw",
           padding: 2,
         },
       }}
@@ -112,13 +115,16 @@ export function DrawerEditAndDeleteButtons({
 export function DrawerContentItem({
   label,
   value,
+  sx,
 }: {
   label: string;
   value?: string | number;
+  sx?: SxProps;
 }) {
   return (
     <Box
       sx={{
+        ...sx,
         paddingY: "0.3rem",
       }}
     >

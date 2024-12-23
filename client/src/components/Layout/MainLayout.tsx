@@ -30,6 +30,7 @@ import {
 import { Link, useLocation } from "react-router";
 import { SidebarItem, sidebarItems } from "./SidebarItems";
 import theme from "../../theme";
+import useIsMobile from "../../customHooks/useIsMobile";
 
 const drawerWidth = 265;
 
@@ -452,11 +453,18 @@ interface LinkButtonProps {
 export const LinkButton = React.memo(
   ({ to, icon, title, disabled, handleDrawerClose }: LinkButtonProps) => {
     const { pathname } = useLocation();
+    const { isTablet } = useIsMobile();
 
     const isMatch = to === "/" ? pathname === to : pathname.startsWith(to);
 
     return (
-      <Link to={to} style={{ width: 220 }} onClick={handleDrawerClose}>
+      <Link
+        to={to}
+        style={{ width: 220 }}
+        onClick={() => {
+          if (isTablet) handleDrawerClose();
+        }}
+      >
         <Button
           sx={{
             fontSize: "0.8rem",
