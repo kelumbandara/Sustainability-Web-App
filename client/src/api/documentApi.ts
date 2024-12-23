@@ -4,7 +4,7 @@ export enum DocumentType {
   CERTIFICATE_AND_AUDIT = "Certificate and Audit",
   GENERAL = "General",
   RISK_ASSESSMENT = "Risk Assessment",
-  POLICY_AND_PROCEDURES = "Policy and ProcedureS",
+  POLICY_AND_PROCEDURES = "Policy and Procedures",
   LEGAL_AND_STATUTORY = "Legal and Statutory",
 }
 

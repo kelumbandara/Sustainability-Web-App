@@ -8,19 +8,22 @@ function DatePickerComponent({
   onChange,
   defaultValue,
   label,
+  error,
 }: {
   value: Date | null;
   onChange: (value: Date) => void;
   defaultValue?: Date;
   label?: string;
+  error?: string;
 }) {
   const { isMobile } = useIsMobile();
+  console.log("err", error);
   return (
     <Stack>
       {label && (
         <Typography
           variant="body2"
-          sx={{ marginBottom: "0.3rem", color: grey[700] }}
+          sx={{ marginBottom: "0.1rem", color: grey[700] }}
         >
           {label}
         </Typography>
@@ -30,13 +33,20 @@ function DatePickerComponent({
           value={value}
           onChange={onChange}
           defaultValue={defaultValue}
+          sx={{ border: error ? "1px solid var(--pallet-red)" : "" }}
         />
       ) : (
         <DatePicker
           value={value}
           onChange={onChange}
           defaultValue={defaultValue}
+          sx={{ border: error ? "1px solid var(--pallet-red)" : "" }}
         />
+      )}
+      {error && (
+        <Typography variant="caption" sx={{ color: "var(--pallet-red)" }}>
+          {error}
+        </Typography>
       )}
     </Stack>
   );

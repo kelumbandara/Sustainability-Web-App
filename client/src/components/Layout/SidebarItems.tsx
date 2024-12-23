@@ -212,16 +212,10 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
     title: "Hazard & Risk",
     href: "/hazard-risk",
     icon: <EmergencyIcon fontSize="small" />,
-    disabled: true,
     nestedItems: [
       {
         title: "Dashboard",
         href: "/hazard-risk/dashboard",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-      },
-      {
-        title: "Report a Hazard/Risk",
-        href: "/hazard-risk/report-hazard-risk",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
       },
       {

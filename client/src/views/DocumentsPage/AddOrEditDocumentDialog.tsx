@@ -119,7 +119,6 @@ export default function AddOrEditDocumentDialog({
           edge="start"
           sx={{
             color: "#024271",
-            marginRight: 3,
           }}
         >
           <CloseIcon />
@@ -189,13 +188,13 @@ export default function AddOrEditDocumentDialog({
                 size="small"
                 disablePortal
                 options={sampleDivisions?.map((division) => division.name)}
-                defaultValue={defaultValues?.documentType}
+                defaultValue={defaultValues?.division}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
                     required
-                    error={!!errors.documentType}
+                    error={!!errors.division}
                     label="Division"
                     name="division"
                   />
@@ -336,6 +335,7 @@ export default function AddOrEditDocumentDialog({
               borderRadius: "0.3rem",
               marginY: isTablet ? "0.5rem" : 0,
               marginLeft: isTablet ? 0 : "0.5rem",
+              height: "fit-content",
             }}
           >
             <Box sx={{ margin: "0.5rem" }}>
@@ -407,6 +407,7 @@ export default function AddOrEditDocumentDialog({
           </Stack>
         </Stack>
       </DialogContent>
+      <Divider />
       <DialogActions sx={{ padding: "1rem" }}>
         <Button
           onClick={() => {
