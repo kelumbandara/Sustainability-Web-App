@@ -327,6 +327,7 @@ export default function AddOrEditHazardRiskDialog({
                 sx={{ flex: 1, margin: "0.5rem" }}
                 defaultValue={defaultValues?.category}
                 onChange={(e, value) => {
+                  console.log("e", e);
                   setValue("category", value);
                 }}
                 renderInput={(params) => (
@@ -347,6 +348,7 @@ export default function AddOrEditHazardRiskDialog({
                   options={subCategoryOptions}
                   defaultValue={defaultValues?.subCategory}
                   onChange={(e, value) => {
+                    console.log("e", e);
                     setValue("subCategory", value);
                   }}
                   sx={{ flex: 1, margin: "0.5rem" }}
@@ -523,7 +525,10 @@ export default function AddOrEditHazardRiskDialog({
                       color="primary"
                       value={field.value}
                       exclusive
-                      onChange={(e, value) => field.onChange(value)}
+                      onChange={(e, value) => {
+                        console.log("e", e);
+                        field.onChange(value);
+                      }}
                     >
                       <ToggleButton value={RiskLevel.HIGH} key={RiskLevel.HIGH}>
                         <Typography variant="caption" component="div">
@@ -568,7 +573,10 @@ export default function AddOrEditHazardRiskDialog({
                       color="primary"
                       value={field.value}
                       exclusive
-                      onChange={(e, value) => field.onChange(value)}
+                      onChange={(e, value) => {
+                        console.log("e", e);
+                        field.onChange(value);
+                      }}
                     >
                       <ToggleButton
                         value={UnsafeActOrCondition.UNSAFE_ACT}
