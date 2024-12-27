@@ -14,42 +14,37 @@ import groupLogo from "../../assets/group-logo.png";
 import { useForm } from "react-hook-form";
 import CustomButton from "../../components/CustomButton";
 import LoginIcon from "@mui/icons-material/Login";
-import ForgotPasswordDialog from "./ForgotPasswordDialog";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router";
 
-const sampleEmail = "admin@gmail.com";
-const samplePassword = "password";
-
-function LoginForm() {
+function RegistrationForm() {
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up(990));
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
-  const [openForgotPasswordDialog, setOpenForgotPasswordDialog] =
-    useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm({
     mode: "all",
     defaultValues: {
       email: "",
       password: "",
+      organizationName: "",
+      confirmPassword: "",
     },
   });
 
-  const onLoginSubmit = (data: { email: string; password: string }) => {
-    if (data.email === sampleEmail && data.password === samplePassword) {
-      navigate("/home");
-      enqueueSnackbar("Welcome Back!", { variant: "success" });
-    } else {
-      enqueueSnackbar("Invalid email or password", { variant: "error" });
-    }
+  const userPassword = watch("password");
+
+  const onRegistrationSubmit = () => {
+    navigate("/home");
+    enqueueSnackbar("Welcome!", { variant: "success" });
   };
 
   return (
@@ -73,17 +68,34 @@ function LoginForm() {
       </Box>
       <Box>
         <Typography variant={"body2"}>
-          Please sign-in to your account using your credentials
-          <br /> Don't have an account?{" "}
-          <span
-            style={{ color: "var(--pallet-blue)", cursor: "pointer" }}
-            onClick={() => navigate("/register")}
-          >
-            Sign Up Here
-          </span>
+          Create an account to access the platform
         </Typography>
       </Box>
-      <form onSubmit={handleSubmit(onLoginSubmit)}>
+      <form onSubmit={handleSubmit(onRegistrationSubmit)}>
+        <TextField
+          required
+          id="organizationName"
+          label="Organization Name"
+          error={!!errors.organizationName}
+          fullWidth
+          size="small"
+          sx={{ marginTop: "0.5rem" }}
+          helperText={
+            errors.organizationName && (
+              <Typography
+                sx={{
+                  mt: "0",
+                  ml: -1,
+                }}
+                variant="caption"
+              >
+                Organization name is required
+              </Typography>
+            )
+          }
+          {...register("organizationName", { required: true })}
+        />
+
         <TextField
           required
           id="email"
@@ -94,6 +106,19 @@ function LoginForm() {
           type="email"
           size="small"
           sx={{ marginTop: "0.5rem" }}
+          helperText={
+            errors.email && (
+              <Typography
+                sx={{
+                  mt: "0",
+                  ml: -1,
+                }}
+                variant="caption"
+              >
+                Email is required
+              </Typography>
+            )
+          }
           {...register("email", { required: true })}
         />
 
@@ -106,7 +131,48 @@ function LoginForm() {
           fullWidth
           sx={{ marginTop: "1rem" }}
           error={!!errors.password}
+          helperText={
+            errors.password && (
+              <Typography
+                sx={{
+                  mt: "0",
+                  ml: -1,
+                }}
+                variant="caption"
+              >
+                Password is required
+              </Typography>
+            )
+          }
           {...register("password", { required: true })}
+        />
+
+        <TextField
+          required
+          id="confirmPassword"
+          label="Confirm Password"
+          type={"password"}
+          size="small"
+          fullWidth
+          helperText={
+            errors.confirmPassword && (
+              <Typography
+                sx={{
+                  mt: "0",
+                  ml: -1,
+                }}
+                variant="caption"
+              >
+                Passwords do not match
+              </Typography>
+            )
+          }
+          sx={{ marginTop: "0.5rem" }}
+          error={!!errors.confirmPassword}
+          {...register("confirmPassword", {
+            required: true,
+            validate: (value) => value === userPassword,
+          })}
         />
 
         <Box>
@@ -144,7 +210,7 @@ function LoginForm() {
             size="medium"
             startIcon={<LoginIcon />}
           >
-            Sign In
+            Create Account
           </CustomButton>
           <CustomButton
             variant="text"
@@ -152,18 +218,14 @@ function LoginForm() {
               color: "var(--pallet-orange)",
             }}
             size="medium"
-            onClick={() => setOpenForgotPasswordDialog(true)}
+            onClick={() => navigate("/")}
           >
-            Forgot Password
+            Login to an existing account
           </CustomButton>
         </Box>
       </form>
-      <ForgotPasswordDialog
-        open={openForgotPasswordDialog}
-        handleClose={() => setOpenForgotPasswordDialog(false)}
-      />
     </Stack>
   );
 }
 
-export default LoginForm;
+export default RegistrationForm;
