@@ -3,6 +3,9 @@ import { Route, Routes } from "react-router";
 import MainLayout from "./components/Layout/MainLayout";
 
 const LoginPage = React.lazy(() => import("./views/LoginPage/LoginPage"));
+const RegistrationPage = React.lazy(
+  () => import("./views/RegistrationPage/RegistrationPage")
+);
 const InsightsPage = React.lazy(() => import("./views/Insights/Insight"));
 const UnderDevelopment = React.lazy(
   () => import("./components/UnderDevelopment")
@@ -49,6 +52,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={withoutLayout(LoginPage)} />
+      <Route path="/register" element={withoutLayout(RegistrationPage)} />
       <Route path="/home" element={withLayout(MainLayout, InsightsPage)} />
       <Route
         path="/audit-inspection/dashboard"
