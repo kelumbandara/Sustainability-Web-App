@@ -13,6 +13,11 @@ const UnderDevelopment = React.lazy(
 const DocumentRegister = React.lazy(
   () => import("./views/DocumentsPage/DocumentsTable")
 );
+
+//hazard and risk
+const HazardRiskDashboard = React.lazy(
+  () => import("./views/HazardAndRisk/Dashboard")
+);
 const HazardRiskTable = React.lazy(
   () => import("./views/HazardAndRisk/HazardRiskTable")
 );
@@ -85,9 +90,7 @@ const AppRoutes = () => {
 
       <Route
         path="/hazard-risk/dashboard"
-        element={withLayout(MainLayout, () => (
-          <UnderDevelopment pageName="Document > Dashboard" />
-        ))}
+        element={withLayout(MainLayout, HazardRiskDashboard)}
       />
       <Route
         path="/hazard-risk/history"

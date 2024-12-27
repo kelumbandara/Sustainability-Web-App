@@ -4,6 +4,7 @@ import {
   RiskLevel,
   UnsafeActOrCondition,
 } from "../hazardRiskApi";
+import { sampleDivisions } from "./documentData";
 
 export const sampleHazardRiskData = [
   {
@@ -60,4 +61,37 @@ export const sampleHazardRiskData = [
     createdByUser: "Admin",
     status: HazardAndRiskStatus.OPEN,
   },
+];
+
+export const hazardRiskChartData1 = [
+  {
+    name: sampleDivisions[0].name,
+    uv: 4000,
+    pv: 2400,
+  },
+  {
+    name: sampleDivisions[1].name,
+    uv: 3000,
+    pv: 1398,
+  },
+  {
+    name: sampleDivisions[2].name,
+    uv: 2000,
+    pv: 9800,
+  },
+  {
+    name: sampleDivisions[3].name,
+    uv: 2780,
+    pv: 3908,
+  },
+  {
+    name: sampleDivisions[4].name,
+    uv: 1890,
+    pv: 4800,
+  },
+];
+
+export const hazardRiskChartData2 = [
+  { name: "Completed", value: 30 },
+  { name: "Not completed", value: 70 },
 ];
