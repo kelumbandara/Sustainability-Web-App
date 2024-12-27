@@ -42,7 +42,7 @@ function RegistrationForm() {
 
   const userPassword = watch("password");
 
-  const onRegistrationSubmit = (data: { email: string; password: string }) => {
+  const onRegistrationSubmit = () => {
     navigate("/home");
     enqueueSnackbar("Welcome!", { variant: "success" });
   };
