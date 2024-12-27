@@ -172,6 +172,16 @@ export enum HazardAndRiskStatus {
   DRAFT = "Draft",
 }
 
+export enum HazardDashboardPeriods {
+  THIS_WEEK = "This Week",
+  LAST_WEEK = "Last Week",
+  THIS_MONTH = "This Month",
+  LAST_MONTH = "Last Month",
+  THIS_YEAR = "This Year",
+  LAST_YEAR = "Last Year",
+  CUSTOM = "Custom",
+}
+
 export const HazardAndRiskSchema = z.object({
   id: z.string().optional(),
   category: z.string(),

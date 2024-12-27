@@ -22,7 +22,7 @@ function DatePickerComponent({
     <Stack>
       {label && (
         <Typography
-          variant="body2"
+          variant="caption"
           sx={{ marginBottom: "0.1rem", color: grey[700] }}
         >
           {label}
@@ -33,14 +33,29 @@ function DatePickerComponent({
           value={value}
           onChange={onChange}
           defaultValue={defaultValue}
-          sx={{ border: error ? "1px solid var(--pallet-red)" : "" }}
+          sx={{
+            border: error ? "1px solid var(--pallet-red)" : "",
+          }}
         />
       ) : (
         <DatePicker
           value={value}
           onChange={onChange}
           defaultValue={defaultValue}
-          sx={{ border: error ? "1px solid var(--pallet-red)" : "" }}
+          className="date-picker"
+          sx={{
+            border: error ? "1px solid var(--pallet-red)" : "",
+            padding: 0,
+          }}
+          slotProps={{
+            textField: {
+              InputProps: {
+                sx: {
+                  height: "2.5rem",
+                },
+              },
+            },
+          }}
         />
       )}
       {error && (
