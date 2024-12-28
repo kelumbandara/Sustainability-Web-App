@@ -169,6 +169,7 @@ function DocumentTable() {
       </Stack>
       <ViewDataDrawer
         open={openViewDrawer}
+        fullScreen={true}
         handleClose={() => setOpenViewDrawer(false)}
         drawerContent={
           <Stack spacing={1} sx={{ paddingX: theme.spacing(1) }}>
