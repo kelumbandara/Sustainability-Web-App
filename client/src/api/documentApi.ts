@@ -8,6 +8,21 @@ export enum DocumentType {
   LEGAL_AND_STATUTORY = "Legal and Statutory",
 }
 
+export const DocumentHistoryItemSchema = z.object({
+  documentNumber: z.string(),
+  issuedDate: z.date(),
+  expiryDate: z.date(),
+  notifyDate: z.date(),
+});
+
+export type DocumentHistoryItem = z.infer<typeof DocumentHistoryItemSchema>;
+
+export const ActivityStreamSchema = z.object({
+  action: z.string(),
+  date: z.date(),
+  user: z.string(),
+});
+
 export const DocumentSchema = z
   .object({
     id: z.string().optional(),
@@ -28,6 +43,10 @@ export const DocumentSchema = z
     isNoExpiry: z.boolean(),
     expiryDate: z.date().optional(),
     notifyDate: z.date().optional(),
+    createdDate: z.date().optional(),
+    createdBy: z.string().optional(),
+    documentHistory: z.array(DocumentHistoryItemSchema).optional(),
+    activityStream: z.array(ActivityStreamSchema).optional(),
   })
   .refine((data) => data.isNoExpiry || (data.expiryDate && data.notifyDate), {
     message: "expiryDate and notifyDate are required when isNoExpiry is false",
