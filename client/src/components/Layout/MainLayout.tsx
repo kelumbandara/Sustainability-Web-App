@@ -20,6 +20,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import GridViewIcon from "@mui/icons-material/GridView";
 import groupLogo from "../../assets/group-logo.png";
 import {
+  Alert,
   Avatar,
   Badge,
   Button,
@@ -27,10 +28,14 @@ import {
   Drawer as MobileDrawer,
   useMediaQuery,
 } from "@mui/material";
-import { Link, useLocation } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { SidebarItem, sidebarItems } from "./SidebarItems";
 import theme from "../../theme";
 import useIsMobile from "../../customHooks/useIsMobile";
+import LogoutIcon from "@mui/icons-material/Logout";
+import DeleteConfirmationModal from "../DeleteConfirmationModal";
+import { useState } from "react";
+import { useSnackbar } from "notistack";
 
 const drawerWidth = 265;
 
@@ -277,6 +282,9 @@ const DrawerContent = ({
 }: {
   handleDrawerClose: () => void;
 }) => {
+  const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   return (
     <>
       <DrawerHeader sx={{ justifyContent: "flex-start" }}>
@@ -359,7 +367,59 @@ const DrawerContent = ({
             </ListItem>
           );
         })}
+
+        <Divider
+          sx={{ backgroundColor: "var(--pallet-grey)", marginTop: "1rem" }}
+        />
+        <Button
+          sx={{
+            textTransform: "capitalize",
+            marginLeft: "1rem",
+            marginY: "1rem",
+            color: "var(--pallet-orange)",
+            width: "90%",
+            justifyContent: "flex-start",
+            paddingLeft: "1rem",
+            borderRadius: "0.5rem",
+          }}
+          startIcon={<LogoutIcon />}
+          onClick={() => setLogoutDialogOpen(true)}
+        >
+          Log Out
+        </Button>
       </Box>
+
+      {logoutDialogOpen && (
+        <DeleteConfirmationModal
+          open={logoutDialogOpen}
+          title="Log Out Confirmation"
+          customDeleteButtonText="Log Out Now"
+          customDeleteButtonIon={<LogoutIcon />}
+          content={
+            <>
+              Are you sure you want to log out of the application?
+              <Alert severity="warning" style={{ marginTop: "1rem" }}>
+                You will be logged out of the application and will need to log
+                in with credentials again to access your account.
+              </Alert>
+            </>
+          }
+          handleClose={() => setLogoutDialogOpen(false)}
+          deleteFunc={async () => {
+            localStorage.removeItem("token");
+            navigate("/");
+          }}
+          onSuccess={() => {
+            setLogoutDialogOpen(false);
+            enqueueSnackbar("Logged Out Successfully!", {
+              variant: "success",
+            });
+          }}
+          handleReject={() => {
+            setLogoutDialogOpen(false);
+          }}
+        />
+      )}
     </>
   );
 };

@@ -1,6 +1,7 @@
 import {
   Box,
   Checkbox,
+  CircularProgress,
   FormControlLabel,
   Stack,
   TextField,
@@ -17,15 +18,15 @@ import LoginIcon from "@mui/icons-material/Login";
 import ForgotPasswordDialog from "./ForgotPasswordDialog";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router";
-
-const sampleEmail = "admin@gmail.com";
-const samplePassword = "password";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { login } from "../../api/userApi";
 
 function LoginForm() {
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up(990));
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [showPassword, setShowPassword] = useState(false);
   const [openForgotPasswordDialog, setOpenForgotPasswordDialog] =
@@ -43,13 +44,23 @@ function LoginForm() {
     },
   });
 
-  const onLoginSubmit = (data: { email: string; password: string }) => {
-    if (data.email === sampleEmail && data.password === samplePassword) {
-      navigate("/home");
+  const { mutate: loginMutation, isPending } = useMutation({
+    mutationFn: login,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["current-user"] });
+      localStorage.setItem("token", data?.access_token);
       enqueueSnackbar("Welcome Back!", { variant: "success" });
-    } else {
-      enqueueSnackbar("Invalid email or password", { variant: "error" });
-    }
+      navigate("/home");
+    },
+    onError: () => {
+      enqueueSnackbar(`Login Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const onLoginSubmit = (data: { email: string; password: string }) => {
+    loginMutation(data);
   };
 
   return (
@@ -142,9 +153,16 @@ function LoginForm() {
               backgroundColor: "var(--pallet-blue)",
             }}
             size="medium"
-            startIcon={<LoginIcon />}
+            disabled={isPending}
+            startIcon={
+              isPending ? (
+                <CircularProgress color="inherit" size={"1rem"} />
+              ) : (
+                <LoginIcon />
+              )
+            }
           >
-            Sign In
+            Log In
           </CustomButton>
           <CustomButton
             variant="text"

@@ -1,6 +1,7 @@
 import {
   Box,
   Checkbox,
+  CircularProgress,
   FormControlLabel,
   Stack,
   TextField,
@@ -16,12 +17,15 @@ import CustomButton from "../../components/CustomButton";
 import LoginIcon from "@mui/icons-material/Login";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { registerUser } from "../../api/userApi";
 
 function RegistrationForm() {
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up(990));
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -35,16 +39,38 @@ function RegistrationForm() {
     defaultValues: {
       email: "",
       password: "",
-      organizationName: "",
+      mobileNumber: null,
+      name: "",
       confirmPassword: "",
     },
   });
 
   const userPassword = watch("password");
 
-  const onRegistrationSubmit = () => {
-    navigate("/home");
-    enqueueSnackbar("Welcome!", { variant: "success" });
+  const { mutate: registrationMutation, isPending } = useMutation({
+    mutationFn: registerUser,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["current-user"] });
+      localStorage.setItem("token", data?.access_token);
+      enqueueSnackbar("Account Created Successfully!", { variant: "success" });
+      navigate("/home");
+    },
+    onError: (error: any) => {
+      console.log(error);
+      enqueueSnackbar(error?.data?.message ?? `Registration Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const onRegistrationSubmit = (data: {
+    email: string;
+    password: string;
+    mobileNumber: string;
+    name: string;
+    confirmPassword: string;
+  }) => {
+    registrationMutation(data);
   };
 
   return (
@@ -74,14 +100,14 @@ function RegistrationForm() {
       <form onSubmit={handleSubmit(onRegistrationSubmit)}>
         <TextField
           required
-          id="organizationName"
-          label="Organization Name"
-          error={!!errors.organizationName}
+          id="name"
+          label="Name"
+          error={!!errors.name}
           fullWidth
           size="small"
-          sx={{ marginTop: "0.5rem" }}
+          sx={{ marginTop: "1rem" }}
           helperText={
-            errors.organizationName && (
+            errors.name && (
               <Typography
                 sx={{
                   mt: "0",
@@ -89,11 +115,11 @@ function RegistrationForm() {
                 }}
                 variant="caption"
               >
-                Organization name is required
+                Name is required
               </Typography>
             )
           }
-          {...register("organizationName", { required: true })}
+          {...register("name", { required: true })}
         />
 
         <TextField
@@ -105,7 +131,7 @@ function RegistrationForm() {
           fullWidth
           type="email"
           size="small"
-          sx={{ marginTop: "0.5rem" }}
+          sx={{ marginTop: "1rem" }}
           helperText={
             errors.email && (
               <Typography
@@ -124,12 +150,49 @@ function RegistrationForm() {
 
         <TextField
           required
+          id="mobileNumber"
+          label="Mobile Number"
+          type="tel"
+          error={!!errors.mobileNumber}
+          fullWidth
+          size="small"
+          sx={{ marginTop: "1rem" }}
+          helperText={
+            errors.mobileNumber && (
+              <Typography
+                sx={{
+                  mt: "0",
+                  ml: -1,
+                }}
+                variant="caption"
+              >
+                {`${
+                  errors.mobileNumber.message || "Mobile number is required"
+                }`}
+              </Typography>
+            )
+          }
+          {...register("mobileNumber", {
+            required: true,
+            validate: (value) => {
+              if (isNaN(value)) {
+                return "Mobile number must be a number";
+              } else if (value.length < 10) {
+                return "Mobile number must be at least 10 digits";
+              }
+              return true;
+            },
+          })}
+        />
+
+        <TextField
+          required
           id="password"
           label="Password"
           type={showPassword ? "text" : "password"}
           size="small"
           fullWidth
-          sx={{ marginTop: "1rem" }}
+          sx={{ marginTop: "2rem" }}
           error={!!errors.password}
           helperText={
             errors.password && (
@@ -167,7 +230,7 @@ function RegistrationForm() {
               </Typography>
             )
           }
-          sx={{ marginTop: "0.5rem" }}
+          sx={{ marginTop: "1rem" }}
           error={!!errors.confirmPassword}
           {...register("confirmPassword", {
             required: true,
@@ -208,7 +271,14 @@ function RegistrationForm() {
               backgroundColor: "var(--pallet-blue)",
             }}
             size="medium"
-            startIcon={<LoginIcon />}
+            disabled={isPending}
+            startIcon={
+              isPending ? (
+                <CircularProgress color="inherit" size={"1rem"} />
+              ) : (
+                <LoginIcon />
+              )
+            }
           >
             Create Account
           </CustomButton>

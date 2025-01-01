@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -28,6 +28,8 @@ interface Props {
   handleReject: () => void;
   handleClose: () => void;
   deleteButtonDisabled?: boolean;
+  customDeleteButtonText?: string;
+  customDeleteButtonIon?: ReactNode;
 }
 
 const DeleteConfirmationModal = ({
@@ -39,6 +41,8 @@ const DeleteConfirmationModal = ({
   handleReject,
   onSuccess = () => {},
   deleteButtonDisabled,
+  customDeleteButtonText,
+  customDeleteButtonIon,
 }: Props) => {
   const classes = useStyles();
   const [submitting, setSubmitting] = useState(false);
@@ -72,7 +76,9 @@ const DeleteConfirmationModal = ({
           variant="contained"
           sx={{ backgroundColor: "var(--pallet-red)" }}
           startIcon={
-            submitting ? (
+            customDeleteButtonIon ? (
+              customDeleteButtonIon
+            ) : submitting ? (
               <CircularProgress size={14} color="inherit" />
             ) : (
               <DeleteIcon />
@@ -93,7 +99,11 @@ const DeleteConfirmationModal = ({
           }}
           className={classes.deleteBtn}
         >
-          {submitting ? "Deleting.." : "Delete"}
+          {customDeleteButtonText
+            ? customDeleteButtonText
+            : submitting
+            ? "Deleting.."
+            : "Delete"}
         </CustomButton>
       </DialogActions>
     </Dialog>
