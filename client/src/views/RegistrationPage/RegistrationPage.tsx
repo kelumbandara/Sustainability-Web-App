@@ -6,10 +6,24 @@ import sliderImage1 from "../../assets//welcome.png";
 import sliderImage2 from "../../assets/health_safety.png";
 import sliderImage3 from "../../assets/employee_engage.png";
 import RegistrationForm from "./RegistrationForm";
+import useCurrentUser from "../../hooks/useCurrentUser";
+import PageLoader from "../../components/PageLoader";
+import { useNavigate } from "react-router";
 
 function RegistrationPage() {
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up(990));
+  const navigate = useNavigate();
+
+  const { user, status } = useCurrentUser();
+
+  if (status === "loading" || status === "idle" || status === "pending") {
+    return <PageLoader />;
+  }
+
+  if (user) {
+    navigate("/home");
+  }
 
   return (
     <Stack
