@@ -234,29 +234,11 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
     title: "Accident & Incident",
     href: "/accident-incident",
     icon: <ChangeHistoryIcon fontSize="small" />,
-    disabled: true,
     nestedItems: [
       {
         title: "Dashboard",
         href: "/accident-incident/dashboard",
         icon: <DashboardIcon fontSize="small" />,
-      },
-      {
-        title: "Report",
-        href: "/accident-incident/report",
-        icon: <CalendarMonthIcon fontSize="small" />,
-        nestedItems: [
-          {
-            title: "Report Accident",
-            href: "/accident-incident/report/report-accident",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-          },
-          {
-            title: "Report Incident",
-            href: "/accident-incident/report/report-incident",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-          },
-        ],
       },
       {
         title: "Register",
