@@ -22,7 +22,7 @@ export const AccidentWitnessSchema = z.object({
 
 export type AccidentWitness = z.infer<typeof AccidentWitnessSchema>;
 
-export const AccidentEffectedIndividualsSchema = z.object({
+export const AccidentEffectedIndividualSchema = z.object({
   id: z.string(),
   personType: z.string(),
   employeeId: z.string(),
@@ -32,7 +32,12 @@ export const AccidentEffectedIndividualsSchema = z.object({
   dateOfJoin: z.date(),
   industryExperience: z.string(),
   designation: z.string(),
+  employmentDuration: z.string(),
 });
+
+export type AccidentEffectedIndividual = z.infer<
+  typeof AccidentEffectedIndividualSchema
+>;
 
 export const AccidentSchema = z.object({
   id: z.string(),
@@ -94,7 +99,7 @@ export const AccidentSchema = z.object({
   rootCause: z.string().nullable(),
   assignee: z.string(),
   witnesses: z.array(AccidentWitnessSchema),
-  effectedIndividuals: z.array(AccidentEffectedIndividualsSchema),
+  effectedIndividuals: z.array(AccidentEffectedIndividualSchema),
   reporter: z.string(),
 });
 

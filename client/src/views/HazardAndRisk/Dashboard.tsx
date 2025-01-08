@@ -108,7 +108,6 @@ function HazardAndRiskDashboard() {
               <Autocomplete
                 {...register("period", { required: true })}
                 size="small"
-                disablePortal
                 options={Object.values(HazardDashboardPeriods)}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 onChange={(e, value) => {
@@ -152,7 +151,6 @@ function HazardAndRiskDashboard() {
               <Autocomplete
                 {...register("division", { required: true })}
                 size="small"
-                disablePortal
                 options={sampleDivisions?.map((division) => division.name)}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (

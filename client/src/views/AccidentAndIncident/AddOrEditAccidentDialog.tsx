@@ -8,7 +8,16 @@ import {
   Box,
   Divider,
   IconButton,
+  Paper,
   Stack,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
@@ -17,8 +26,10 @@ import {
 import useIsMobile from "../../customHooks/useIsMobile";
 import { Controller, useForm } from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
-import { sampleDivisions } from "../../api/sampleData/documentData";
-import RichTextComponent from "../../components/RichTextComponent";
+import {
+  sampleDepartments,
+  sampleDivisions,
+} from "../../api/sampleData/documentData";
 import DropzoneComponent from "../../components/DropzoneComponent";
 import { grey } from "@mui/material/colors";
 import DatePickerComponent from "../../components/DatePickerComponent";
@@ -26,15 +37,30 @@ import CustomButton from "../../components/CustomButton";
 import { useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import AddIcon from "@mui/icons-material/Add";
-import {
-  HazardAndRisk,
-  HazardAndRiskStatus,
-  HazardOrRiskCategories,
-  RiskLevel,
-  UnsafeActOrCondition,
-} from "../../api/hazardRiskApi";
+import { HazardAndRiskStatus } from "../../api/hazardRiskApi";
 import { sampleAssignees } from "../../api/sampleData/usersSampleDate";
-import { Accident } from "../../api/accidentAndIncidentApi";
+import {
+  Accident,
+  AccidentEffectedIndividual,
+  AccidentWitness,
+  InjuryType,
+  Severity,
+} from "../../api/accidentAndIncidentApi";
+import TextSnippetIcon from "@mui/icons-material/TextSnippet";
+import WarningIcon from "@mui/icons-material/Warning";
+import theme from "../../theme";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import TimePickerComponent from "../../components/TimePickerComponent";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import {
+  accidentCategories,
+  accidentTypesOptions,
+} from "../../constants/accidentConstants";
+import RichTextComponent from "../../components/RichTextComponent";
+import AddOrEditWitnessDialog from "./AddOrEditWitnessDialog";
+import AddOrEditPersonDialog from "./AddOrEditPersonDialog";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 type DialogProps = {
   open: boolean;
@@ -42,6 +68,36 @@ type DialogProps = {
   defaultValues?: Accident;
   onSubmit?: (data: Accident) => void;
 };
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  dir?: string;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`full-width-tabpanel-${index}`}
+      aria-labelledby={`full-width-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
+  );
+}
+
+function a11yProps(index: number) {
+  return {
+    id: `full-width-tab-${index}`,
+    "aria-controls": `full-width-tabpanel-${index}`,
+  };
+}
 
 export default function AddOrEditAccidentDialog({
   open,
@@ -51,7 +107,18 @@ export default function AddOrEditAccidentDialog({
 }: DialogProps) {
   const { isMobile, isTablet } = useIsMobile();
   const [files, setFiles] = useState<File[]>([]);
-  const [addNewContactDialogOpen, setAddNewContactDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
+  const [addWitnessDialogOpen, setAddWitnessDialogOpen] = useState(false);
+  const [openAddOrEditPersonDialog, setOpenAddOrEditPersonDialog] =
+    useState(false);
+  const [selectedWitness, setSelectedWitness] = useState<AccidentWitness>(null);
+  const [selectedPerson, setSelectedPerson] =
+    useState<AccidentEffectedIndividual>(null);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    console.log("event", event);
+    setActiveTab(newValue);
+  };
 
   const {
     register,
@@ -61,14 +128,17 @@ export default function AddOrEditAccidentDialog({
     formState: { errors },
     reset,
     setValue,
-  } = useForm<Accident>({
-    // defaultValues: {
-    //   ...defaultValues,
-    //   riskLevel: defaultValues?.riskLevel ?? RiskLevel.LOW,
-    //   unsafeActOrCondition:
-    //     defaultValues?.unsafeActOrCondition ?? UnsafeActOrCondition.UNSAFE_ACT,
-    // },
-  });
+  } = useForm<Accident>({});
+
+  const witnessesWatch = watch("witnesses");
+  const categoryWatch = watch("category");
+  const effectedIndividualsWatch = watch("effectedIndividuals");
+
+  const relatedSubCategories = useMemo(() => {
+    return accidentCategories?.find(
+      (division) => division.name === categoryWatch
+    )?.subCategories;
+  }, [categoryWatch]);
 
   useEffect(() => {
     if (defaultValues) {
@@ -83,26 +153,6 @@ export default function AddOrEditAccidentDialog({
     setFiles([]);
   };
 
-  const category = watch("category");
-  const subCategory = watch("subCategory");
-
-  const subCategoryOptions = useMemo(() => {
-    return category
-      ? HazardOrRiskCategories?.find(
-          (d) => d.name === category
-        )?.subCategories?.map((sc) => sc.name) || []
-      : [];
-  }, [category]);
-
-  const observationTypeOptions = useMemo(() => {
-    return category && subCategory
-      ? HazardOrRiskCategories?.find(
-          (d) => d.name === category
-        )?.subCategories?.find((sc) => sc.name === subCategory)
-          ?.observationTypes
-      : [];
-  }, [category, subCategory]);
-
   const handleCreateDocument = (data: Accident) => {
     const submitData: Partial<Accident> = data;
     submitData.id = defaultValues?.id ?? uuidv4();
@@ -113,56 +163,15 @@ export default function AddOrEditAccidentDialog({
     resetForm();
   };
 
-  const AddNewObservationButton = (props) => (
-    <li
-      {...props}
-      variant="contained"
-      style={{
-        backgroundColor: "var(--pallet-lighter-blue)",
-        color: "var(--pallet-blue)",
-        textTransform: "none",
-        margin: "0.5rem",
-        borderRadius: "0.3rem",
-        display: "flex",
-        flexDirection: "row",
-      }}
-      size="small"
-      // onClick closes the menu
-      onMouseDown={() => {
-        setAddNewContactDialogOpen(true);
-      }}
-    >
-      <AddIcon />
-      <Typography variant="body2" component="div">
-        Add New Observation Type
-      </Typography>
-    </li>
-  );
-
-  const AddNewObservationTypeDialog = ({
-    category,
-    subCategory,
-  }: {
-    category: string;
-    subCategory: string;
-  }) => {
-    const { register, handleSubmit } = useForm({
-      defaultValues: {
-        observation: "",
-      },
-    });
-
-    const handleCreateObservationType = (data: { observation: string }) => {
-      console.log("Creating observation type", data, category, subCategory);
-    };
-
-    return (
+  return (
+    <>
       <Dialog
-        open={addNewContactDialogOpen}
-        onClose={() => setAddNewContactDialogOpen(false)}
-        fullScreen={isMobile}
-        fullWidth
-        maxWidth="sm"
+        open={open}
+        onClose={() => {
+          resetForm();
+          handleClose();
+        }}
+        fullScreen={true}
         PaperProps={{
           style: {
             backgroundColor: grey[50],
@@ -179,11 +188,11 @@ export default function AddOrEditAccidentDialog({
           }}
         >
           <Typography variant="h6" component="div">
-            Add New Observation Type
+            {defaultValues ? "Edit an Accident" : "Report an Accident"}
           </Typography>
           <IconButton
             aria-label="open drawer"
-            onClick={() => setAddNewContactDialogOpen(false)}
+            onClick={handleClose}
             edge="start"
             sx={{
               color: "#024271",
@@ -197,23 +206,900 @@ export default function AddOrEditAccidentDialog({
           <Stack
             sx={{
               display: "flex",
-              flexDirection: "column",
+              flexDirection: isTablet ? "column" : "row",
+              padding: "1rem",
             }}
           >
-            <TextField
-              {...register("observation", { required: true })}
-              required
-              id="observation"
-              label="Observation"
-              size="small"
-              fullWidth
-              sx={{ marginBottom: "0.5rem" }}
-            />
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                backgroundColor: "#fff",
+                flex: { lg: 3, md: 1 },
+                boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+                padding: "0.5rem",
+                borderRadius: "0.3rem",
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "flex-end",
+                  flexDirection: "column",
+                  marginX: "0.5rem",
+                  marginY: "1rem",
+                }}
+              >
+                <Typography variant="body2" component="div">
+                  <b>Date</b>
+                </Typography>
+                <Typography variant="body2" component="div">
+                  {new Date().toDateString()}
+                </Typography>
+              </Box>
+              <Tabs
+                value={activeTab}
+                onChange={handleChange}
+                indicatorColor="secondary"
+                TabIndicatorProps={{
+                  style: {
+                    backgroundColor: "var(--pallet-blue)",
+                    height: "3px",
+                  },
+                }}
+                sx={{
+                  backgroundColor: "var(--pallet-lighter-grey)",
+                  color: "var(--pallet-blue)",
+                }}
+                textColor="inherit"
+                variant="fullWidth"
+              >
+                <Tab
+                  label={
+                    <Box
+                      sx={{
+                        color: "var(--pallet-blue)",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <TextSnippetIcon fontSize="small" />
+                      <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                        General Details
+                      </Typography>
+                    </Box>
+                  }
+                  {...a11yProps(0)}
+                />
+                <Tab
+                  label={
+                    <Box
+                      sx={{
+                        color: "var(--pallet-blue)",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <WarningIcon fontSize="small" />
+                      <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                        Accident Details
+                      </Typography>
+                    </Box>
+                  }
+                  {...a11yProps(1)}
+                />
+              </Tabs>
+              <TabPanel value={activeTab} index={0} dir={theme.direction}>
+                <Stack
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    backgroundColor: "#fff",
+                    flex: { lg: 3, md: 1 },
+                    borderRadius: "0.3rem",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: isMobile ? "column" : "row",
+                    }}
+                  >
+                    <Autocomplete
+                      {...register("division", { required: true })}
+                      size="small"
+                      options={sampleDivisions?.map(
+                        (division) => division.name
+                      )}
+                      defaultValue={defaultValues?.division}
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          error={!!errors.division}
+                          label="Division"
+                          name="division"
+                        />
+                      )}
+                    />
+                    <TextField
+                      required
+                      id="location"
+                      label="Location"
+                      error={!!errors.location}
+                      size="small"
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      {...register("location", { required: true })}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: isMobile ? "column" : "row",
+                    }}
+                  >
+                    <Autocomplete
+                      {...register("department", { required: true })}
+                      size="small"
+                      options={sampleDepartments?.map(
+                        (department) => department.name
+                      )}
+                      defaultValue={defaultValues?.department}
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          error={!!errors.department}
+                          label="Department"
+                          name="department"
+                        />
+                      )}
+                    />
+                    <TextField
+                      required
+                      id="supervisorName"
+                      label="Supervisor"
+                      error={!!errors.supervisorName}
+                      size="small"
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      {...register("supervisorName", { required: true })}
+                    />
+                  </Box>
+
+                  <Stack sx={{ alignItems: "center", m: "0.5rem" }}>
+                    <TableContainer
+                      component={Paper}
+                      elevation={2}
+                      sx={{
+                        overflowX: "auto",
+                        maxWidth: isMobile ? "88vw" : "100%",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          padding: theme.spacing(2),
+                          display: "flex",
+                          justifyContent: "flex-end",
+                        }}
+                      >
+                        <Button
+                          variant="contained"
+                          sx={{ backgroundColor: "var(--pallet-blue)" }}
+                          startIcon={<AddIcon />}
+                          onClick={() => {
+                            setSelectedWitness(null);
+                            setAddWitnessDialogOpen(true);
+                          }}
+                        >
+                          Add Witness
+                        </Button>
+                      </Box>
+                      <Table aria-label="simple table">
+                        <TableHead
+                          sx={{
+                            backgroundColor: "var(--pallet-lighter-grey)",
+                          }}
+                        >
+                          <TableRow>
+                            <TableCell align="center">Employee ID</TableCell>
+                            <TableCell align="center">Name</TableCell>
+                            <TableCell align="center">Division</TableCell>
+                            <TableCell align="center">Department</TableCell>
+                            <TableCell align="center"></TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {witnessesWatch?.length > 0 ? (
+                            witnessesWatch?.map((row) => (
+                              <TableRow
+                                // key={`${row.id}`}
+                                sx={{
+                                  "&:last-child td, &:last-child th": {
+                                    border: 0,
+                                  },
+                                  cursor: "pointer",
+                                }}
+                                onClick={() => {
+                                  console.log("row");
+                                }}
+                              >
+                                <TableCell
+                                  component="th"
+                                  scope="row"
+                                  align="center"
+                                >
+                                  {row.employeeId}
+                                </TableCell>
+                                <TableCell align="center">{row.name}</TableCell>
+                                <TableCell align="center">
+                                  {row.division}
+                                </TableCell>
+                                <TableCell align="center">
+                                  {row.department}
+                                </TableCell>
+                                <TableCell align="center">
+                                  <IconButton
+                                    onClick={() => {
+                                      setSelectedWitness(row);
+                                      setAddWitnessDialogOpen(true);
+                                    }}
+                                  >
+                                    <EditIcon />
+                                  </IconButton>
+                                  <IconButton
+                                    onClick={() => {
+                                      setValue(
+                                        "witnesses",
+                                        (witnessesWatch ?? []).filter(
+                                          (item) =>
+                                            item.employeeId !== row.employeeId
+                                        )
+                                      );
+                                    }}
+                                  >
+                                    <DeleteIcon />
+                                  </IconButton>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={11} align="center">
+                                <Typography variant="body2">
+                                  No Records found
+                                </Typography>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Stack>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: isMobile ? "column" : "row",
+                      margin: "0.5rem",
+                    }}
+                  >
+                    <DropzoneComponent
+                      files={files}
+                      setFiles={setFiles}
+                      dropzoneLabel={"Drop Your Documents Here"}
+                    />
+                  </Box>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: isMobile ? "column" : "row",
+                      margin: "0.5rem",
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <CustomButton
+                      variant="contained"
+                      sx={{
+                        backgroundColor: "var(--pallet-blue)",
+                      }}
+                      size="medium"
+                      onClick={() => {
+                        setActiveTab(1);
+                      }}
+                      endIcon={<ArrowForwardIcon />}
+                    >
+                      Next
+                    </CustomButton>
+                  </Box>
+                </Stack>
+              </TabPanel>
+              <TabPanel value={activeTab} index={1} dir={theme.direction}>
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: "bold", marginBottom: "1rem" }}
+                >
+                  Personal Details
+                </Typography>
+                <Stack sx={{ alignItems: "center", m: "0.5rem" }}>
+                  <TableContainer
+                    component={Paper}
+                    elevation={2}
+                    sx={{
+                      overflowX: "auto",
+                      maxWidth: isMobile ? "88vw" : "100%",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        padding: theme.spacing(2),
+                        display: "flex",
+                        justifyContent: "flex-end",
+                      }}
+                    >
+                      <Button
+                        variant="contained"
+                        sx={{ backgroundColor: "var(--pallet-blue)" }}
+                        startIcon={<AddIcon />}
+                        onClick={() => {
+                          setSelectedPerson(null);
+                          setOpenAddOrEditPersonDialog(true);
+                        }}
+                      >
+                        Add Person
+                      </Button>
+                    </Box>
+                    <Table aria-label="simple table">
+                      <TableHead
+                        sx={{
+                          backgroundColor: "var(--pallet-lighter-grey)",
+                        }}
+                      >
+                        <TableRow>
+                          <TableCell align="center">Person Type</TableCell>
+                          <TableCell align="center">Person Name</TableCell>
+                          <TableCell align="center">Gender</TableCell>
+                          <TableCell align="center">Designation</TableCell>
+                          <TableCell align="center"></TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {effectedIndividualsWatch?.length > 0 ? (
+                          effectedIndividualsWatch?.map((row) => (
+                            <TableRow
+                              // key={`${row.id}`}
+                              sx={{
+                                "&:last-child td, &:last-child th": {
+                                  border: 0,
+                                },
+                                cursor: "pointer",
+                              }}
+                              onClick={() => {
+                                console.log("row");
+                              }}
+                            >
+                              <TableCell
+                                component="th"
+                                scope="row"
+                                align="center"
+                              >
+                                {row.personType}
+                              </TableCell>
+                              <TableCell align="center">{row.name}</TableCell>
+                              <TableCell align="center">{row.gender}</TableCell>
+                              <TableCell align="center">
+                                {row.designation}
+                              </TableCell>
+                              <TableCell align="center">
+                                <IconButton
+                                  onClick={() => {
+                                    setSelectedPerson(row);
+                                    setOpenAddOrEditPersonDialog(true);
+                                  }}
+                                >
+                                  <EditIcon />
+                                </IconButton>
+                                <IconButton
+                                  onClick={() => {
+                                    setValue(
+                                      "effectedIndividuals",
+                                      (effectedIndividualsWatch ?? []).filter(
+                                        (item) => item.id !== row.id
+                                      )
+                                    );
+                                  }}
+                                >
+                                  <DeleteIcon />
+                                </IconButton>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={11} align="center">
+                              <Typography variant="body2">
+                                No Records found
+                              </Typography>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Stack>
+                <Stack
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    backgroundColor: "#fff",
+                    flex: { lg: 3, md: 1 },
+                    borderRadius: "0.3rem",
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: "bold", marginY: "0.5rem" }}
+                  >
+                    Accident Details
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: isMobile ? "column" : "row",
+                    }}
+                  >
+                    <Autocomplete
+                      {...register("category", { required: true })}
+                      size="small"
+                      options={accidentCategories?.map(
+                        (category) => category.name
+                      )}
+                      defaultValue={defaultValues?.category}
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      onChange={(e, value) => {
+                        setValue("category", value);
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          error={!!errors.category}
+                          label="Category"
+                          name="category"
+                        />
+                      )}
+                    />
+                    {categoryWatch && (
+                      <Autocomplete
+                        {...register("subCategory", { required: true })}
+                        size="small"
+                        options={relatedSubCategories?.map(
+                          (subCategory) => subCategory.name
+                        )}
+                        defaultValue={defaultValues?.subCategory}
+                        sx={{ flex: 1, margin: "0.5rem" }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            required
+                            error={!!errors.subCategory}
+                            label="Sub Category"
+                            name="subCategory"
+                          />
+                        )}
+                      />
+                    )}
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: isMobile ? "column" : "row",
+                    }}
+                  >
+                    <Autocomplete
+                      {...register("accidentType", { required: true })}
+                      size="small"
+                      options={accidentTypesOptions}
+                      defaultValue={defaultValues?.accidentType}
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          error={!!errors.accidentType}
+                          label="Accident Type"
+                          name="accidentType"
+                        />
+                      )}
+                    />
+                  </Box>
+                  <Box sx={{ margin: "0.5rem" }}>
+                    <Autocomplete
+                      {...register("affectedPrimaryRegion", { required: true })}
+                      size="small"
+                      options={sampleAssignees?.map(
+                        (category) => category.name
+                      )}
+                      sx={{ flex: 1 }}
+                      defaultValue={defaultValues?.affectedPrimaryRegion}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          error={!!errors.affectedPrimaryRegion}
+                          label="Body Primary Region"
+                          name="affectedPrimaryRegion"
+                        />
+                      )}
+                    />
+                  </Box>
+
+                  <Box sx={{ margin: "0.5rem" }}>
+                    <Autocomplete
+                      {...register("affectedSecondaryRegion", {
+                        required: true,
+                      })}
+                      size="small"
+                      options={sampleAssignees?.map(
+                        (category) => category.name
+                      )}
+                      sx={{ flex: 1 }}
+                      defaultValue={defaultValues?.affectedSecondaryRegion}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          error={!!errors.affectedSecondaryRegion}
+                          label="Body Secondary Region"
+                          name="affectedSecondaryRegion"
+                        />
+                      )}
+                    />
+                  </Box>
+                  <Box sx={{ margin: "0.5rem" }}>
+                    <Autocomplete
+                      {...register("affectedTertiaryRegion", {
+                        required: true,
+                      })}
+                      size="small"
+                      options={sampleAssignees?.map(
+                        (category) => category.name
+                      )}
+                      sx={{ flex: 1 }}
+                      defaultValue={defaultValues?.affectedTertiaryRegion}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          error={!!errors.affectedTertiaryRegion}
+                          label="Body Tertiary Region"
+                          name="affectedTertiaryRegion"
+                        />
+                      )}
+                    />
+                  </Box>
+                  <Box sx={{ display: "flex" }}>
+                    <Autocomplete
+                      {...register("injuryCause", { required: true })}
+                      size="small"
+                      options={sampleAssignees?.map(
+                        (category) => category.name
+                      )}
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      defaultValue={defaultValues?.injuryCause}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          error={!!errors.injuryCause}
+                          label="Type"
+                          name="injuryCause"
+                        />
+                      )}
+                    />
+                    <TextField
+                      required
+                      id="rootCause"
+                      label="Cause"
+                      error={!!errors.rootCause}
+                      size="small"
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      {...register("rootCause", { required: true })}
+                    />
+                  </Box>
+                  <Box sx={{ display: "flex" }}>
+                    <TextField
+                      required
+                      id="consultedHospital"
+                      label="Consulted Hospital"
+                      error={!!errors.consultedHospital}
+                      size="small"
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      {...register("consultedHospital", { required: true })}
+                    />
+                    <TextField
+                      required
+                      id="consultedDoctor"
+                      label="Consulted Doctor"
+                      error={!!errors.consultedDoctor}
+                      size="small"
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      {...register("consultedDoctor", { required: true })}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: isMobile ? "column" : "row",
+                      margin: "0.5rem",
+                    }}
+                  >
+                    <Controller
+                      control={control}
+                      name={"workPerformed"}
+                      render={({ field }) => {
+                        return (
+                          <RichTextComponent
+                            onChange={(e) => field.onChange(e)}
+                            placeholder={field.value ?? "Work Performed"}
+                          />
+                        );
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: isMobile ? "column" : "row",
+                      margin: "0.5rem",
+                    }}
+                  >
+                    <Controller
+                      control={control}
+                      name={"description"}
+                      render={({ field }) => {
+                        return (
+                          <RichTextComponent
+                            onChange={(e) => field.onChange(e)}
+                            placeholder={field.value ?? "Description"}
+                          />
+                        );
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: isMobile ? "column" : "row",
+                      margin: "0.5rem",
+                    }}
+                  >
+                    <Controller
+                      control={control}
+                      name={"actionTaken"}
+                      render={({ field }) => {
+                        return (
+                          <RichTextComponent
+                            onChange={(e) => field.onChange(e)}
+                            placeholder={field.value ?? "Action Taken"}
+                          />
+                        );
+                      }}
+                    />
+                  </Box>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: isMobile ? "column" : "row",
+                      margin: "0.5rem",
+                      justifyContent: "flex-start",
+                    }}
+                  >
+                    <CustomButton
+                      variant="contained"
+                      sx={{
+                        backgroundColor: "var(--pallet-blue)",
+                      }}
+                      size="medium"
+                      onClick={() => {
+                        setActiveTab(0);
+                      }}
+                      startIcon={<ArrowBackIcon />}
+                    >
+                      Previous
+                    </CustomButton>
+                  </Box>
+                </Stack>
+              </TabPanel>
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                flex: { lg: 1, md: 1 },
+                flexDirection: "column",
+                backgroundColor: "#fff",
+                boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+                padding: "1rem",
+                borderRadius: "0.3rem",
+                marginY: isTablet ? "0.5rem" : 0,
+                marginLeft: isTablet ? 0 : "0.5rem",
+                height: "fit-content",
+              }}
+            >
+              <Box sx={{ margin: "0.5rem" }}>
+                <Controller
+                  control={control}
+                  {...register("accidentDate", { required: true })}
+                  name={"accidentDate"}
+                  render={({ field }) => {
+                    return (
+                      <DatePickerComponent
+                        onChange={(e) => field.onChange(e)}
+                        value={field.value}
+                        label="Accident Date"
+                        error={errors?.accidentDate ? "Required" : ""}
+                      />
+                    );
+                  }}
+                />
+              </Box>
+              <Box sx={{ margin: "0.5rem" }}>
+                <Controller
+                  control={control}
+                  {...register("accidentTime", { required: true })}
+                  name={"accidentTime"}
+                  render={({ field }) => {
+                    return (
+                      <TimePickerComponent
+                        onChange={(e) => field.onChange(e)}
+                        value={field.value}
+                        label="Accident Time"
+                        error={errors?.accidentTime ? "Required" : ""}
+                      />
+                    );
+                  }}
+                />
+              </Box>
+
+              <Box sx={{ margin: "0.5rem" }}>
+                <Typography
+                  variant="caption"
+                  sx={{ marginBottom: "0.1rem", color: grey[700] }}
+                >
+                  Injury Type
+                </Typography>
+                <Controller
+                  control={control}
+                  name={"injuryType"}
+                  render={({ field }) => {
+                    return (
+                      <ToggleButtonGroup
+                        size="small"
+                        {...control}
+                        aria-label="Small sizes"
+                        color="primary"
+                        value={field.value}
+                        exclusive
+                        orientation="vertical"
+                        fullWidth
+                        onChange={(e, value) => {
+                          console.log("e", e);
+                          field.onChange(value);
+                        }}
+                      >
+                        <ToggleButton
+                          value={InjuryType.FIRST_AID}
+                          key={InjuryType.FIRST_AID}
+                        >
+                          <Typography variant="caption" component="div">
+                            {InjuryType.FIRST_AID}
+                          </Typography>
+                        </ToggleButton>
+                        <ToggleButton
+                          value={InjuryType.REPORTABLE_ACCIDENT}
+                          key={InjuryType.REPORTABLE_ACCIDENT}
+                        >
+                          <Typography variant="caption" component="div">
+                            {InjuryType.REPORTABLE_ACCIDENT}
+                          </Typography>
+                        </ToggleButton>
+                        <ToggleButton
+                          value={InjuryType.NON_REPORTABLE_ACCIDENT}
+                          key={InjuryType.NON_REPORTABLE_ACCIDENT}
+                        >
+                          <Typography variant="caption" component="div">
+                            {InjuryType.NON_REPORTABLE_ACCIDENT}
+                          </Typography>
+                        </ToggleButton>
+                      </ToggleButtonGroup>
+                    );
+                  }}
+                />
+              </Box>
+
+              <Box
+                sx={{
+                  margin: "0.5rem",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <Typography
+                  variant="caption"
+                  sx={{ marginBottom: "0.1rem", color: grey[700] }}
+                >
+                  Severity
+                </Typography>
+                <Controller
+                  control={control}
+                  name={"severity"}
+                  render={({ field }) => {
+                    return (
+                      <ToggleButtonGroup
+                        size="small"
+                        {...control}
+                        aria-label="Small sizes"
+                        color="primary"
+                        value={field.value}
+                        exclusive
+                        onChange={(e, value) => {
+                          console.log("e", e);
+                          field.onChange(value);
+                        }}
+                      >
+                        <ToggleButton
+                          value={Severity.MAJOR}
+                          key={Severity.MAJOR}
+                        >
+                          <Typography variant="caption" component="div">
+                            {Severity.MAJOR}
+                          </Typography>
+                        </ToggleButton>
+                        <ToggleButton
+                          value={Severity.MINOR}
+                          key={Severity.MINOR}
+                        >
+                          <Typography variant="caption" component="div">
+                            {Severity.MINOR}
+                          </Typography>
+                        </ToggleButton>
+                      </ToggleButtonGroup>
+                    );
+                  }}
+                />
+              </Box>
+
+              <Box sx={{ margin: "0.5rem" }}>
+                <Autocomplete
+                  {...register("assignee", { required: true })}
+                  size="small"
+                  options={sampleAssignees?.map((category) => category.name)}
+                  sx={{ flex: 1 }}
+                  defaultValue={defaultValues?.assignee}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      required
+                      error={!!errors.assignee}
+                      label="Assignee"
+                      name="assignee"
+                    />
+                  )}
+                />
+              </Box>
+            </Box>
           </Stack>
         </DialogContent>
+        <Divider />
         <DialogActions sx={{ padding: "1rem" }}>
           <Button
-            onClick={() => setAddNewContactDialogOpen(false)}
+            onClick={() => {
+              resetForm();
+              handleClose();
+            }}
             sx={{ color: "var(--pallet-blue)" }}
           >
             Cancel
@@ -224,445 +1110,68 @@ export default function AddOrEditAccidentDialog({
               backgroundColor: "var(--pallet-blue)",
             }}
             size="medium"
-            onClick={handleSubmit(handleCreateObservationType)}
+            onClick={handleSubmit((data) => {
+              handleCreateDocument(data);
+            })}
           >
-            Add Observation Type
+            {defaultValues ? "Update Changes" : "Submit Report"}
           </CustomButton>
         </DialogActions>
       </Dialog>
-    );
-  };
-
-  return (
-    <Dialog
-      open={open}
-      onClose={() => {
-        resetForm();
-        handleClose();
-      }}
-      fullScreen={true}
-      PaperProps={{
-        style: {
-          backgroundColor: grey[50],
-        },
-        component: "form",
-      }}
-    >
-      {/* {addNewContactDialogOpen &&  */}
-      <AddNewObservationTypeDialog
-        category={category}
-        subCategory={subCategory}
-      />
-      {/* } */}
-      <DialogTitle
-        sx={{
-          paddingY: "1rem",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Typography variant="h6" component="div">
-          {defaultValues
-            ? "Edit Hazard or Risk"
-            : "Report a New Hazard or Risk"}
-        </Typography>
-        <IconButton
-          aria-label="open drawer"
-          onClick={handleClose}
-          edge="start"
-          sx={{
-            color: "#024271",
+      {addWitnessDialogOpen && (
+        <AddOrEditWitnessDialog
+          open={addWitnessDialogOpen}
+          onClose={() => {
+            setAddWitnessDialogOpen(false);
+            setSelectedWitness(null);
           }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <Divider />
-      {/* <DialogContent>
-        <Stack
-          sx={{
-            display: "flex",
-            flexDirection: isTablet ? "column" : "row",
-            padding: "1rem",
-          }}
-        >
-          <Stack
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              backgroundColor: "#fff",
-              flex: { lg: 3, md: 1 },
-              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-              padding: "0.5rem",
-              borderRadius: "0.3rem",
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "flex-end",
-                flexDirection: "column",
-                margin: "0.5rem",
-              }}
-            >
-              <Typography variant="body2" component="div">
-                <b>Date</b>
-              </Typography>
-              <Typography variant="body2" component="div">
-                {new Date().toDateString()}
-              </Typography>
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-              }}
-            >
-              <Autocomplete
-                {...register("category", { required: true })}
-                size="small"
-                options={HazardOrRiskCategories?.map(
-                  (category) => category.name
-                )}
-                sx={{ flex: 1, margin: "0.5rem" }}
-                defaultValue={defaultValues?.category}
-                onChange={(e, value) => {
-                  console.log("e", e);
-                  setValue("category", value);
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    error={!!errors.category}
-                    label="Category"
-                    name="category"
-                  />
-                )}
-              />
-              {category && (
-                <Autocomplete
-                  {...register("subCategory", { required: true })}
-                  size="small"
-                  disablePortal
-                  options={subCategoryOptions}
-                  defaultValue={defaultValues?.subCategory}
-                  onChange={(e, value) => {
-                    console.log("e", e);
-                    setValue("subCategory", value);
-                  }}
-                  sx={{ flex: 1, margin: "0.5rem" }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      required
-                      error={!!errors.subCategory}
-                      label="Sub Category"
-                      name="subCategory"
-                    />
-                  )}
-                />
-              )}
-            </Box>
-
-            {category && subCategory && (
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: isMobile ? "column" : "row",
-                }}
-              >
-                <Autocomplete
-                  {...register("observationType")}
-                  size="small"
-                  disablePortal
-                  noOptionsText={
-                    <>
-                      <Typography variant="body2" color="inherit" gutterBottom>
-                        No matching Items
-                      </Typography>
-                    </>
+          onSubmit={(data) => {
+            console.log("data", data);
+            if (selectedWitness) {
+              setValue("witnesses", [
+                ...(witnessesWatch ?? []).map((item) => {
+                  if (item.employeeId === selectedWitness.employeeId) {
+                    return data;
                   }
-                  options={[...observationTypeOptions, "$ADD_NEW_ITEM"]}
-                  renderOption={(props, option) => (
-                    <>
-                      {option === "$ADD_NEW_ITEM" ? (
-                        <AddNewObservationButton {...props} />
-                      ) : (
-                        <li {...props} key={option}>
-                          {option}
-                        </li>
-                      )}
-                    </>
-                  )}
-                  defaultValue={defaultValues?.observationType}
-                  sx={{ flex: 1, margin: "0.5rem" }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      error={!!errors.observationType}
-                      label="Observation Type"
-                      name="observationType"
-                    />
-                  )}
-                />
-              </Box>
-            )}
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-              }}
-            >
-              <Autocomplete
-                {...register("division", { required: true })}
-                size="small"
-                disablePortal
-                options={sampleDivisions?.map((division) => division.name)}
-                defaultValue={defaultValues?.division}
-                sx={{ flex: 1, margin: "0.5rem" }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    error={!!errors.division}
-                    label="Division"
-                    name="division"
-                  />
-                )}
-              />
-              <TextField
-                required
-                id="locationOrDepartment"
-                label="Location or Department"
-                error={!!errors.locationOrDepartment}
-                size="small"
-                sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("locationOrDepartment", { required: true })}
-              />
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-              }}
-            >
-              <TextField
-                id="subLocation"
-                label="Sub Location"
-                error={!!errors.subLocation}
-                size="small"
-                sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("subLocation")}
-              />
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-                margin: "0.5rem",
-              }}
-            >
-              <Controller
-                control={control}
-                name={"description"}
-                render={({ field }) => {
-                  return (
-                    <RichTextComponent
-                      onChange={(e) => field.onChange(e)}
-                      placeholder={field.value ?? "Description"}
-                    />
-                  );
-                }}
-              />
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-                margin: "0.5rem",
-              }}
-            >
-              <DropzoneComponent
-                files={files}
-                setFiles={setFiles}
-                dropzoneLabel={
-                  "Drop your evidence here. Please ensure the image size is less than 10mb."
-                }
-              />
-            </Box>
-          </Stack>
-          <Stack
-            sx={{
-              display: "flex",
-              flex: { lg: 1, md: 1 },
-              flexDirection: "column",
-              backgroundColor: "#fff",
-              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-              padding: "0.5rem",
-              borderRadius: "0.3rem",
-              marginY: isTablet ? "0.5rem" : 0,
-              marginLeft: isTablet ? 0 : "0.5rem",
-              height: "fit-content",
-            }}
-          >
-            <Box sx={{ margin: "0.5rem" }}>
-              <Typography
-                variant="body2"
-                sx={{ marginBottom: "0.1rem", color: grey[700] }}
-              >
-                Risk Level
-              </Typography>
-              <Controller
-                control={control}
-                name={"riskLevel"}
-                render={({ field }) => {
-                  return (
-                    <ToggleButtonGroup
-                      size="small"
-                      {...control}
-                      aria-label="Small sizes"
-                      color="primary"
-                      value={field.value}
-                      exclusive
-                      onChange={(e, value) => {
-                        console.log("e", e);
-                        field.onChange(value);
-                      }}
-                    >
-                      <ToggleButton value={RiskLevel.HIGH} key={RiskLevel.HIGH}>
-                        <Typography variant="caption" component="div">
-                          {RiskLevel.HIGH}
-                        </Typography>
-                      </ToggleButton>
-                      <ToggleButton
-                        value={RiskLevel.MEDIUM}
-                        key={RiskLevel.MEDIUM}
-                      >
-                        <Typography variant="caption" component="div">
-                          {RiskLevel.MEDIUM}
-                        </Typography>
-                      </ToggleButton>
-                      <ToggleButton value={RiskLevel.LOW} key={RiskLevel.LOW}>
-                        <Typography variant="caption" component="div">
-                          {RiskLevel.LOW}
-                        </Typography>
-                      </ToggleButton>
-                    </ToggleButtonGroup>
-                  );
-                }}
-              />
-            </Box>
-
-            <Box sx={{ margin: "0.5rem" }}>
-              <Typography
-                variant="body2"
-                sx={{ marginBottom: "0.1rem", color: grey[700] }}
-              >
-                Unsafe Act or Condition
-              </Typography>
-              <Controller
-                control={control}
-                name={"unsafeActOrCondition"}
-                render={({ field }) => {
-                  return (
-                    <ToggleButtonGroup
-                      size="small"
-                      {...control}
-                      aria-label="Small sizes"
-                      color="primary"
-                      value={field.value}
-                      exclusive
-                      onChange={(e, value) => {
-                        console.log("e", e);
-                        field.onChange(value);
-                      }}
-                    >
-                      <ToggleButton
-                        value={UnsafeActOrCondition.UNSAFE_ACT}
-                        key={UnsafeActOrCondition.UNSAFE_ACT}
-                      >
-                        <Typography variant="caption" component="div">
-                          {UnsafeActOrCondition.UNSAFE_ACT}
-                        </Typography>
-                      </ToggleButton>
-                      <ToggleButton
-                        value={UnsafeActOrCondition.UNSAFE_CONDITION}
-                        key={UnsafeActOrCondition.UNSAFE_CONDITION}
-                      >
-                        <Typography variant="caption" component="div">
-                          {UnsafeActOrCondition.UNSAFE_CONDITION}
-                        </Typography>
-                      </ToggleButton>
-                    </ToggleButtonGroup>
-                  );
-                }}
-              />
-            </Box>
-            <Box sx={{ margin: "0.5rem" }}>
-              <Controller
-                control={control}
-                {...register("dueDate", { required: true })}
-                name={"dueDate"}
-                render={({ field }) => {
-                  return (
-                    <DatePickerComponent
-                      onChange={(e) => field.onChange(e)}
-                      value={field.value}
-                      label="Due Date"
-                      error={errors?.dueDate ? "Required" : ""}
-                    />
-                  );
-                }}
-              />
-            </Box>
-            <Box sx={{ margin: "0.5rem" }}>
-              <Autocomplete
-                {...register("assignee", { required: true })}
-                size="small"
-                disablePortal
-                options={sampleAssignees?.map((category) => category.name)}
-                sx={{ flex: 1 }}
-                defaultValue={defaultValues?.assignee}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    error={!!errors.assignee}
-                    label="Assignee"
-                    name="assignee"
-                  />
-                )}
-              />
-            </Box>
-          </Stack>
-        </Stack>
-      </DialogContent> */}
-      <Divider />
-      <DialogActions sx={{ padding: "1rem" }}>
-        <Button
-          onClick={() => {
-            resetForm();
-            handleClose();
+                  return item;
+                }),
+              ]);
+            } else {
+              setValue("witnesses", [...(witnessesWatch ?? []), data]);
+            }
+            setAddWitnessDialogOpen(false);
+            setSelectedWitness(null);
           }}
-          sx={{ color: "var(--pallet-blue)" }}
-        >
-          Cancel
-        </Button>
-        <CustomButton
-          variant="contained"
-          sx={{
-            backgroundColor: "var(--pallet-blue)",
+          defaultValues={selectedWitness}
+        />
+      )}
+      {openAddOrEditPersonDialog && (
+        <AddOrEditPersonDialog
+          open={openAddOrEditPersonDialog}
+          handleClose={() => setOpenAddOrEditPersonDialog(false)}
+          onSubmit={(data) => {
+            console.log("Adding new person", data);
+            if (selectedPerson) {
+              setValue("effectedIndividuals", [
+                ...(effectedIndividualsWatch ?? []).map((item) => {
+                  if (item.employeeId === selectedPerson.employeeId) {
+                    return data;
+                  }
+                  return item;
+                }),
+              ]);
+            } else {
+              setValue("effectedIndividuals", [
+                ...(effectedIndividualsWatch ?? []),
+                data,
+              ]);
+            }
+            setOpenAddOrEditPersonDialog(false);
+            setSelectedPerson(null);
           }}
-          size="medium"
-          onClick={handleSubmit((data) => {
-            handleCreateDocument(data);
-          })}
-        >
-          {defaultValues ? "Update Changes" : "Submit Report"}
-        </CustomButton>
-      </DialogActions>
-    </Dialog>
+          defaultValues={selectedPerson}
+        />
+      )}
+    </>
   );
 }
