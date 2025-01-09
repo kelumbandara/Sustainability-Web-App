@@ -4,10 +4,12 @@ import MainLayout from "./components/Layout/MainLayout";
 import PageLoader from "./components/PageLoader";
 import useCurrentUser from "./hooks/useCurrentUser";
 
+//login & registation page
 const LoginPage = React.lazy(() => import("./views/LoginPage/LoginPage"));
 const RegistrationPage = React.lazy(
   () => import("./views/RegistrationPage/RegistrationPage")
 );
+
 const InsightsPage = React.lazy(() => import("./views/Insights/Insight"));
 const UnderDevelopment = React.lazy(
   () => import("./components/UnderDevelopment")
@@ -73,7 +75,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={withoutLayout(LoginPage)} />
-      <Route path="/register" element={withoutLayout(RegistrationPage)} />
+      {/* <Route path="/register" element={withoutLayout(RegistrationPage)} /> */}
       <Route element={<ProtectedRoute />}>
         <Route path="/home" element={withLayout(MainLayout, InsightsPage)} />
 
@@ -104,6 +106,10 @@ const AppRoutes = () => {
         <Route
           path="/document"
           element={withLayout(MainLayout, DocumentRegister)}
+        />
+        <Route
+          path="/register"
+          element={withLayout(MainLayout, RegistrationPage)}
         />
 
         <Route
