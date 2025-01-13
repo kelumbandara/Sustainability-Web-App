@@ -24,6 +24,11 @@ const HazardRiskTable = React.lazy(
   () => import("./views/HazardAndRisk/HazardRiskTable")
 );
 
+//accident and incident
+const AccidentTable = React.lazy(
+  () => import("./views/AccidentAndIncident/AccidentTable")
+);
+
 function withLayout(Layout: any, Component: any) {
   return (
     <Layout>
@@ -76,7 +81,6 @@ const AppRoutes = () => {
       <Route path="/register" element={withoutLayout(RegistrationPage)} />
       <Route element={<ProtectedRoute />}>
         <Route path="/home" element={withLayout(MainLayout, InsightsPage)} />
-
         <Route
           path="/audit-inspection/dashboard"
           element={withLayout(MainLayout, () => (
@@ -101,11 +105,14 @@ const AppRoutes = () => {
             <UnderDevelopment pageName="Audit & Inspection > External Audit" />
           ))}
         />
+
+        {/* document */}
         <Route
           path="/document"
           element={withLayout(MainLayout, DocumentRegister)}
         />
 
+        {/* hazard and risk */}
         <Route
           path="/hazard-risk/dashboard"
           element={withLayout(MainLayout, HazardRiskDashboard)}
@@ -120,6 +127,30 @@ const AppRoutes = () => {
           path="/hazard-risk/assigned-tasks"
           element={withLayout(MainLayout, () => (
             <UnderDevelopment pageName="Document > Assigned Task" />
+          ))}
+        />
+
+        {/* Accident & Incident */}
+        <Route
+          path="/accident-incident/dashboard"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Accident & Incident > Dashboard" />
+          ))}
+        />
+        <Route
+          path="/accident-incident/register/accident-register"
+          element={withLayout(MainLayout, AccidentTable)}
+        />
+        <Route
+          path="/accident-incident/register/incident-register"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Accident & Incident > Incident Register" />
+          ))}
+        />
+        <Route
+          path="/accident-incident/register/corrective-action"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Accident & Incident > Corrective Action" />
           ))}
         />
       </Route>

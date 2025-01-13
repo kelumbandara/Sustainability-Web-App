@@ -115,10 +115,12 @@ export function DrawerEditAndDeleteButtons({
 export function DrawerContentItem({
   label,
   value,
+  isRichText,
   sx,
 }: {
   label: string;
   value?: string | number;
+  isRichText?: boolean;
   sx?: SxProps;
 }) {
   return (
@@ -134,7 +136,14 @@ export function DrawerContentItem({
       >
         {label}
       </Typography>
-      <Typography variant="body2">{value ?? "--"}</Typography>
+      {isRichText ? (
+        <Typography
+          variant="body2"
+          dangerouslySetInnerHTML={{ __html: value ?? "--" }}
+        />
+      ) : (
+        <Typography variant="body2">{value ?? "--"}</Typography>
+      )}
     </Box>
   );
 }

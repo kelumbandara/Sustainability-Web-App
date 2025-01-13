@@ -23,6 +23,45 @@ export const sampleDivisions = [
   },
 ];
 
+export const sampleDepartments = [
+  {
+    id: "dept_1",
+    name: "IE",
+  },
+  {
+    id: "dept_2",
+    name: "Audit",
+  },
+  {
+    id: "dept_3",
+    name: "Finance and Accounts",
+  },
+  {
+    id: "dept_4",
+    name: "3D",
+  },
+  {
+    id: "dept_5",
+    name: "Store",
+  },
+  {
+    id: "dept_6",
+    name: "Sample",
+  },
+  {
+    id: "dept_7",
+    name: "Quality",
+  },
+  {
+    id: "dept_8",
+    name: "Wait Process",
+  },
+  {
+    id: "dept_9",
+    name: "Cutting",
+  },
+];
+
 export const sampleDocuments: Document[] = [
   {
     id: "doc_1",

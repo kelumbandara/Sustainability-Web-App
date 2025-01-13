@@ -168,7 +168,6 @@ export default function AddOrEditDocumentDialog({
               <Autocomplete
                 {...register("documentType", { required: true })}
                 size="small"
-                disablePortal
                 options={Object.values(DocumentType)}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 defaultValue={defaultValues?.documentType}
@@ -186,7 +185,6 @@ export default function AddOrEditDocumentDialog({
               <Autocomplete
                 {...register("division", { required: true })}
                 size="small"
-                disablePortal
                 options={sampleDivisions?.map((division) => division.name)}
                 defaultValue={defaultValues?.division}
                 sx={{ flex: 1, margin: "0.5rem" }}

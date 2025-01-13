@@ -344,7 +344,6 @@ export default function AddOrEditHazardRiskDialog({
                 <Autocomplete
                   {...register("subCategory", { required: true })}
                   size="small"
-                  disablePortal
                   options={subCategoryOptions}
                   defaultValue={defaultValues?.subCategory}
                   onChange={(e, value) => {
@@ -375,7 +374,6 @@ export default function AddOrEditHazardRiskDialog({
                 <Autocomplete
                   {...register("observationType")}
                   size="small"
-                  disablePortal
                   noOptionsText={
                     <>
                       <Typography variant="body2" color="inherit" gutterBottom>
@@ -417,7 +415,6 @@ export default function AddOrEditHazardRiskDialog({
               <Autocomplete
                 {...register("division", { required: true })}
                 size="small"
-                disablePortal
                 options={sampleDivisions?.map((division) => division.name)}
                 defaultValue={defaultValues?.division}
                 sx={{ flex: 1, margin: "0.5rem" }}
@@ -620,7 +617,6 @@ export default function AddOrEditHazardRiskDialog({
               <Autocomplete
                 {...register("assignee", { required: true })}
                 size="small"
-                disablePortal
                 options={sampleAssignees?.map((category) => category.name)}
                 sx={{ flex: 1 }}
                 defaultValue={defaultValues?.assignee}
