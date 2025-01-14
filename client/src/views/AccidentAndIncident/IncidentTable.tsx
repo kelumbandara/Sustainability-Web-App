@@ -23,23 +23,23 @@ import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
-import { Accident } from "../../api/accidentAndIncidentApi";
-import ViewAccidentContent from "./ViewAccidentContent";
-import AddOrEditAccidentDialog from "./AddOrEditAccidentDialog";
-import { sampleAccidentData } from "../../api/sampleData/accidentData";
+import { Incident } from "../../api/accidentAndIncidentApi";
+import AddOrEditIncidentDialog from "./AddOrEditIncidentDialog";
+import { sampleIncidentData } from "../../api/sampleData/incidentData";
+import ViewIncidentContent from "./ViewIncidentContent";
 
-function AccidentTable() {
+function IncidentTable() {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<Accident>(null);
+  const [selectedRow, setSelectedRow] = useState<Incident>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
-  const [accidentData, setAccidentData] =
-    useState<Accident[]>(sampleAccidentData);
+  const [incidentData, setIncidentData] =
+    useState<Incident[]>(sampleIncidentData);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
-    { title: "Accident Management" },
+    { title: "Incident Management" },
   ];
 
   const isMobile = useMediaQuery((theme: Theme) =>
@@ -57,7 +57,7 @@ function AccidentTable() {
           overflowX: "hidden",
         }}
       >
-        <PageTitle title="Accident Management" />
+        <PageTitle title="Incident Management" />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
       <Stack sx={{ alignItems: "center" }}>
@@ -85,29 +85,26 @@ function AccidentTable() {
                 setOpenAddOrEditDialog(true);
               }}
             >
-              Report an accident
+              Report an incident
             </Button>
           </Box>
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
                 <TableCell>Reference</TableCell>
-                <TableCell align="right">Accident Date</TableCell>
-                <TableCell align="right">Accident Time</TableCell>
+                <TableCell align="right">Incident Date</TableCell>
+                <TableCell align="right">Incident Time</TableCell>
                 <TableCell align="right">Severity</TableCell>
-                <TableCell align="right">Injury</TableCell>
-                <TableCell align="right">Time of Work</TableCell>
-                <TableCell align="right">Return for Work</TableCell>
                 <TableCell align="right">Division</TableCell>
-                <TableCell align="right">Department</TableCell>
-                <TableCell align="right">Category</TableCell>
+                <TableCell align="right">Location</TableCell>
+                <TableCell align="right">Circumstances</TableCell>
                 <TableCell align="right">Assignee</TableCell>
                 <TableCell align="right">Status</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {accidentData?.length > 0 ? (
-                accidentData?.map((row) => (
+              {incidentData?.length > 0 ? (
+                incidentData?.map((row) => (
                   <TableRow
                     key={`${row.id}`}
                     sx={{
@@ -123,20 +120,19 @@ function AccidentTable() {
                       {row.referenceNumber}
                     </TableCell>
                     <TableCell align="right">
-                      {format(row.accidentDate, "yyyy-MM-dd")}
+                      {row?.incidentDate
+                        ? format(row?.incidentDate, "yyyy-MM-dd")
+                        : "--"}
                     </TableCell>
                     <TableCell align="right">
-                      {format(row.accidentTime, "HH:mm")}
+                      {row?.incidentTime
+                        ? format(row?.incidentTime, "HH:mm")
+                        : "--"}
                     </TableCell>
                     <TableCell align="right">{row.severity}</TableCell>
-                    <TableCell align="right">{row.injury}</TableCell>
-                    <TableCell align="right">{row.timeOfWork}</TableCell>
-                    <TableCell align="right">
-                      {row.returnForWork ? row.returnForWork : "--"}
-                    </TableCell>
                     <TableCell align="right">{row.division}</TableCell>
-                    <TableCell align="right">{row.department}</TableCell>
-                    <TableCell align="right">{row.category}</TableCell>
+                    <TableCell align="right">{row.location}</TableCell>
+                    <TableCell align="right">{row.circumstances}</TableCell>
                     <TableCell align="right">{row.assignee}</TableCell>
                     <TableCell align="right">{row.status}</TableCell>
                   </TableRow>
@@ -159,7 +155,7 @@ function AccidentTable() {
         drawerContent={
           <Stack spacing={1} sx={{ paddingX: theme.spacing(1) }}>
             <DrawerHeader
-              title="Accident Details"
+              title="Incident Details"
               handleClose={() => setOpenViewDrawer(false)}
               onEdit={() => {
                 setSelectedRow(selectedRow);
@@ -170,14 +166,14 @@ function AccidentTable() {
 
             {selectedRow && (
               <Stack>
-                <ViewAccidentContent accident={selectedRow} />
+                <ViewIncidentContent incident={selectedRow} />
               </Stack>
             )}
           </Stack>
         }
       />
       {openAddOrEditDialog && (
-        <AddOrEditAccidentDialog
+        <AddOrEditIncidentDialog
           open={openAddOrEditDialog}
           handleClose={() => {
             setSelectedRow(null);
@@ -187,16 +183,16 @@ function AccidentTable() {
           onSubmit={(data) => {
             if (selectedRow) {
               console.log("Updating document", data);
-              setAccidentData(
-                accidentData.map((risk) => (risk.id === data.id ? data : risk))
+              setIncidentData(
+                incidentData.map((risk) => (risk.id === data.id ? data : risk))
               ); // Update the document in the list if it already exists
               enqueueSnackbar("Document Details Updated Successfully!", {
                 variant: "success",
               });
             } else {
-              console.log("Adding new accident", data);
-              setAccidentData([...accidentData, data]); // Add new document to the list
-              enqueueSnackbar("Accident Report Created Successfully!", {
+              console.log("Adding new incident", data);
+              setIncidentData([...incidentData, data]); // Add new document to the list
+              enqueueSnackbar("Incident Created Successfully!", {
                 variant: "success",
               });
             }
@@ -210,10 +206,10 @@ function AccidentTable() {
       {deleteDialogOpen && (
         <DeleteConfirmationModal
           open={deleteDialogOpen}
-          title="Remove Accident Confirmation"
+          title="Remove Incident Confirmation"
           content={
             <>
-              Are you sure you want to remove this accident?
+              Are you sure you want to remove this incident?
               <Alert severity="warning" style={{ marginTop: "1rem" }}>
                 This action is not reversible.
               </Alert>
@@ -221,8 +217,8 @@ function AccidentTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            setAccidentData(
-              accidentData.filter((doc) => doc.id !== selectedRow.id)
+            setIncidentData(
+              incidentData.filter((doc) => doc.id !== selectedRow.id)
             );
           }}
           onSuccess={() => {
@@ -244,4 +240,4 @@ function AccidentTable() {
   );
 }
 
-export default AccidentTable;
+export default IncidentTable;

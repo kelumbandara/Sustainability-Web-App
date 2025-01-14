@@ -1,8 +1,42 @@
 import { z } from "zod";
 
 export enum Severity {
-  MAJOR = "Major",
   MINOR = "Minor",
+  MAJOR = "Major",
+}
+
+export enum IncidentSeverity {
+  LOW = "Low",
+  MEDIUM = "Medium",
+  HIGH = "High",
+  VERY_HIGH = "Very High",
+  EXTREME = "Extreme",
+}
+
+export enum IncidentTypeOfNearMiss {
+  NEAR_MISS = "Near Miss",
+  OTHER = "Other",
+  SAFETY_CONCERN = "Safety Concern",
+  SAFETY_IDEA_SUGGESTION = "Safety Idea/Suggestion",
+}
+
+export enum IncidentTypeOfConcern {
+  AREA = "Area",
+  OTHER = "Other",
+  SAFETY_POLICY_VIOLATION = "Safety Policy Violation",
+  UNSAFE_ACT = "Unsafe Act",
+  UNSAFE_CONDITION = "Unsafe Condition",
+  UNSAFE_CONDITION_OF_EQUIPMENT = "Unsafe Condition of Equipment",
+  UNSAFE_USE_OF_EQUIPMENT = "Unsafe Use of Equipment",
+}
+
+export enum IncidentFactors {
+  ENVIRONMENTAL = "Environmental",
+  EQUIPMENT_TOOLS = "Equipment and Tools",
+  EXTERNAL = "External",
+  HUMAN = "Human",
+  ORGANIZATIONAL = "Organizational",
+  PROCEDURAL_ISSUES = "Procedural Issues",
 }
 
 export enum InjuryType {
@@ -104,3 +138,35 @@ export const AccidentSchema = z.object({
 });
 
 export type Accident = z.infer<typeof AccidentSchema>;
+
+export const IncidentSchema = z.object({
+  id: z.string(),
+  referenceNumber: z.string(),
+  incidentDate: z.date(),
+  incidentTime: z.date(),
+  severity: z.nativeEnum(IncidentSeverity),
+  division: z.string(),
+  location: z.string(),
+  supervisorName: z.string(),
+  reportedDate: z.string(),
+  orgId: z.string(),
+  evidenceType: z.string().optional(),
+  evidenceName: z.string().optional(),
+  evidenceId: z.string().nullable(),
+  status: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  publishedAt: z.string(),
+  assignee: z.string(),
+  witnesses: z.array(AccidentWitnessSchema),
+  effectedIndividuals: z.array(AccidentEffectedIndividualSchema),
+  reporter: z.string(),
+  circumstances: z.string(),
+  incidentDetails: z.string().optional(),
+  typeOfNearMiss: z.nativeEnum(IncidentTypeOfNearMiss),
+  typeOfConcern: z.nativeEnum(IncidentTypeOfConcern),
+  factors: z.nativeEnum(IncidentFactors),
+  causes: z.string().optional(),
+});
+
+export type Incident = z.infer<typeof IncidentSchema>;
