@@ -83,79 +83,79 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={withoutLayout(LoginPage)} />
       <Route path="/register" element={withoutLayout(RegistrationPage)} />
-      {/* <Route element={<ProtectedRoute />}> */}
-      <Route path="/home" element={withLayout(MainLayout, InsightsPage)} />
-      <Route
-        path="/audit-inspection/dashboard"
-        element={withLayout(MainLayout, () => (
-          <UnderDevelopment pageName="Audit & Inspection > Dashboard" />
-        ))}
-      />
-      <Route
-        path="/audit-inspection/calendar"
-        element={withLayout(MainLayout, () => (
-          <UnderDevelopment pageName="Audit & Inspection > Calendar" />
-        ))}
-      />
-      <Route
-        path="/audit-inspection/internal-audit"
-        element={withLayout(MainLayout, () => (
-          <UnderDevelopment pageName="Audit & Inspection > Internal Audit" />
-        ))}
-      />
-      <Route
-        path="/audit-inspection/external-audit"
-        element={withLayout(MainLayout, () => (
-          <UnderDevelopment pageName="Audit & Inspection > External Audit" />
-        ))}
-      />
+      <Route element={<ProtectedRoute />}>
+        <Route path="/home" element={withLayout(MainLayout, InsightsPage)} />
+        <Route
+          path="/audit-inspection/dashboard"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Audit & Inspection > Dashboard" />
+          ))}
+        />
+        <Route
+          path="/audit-inspection/calendar"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Audit & Inspection > Calendar" />
+          ))}
+        />
+        <Route
+          path="/audit-inspection/internal-audit"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Audit & Inspection > Internal Audit" />
+          ))}
+        />
+        <Route
+          path="/audit-inspection/external-audit"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Audit & Inspection > External Audit" />
+          ))}
+        />
 
-      {/* document */}
-      <Route
-        path="/document"
-        element={withLayout(MainLayout, DocumentRegister)}
-      />
+        {/* document */}
+        <Route
+          path="/document"
+          element={withLayout(MainLayout, DocumentRegister)}
+        />
 
-      {/* hazard and risk */}
-      <Route
-        path="/hazard-risk/dashboard"
-        element={withLayout(MainLayout, HazardRiskDashboard)}
-      />
-      <Route
-        path="/hazard-risk/history"
-        element={withLayout(MainLayout, () => (
-          <HazardRiskTable />
-        ))}
-      />
-      <Route
-        path="/hazard-risk/assigned-tasks"
-        element={withLayout(MainLayout, () => (
-          <UnderDevelopment pageName="Document > Assigned Task" />
-        ))}
-      />
+        {/* hazard and risk */}
+        <Route
+          path="/hazard-risk/dashboard"
+          element={withLayout(MainLayout, HazardRiskDashboard)}
+        />
+        <Route
+          path="/hazard-risk/history"
+          element={withLayout(MainLayout, () => (
+            <HazardRiskTable />
+          ))}
+        />
+        <Route
+          path="/hazard-risk/assigned-tasks"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Document > Assigned Task" />
+          ))}
+        />
 
-      {/* Accident & Incident */}
-      <Route
-        path="/accident-incident/dashboard"
-        element={withLayout(MainLayout, () => (
-          <UnderDevelopment pageName="Accident & Incident > Dashboard" />
-        ))}
-      />
-      <Route
-        path="/accident-incident/register/accident-register"
-        element={withLayout(MainLayout, AccidentTable)}
-      />
-      <Route
-        path="/accident-incident/register/incident-register"
-        element={withLayout(MainLayout, IncidentTable)}
-      />
-      <Route
-        path="/accident-incident/register/corrective-action"
-        element={withLayout(MainLayout, () => (
-          <UnderDevelopment pageName="Accident & Incident > Corrective Action" />
-        ))}
-      />
-      {/* </Route> */}
+        {/* Accident & Incident */}
+        <Route
+          path="/accident-incident/dashboard"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Accident & Incident > Dashboard" />
+          ))}
+        />
+        <Route
+          path="/accident-incident/register/accident-register"
+          element={withLayout(MainLayout, AccidentTable)}
+        />
+        <Route
+          path="/accident-incident/register/incident-register"
+          element={withLayout(MainLayout, IncidentTable)}
+        />
+        <Route
+          path="/accident-incident/register/corrective-action"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Accident & Incident > Corrective Action" />
+          ))}
+        />
+      </Route>
     </Routes>
   );
 };
