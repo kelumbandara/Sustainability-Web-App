@@ -1,18 +1,18 @@
-import { useQuery } from "@tanstack/react-query";
-import { User, validateUser } from "../api/userApi"; // Ensure this import is correct
+// import { useQuery } from "@tanstack/react-query";
+// import { User, validateUser } from "../api/userApi"; // Ensure this import is correct
 
-interface UseCurrentUserResult {
-  user: User | undefined;
-  status: "idle" | "loading" | "error" | "success" | "pending";
-}
+// interface UseCurrentUserResult {
+//   user: User | undefined;
+//   status: "idle" | "loading" | "error" | "success" | "pending";
+// }
 
-function useCurrentUser(): UseCurrentUserResult {
-  const { data, status } = useQuery<User>({
-    queryKey: ["current-user"],
-    queryFn: validateUser,
-  });
+// function useCurrentUser(): UseCurrentUserResult {
+//   const { data, status } = useQuery<User>({
+//     queryKey: ["current-user"],
+//     queryFn: validateUser,
+//   });
 
-  return { user: data, status };
-}
+//   return { user: data, status };
+// }
 
-export default useCurrentUser;
+// export default useCurrentUser;

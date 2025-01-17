@@ -32,6 +32,7 @@ import {
   HazardOrRiskCategories,
   RiskLevel,
   UnsafeActOrCondition,
+  createHazardRisk,
 } from "../../api/hazardRiskApi";
 import { sampleAssignees } from "../../api/sampleData/usersSampleDate";
 
@@ -55,20 +56,71 @@ export default function AddOrEditHazardRiskDialog({
   const {
     register,
     handleSubmit,
-    watch,
     control,
     formState: { errors },
     reset,
+    watch,
     setValue,
   } = useForm<HazardAndRisk>({
     defaultValues: {
-      ...defaultValues,
-      riskLevel: defaultValues?.riskLevel ?? RiskLevel.LOW,
-      unsafeActOrCondition:
-        defaultValues?.unsafeActOrCondition ?? UnsafeActOrCondition.UNSAFE_ACT,
+      category: defaultValues?.category ?? "", // Make sure default is not undefined
+      division: defaultValues?.division ?? "",
+      locationOrDepartment: defaultValues?.locationOrDepartment ?? "",
+      subLocation: defaultValues?.subLocation ?? "", // Added subLocation if applicable
+      description: defaultValues?.description ?? "", // Added description for hazard/risk details
+      riskLevel: defaultValues?.riskLevel ?? RiskLevel.LOW, // Default risk level to LOW
+      unsafeActOrCondition: defaultValues?.unsafeActOrCondition ?? UnsafeActOrCondition.UNSAFE_ACT, // Default to UNSAFE_ACT
+      observationType: defaultValues?.observationType ?? "", // Added observationType if applicable
+      actionTaken: defaultValues?.actionTaken ?? "", // Added actionTaken if applicable
+      status: defaultValues?.status ?? HazardAndRiskStatus.DRAFT, // Default status to DRAFT
+      createdByUser: defaultValues?.createdByUser ?? "", // Optional: Assign a default if needed
+      // createdDate: defaultValues?.createdDate ?? new Date(), // Optional: Current date if not set
+      // Add other fields if applicable in your HazardAndRisk type
     },
   });
+  
 
+  const onSubmitForm = async (data: HazardAndRisk) => {
+    // Check if required fields are filled
+    if (!data.category || !data.division || !data.locationOrDepartment || !data.riskLevel) {
+      // Handle error (show a message, etc.)
+      console.error("Required fields are missing");
+      return;
+    }
+  
+    try {
+      // Handle create document logic (async call)
+      await handleCreateDocument(data);
+  
+      // Call the createHazardRisk function
+      await createHazardRisk({
+        
+        category: data.category,
+        subCategory: data.subCategory ?? "",
+        observationType: data.observationType ?? "",
+        division: data.division,
+        locationOrDepartment: data.locationOrDepartment,
+        subLocation: data.subLocation ?? "",
+        description: data.description ?? "",
+        riskLevel: data.riskLevel,
+        unsafeActOrCondition: data.unsafeActOrCondition,
+        dueDate: data.dueDate ?? new Date(),
+        assignee: data.assignee ?? "",
+        // createdDate: new Date(),
+        createdByUser: data.createdByUser ?? "",
+      });
+  
+      // Optionally, display a success message
+      console.log("Form submitted successfully!");
+  
+      // Optionally reset the form
+      reset();
+    } catch (error) {
+      console.error("Error while submitting form: ", error);
+    }
+  };
+  
+  
   useEffect(() => {
     if (defaultValues) {
       reset(defaultValues);
@@ -103,15 +155,28 @@ export default function AddOrEditHazardRiskDialog({
   }, [category, subCategory]);
 
   const handleCreateDocument = (data: HazardAndRisk) => {
-    const submitData: Partial<HazardAndRisk> = data;
-    submitData.id = defaultValues?.id ?? uuidv4();
-    submitData.createdDate = new Date();
-    submitData.createdByUser = sampleAssignees[0].name;
-    submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
-    onSubmit(submitData as HazardAndRisk);
+    // Ensure that the required fields are set
+    if (!data.category || !data.division || !data.locationOrDepartment || !data.riskLevel) {
+      console.error("Required fields are missing");
+      return;
+    }
+  
+    // Prepare the data for submission
+    const submitData: HazardAndRisk = {
+      ...data,
+      id: defaultValues?.id ?? uuidv4(), // Ensure ID is set, generating new one if not available
+      // createdDate: new Date(), // Set the current date for the document creation
+      createdByUser: sampleAssignees[0]?.name ?? 'Unknown', // Ensure there is a fallback value for createdByUser
+      status: defaultValues?.status ?? HazardAndRiskStatus.DRAFT, // Default to DRAFT if status is missing
+    };
+  
+    // Submit the data
+    onSubmit(submitData);
+  
+    // Reset the form state
     resetForm();
   };
-
+  
   const AddNewObservationButton = (props) => (
     <li
       {...props}
@@ -655,9 +720,7 @@ export default function AddOrEditHazardRiskDialog({
             backgroundColor: "var(--pallet-blue)",
           }}
           size="medium"
-          onClick={handleSubmit((data) => {
-            handleCreateDocument(data);
-          })}
+          onClick={handleSubmit(onSubmitForm)} // Using onSubmitForm here
         >
           {defaultValues ? "Update Changes" : "Submit Report"}
         </CustomButton>
