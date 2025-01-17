@@ -114,3 +114,87 @@ export const sampleDocuments: Document[] = [
     ],
   },
 ];
+
+export const sampleDepartments = [
+  {
+    id: "div_1",
+    name: "IE",
+  },
+  {
+    id: "div_2",
+    name: "Audit",
+  },
+  {
+    id: "div_3",
+    name: "Finance & Account",
+  },
+  {
+    id: "div_4",
+    name: "3D",
+  },
+  {
+    id: "div_5",
+    name: "Store",
+  },
+  {
+    id: "div_6",
+    name: "Sample",
+  },
+  {
+    id: "div_7",
+    name: "Sewing",
+  },
+];
+
+export const sampleAsignee = [
+  {
+    id: "div_1",
+    name: "Nafee Udden",
+  },
+  {
+    id: "div_2",
+    name: "Mirza Kauzar",
+  },
+  {
+    id: "div_3",
+    name: "Duminda Mangala",
+  },
+  {
+    id: "div_4",
+    name: "Haroon Haridas",
+  },
+  {
+    id: "div_5",
+    name: "Abdul Azeez",
+  },
+];
+
+export const sampleCategory = [
+  {
+    id: "div_1",
+    name: "Environmantal",
+  },
+  {
+    id: "div_2",
+    name: "Safty",
+  },
+  {
+    id: "div_3",
+    name: "Health",
+  },
+];
+
+export const sampleAccidentTypes = [
+  {
+    id: "div_1",
+    name: "Exposire to fire",
+  },
+  {
+    id: "div_2",
+    name: "Exposire to Explotion",
+  },
+  {
+    id: "div_3",
+    name: "Equipment Failure",
+  },
+];

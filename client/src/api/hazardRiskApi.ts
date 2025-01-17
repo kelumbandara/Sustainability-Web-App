@@ -1,4 +1,5 @@
 import { z } from "zod";
+import axios from "axios";
 
 export enum CategoryType {
   HEALTH_AND_HSE_MANAGEMENT = "Health and HSE Management",
@@ -195,10 +196,10 @@ export const HazardAndRiskSchema = z.object({
   unsafeActOrCondition: z.nativeEnum(UnsafeActOrCondition),
   dueDate: z.date(),
   assignee: z.string(),
-  documents: z
-    .array(z.union([z.string().url(), z.instanceof(File)]))
-    .optional(),
-  createdDate: z.date(),
+  // documents: z
+  //   .array(z.union([z.string().url(), z.instanceof(File)]))
+  //   .optional(),
+  // createdDate: z.date(),
   createdByUser: z.string(),
   status: z.nativeEnum(HazardAndRiskStatus),
   control: z.string().optional(),
@@ -206,5 +207,57 @@ export const HazardAndRiskSchema = z.object({
   remarks: z.string().optional(),
   actionTaken: z.string().optional(),
 });
+
+export async function createHazardRisk({
+  id,
+  category,
+  subCategory,
+  observationType,
+  division,
+  locationOrDepartment,
+  subLocation,
+  description,
+  riskLevel,
+  unsafeActOrCondition,
+  dueDate,
+  assignee,
+  // documents,
+  // createdDate,
+  createdByUser,
+}: {
+  id?: string;
+  category: string;
+  subCategory: string;
+  observationType?: string;
+  division: string;
+  locationOrDepartment: string;
+  subLocation?: string;
+  description?: string;
+  riskLevel: RiskLevel;
+  unsafeActOrCondition: UnsafeActOrCondition;
+  dueDate: Date;
+  assignee: string;
+  // documents: string;
+  // createdDate: Date;
+  createdByUser: string;
+}) {
+  const res = await axios.post("/api/hazard-risk", {
+    category,
+    subCategory,
+    observationType,
+    division,
+    locationOrDepartment,
+    subLocation,
+    description,
+    riskLevel,
+    unsafeActOrCondition,
+    dueDate,
+    assignee,
+    // documents,
+    // createdDate,
+    createdByUser,
+  });
+  return res.data;
+}
 
 export type HazardAndRisk = z.infer<typeof HazardAndRiskSchema>;

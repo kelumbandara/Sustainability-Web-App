@@ -58,7 +58,7 @@ export async function registerUser({
   return res.data;
 }
 
-export async function validateUser() {
-  const res = await axios.get("/api/user");
-  return res.data;
-}
+// export async function validateUser() {
+//   const res = await axios.get("/api/user");
+//   return res.data;
+// }

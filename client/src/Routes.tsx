@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router";
 import MainLayout from "./components/Layout/MainLayout";
 import PageLoader from "./components/PageLoader";
-import useCurrentUser from "./hooks/useCurrentUser";
+// import useCurrentUser from "./hooks/useCurrentUser";
 
 //login & registation page
 const LoginPage = React.lazy(() => import("./views/LoginPage/LoginPage"));
@@ -24,6 +24,11 @@ const HazardRiskDashboard = React.lazy(
 );
 const HazardRiskTable = React.lazy(
   () => import("./views/HazardAndRisk/HazardRiskTable")
+);
+
+//accident and incident
+const AccidentReport = React.lazy(
+  () => import("./views/AccidentAndIncidents/AddAccident")
 );
 
 function withLayout(Layout: any, Component: any) {
@@ -56,27 +61,27 @@ function withoutLayout(Component: React.LazyExoticComponent<any>) {
   );
 }
 
-const ProtectedRoute = () => {
-  const { user, status } = useCurrentUser();
-  console.log(user, status);
+// const ProtectedRoute = () => {
+//   const { user, status } = useCurrentUser();
+//   console.log(user, status);
 
-  if (status === "loading" || status === "idle" || status === "pending") {
-    return <PageLoader />;
-  }
+//   if (status === "loading" || status === "idle" || status === "pending") {
+//     return <PageLoader />;
+//   }
 
-  if (!user) {
-    return <Navigate to="/" />;
-  }
+//   if (!user) {
+//     return <Navigate to="/" />;
+//   }
 
-  return <Outlet />;
-};
+//   return <Outlet />;
+// };
 
 const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={withoutLayout(LoginPage)} />
-      {/* <Route path="/register" element={withoutLayout(RegistrationPage)} /> */}
-      <Route element={<ProtectedRoute />}>
+      <Route path="/register" element={withoutLayout(RegistrationPage)} />
+      {/* <Route element={<ProtectedRoute />}> */}
         <Route path="/home" element={withLayout(MainLayout, InsightsPage)} />
 
         <Route
@@ -107,10 +112,10 @@ const AppRoutes = () => {
           path="/document"
           element={withLayout(MainLayout, DocumentRegister)}
         />
-        <Route
+        {/* <Route
           path="/register"
           element={withLayout(MainLayout, RegistrationPage)}
-        />
+        /> */}
 
         <Route
           path="/hazard-risk/dashboard"
@@ -123,12 +128,18 @@ const AppRoutes = () => {
           ))}
         />
         <Route
+          path="/accident-incident/report/report-accident"
+          element={withLayout(MainLayout, () => (
+            <AccidentReport />
+          ))}
+        />
+        <Route
           path="/hazard-risk/assigned-tasks"
           element={withLayout(MainLayout, () => (
             <UnderDevelopment pageName="Document > Assigned Task" />
           ))}
         />
-      </Route>
+      {/* </Route> */}
     </Routes>
   );
 };

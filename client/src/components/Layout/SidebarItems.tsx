@@ -234,7 +234,7 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
     title: "Accident & Incident",
     href: "/accident-incident",
     icon: <ChangeHistoryIcon fontSize="small" />,
-    disabled: true,
+    disabled: false,
     nestedItems: [
       {
         title: "Dashboard",
