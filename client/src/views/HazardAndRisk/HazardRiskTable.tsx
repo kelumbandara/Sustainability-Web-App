@@ -194,7 +194,7 @@ function HazardRiskTable() {
               setRiskData(
                 riskData.map((risk) => (risk.id === data.id ? data : risk))
               ); // Update the document in the list if it already exists
-              enqueueSnackbar("Document Details Updated Successfully!", {
+              enqueueSnackbar("Details Updated Successfully!", {
                 variant: "success",
               });
             } else {
@@ -231,7 +231,7 @@ function HazardRiskTable() {
             setOpenViewDrawer(false);
             setSelectedRow(null);
             setDeleteDialogOpen(false);
-            enqueueSnackbar("Document Deleted Successfully!", {
+            enqueueSnackbar("Record Deleted Successfully!", {
               variant: "success",
             });
           }}

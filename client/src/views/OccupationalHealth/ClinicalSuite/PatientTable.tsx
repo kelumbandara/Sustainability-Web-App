@@ -14,32 +14,33 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import theme from "../../theme";
-import PageTitle from "../../components/PageTitle";
-import Breadcrumb from "../../components/BreadCrumb";
 import { useState } from "react";
-import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
-import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
-import { Accident } from "../../api/accidentAndIncidentApi";
-import ViewAccidentContent from "./ViewAccidentContent";
-import AddOrEditAccidentDialog from "./AddOrEditAccidentDialog";
-import { sampleAccidentData } from "../../api/sampleData/accidentData";
+import theme from "../../../theme";
+import PageTitle from "../../../components/PageTitle";
+import Breadcrumb from "../../../components/BreadCrumb";
+import ViewDataDrawer, {
+  DrawerHeader,
+} from "../../../components/ViewDataDrawer";
+import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
+import { Patient } from "../../../api/OccupationalHealth/patientApi";
+import { samplePatientData } from "../../../api/sampleData/patientData";
+import ViewPatientContent from "./ViewPatientContent";
+import AddOrEditPatientDialog from "./AddOrEditPatientDialog";
 
-function AccidentTable() {
+function PatientTable() {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<Accident>(null);
+  const [selectedRow, setSelectedRow] = useState<Patient>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
-  const [accidentData, setAccidentData] =
-    useState<Accident[]>(sampleAccidentData);
+  const [patients, setPatients] = useState<Patient[]>(samplePatientData);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
-    { title: "Accident Management" },
+    { title: "Patient Management" },
   ];
 
   const isMobile = useMediaQuery((theme: Theme) =>
@@ -57,7 +58,7 @@ function AccidentTable() {
           overflowX: "hidden",
         }}
       >
-        <PageTitle title="Accident Management" />
+        <PageTitle title="Patient Management" />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
       <Stack sx={{ alignItems: "center" }}>
@@ -85,31 +86,28 @@ function AccidentTable() {
                 setOpenAddOrEditDialog(true);
               }}
             >
-              Report an accident
+              Add New Patient
             </Button>
           </Box>
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
-                <TableCell>Reference</TableCell>
-                <TableCell align="right">Accident Date</TableCell>
-                <TableCell align="right">Accident Time</TableCell>
-                <TableCell align="right">Severity</TableCell>
-                <TableCell align="right">Injury</TableCell>
-                <TableCell align="right">Time of Work</TableCell>
-                <TableCell align="right">Return for Work</TableCell>
-                <TableCell align="right">Division</TableCell>
-                <TableCell align="right">Department</TableCell>
-                <TableCell align="right">Category</TableCell>
-                <TableCell align="right">Assignee</TableCell>
+                <TableCell>Patient ID</TableCell>
+                <TableCell align="right">Employee ID</TableCell>
+                <TableCell align="right">Employee Name</TableCell>
+                <TableCell align="right">Gender</TableCell>
+                <TableCell align="right">Check In</TableCell>
+                <TableCell align="right">Consulting Doctor</TableCell>
+                <TableCell align="right">Disease</TableCell>
+                <TableCell align="right">Check Out</TableCell>
                 <TableCell align="right">Status</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {accidentData?.length > 0 ? (
-                accidentData?.map((row) => (
+              {patients?.length > 0 ? (
+                patients.map((row) => (
                   <TableRow
-                    key={`${row.id}`}
+                    key={`${row.id}${row.employee_id}`}
                     sx={{
                       "&:last-child td, &:last-child th": { border: 0 },
                       cursor: "pointer",
@@ -120,31 +118,32 @@ function AccidentTable() {
                     }}
                   >
                     <TableCell component="th" scope="row">
-                      {row.referenceNumber}
+                      {row.id}
+                    </TableCell>
+                    <TableCell align="right">{row.employee_id}</TableCell>
+                    <TableCell align="right">{row.employee_name}</TableCell>
+                    <TableCell align="right">{row.gender}</TableCell>
+                    <TableCell align="right">
+                      {row?.check_in_date
+                        ? format(new Date(row.check_in_date), "yyyy-MM-dd")
+                        : "--"}
                     </TableCell>
                     <TableCell align="right">
-                      {format(row.accidentDate, "yyyy-MM-dd")}
+                      {row?.consulting_doctor}
                     </TableCell>
+                    <TableCell align="right">{row.disease ?? "--"}</TableCell>
                     <TableCell align="right">
-                      {format(row.accidentTime, "HH:mm")}
+                      {row?.check_out_date
+                        ? format(new Date(row.check_out_date), "yyyy-MM-dd")
+                        : "--"}
                     </TableCell>
-                    <TableCell align="right">{row.severity}</TableCell>
-                    <TableCell align="right">{row.injury}</TableCell>
-                    <TableCell align="right">{row.timeOfWork}</TableCell>
-                    <TableCell align="right">
-                      {row.returnForWork ? row.returnForWork : "--"}
-                    </TableCell>
-                    <TableCell align="right">{row.division}</TableCell>
-                    <TableCell align="right">{row.department}</TableCell>
-                    <TableCell align="right">{row.category}</TableCell>
-                    <TableCell align="right">{row.assignee}</TableCell>
                     <TableCell align="right">{row.status}</TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
                   <TableCell colSpan={11} align="center">
-                    <Typography variant="body2">No Records found</Typography>
+                    <Typography variant="body2">No patients found</Typography>
                   </TableCell>
                 </TableRow>
               )}
@@ -154,12 +153,12 @@ function AccidentTable() {
       </Stack>
       <ViewDataDrawer
         open={openViewDrawer}
-        handleClose={() => setOpenViewDrawer(false)}
         fullScreen={true}
+        handleClose={() => setOpenViewDrawer(false)}
         drawerContent={
           <Stack spacing={1} sx={{ paddingX: theme.spacing(1) }}>
             <DrawerHeader
-              title="Accident Details"
+              title="Patient Details"
               handleClose={() => setOpenViewDrawer(false)}
               onEdit={() => {
                 setSelectedRow(selectedRow);
@@ -170,14 +169,14 @@ function AccidentTable() {
 
             {selectedRow && (
               <Stack>
-                <ViewAccidentContent accident={selectedRow} />
+                <ViewPatientContent patient={selectedRow} />
               </Stack>
             )}
           </Stack>
         }
       />
       {openAddOrEditDialog && (
-        <AddOrEditAccidentDialog
+        <AddOrEditPatientDialog
           open={openAddOrEditDialog}
           handleClose={() => {
             setSelectedRow(null);
@@ -186,17 +185,16 @@ function AccidentTable() {
           }}
           onSubmit={(data) => {
             if (selectedRow) {
-              console.log("Updating document", data);
-              setAccidentData(
-                accidentData.map((risk) => (risk.id === data.id ? data : risk))
-              ); // Update the document in the list if it already exists
-              enqueueSnackbar("Accident Details Updated Successfully!", {
+              setPatients(
+                patients.map((doc) => (doc.id === data.id ? data : doc))
+              ); // Update the patient in the list if it already exists
+              enqueueSnackbar("Document Details Updated Successfully!", {
                 variant: "success",
               });
             } else {
-              console.log("Adding new accident", data);
-              setAccidentData([...accidentData, data]); // Add new document to the list
-              enqueueSnackbar("Accident Report Created Successfully!", {
+              console.log("Adding new document", data);
+              setPatients([...patients, data]); // Add new patient to the list
+              enqueueSnackbar("Patient Created Successfully!", {
                 variant: "success",
               });
             }
@@ -210,10 +208,10 @@ function AccidentTable() {
       {deleteDialogOpen && (
         <DeleteConfirmationModal
           open={deleteDialogOpen}
-          title="Remove Accident Confirmation"
+          title="Remove Patient Confirmation"
           content={
             <>
-              Are you sure you want to remove this accident?
+              Are you sure you want to remove this patient?
               <Alert severity="warning" style={{ marginTop: "1rem" }}>
                 This action is not reversible.
               </Alert>
@@ -221,15 +219,13 @@ function AccidentTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            setAccidentData(
-              accidentData.filter((doc) => doc.id !== selectedRow.id)
-            );
+            setPatients(patients.filter((doc) => doc.id !== selectedRow.id));
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);
             setSelectedRow(null);
             setDeleteDialogOpen(false);
-            enqueueSnackbar("Accident Deleted Successfully!", {
+            enqueueSnackbar("Patient Deleted Successfully!", {
               variant: "success",
             });
           }}
@@ -244,4 +240,4 @@ function AccidentTable() {
   );
 }
 
-export default AccidentTable;
+export default PatientTable;

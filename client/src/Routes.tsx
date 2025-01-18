@@ -33,6 +33,11 @@ const IncidentTable = React.lazy(
   () => import("./views/AccidentAndIncident/IncidentTable")
 );
 
+//Occupational Health
+const PatientTable = React.lazy(
+  () => import("./views/OccupationalHealth/ClinicalSuite/PatientTable")
+);
+
 function withLayout(Layout: any, Component: any) {
   return (
     <Layout>
@@ -109,13 +114,11 @@ const AppRoutes = () => {
             <UnderDevelopment pageName="Audit & Inspection > External Audit" />
           ))}
         />
-
         {/* document */}
         <Route
           path="/document"
           element={withLayout(MainLayout, DocumentRegister)}
         />
-
         {/* hazard and risk */}
         <Route
           path="/hazard-risk/dashboard"
@@ -133,7 +136,6 @@ const AppRoutes = () => {
             <UnderDevelopment pageName="Document > Assigned Task" />
           ))}
         />
-
         {/* Accident & Incident */}
         <Route
           path="/accident-incident/dashboard"
@@ -153,6 +155,89 @@ const AppRoutes = () => {
           path="/accident-incident/register/corrective-action"
           element={withLayout(MainLayout, () => (
             <UnderDevelopment pageName="Accident & Incident > Corrective Action" />
+          ))}
+        />
+        {/* Assigned Tasks */}
+        <Route
+          path="/accident-incident/assigned-tasks/accident-assigned"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Assigned Tasks > Accident Assigned" />
+          ))}
+        />
+        <Route
+          path="/accident-incident/assigned-tasks/incident-assigned"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Assigned Tasks > Incident Assigned" />
+          ))}
+        />
+        <Route
+          path="/accident-incident/assigned-tasks/corrective-action"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Assigned Tasks > Corrective Action" />
+          ))}
+        />
+
+        {/* Occupational health */}
+        {/* Dashboard */}
+        <Route
+          path="/occupational-health/dashboard"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Clinical Suite > Dashboard" />
+          ))}
+        />
+        {/* Clinical Suite */}
+        <Route
+          path="/occupational-health/clinical-suite/patient-register"
+          element={withLayout(MainLayout, PatientTable)}
+        />
+        <Route
+          path="/occupational-health/clinical-suite/consultation"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Clinical Suite > Consultation" />
+          ))}
+        />
+        <Route
+          path="/occupational-health/clinical-suite/medicine-stock"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Clinical Suite > Medicine Stock" />
+          ))}
+        />
+        <Route
+          path="/occupational-health/clinical-suite/pharmacy-queue"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Clinical Suite > Pharmacy Queue" />
+          ))}
+        />
+        {/* Medicine Inventory */}
+        <Route
+          path="/occupational-health/medicines-inventory/medicine-request"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Medicine Inventory > Medicine Request" />
+          ))}
+        />
+        <Route
+          path="/occupational-health/medicines-inventory/purchase-inventory"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Medicine Inventory > Purchase & Inventory" />
+          ))}
+        />
+        <Route
+          path="/occupational-health/medicines-inventory/transaction"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Medicine Inventory > Transaction" />
+          ))}
+        />
+        <Route
+          path="/occupational-health/medicines-inventory/assigned-tasks"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Medicine Inventory > Assigned Tasks" />
+          ))}
+        />
+        {/* Medical Records */}
+        <Route
+          path="/occupational-health/medical-records/maternity-register"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Medical Records > Maternity Register" />
           ))}
         />
       </Route>

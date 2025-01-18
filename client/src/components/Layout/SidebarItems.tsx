@@ -336,7 +336,7 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
     title: "Occupational Health",
     href: "/occupational-health",
     icon: <FavoriteBorderIcon fontSize="small" />,
-    disabled: true,
+    disabled: false,
     nestedItems: [
       {
         title: "Dashboard",
