@@ -52,7 +52,7 @@ function a11yProps(index: number) {
   };
 }
 
-function ViewHazardOrRiskContent({ document }: { document: Document }) {
+function ViewDocumentContent({ document }: { document: Document }) {
   const [activeTab, setActiveTab] = useState(0);
   const { isTablet } = useIsMobile();
 
@@ -376,4 +376,4 @@ function ViewHazardOrRiskContent({ document }: { document: Document }) {
   );
 }
 
-export default ViewHazardOrRiskContent;
+export default ViewDocumentContent;

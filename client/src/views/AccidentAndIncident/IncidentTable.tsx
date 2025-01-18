@@ -186,7 +186,7 @@ function IncidentTable() {
               setIncidentData(
                 incidentData.map((risk) => (risk.id === data.id ? data : risk))
               ); // Update the document in the list if it already exists
-              enqueueSnackbar("Document Details Updated Successfully!", {
+              enqueueSnackbar("Incident Details Updated Successfully!", {
                 variant: "success",
               });
             } else {
@@ -225,7 +225,7 @@ function IncidentTable() {
             setOpenViewDrawer(false);
             setSelectedRow(null);
             setDeleteDialogOpen(false);
-            enqueueSnackbar("Document Deleted Successfully!", {
+            enqueueSnackbar("Incident Deleted Successfully!", {
               variant: "success",
             });
           }}
