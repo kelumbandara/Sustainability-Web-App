@@ -780,7 +780,12 @@ export default function AddOrEditAccidentDialog({
                       )}
                     />
                   </Box>
-                  <Box sx={{ display: "flex" }}>
+                  <Box 
+                    sx={{ 
+                      display: "flex" ,
+                      flexDirection: isMobile ? "column" : "row",
+                    }}
+                  >
                     <Autocomplete
                       {...register("injuryCause", { required: true })}
                       size="small"
@@ -809,7 +814,13 @@ export default function AddOrEditAccidentDialog({
                       {...register("rootCause", { required: true })}
                     />
                   </Box>
-                  <Box sx={{ display: "flex" }}>
+                  <Box 
+                    sx={{ 
+                      display: "flex" ,
+                      flexDirection: isMobile ? "column" : "row",
+                    }}
+                  
+                  >
                     <TextField
                       required
                       id="consultedHospital"

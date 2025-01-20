@@ -59,7 +59,7 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
     icon: <LayersIcon fontSize="small" />,
     href: "/audit-inspection",
     open: false,
-    disabled: true,
+    disabled: false,
     nestedItems: [
       {
         title: "Dashboard",
