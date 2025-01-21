@@ -11,15 +11,29 @@ import {
   Stack,
   TextField,
   Typography,
+  Switch, 
+  FormControlLabel,
 } from "@mui/material";
-import { DocumentType } from "../../api/documentApi";
-import { Document } from "../../api/documentApi";
+import { 
+  InternalAudit,
+  InternalAuditStatus,
+} from "../../api/AuditAndInspection/internalAuditApi";
+
+import { 
+  sampleAuditee,
+  sampleApprover,
+  sampleAuditTitle,
+  sampleAuditType,
+  sampleFactoryName,
+  sampleProcessType,
+  sampleSupplierType,
+
+} from "../../api/sampleData/internalAuditData";
 import useIsMobile from "../../customHooks/useIsMobile";
 import { Controller, useForm } from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
-import { sampleDivisions } from "../../api/sampleData/documentData";
+import { sampleDivisions,sampleDepartments } from "../../api/sampleData/documentData";
 import RichTextComponent from "../../components/RichTextComponent";
-import DropzoneComponent from "../../components/DropzoneComponent";
 import { grey } from "@mui/material/colors";
 import DatePickerComponent from "../../components/DatePickerComponent";
 import SwitchButton from "../../components/SwitchButton";
@@ -30,8 +44,8 @@ import { v4 as uuidv4 } from "uuid";
 type DialogProps = {
   open: boolean;
   handleClose: () => void;
-  defaultValues?: Document;
-  onSubmit?: (data: Document) => void;
+  defaultValues?: InternalAudit;
+  onSubmit?: (data: InternalAudit) => void;
 };
 
 export default function AddOrEditInternalAuditDialog({
@@ -50,14 +64,12 @@ export default function AddOrEditInternalAuditDialog({
     control,
     formState: { errors },
     reset,
-  } = useForm<Document>({
+  } = useForm<InternalAudit>({
     defaultValues: defaultValues,
   });
 
-  const isNoExpiry = watch("isNoExpiry");
-  const versionNumber = watch("versionNumber");
-
-  console.log("versionNumber", versionNumber, defaultValues);
+  const isNotSupplier = watch("isNotSupplier");
+  console.log("form values", defaultValues);
 
   useEffect(() => {
     if (defaultValues) {
@@ -72,18 +84,22 @@ export default function AddOrEditInternalAuditDialog({
     setFiles([]);
   };
 
-  const handleCreateDocument = (data: Document) => {
-    const { isNoExpiry, expiryDate, notifyDate, ...rest } = data;
-    const submitData: Partial<Document> = rest;
+  const handleCreateInternalAudit = (data: InternalAudit) => {
+    console.log("Submitted form data:", data);
+    const { isNotSupplier, ...rest } = data;
+    const submitData: Partial<InternalAudit> = rest;
     submitData.id = defaultValues?.id ?? uuidv4();
-    if (!isNoExpiry) {
-      submitData.isNoExpiry = false;
-      submitData.expiryDate = expiryDate;
-      submitData.notifyDate = notifyDate;
+
+    if (!isNotSupplier) {
+      submitData.isNotSupplier = false;
     } else {
-      submitData.isNoExpiry = true;
+      submitData.isNotSupplier = true;
     }
-    onSubmit(submitData as Document);
+    
+    submitData.status = defaultValues?.status ?? InternalAuditStatus.DRAFT;
+    console.log("Processed submission data:", submitData);
+  
+    onSubmit(submitData as InternalAudit);
     resetForm();
   };
 
@@ -111,7 +127,7 @@ export default function AddOrEditInternalAuditDialog({
         }}
       >
         <Typography variant="h6" component="div">
-          {defaultValues ? "Edit Document Details" : "Create a New Document"}
+          {defaultValues ? "Edit Document Details" : "Create a New Audit Schedule"}
         </Typography>
         <IconButton
           aria-label="open drawer"
@@ -166,23 +182,6 @@ export default function AddOrEditInternalAuditDialog({
               }}
             >
               <Autocomplete
-                {...register("documentType", { required: true })}
-                size="small"
-                options={Object.values(DocumentType)}
-                sx={{ flex: 1, margin: "0.5rem" }}
-                defaultValue={defaultValues?.documentType}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    error={!!errors.documentType}
-                    label="Document Type"
-                    name="documentType"
-                  />
-                )}
-              />
-
-              <Autocomplete
                 {...register("division", { required: true })}
                 size="small"
                 options={sampleDivisions?.map((division) => division.name)}
@@ -198,96 +197,237 @@ export default function AddOrEditInternalAuditDialog({
                   />
                 )}
               />
+              <Autocomplete
+                {...register("department", { required: true })}
+                size="small"
+                options={sampleDepartments?.map((department) => department.name)}
+                defaultValue={defaultValues?.department}
+                sx={{ flex: 1, margin: "0.5rem" }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    error={!!errors.department}
+                    label="Department"
+                    name="department"
+                  />
+                )}
+              />
+              <Autocomplete
+                {...register("auditTitle", { required: true })}
+                size="small"
+                options={sampleAuditTitle?.map((auditTitle) => auditTitle.name)}
+                defaultValue={defaultValues?.auditTitle}
+                sx={{ flex: 1, margin: "0.5rem" }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    error={!!errors.auditTitle}
+                    label="Audit Title"
+                    name="auditTitle"
+                  />
+                )}
+              /> 
+              <Autocomplete
+                {...register("auditType", { required: true })}
+                size="small"
+                options={sampleAuditType?.map((auditType) => auditType.name)}
+                defaultValue={defaultValues?.auditType}
+                sx={{ flex: 1, margin: "0.5rem" }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    error={!!errors.auditType}
+                    label="Audit Type"
+                    name="auditType"
+                  />
+                )}
+              />              
             </Box>
-            <Box
+
+            <Box sx={{ margin: "0.5rem" }}>
+              <Controller
+                control={control}
+                name={"isNotSupplier"}
+                render={({ field }) => {
+                  return (
+                    <SwitchButton
+                      label="Is the audit scheduled for a supplier"
+                      onChange={field.onChange}
+                      value={field.value}
+                    />
+                  );
+                }}
+              />
+            </Box>
+            
+            {isNotSupplier ? (
+              <Stack
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
+                  gridTemplateRows: isMobile ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)',
+                }}
+              >
+        
+                <Autocomplete
+                  {...register("supplierType", { required: true })}
+                  size="small"
+                  options={sampleSupplierType?.map((supplierType) => supplierType.name)}
+                  defaultValue={defaultValues?.supplierType}
+                  sx={{ flex: 1, margin: "0.5rem" }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      required
+                      error={!!errors.supplierType}
+                      label="Supplier Type"
+                      name="supplierType"
+                    />
+                  )}
+                />
+                <TextField
+                  required
+                  id="factoryLiNo"
+                  label="Factory Licence Number"
+                  error={!!errors.factoryAddress}
+                  size="small"
+                  sx={{ flex: 1, margin: "0.5rem" }}
+                  {...register("factoryLiNo", { required: true })}
+                />
+                <TextField
+                  required
+                  id="higgId"
+                  label="HIGG ID"
+                  error={!!errors.factoryAddress}
+                  size="small"
+                  sx={{ flex: 1, margin: "0.5rem" }}
+                  {...register("higgId", { required: true })}
+                />
+                <TextField
+                  required
+                  id="zdhcId"
+                  label="ZDHC ID"
+                  error={!!errors.factoryAddress}
+                  size="small"
+                  sx={{ flex: 1, margin: "0.5rem" }}
+                  {...register("zdhcId", { required: true })}
+                />
+                <Autocomplete
+                  {...register("processType", { required: true })}
+                  size="small"
+                  options={sampleProcessType?.map((processType) => processType.name)}
+                  defaultValue={defaultValues?.processType}
+                  sx={{ flex: 1, margin: "0.5rem" }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      required
+                      error={!!errors.processType}
+                      label="Process Type"
+                      name="processType"
+                    />
+                  )}
+                />
+              </Stack>
+            ) : null}
+
+            <Stack
               sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
+                display: "grid",
+                gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
+                gridTemplateRows: isMobile ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)',
               }}
             >
-              <TextField
-                required
-                id="issuingAuthority"
-                label="Issuing Authority"
-                error={!!errors.issuingAuthority}
+              <Autocomplete
+                {...register("factoryName", { required: true })}
                 size="small"
+                options={sampleFactoryName?.map((factoryName) => factoryName.name)}
+                defaultValue={defaultValues?.factoryName}
                 sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("issuingAuthority", { required: true })}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    error={!!errors.factoryName}
+                    label="Factory Name"
+                    name="factoryName"
+                  />
+                )}
               />
               <TextField
                 required
-                id="documentNumber"
-                label="Document Number"
-                error={!!errors.documentNumber}
+                id="factoryAddress"
+                label="Factory Address"
+                error={!!errors.factoryAddress}
                 size="small"
                 sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("documentNumber", { required: true })}
-              />
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-              }}
-            >
-              <TextField
-                required
-                id="title"
-                label="Title"
-                error={!!errors.title}
-                size="small"
-                sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("title", { required: true })}
-              />
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-              }}
-            >
-              <TextField
-                id="documentOwner"
-                label="Document Owner"
-                error={!!errors.documentOwner}
-                size="small"
-                sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("documentOwner")}
+                {...register("factoryAddress", { required: true })}
               />
               <TextField
                 required
-                id="documentReviewer"
-                label="Document Reviewer"
-                error={!!errors.documentReviewer}
+                id="factoryContact"
+                type="tel"
+                label="Factory Contact"
+                error={!!errors.factoryContact}
                 size="small"
                 sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("documentReviewer", { required: true })}
+                {...register("factoryContact", {
+                  required: "Factory Contact is required",
+                  validate: (value: string) => {
+                    if (isNaN(Number(value))) {
+                      return "Mobile number must be a number";
+                    } else if (value.length < 10) {
+                      return "Mobile number must be at least 10 digits";
+                    }
+                    return true;
+                  },
+                })}
               />
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-              }}
-            >
               <TextField
-                id="physicalLocation"
-                label="Physical Location"
-                error={!!errors.physicalLocation}
+                id="designation"
+                label="Designation"
+                error={!!errors.designation}
                 size="small"
                 sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("physicalLocation")}
+                {...register("designation")}
               />
               <TextField
                 required
-                id="versionNumber"
-                label="Version Number"
-                error={!!errors.versionNumber}
+                id="email"
+                type="email"
+                label="E-mail"
+                error={!!errors.email}
+                helperText={errors.email?.message} // Display validation error messages
                 size="small"
                 sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("versionNumber", { required: true })}
+                {...register("email", {
+                  required: "Email is required", // Custom error message for required field
+                  validate: (value: string) =>
+                    /^\S+@\S+\.\S+$/.test(value) || "Enter a valid email address", // Regex for email validation
+                })}
               />
-            </Box>
+              <TextField
+                id="contactNumber"
+                label="Contact Number"
+                error={!!errors.contactNumber}
+                size="small"
+                sx={{ flex: 1, margin: "0.5rem" }}
+                {...register("contactNumber", {
+                  required: "Contact number is required",
+                  validate: (value: string) => {
+                    if (isNaN(Number(value))) {
+                      return "Mobile number must be a number";
+                    } else if (value.length < 10) {
+                      return "Mobile number must be at least 10 digits";
+                    }
+                    return true;
+                  },
+                })}
+              />
+            </Stack>
             <Box
               sx={{
                 display: "flex",
@@ -297,31 +437,19 @@ export default function AddOrEditInternalAuditDialog({
             >
               <Controller
                 control={control}
-                name={"remarks"}
+                name={"description"}
                 render={({ field }) => {
                   return (
                     <RichTextComponent
                       onChange={(e) => field.onChange(e)}
-                      placeholder={field.value ?? "Remarks"}
+                      placeholder={field.value ?? "description"}
                     />
                   );
                 }}
               />
             </Box>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-                margin: "0.5rem",
-              }}
-            >
-              <DropzoneComponent
-                files={files}
-                setFiles={setFiles}
-                dropzoneLabel={"Drop Your Documents Here"}
-              />
-            </Box>
           </Stack>
+
           <Stack
             sx={{
               display: "flex",
@@ -339,69 +467,69 @@ export default function AddOrEditInternalAuditDialog({
             <Box sx={{ margin: "0.5rem" }}>
               <Controller
                 control={control}
-                name={"issuedDate"}
+                {...register("auditDate", { required: true })}
+                name={"auditDate"}
                 render={({ field }) => {
                   return (
                     <DatePickerComponent
                       onChange={(e) => field.onChange(e)}
                       value={field.value}
-                      label="Issued Date"
+                      label="Audit Date"
+                      error={errors?.auditDate ? "Required" : ""}
                     />
                   );
                 }}
               />
             </Box>
+            <Autocomplete
+              {...register("auditee", { required: true })}
+              size="small"
+              options={sampleAuditee?.map((auditee) => auditee.name)}
+              defaultValue={defaultValues?.auditee}
+              sx={{ flex: 1, margin: "0.5rem" }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  required
+                  error={!!errors.auditee}
+                  label="Auditee"
+                  name="auditee"
+                />
+              )}
+            />
+            <Autocomplete
+              {...register("approver", { required: true })}
+              size="small"
+              options={sampleApprover?.map((approver) => approver.name)}
+              defaultValue={defaultValues?.approver}
+              sx={{ flex: 1, margin: "0.5rem" }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  required
+                  error={!!errors.approver}
+                  label="Approver"
+                  name="approver"
+                />
+              )}
+            />
             <Box sx={{ margin: "0.5rem" }}>
               <Controller
                 control={control}
-                name={"isNoExpiry"}
+                {...register("dateApproval", { required: true })}
+                name={"dateApproval"}
                 render={({ field }) => {
                   return (
-                    <SwitchButton
-                      label="No Expiry"
-                      onChange={field.onChange}
+                    <DatePickerComponent
+                      onChange={(e) => field.onChange(e)}
                       value={field.value}
+                      label="Date For Approval"
+                      error={errors?.dateApproval ? "Required" : ""}
                     />
                   );
                 }}
               />
             </Box>
-
-            {!isNoExpiry && (
-              <>
-                <Box sx={{ margin: "0.5rem" }}>
-                  <Controller
-                    control={control}
-                    name={"expiryDate"}
-                    render={({ field }) => {
-                      return (
-                        <DatePickerComponent
-                          onChange={(e) => field.onChange(e)}
-                          value={field.value}
-                          label="Expiry Date"
-                        />
-                      );
-                    }}
-                  />
-                </Box>
-
-                <Box sx={{ margin: "0.5rem" }}>
-                  <Controller
-                    control={control}
-                    name={"notifyDate"}
-                    render={({ field }) => {
-                      return (
-                        <DatePickerComponent
-                          onChange={(e) => field.onChange(e)}
-                          value={field.value}
-                          label="Notify Date"
-                        />
-                      );
-                    }}
-                  />
-                </Box>
-              </>
-            )}
           </Stack>
         </Stack>
       </DialogContent>
@@ -423,10 +551,10 @@ export default function AddOrEditInternalAuditDialog({
           }}
           size="medium"
           onClick={handleSubmit((data) => {
-            handleCreateDocument(data);
+            handleCreateInternalAudit(data);
           })}
         >
-          {defaultValues ? "Update Changes" : "Create Document"}
+          {defaultValues ? "Update Changes" : "Create Audit Schedule"}
         </CustomButton>
       </DialogActions>
     </Dialog>

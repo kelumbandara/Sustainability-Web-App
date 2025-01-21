@@ -27,7 +27,6 @@ import { format } from "date-fns";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
 import { InternalAudit } from "../../api/AuditAndInspection/internalAuditApi";
-// import ViewAccidentContent from "./ViewAccidentContent";
 import AddOrEditInternalAuditDialog from "./AddOrEditInternalAudit";
 import { sampleInternalAuditData } from "../../api/sampleData/internalAuditData";
 
@@ -55,8 +54,7 @@ function AccidentTable() {
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<InternalAudit>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
-  const [accidentData, setAccidentData] =
-    useState<InternalAudit[]>(sampleInternalAuditData);
+  const [internalAuditData, setInternalAuditData] = useState<InternalAudit[]>(sampleInternalAuditData);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const breadcrumbItems = [
@@ -121,11 +119,12 @@ function AccidentTable() {
                 <TableCell align="right">Auditee</TableCell>
                 <TableCell align="right">Approver</TableCell>
                 <TableCell align="right">Audit Status</TableCell>
+                <TableCell align="right">Status</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {accidentData?.length > 0 ? (
-                accidentData?.map((row) => (
+              {internalAuditData?.length > 0 ? (
+                internalAuditData?.map((row) => (
                   <TableRow
                     key={`${row.id}`}
                     sx={{
@@ -141,7 +140,7 @@ function AccidentTable() {
                       {row.referenceNumber}
                     </TableCell>
                     <TableCell align="right">
-                      {format(row.auditDate, "yyyy-MM-dd")}
+                      {row.auditDate ? format(new Date(row.auditDate), "yyyy-MM-dd") : "N/A"}
                     </TableCell>
                     <TableCell align="right">{row.division}</TableCell>
                     <TableCell align="right">{row.auditTitle}</TableCell>
@@ -149,6 +148,7 @@ function AccidentTable() {
                     <TableCell align="right">{row.auditee}</TableCell>
                     <TableCell align="right">{row.approver}</TableCell>
                     <TableCell align="right"><BorderLinearProgress variant="determinate" value={row.auditStatus} /></TableCell>
+                    <TableCell align="right">{row.status}</TableCell>
                   </TableRow>
                 ))
               ) : (
@@ -197,15 +197,15 @@ function AccidentTable() {
           onSubmit={(data) => {
             if (selectedRow) {
               console.log("Updating document", data);
-              setAccidentData(
-                accidentData.map((risk) => (risk.id === data.id ? data : risk))
+              setInternalAuditData(
+                internalAuditData.map((risk) => (risk.id === data.id ? data : risk))
               ); // Update the document in the list if it already exists
               enqueueSnackbar("Accident Details Updated Successfully!", {
                 variant: "success",
               });
             } else {
               console.log("Adding new accident", data);
-              setAccidentData([...accidentData, data]); // Add new document to the list
+              setInternalAuditData([...internalAuditData, data]); // Add new document to the list
               enqueueSnackbar("Accident Report Created Successfully!", {
                 variant: "success",
               });
@@ -223,7 +223,7 @@ function AccidentTable() {
           title="Remove Accident Confirmation"
           content={
             <>
-              Are you sure you want to remove this accident?
+              Are you sure you want to remove this Audit Schedule?
               <Alert severity="warning" style={{ marginTop: "1rem" }}>
                 This action is not reversible.
               </Alert>
@@ -231,8 +231,8 @@ function AccidentTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            setAccidentData(
-              accidentData.filter((doc) => doc.id !== selectedRow.id)
+            setInternalAuditData(
+              internalAuditData.filter((doc) => doc.id !== selectedRow.id)
             );
           }}
           onSuccess={() => {
