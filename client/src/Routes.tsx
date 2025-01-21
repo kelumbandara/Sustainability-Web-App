@@ -38,7 +38,7 @@ const PatientTable = React.lazy(
   () => import("./views/OccupationalHealth/ClinicalSuite/PatientTable")
 );
 
-//Occupational Health
+//Audit and Inspection
 const InternalAuditTable = React.lazy(
   () => import("./views/AuditAndInspection/InternalAudit")
 );

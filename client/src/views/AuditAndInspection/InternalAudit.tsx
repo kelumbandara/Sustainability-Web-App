@@ -49,7 +49,7 @@ const BorderLinearProgress = styled(LinearProgress)(({ theme }) => ({
     },
 }));
 
-function AccidentTable() {
+function InternalAuditTable() {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<InternalAudit>(null);
@@ -169,7 +169,7 @@ function AccidentTable() {
         drawerContent={
           <Stack spacing={1} sx={{ paddingX: theme.spacing(1) }}>
             <DrawerHeader
-              title="Accident Details"
+              title="Internal Audit Details"
               handleClose={() => setOpenViewDrawer(false)}
               onEdit={() => {
                 setSelectedRow(selectedRow);
@@ -200,13 +200,13 @@ function AccidentTable() {
               setInternalAuditData(
                 internalAuditData.map((risk) => (risk.id === data.id ? data : risk))
               ); // Update the document in the list if it already exists
-              enqueueSnackbar("Accident Details Updated Successfully!", {
+              enqueueSnackbar("Internal Audit Details Updated Successfully!", {
                 variant: "success",
               });
             } else {
-              console.log("Adding new accident", data);
+              console.log("Adding new Internal Audit", data);
               setInternalAuditData([...internalAuditData, data]); // Add new document to the list
-              enqueueSnackbar("Accident Report Created Successfully!", {
+              enqueueSnackbar("Internal Audit Report Created Successfully!", {
                 variant: "success",
               });
             }
@@ -220,7 +220,7 @@ function AccidentTable() {
       {deleteDialogOpen && (
         <DeleteConfirmationModal
           open={deleteDialogOpen}
-          title="Remove Accident Confirmation"
+          title="Remove Internal Audit Confirmation"
           content={
             <>
               Are you sure you want to remove this Audit Schedule?
@@ -239,7 +239,7 @@ function AccidentTable() {
             setOpenViewDrawer(false);
             setSelectedRow(null);
             setDeleteDialogOpen(false);
-            enqueueSnackbar("Accident Deleted Successfully!", {
+            enqueueSnackbar("Internal Audit Deleted Successfully!", {
               variant: "success",
             });
           }}
@@ -254,4 +254,4 @@ function AccidentTable() {
   );
 }
 
-export default AccidentTable;
+export default InternalAuditTable;
