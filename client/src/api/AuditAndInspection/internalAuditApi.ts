@@ -1,4 +1,5 @@
 import { z } from "zod";
+import axios from "axios";
 
 export enum InternalAuditStatus {
   OPEN = "Open",
@@ -19,7 +20,7 @@ export const InternalAudit = z.object({
   factoryAddress: z.string(),
   factoryContact: z.string(),
   designation: z.string(),
-  email: z.string(),
+  email: z.string().email(),
   contactNumber: z.string(),
   description: z.string(),
   auditee: z.string(),
@@ -36,3 +37,12 @@ export const InternalAudit = z.object({
 
 export type InternalAudit = z.infer<typeof InternalAudit>;
 
+export async function createAudit(data: InternalAudit) {
+  const res = await axios.post("/api/internal-audits", data);
+  return res.data;
+}
+
+export async function fetchAuditAllData() {
+  const res = await axios.get("/api/internal-audits");
+  return res.data;
+}

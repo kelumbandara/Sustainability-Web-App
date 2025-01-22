@@ -18,7 +18,7 @@ export const sampleInternalAuditData = [
     description: "This is Internal Audit",
     auditee: "John Doe",
     approver: "John Cena",
-    auditStatus: 20,
+    auditStatus: 75,
     status: "scheduled",
   },
   {

@@ -20,13 +20,13 @@ import { styled } from '@mui/material/styles';
 import theme from "../../theme";
 import PageTitle from "../../components/PageTitle";
 import Breadcrumb from "../../components/BreadCrumb";
-import { useState,useEffect  } from "react";
+import { useState } from "react";
 import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
-import { InternalAudit,fetchAuditAllData } from "../../api/AuditAndInspection/internalAuditApi";
+import { InternalAudit } from "../../api/AuditAndInspection/internalAuditApi";
 import AddOrEditInternalAuditDialog from "./AddOrEditInternalAudit";
 import { sampleInternalAuditData } from "../../api/sampleData/internalAuditData";
 
@@ -52,9 +52,9 @@ const BorderLinearProgress = styled(LinearProgress)(({ theme }) => ({
 function InternalAuditTable() {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<InternalAudit | null>(null);
+  const [selectedRow, setSelectedRow] = useState<InternalAudit>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
-  const [internalAuditData, setInternalAuditData] = useState<InternalAudit[]>([]);
+  const [internalAuditData, setInternalAuditData] = useState<InternalAudit[]>(sampleInternalAuditData);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const breadcrumbItems = [
@@ -65,20 +65,6 @@ function InternalAuditTable() {
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("md")
   );
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await fetchAuditAllData();
-        setInternalAuditData(data);
-      } catch (error) {
-        console.error("Error fetching audit data:", error);
-        enqueueSnackbar("Failed to fetch audit data. Please try again later.", { variant: "error" });
-      }
-    };
-
-    fetchData();
-  }, [enqueueSnackbar]);
 
   return (
     <Stack>

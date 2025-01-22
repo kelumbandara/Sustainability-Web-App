@@ -11,12 +11,11 @@ import {
   Stack,
   TextField,
   Typography,
-  Switch, 
-  FormControlLabel,
 } from "@mui/material";
 import { 
   InternalAudit,
   InternalAuditStatus,
+  createAudit,
 } from "../../api/AuditAndInspection/internalAuditApi";
 
 import { 
@@ -27,7 +26,6 @@ import {
   sampleFactoryName,
   sampleProcessType,
   sampleSupplierType,
-
 } from "../../api/sampleData/internalAuditData";
 import useIsMobile from "../../customHooks/useIsMobile";
 import { Controller, useForm } from "react-hook-form";
@@ -40,6 +38,10 @@ import SwitchButton from "../../components/SwitchButton";
 import CustomButton from "../../components/CustomButton";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSnackbar } from "notistack";
+import { useNavigate } from "react-router";
+
 
 type DialogProps = {
   open: boolean;
@@ -70,7 +72,9 @@ export default function AddOrEditInternalAuditDialog({
 
   const isNotSupplier = watch("isNotSupplier");
   console.log("form values", defaultValues);
-
+  const queryClient = useQueryClient();
+  const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate();
   useEffect(() => {
     if (defaultValues) {
       reset(defaultValues);
@@ -86,22 +90,37 @@ export default function AddOrEditInternalAuditDialog({
 
   const handleCreateInternalAudit = (data: InternalAudit) => {
     console.log("Submitted form data:", data);
-    const { isNotSupplier, ...rest } = data;
-    const submitData: Partial<InternalAudit> = rest;
-    submitData.id = defaultValues?.id ?? uuidv4();
-
-    if (!isNotSupplier) {
-      submitData.isNotSupplier = false;
-    } else {
+    const { isNotSupplier, supplierType, factoryLiNo, higgId, zdhcId, processType, ...rest } = data;
+    const submitData: Partial<InternalAudit> = {
+      ...rest,
+      id: defaultValues?.id ?? uuidv4(),
+    };
+    if (isNotSupplier) {
       submitData.isNotSupplier = true;
+      submitData.supplierType = supplierType;
+      submitData.factoryLiNo = factoryLiNo;
+      submitData.higgId = higgId;
+      submitData.zdhcId = zdhcId;
+      submitData.processType = processType;
+    } else {
+      submitData.isNotSupplier = false;
     }
-    
-    submitData.status = defaultValues?.status ?? InternalAuditStatus.DRAFT;
     console.log("Processed submission data:", submitData);
-  
+    internalAuditMutation(submitData);
     onSubmit(submitData as InternalAudit);
     resetForm();
   };
+   
+  const { mutate: internalAuditMutation } = useMutation({
+    mutationFn: createAudit,
+    onSuccess: () => {
+      enqueueSnackbar("Internal Audit created successfully!", { variant: "success" });
+      navigate("/audit-inspection/internal-audit");
+    },
+    onError: () => {
+      enqueueSnackbar("Create Internal Audit Failed", { variant: "error" });
+    },
+  });
 
   return (
     <Dialog
@@ -442,7 +461,7 @@ export default function AddOrEditInternalAuditDialog({
                   return (
                     <RichTextComponent
                       onChange={(e) => field.onChange(e)}
-                      placeholder={field.value ?? "description"}
+                      placeholder="description"
                     />
                   );
                 }}
