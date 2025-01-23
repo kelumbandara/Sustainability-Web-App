@@ -42,6 +42,9 @@ const PatientTable = React.lazy(
 const InternalAuditTable = React.lazy(
   () => import("./views/AuditAndInspection/InternalAudit")
 );
+const ExternalAuditTable = React.lazy(
+  () => import("./views/AuditAndInspection/ExternalAuditTable")
+);
 
 function withLayout(Layout: any, Component: any) {
   return (
@@ -113,9 +116,7 @@ const AppRoutes = () => {
         />
         <Route
           path="/audit-inspection/external-audit"
-          element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="Audit & Inspection > External Audit" />
-          ))}
+          element={withLayout(MainLayout, ExternalAuditTable)}
         />
         {/* document */}
         <Route

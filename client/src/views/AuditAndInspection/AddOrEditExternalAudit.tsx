@@ -1,257 +1,444 @@
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
 import {
-  Alert,
+  Autocomplete,
   Box,
-  Button,
+  Divider,
+  IconButton,
   Stack,
-  Theme,
+  TextField,
   Typography,
-  useMediaQuery,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "@mui/material";
-import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
-import { styled } from '@mui/material/styles';
-
-import theme from "../../theme";
-import PageTitle from "../../components/PageTitle";
-import Breadcrumb from "../../components/BreadCrumb";
-import { useState } from "react";
-import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
-import AddIcon from "@mui/icons-material/Add";
-import { format } from "date-fns";
-import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import { 
+  sampleAuditee,
+  sampleApprover,
+  sampleAuditType,
+  sampleAuditCategory,
+} from "../../api/sampleData/internalAuditData";
+import { sampleDivisions } from "../../api/sampleData/documentData";
+import { ExternalAudit,createExternalAudit } from "../../api/AuditAndInspection/externalAuditApi";
+import useIsMobile from "../../customHooks/useIsMobile";
+import { Controller, useForm } from "react-hook-form";
+import CloseIcon from "@mui/icons-material/Close";
+import { Announcement,sampleAuditFirm } from "../../api/sampleData/externalAuditData";
+import { grey } from "@mui/material/colors";
+import DatePickerComponent from "../../components/DatePickerComponent";
+import CustomButton from "../../components/CustomButton";
+import { useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
-import { InternalAudit } from "../../api/AuditAndInspection/internalAuditApi";
-import AddOrEditInternalAuditDialog from "./AddOrEditInternalAudit";
-import { sampleInternalAuditData } from "../../api/sampleData/internalAuditData";
+import { useNavigate } from "react-router";
 
+type DialogProps = {
+  open: boolean;
+  handleClose: () => void;
+  defaultValues?: ExternalAudit;
+  onSubmit?: (data: ExternalAudit) => void;
+};
 
-const BorderLinearProgress = styled(LinearProgress)(({ theme }) => ({
-    height: 10,
-    borderRadius: 5,
-    [`&.${linearProgressClasses.colorPrimary}`]: {
-      backgroundColor: theme.palette.grey[200],
-      ...theme.applyStyles('dark', {
-        backgroundColor: theme.palette.grey[800],
-      }),
-    },
-    [`& .${linearProgressClasses.bar}`]: {
-      borderRadius: 5,
-      backgroundColor: '#1a90ff',
-      ...theme.applyStyles('dark', {
-        backgroundColor: '#308fe8',
-      }),
-    },
-}));
+export default function AddOrEditExternalAudit({
+  open,
+  handleClose,
+  defaultValues,
+  onSubmit,
+}: DialogProps) {
+  const { isMobile, isTablet } = useIsMobile();
 
-function InternalAuditTable() {
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    reset,
+  } = useForm<ExternalAudit>({
+    defaultValues: defaultValues,
+  });
+
   const { enqueueSnackbar } = useSnackbar();
-  const [openViewDrawer, setOpenViewDrawer] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<InternalAudit>(null);
-  const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
-  const [internalAuditData, setInternalAuditData] = useState<InternalAudit[]>(sampleInternalAuditData);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const navigate = useNavigate();
 
-  const breadcrumbItems = [
-    { title: "Home", href: "/home" },
-    { title: "Internal Audit Management" },
-  ];
+  useEffect(() => {
+    if (defaultValues) {
+      reset(defaultValues);
+    } else {
+      reset();
+    }
+  }, [defaultValues, reset]);
 
-  const isMobile = useMediaQuery((theme: Theme) =>
-    theme.breakpoints.down("md")
-  );
+  const resetForm = () => {
+    reset();
+  };
+
+  const handleCreateInternalAudit = (data: ExternalAudit) => {
+    console.log("Submitted form data:", data);
+
+    console.log("Processed submission data:", data);
+    ExternalAuditMutation(data);
+    onSubmit(data as ExternalAudit);
+    resetForm();
+  };
+   
+  const { mutate: ExternalAuditMutation } = useMutation({
+    mutationFn: createExternalAudit,
+    onSuccess: () => {
+      enqueueSnackbar("External Audit Schedule created successfully!", { variant: "success" });
+      navigate("/audit-inspection/external-audit");
+    },
+    onError: () => {
+      enqueueSnackbar("Create Internal Audit Failed", { variant: "error" });
+    },
+  });
 
   return (
-    <Stack>
-      <Box
+    <Dialog
+      open={open}
+      onClose={() => {
+        resetForm();
+        handleClose();
+      }}
+      fullScreen={true}
+      PaperProps={{
+        style: {
+          backgroundColor: grey[50],
+        },
+        component: "form",
+      }}
+    >
+      <DialogTitle
         sx={{
-          padding: theme.spacing(2),
-          boxShadow: 2,
-          marginY: 2,
-          borderRadius: 1,
-          overflowX: "hidden",
+          paddingY: "1rem",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
-        <PageTitle title="Internal Audit Management" />
-        <Breadcrumb breadcrumbs={breadcrumbItems} />
-      </Box>
-      <Stack sx={{ alignItems: "center" }}>
-        <TableContainer
-          component={Paper}
-          elevation={2}
+        <Typography variant="h6" component="div">
+          {defaultValues ? "Edit Audit Details" : "Create External Audit Schedule"}
+        </Typography>
+        <IconButton
+          aria-label="open drawer"
+          onClick={handleClose}
+          edge="start"
           sx={{
-            overflowX: "auto",
-            maxWidth: isMobile ? "88vw" : "100%",
+            color: "#024271",
           }}
         >
-          <Box
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+      <Divider />
+      <DialogContent>
+        <Stack
+          sx={{
+            display: "flex",
+            flexDirection: isTablet ? "column" : "row",
+            padding: "1rem",
+          }}
+        >
+          <Stack
             sx={{
-              padding: theme.spacing(2),
               display: "flex",
-              justifyContent: "flex-end",
+              flexDirection: "column",
+              backgroundColor: "#fff",
+              flex: { lg: 3, md: 1 },
+              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+              padding: "0.5rem",
+              borderRadius: "0.3rem",
             }}
           >
-            <Button
-              variant="contained"
-              sx={{ backgroundColor: "var(--pallet-blue)" }}
-              startIcon={<AddIcon />}
-              onClick={() => {
-                setSelectedRow(null);
-                setOpenAddOrEditDialog(true);
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "flex-end",
+                flexDirection: "column",
+                margin: "0.5rem",
               }}
             >
-              Add Audit Schedule
-            </Button>
-          </Box>
-          <Table aria-label="simple table">
-            <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
-              <TableRow>
-                <TableCell>Reference</TableCell>
-                <TableCell align="right">Audit Date</TableCell>
-                <TableCell align="right">Division</TableCell>
-                <TableCell align="right">Audit Title</TableCell>
-                <TableCell align="right">Audit Type</TableCell>
-                <TableCell align="right">Auditee</TableCell>
-                <TableCell align="right">Approver</TableCell>
-                <TableCell align="right">Audit Status</TableCell>
-                <TableCell align="right">Status</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {internalAuditData?.length > 0 ? (
-                internalAuditData?.map((row) => (
-                  <TableRow
-                    key={`${row.id}`}
-                    sx={{
-                      "&:last-child td, &:last-child th": { border: 0 },
-                      cursor: "pointer",
-                    }}
-                    onClick={() => {
-                      setSelectedRow(row);
-                      setOpenViewDrawer(true);
-                    }}
-                  >
-                    <TableCell component="th" scope="row">
-                      {row.referenceNumber}
-                    </TableCell>
-                    <TableCell align="right">
-                      {row.auditDate ? format(new Date(row.auditDate), "yyyy-MM-dd") : "N/A"}
-                    </TableCell>
-                    <TableCell align="right">{row.division}</TableCell>
-                    <TableCell align="right">{row.auditTitle}</TableCell>
-                    <TableCell align="right">{row.auditType}</TableCell>
-                    <TableCell align="right">{row.auditee}</TableCell>
-                    <TableCell align="right">{row.approver}</TableCell>
-                    <TableCell align="right"><BorderLinearProgress variant="determinate" value={row.auditStatus} /></TableCell>
-                    <TableCell align="right">{row.status}</TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={11} align="center">
-                    <Typography variant="body2">No Records found</Typography>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Stack>
-      <ViewDataDrawer
-        open={openViewDrawer}
-        handleClose={() => setOpenViewDrawer(false)}
-        fullScreen={true}
-        drawerContent={
-          <Stack spacing={1} sx={{ paddingX: theme.spacing(1) }}>
-            <DrawerHeader
-              title="Internal Audit Details"
-              handleClose={() => setOpenViewDrawer(false)}
-              onEdit={() => {
-                setSelectedRow(selectedRow);
-                setOpenAddOrEditDialog(true);
+              <Typography variant="body2" component="div">
+                <b>Date</b>
+              </Typography>
+              <Typography variant="body2" component="div">
+                {new Date().toDateString()}
+              </Typography>
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: isMobile ? "column" : "row",
               }}
-              onDelete={() => setDeleteDialogOpen(true)}
+            >
+              <Autocomplete
+                {...register("auditType", { required: true })}
+                size="small"
+                options={sampleAuditType?.map((auditType) => auditType.name)}
+                defaultValue={defaultValues?.auditType}
+                sx={{ flex: 1, margin: "0.5rem" }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    error={!!errors.auditType}
+                    label="Audit Type"
+                    name="auditType"
+                  />
+                )}
+              /> 
+
+              <Autocomplete
+                {...register("auditCategory", { required: true })}
+                size="small"
+                options={sampleAuditCategory?.map((auditCategory) => auditCategory.name)}
+                defaultValue={defaultValues?.auditCategory}
+                sx={{ flex: 1, margin: "0.5rem" }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    error={!!errors.auditCategory}
+                    label="Audit Category"
+                    name="auditCategory"
+                  />
+                )}
+              />
+
+              <TextField
+                required
+                id="customer"
+                label="Customer"
+                error={!!errors.customer}
+                size="small"
+                sx={{ flex: 1, margin: "0.5rem" }}
+                {...register("customer", { required: true })}
+              />
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: isMobile ? "column" : "row",
+              }}
+            >
+              <TextField
+                required
+                id="auditStandard"
+                label="Audit Standard"
+                error={!!errors.auditStandard}
+                size="small"
+                sx={{ flex: 1, margin: "0.5rem" }}
+                {...register("auditStandard", { required: true })}
+              />
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: isMobile ? "column" : "row",
+              }}
+            >
+              <Autocomplete
+                {...register("auditFirm", { required: true })}
+                size="small"
+                options={sampleAuditFirm?.map((auditFirm) => auditFirm.name)}
+                defaultValue={defaultValues?.auditFirm}
+                sx={{ flex: 1, margin: "0.5rem" }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    error={!!errors.auditFirm}
+                    label="Audit Firm"
+                    name="auditFirm"
+                  />
+                )}
+              />
+
+              <Autocomplete
+                {...register("division", { required: true })}
+                size="small"
+                options={sampleDivisions?.map((division) => division.name)}
+                defaultValue={defaultValues?.division}
+                sx={{ flex: 1, margin: "0.5rem" }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    error={!!errors.division}
+                    label="Division"
+                    name="division"
+                  />
+                )}
+              />
+            </Box>
+          </Stack>
+          <Stack
+            sx={{
+              display: "flex",
+              flex: { lg: 1, md: 1 },
+              flexDirection: "column",
+              backgroundColor: "#fff",
+              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+              padding: "0.5rem",
+              borderRadius: "0.3rem",
+              marginY: isTablet ? "0.5rem" : 0,
+              marginLeft: isTablet ? 0 : "0.5rem",
+              height: "fit-content",
+            }}
+          >
+            <Box sx={{ margin: "0.5rem" }}>
+              <Controller
+                control={control}
+                {...register("auditDate", { required: true })}
+                name={"auditDate"}
+                render={({ field }) => {
+                  return (
+                    <DatePickerComponent
+                      onChange={(e) => field.onChange(e)}
+                      value={field.value}
+                      label="Audit Date"
+                      error={errors?.auditDate ? "Required" : ""}
+                    />
+                  );
+                }}
+              />
+            </Box>
+
+            <Box sx={{ margin: "0.5rem" }}>
+              <Controller
+                  control={control}
+                  {...register("dateApproval", { required: true })}
+                  name={"dateApproval"}
+                  render={({ field }) => {
+                    return (
+                      <DatePickerComponent
+                        onChange={(e) => field.onChange(e)}
+                        value={field.value}
+                        label="Date For Approval"
+                        error={errors?.dateApproval ? "Required" : ""}
+                      />
+                    );
+                  }}
+                />
+            </Box>
+            <Autocomplete
+              {...register("approver", { required: true })}
+              size="small"
+              options={sampleApprover?.map((approver) => approver.name)}
+              defaultValue={defaultValues?.auditType}
+              sx={{ flex: 1, margin: "0.5rem" }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  required
+                  error={!!errors.approver}
+                  label="Approver"
+                  name="approver"
+                />
+              )}
             />
 
-            {selectedRow && (
-              <Stack>
-                {/* <ViewAccidentContent accident={selectedRow} /> */}
-              </Stack>
-            )}
+            <Autocomplete
+              {...register("representative", { required: true })}
+              size="small"
+              options={sampleAuditee?.map((representative) => representative.name)}
+              defaultValue={defaultValues?.representative}
+              sx={{ flex: 1, margin: "0.5rem" }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  required
+                  error={!!errors.representative}
+                  label="Management Representative"
+                  name="representative"
+                />
+              )}
+            />
+
+            <Box sx={{ margin: "0.5rem" }}>
+              <Typography
+                variant="caption"
+                sx={{ marginBottom: "0.1rem", color: grey[700] }}
+              >
+                Injury Type
+              </Typography>
+              <Controller
+                control={control}
+                name={"announcement"}
+                render={({ field }) => {
+                  return (
+                    <ToggleButtonGroup
+                      size="small"
+                      {...control}
+                      aria-label="Small sizes"
+                      color="primary"
+                      value={field.value}
+                      exclusive
+                      orientation="vertical"
+                      fullWidth
+                      onChange={(e, value) => {
+                        console.log("e", e);
+                        field.onChange(value);
+                      }}
+                    >
+                      <ToggleButton
+                        value={Announcement.ANNOUNCED}
+                        key={Announcement.ANNOUNCED}
+                      >
+                        <Typography variant="caption" component="div">
+                          {Announcement.ANNOUNCED}
+                        </Typography>
+                      </ToggleButton>
+                      <ToggleButton
+                        value={Announcement.SEMI_ANNOUNCED}
+                        key={Announcement.SEMI_ANNOUNCED}
+                      >
+                        <Typography variant="caption" component="div">
+                          {Announcement.SEMI_ANNOUNCED}
+                        </Typography>
+                      </ToggleButton>
+                      <ToggleButton
+                        value={Announcement.UNANNOUNCED}
+                        key={Announcement.UNANNOUNCED}
+                      >
+                        <Typography variant="caption" component="div">
+                          {Announcement.UNANNOUNCED}
+                        </Typography>
+                      </ToggleButton>
+                    </ToggleButtonGroup>
+                  );
+                }}
+              />
+            </Box>
+
           </Stack>
-        }
-      />
-      {openAddOrEditDialog && (
-        <AddOrEditInternalAuditDialog
-          open={openAddOrEditDialog}
-          handleClose={() => {
-            setSelectedRow(null);
-            setOpenViewDrawer(false);
-            setOpenAddOrEditDialog(false);
+        </Stack>
+      </DialogContent>
+      <Divider />
+      <DialogActions sx={{ padding: "1rem" }}>
+        <Button
+          onClick={() => {
+            resetForm();
+            handleClose();
           }}
-          onSubmit={(data) => {
-            if (selectedRow) {
-              console.log("Updating document", data);
-              setInternalAuditData(
-                internalAuditData.map((risk) => (risk.id === data.id ? data : risk))
-              ); // Update the document in the list if it already exists
-              enqueueSnackbar("Internal Audit Details Updated Successfully!", {
-                variant: "success",
-              });
-            } else {
-              console.log("Adding new Internal Audit", data);
-              setInternalAuditData([...internalAuditData, data]); // Add new document to the list
-              enqueueSnackbar("Internal Audit Report Created Successfully!", {
-                variant: "success",
-              });
-            }
-            setSelectedRow(null);
-            setOpenViewDrawer(false);
-            setOpenAddOrEditDialog(false);
+          sx={{ color: "var(--pallet-blue)" }}
+        >
+          Cancel
+        </Button>
+        <CustomButton
+          variant="contained"
+          sx={{
+            backgroundColor: "var(--pallet-blue)",
           }}
-          defaultValues={selectedRow}
-        />
-      )}
-      {deleteDialogOpen && (
-        <DeleteConfirmationModal
-          open={deleteDialogOpen}
-          title="Remove Internal Audit Confirmation"
-          content={
-            <>
-              Are you sure you want to remove this Audit Schedule?
-              <Alert severity="warning" style={{ marginTop: "1rem" }}>
-                This action is not reversible.
-              </Alert>
-            </>
-          }
-          handleClose={() => setDeleteDialogOpen(false)}
-          deleteFunc={async () => {
-            setInternalAuditData(
-              internalAuditData.filter((doc) => doc.id !== selectedRow.id)
-            );
-          }}
-          onSuccess={() => {
-            setOpenViewDrawer(false);
-            setSelectedRow(null);
-            setDeleteDialogOpen(false);
-            enqueueSnackbar("Internal Audit Deleted Successfully!", {
-              variant: "success",
-            });
-          }}
-          handleReject={() => {
-            setOpenViewDrawer(false);
-            setSelectedRow(null);
-            setDeleteDialogOpen(false);
-          }}
-        />
-      )}
-    </Stack>
+          size="medium"
+          onClick={handleSubmit((data) => {
+            handleCreateInternalAudit(data);
+          })}
+        >
+          {defaultValues ? "Update Changes" : "Create External Audit"}
+        </CustomButton>
+      </DialogActions>
+    </Dialog>
   );
 }
-
-export default InternalAuditTable;

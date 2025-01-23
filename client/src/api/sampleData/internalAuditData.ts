@@ -125,3 +125,14 @@ export const sampleProcessType = [
     name: "Denims",
   }
 ];
+
+export const sampleAuditCategory = [
+  {
+    id: "1",
+    name: "Supply Chain",
+  },
+  {
+    id: "2",
+    name: "Company",
+  }
+];

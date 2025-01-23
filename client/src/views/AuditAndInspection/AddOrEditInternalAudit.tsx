@@ -14,7 +14,6 @@ import {
 } from "@mui/material";
 import { 
   InternalAudit,
-  InternalAuditStatus,
   createAudit,
 } from "../../api/AuditAndInspection/internalAuditApi";
 
@@ -38,7 +37,7 @@ import SwitchButton from "../../components/SwitchButton";
 import CustomButton from "../../components/CustomButton";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router";
 
@@ -72,7 +71,6 @@ export default function AddOrEditInternalAuditDialog({
 
   const isNotSupplier = watch("isNotSupplier");
   console.log("form values", defaultValues);
-  const queryClient = useQueryClient();
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
   useEffect(() => {
@@ -461,7 +459,7 @@ export default function AddOrEditInternalAuditDialog({
                   return (
                     <RichTextComponent
                       onChange={(e) => field.onChange(e)}
-                      placeholder="description"
+                      placeholder={field.value ?? "Description"}
                     />
                   );
                 }}
