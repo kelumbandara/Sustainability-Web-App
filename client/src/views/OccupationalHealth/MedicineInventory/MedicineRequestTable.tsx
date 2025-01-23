@@ -25,22 +25,24 @@ import ViewDataDrawer, {
   DrawerHeader,
 } from "../../../components/ViewDataDrawer";
 import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
-import { Patient } from "../../../api/OccupationalHealth/patientApi";
-import { samplePatientData } from "../../../api/sampleData/patientData";
-import ViewPatientContent from "./ViewPatientContent";
-import AddOrEditPatientDialog from "./AddOrEditPatientDialog";
+import { MedicineRequest } from "../../../api/medicineRequestApi";
+import ViewMedicineRequestContent from "./ViewMedicineRequestContent";
+import { medicineRequestSampleData } from "../../../api/sampleData/medicineRequestSampleData";
+import AddOrEditMedicineRequestDialog from "./AddOrEditMedicineRequestDialog";
 
-function PatientTable() {
+function MedicineRequestTable() {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<Patient>(null);
+  const [selectedRow, setSelectedRow] = useState<MedicineRequest>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
-  const [patients, setPatients] = useState<Patient[]>(samplePatientData);
+  const [medicineRequests, setMedicineRequests] = useState<MedicineRequest[]>(
+    medicineRequestSampleData
+  );
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
-    { title: "Patient Management" },
+    { title: "Medicine Request Management" },
   ];
 
   const isMobile = useMediaQuery((theme: Theme) =>
@@ -58,7 +60,7 @@ function PatientTable() {
           overflowX: "hidden",
         }}
       >
-        <PageTitle title="Patient Management" />
+        <PageTitle title="Medicine Request Management" />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
       <Stack sx={{ alignItems: "center" }}>
@@ -86,28 +88,26 @@ function PatientTable() {
                 setOpenAddOrEditDialog(true);
               }}
             >
-              Add New Patient
+              Add New Medicine Request
             </Button>
           </Box>
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
-                <TableCell>Patient ID</TableCell>
-                <TableCell align="right">Employee ID</TableCell>
-                <TableCell align="right">Employee Name</TableCell>
-                <TableCell align="right">Gender</TableCell>
-                <TableCell align="right">Check In</TableCell>
-                <TableCell align="right">Consulting Doctor</TableCell>
-                <TableCell align="right">Disease</TableCell>
-                <TableCell align="right">Check Out</TableCell>
+                <TableCell>Reference Number</TableCell>
+                <TableCell align="right">Requested Date</TableCell>
+                <TableCell align="right">Medicine Name</TableCell>
+                <TableCell align="right">Generic Name</TableCell>
+                <TableCell align="right">Division</TableCell>
+                <TableCell align="right">Approver</TableCell>
                 <TableCell align="right">Status</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {patients?.length > 0 ? (
-                patients.map((row) => (
+              {medicineRequests?.length > 0 ? (
+                medicineRequests.map((row) => (
                   <TableRow
-                    key={`${row.id}${row.employee_id}`}
+                    key={`${row.id}${row.reference_number}`}
                     sx={{
                       "&:last-child td, &:last-child th": { border: 0 },
                       cursor: "pointer",
@@ -118,32 +118,26 @@ function PatientTable() {
                     }}
                   >
                     <TableCell component="th" scope="row">
-                      {row.id}
+                      {row.reference_number}
                     </TableCell>
-                    <TableCell align="right">{row.employee_id}</TableCell>
-                    <TableCell align="right">{row.employee_name}</TableCell>
-                    <TableCell align="right">{row.gender}</TableCell>
                     <TableCell align="right">
-                      {row?.check_in_date
-                        ? format(new Date(row.check_in_date), "yyyy-MM-dd")
+                      {row?.request_date
+                        ? format(new Date(row.request_date), "yyyy-MM-dd")
                         : "--"}
                     </TableCell>
-                    <TableCell align="right">
-                      {row?.consulting_doctor}
-                    </TableCell>
-                    <TableCell align="right">{row.disease ?? "--"}</TableCell>
-                    <TableCell align="right">
-                      {row?.check_out_date
-                        ? format(new Date(row.check_out_date), "yyyy-MM-dd")
-                        : "--"}
-                    </TableCell>
+                    <TableCell align="right">{row.medicine_name}</TableCell>
+                    <TableCell align="right">{row.generic_name}</TableCell>
+                    <TableCell align="right">{row?.division ?? "--"}</TableCell>
+                    <TableCell align="right">{row?.approver ?? "--"}</TableCell>
                     <TableCell align="right">{row.status}</TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
                   <TableCell colSpan={11} align="center">
-                    <Typography variant="body2">No patients found</Typography>
+                    <Typography variant="body2">
+                      No Medical Request found
+                    </Typography>
                   </TableCell>
                 </TableRow>
               )}
@@ -153,12 +147,11 @@ function PatientTable() {
       </Stack>
       <ViewDataDrawer
         open={openViewDrawer}
-        fullScreen={true}
         handleClose={() => setOpenViewDrawer(false)}
         drawerContent={
           <Stack spacing={1} sx={{ paddingX: theme.spacing(1) }}>
             <DrawerHeader
-              title="Patient Details"
+              title="Medicine Request Details"
               handleClose={() => setOpenViewDrawer(false)}
               onEdit={() => {
                 setSelectedRow(selectedRow);
@@ -169,14 +162,14 @@ function PatientTable() {
 
             {selectedRow && (
               <Stack>
-                <ViewPatientContent patient={selectedRow} />
+                <ViewMedicineRequestContent medicalRequest={selectedRow} />
               </Stack>
             )}
           </Stack>
         }
       />
       {openAddOrEditDialog && (
-        <AddOrEditPatientDialog
+        <AddOrEditMedicineRequestDialog
           open={openAddOrEditDialog}
           handleClose={() => {
             setSelectedRow(null);
@@ -185,16 +178,18 @@ function PatientTable() {
           }}
           onSubmit={(data) => {
             if (selectedRow) {
-              setPatients(
-                patients.map((doc) => (doc.id === data.id ? data : doc))
+              setMedicineRequests(
+                medicineRequests.map((request) =>
+                  request.id === data.id ? data : request
+                )
               ); // Update the patient in the list if it already exists
-              enqueueSnackbar("Patient Details Updated Successfully!", {
+              enqueueSnackbar("Medicine Request Updated Successfully!", {
                 variant: "success",
               });
             } else {
-              console.log("Adding new patient", data);
-              setPatients([...patients, data]); // Add new patient to the list
-              enqueueSnackbar("Patient Created Successfully!", {
+              console.log("Adding new document", data);
+              setMedicineRequests([...medicineRequests, data]); // Add new medicine request to the list
+              enqueueSnackbar("Medicine Request Created Successfully!", {
                 variant: "success",
               });
             }
@@ -208,10 +203,10 @@ function PatientTable() {
       {deleteDialogOpen && (
         <DeleteConfirmationModal
           open={deleteDialogOpen}
-          title="Remove Patient Confirmation"
+          title="Remove Medicine Request Confirmation"
           content={
             <>
-              Are you sure you want to remove this patient?
+              Are you sure you want to remove this medicine request?
               <Alert severity="warning" style={{ marginTop: "1rem" }}>
                 This action is not reversible.
               </Alert>
@@ -219,13 +214,15 @@ function PatientTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            setPatients(patients.filter((doc) => doc.id !== selectedRow.id));
+            setMedicineRequests(
+              medicineRequests.filter((doc) => doc.id !== selectedRow.id)
+            );
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);
             setSelectedRow(null);
             setDeleteDialogOpen(false);
-            enqueueSnackbar("Patient Deleted Successfully!", {
+            enqueueSnackbar("Medicine Request Deleted Successfully!", {
               variant: "success",
             });
           }}
@@ -240,4 +237,4 @@ function PatientTable() {
   );
 }
 
-export default PatientTable;
+export default MedicineRequestTable;
