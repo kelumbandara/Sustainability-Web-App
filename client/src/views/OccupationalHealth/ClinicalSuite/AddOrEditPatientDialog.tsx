@@ -15,9 +15,8 @@ import {
 import { Controller, useForm } from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
 import { grey } from "@mui/material/colors";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import AddIcon from "@mui/icons-material/Add";
 import {
   Designation,
   Gender,
@@ -25,7 +24,6 @@ import {
   WorkStatus,
 } from "../../../api/OccupationalHealth/patientApi";
 import useIsMobile from "../../../customHooks/useIsMobile";
-import { HazardAndRisk } from "../../../api/hazardRiskApi";
 import {
   sampleDepartments,
   sampleDivisions,
@@ -50,16 +48,13 @@ export default function AddOrEditPatientDialog({
   onSubmit,
 }: DialogProps) {
   const { isMobile, isTablet } = useIsMobile();
-  const [addNewContactDialogOpen, setAddNewContactDialogOpen] = useState(false);
 
   const {
     register,
     handleSubmit,
-    watch,
     control,
     formState: { errors },
     reset,
-    setValue,
   } = useForm<Patient>({
     defaultValues,
   });
@@ -79,128 +74,8 @@ export default function AddOrEditPatientDialog({
   const handleCreateDocument = (data: Patient) => {
     const submitData: Partial<Patient> = data;
     submitData.id = defaultValues?.id ?? uuidv4();
-    onSubmit(submitData as HazardAndRisk);
+    onSubmit(submitData as Patient);
     resetForm();
-  };
-
-  const AddNewObservationButton = (props) => (
-    <li
-      {...props}
-      variant="contained"
-      style={{
-        backgroundColor: "var(--pallet-lighter-blue)",
-        color: "var(--pallet-blue)",
-        textTransform: "none",
-        margin: "0.5rem",
-        borderRadius: "0.3rem",
-        display: "flex",
-        flexDirection: "row",
-      }}
-      size="small"
-      // onClick closes the menu
-      onMouseDown={() => {
-        setAddNewContactDialogOpen(true);
-      }}
-    >
-      <AddIcon />
-      <Typography variant="body2" component="div">
-        Add New Observation Type
-      </Typography>
-    </li>
-  );
-
-  const AddNewObservationTypeDialog = ({
-    category,
-    subCategory,
-  }: {
-    category: string;
-    subCategory: string;
-  }) => {
-    const { register, handleSubmit } = useForm({
-      defaultValues: {
-        observation: "",
-      },
-    });
-
-    const handleCreateObservationType = (data: { observation: string }) => {
-      console.log("Creating observation type", data, category, subCategory);
-    };
-
-    return (
-      <Dialog
-        open={addNewContactDialogOpen}
-        onClose={() => setAddNewContactDialogOpen(false)}
-        fullScreen={isMobile}
-        fullWidth
-        maxWidth="sm"
-        PaperProps={{
-          style: {
-            backgroundColor: grey[50],
-          },
-          component: "form",
-        }}
-      >
-        <DialogTitle
-          sx={{
-            paddingY: "1rem",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <Typography variant="h6" component="div">
-            Add New Observation Type
-          </Typography>
-          <IconButton
-            aria-label="open drawer"
-            onClick={() => setAddNewContactDialogOpen(false)}
-            edge="start"
-            sx={{
-              color: "#024271",
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <Divider />
-        <DialogContent>
-          <Stack
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <TextField
-              {...register("observation", { required: true })}
-              required
-              id="observation"
-              label="Observation"
-              size="small"
-              fullWidth
-              sx={{ marginBottom: "0.5rem" }}
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions sx={{ padding: "1rem" }}>
-          <Button
-            onClick={() => setAddNewContactDialogOpen(false)}
-            sx={{ color: "var(--pallet-blue)" }}
-          >
-            Cancel
-          </Button>
-          <CustomButton
-            variant="contained"
-            sx={{
-              backgroundColor: "var(--pallet-blue)",
-            }}
-            size="medium"
-            onClick={handleSubmit(handleCreateObservationType)}
-          >
-            Add Observation Type
-          </CustomButton>
-        </DialogActions>
-      </Dialog>
-    );
   };
 
   return (
@@ -218,12 +93,6 @@ export default function AddOrEditPatientDialog({
         component: "form",
       }}
     >
-      {/* {addNewContactDialogOpen &&  */}
-      {/* <AddNewObservationTypeDialog
-        category={category}
-        subCategory={subCategory}
-      /> */}
-      {/* } */}
       <DialogTitle
         sx={{
           paddingY: "1rem",
