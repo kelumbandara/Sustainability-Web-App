@@ -148,3 +148,32 @@
   font-weight: 900;
   font-style: italic;
 }
+
+/* Modern browsers (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #b5bcce;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #7db0ff;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b5bcce;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #7db0ff transparent;
+}
+
+/* Fallback for IE */
+.scrollable-div {
+  -ms-overflow-style: scrollbar; /* Force visible scrollbar in IE */
+}

@@ -38,6 +38,12 @@ const PatientTable = React.lazy(
   () => import("./views/OccupationalHealth/ClinicalSuite/PatientTable")
 );
 
+//Medicine Request
+const MedicineRequestTable = React.lazy(
+  () =>
+    import("./views/OccupationalHealth/MedicineInventory/MedicineRequestTable")
+);
+
 //Audit and Inspection
 const InternalAuditTable = React.lazy(
   () => import("./views/AuditAndInspection/InternalAudit")
@@ -45,7 +51,6 @@ const InternalAuditTable = React.lazy(
 const ExternalAuditTable = React.lazy(
   () => import("./views/AuditAndInspection/ExternalAuditTable")
 );
-
 function withLayout(Layout: any, Component: any) {
   return (
     <Layout>
@@ -215,9 +220,7 @@ const AppRoutes = () => {
         {/* Medicine Inventory */}
         <Route
           path="/occupational-health/medicines-inventory/medicine-request"
-          element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="Medicine Inventory > Medicine Request" />
-          ))}
+          element={withLayout(MainLayout, MedicineRequestTable)}
         />
         <Route
           path="/occupational-health/medicines-inventory/purchase-inventory"
