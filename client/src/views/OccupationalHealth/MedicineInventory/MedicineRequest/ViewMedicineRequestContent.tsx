@@ -1,8 +1,8 @@
 import { Box, Stack } from "@mui/material";
-import useIsMobile from "../../../customHooks/useIsMobile";
-import { DrawerContentItem } from "../../../components/ViewDataDrawer";
 import { format } from "date-fns";
-import { MedicineRequest } from "../../../api/medicineRequestApi";
+import { MedicineRequest } from "../../../../api/medicineRequestApi";
+import useIsMobile from "../../../../customHooks/useIsMobile";
+import { DrawerContentItem } from "../../../../components/ViewDataDrawer";
 
 function ViewMedicineRequestContent({
   medicalRequest,

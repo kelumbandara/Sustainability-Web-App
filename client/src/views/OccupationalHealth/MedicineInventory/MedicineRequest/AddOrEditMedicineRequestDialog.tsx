@@ -16,12 +16,12 @@ import CloseIcon from "@mui/icons-material/Close";
 import { grey } from "@mui/material/colors";
 import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-import useIsMobile from "../../../customHooks/useIsMobile";
-import { sampleDivisions } from "../../../api/sampleData/documentData";
-import CustomButton from "../../../components/CustomButton";
-import { MedicineRequest } from "../../../api/medicineRequestApi";
-import { sampleAssignees } from "../../../api/sampleData/usersSampleDate";
-import { sampleMedicines } from "../../../api/sampleData/medicineRequestSampleData";
+import { MedicineRequest } from "../../../../api/medicineRequestApi";
+import useIsMobile from "../../../../customHooks/useIsMobile";
+import { sampleMedicines } from "../../../../api/sampleData/medicineRequestSampleData";
+import { sampleDivisions } from "../../../../api/sampleData/documentData";
+import { sampleAssignees } from "../../../../api/sampleData/usersSampleDate";
+import CustomButton from "../../../../components/CustomButton";
 
 type DialogProps = {
   open: boolean;
