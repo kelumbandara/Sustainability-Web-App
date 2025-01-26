@@ -83,7 +83,7 @@ function ViewHazardOrRiskContent({
           />
           <DrawerContentItem
             label="Reported Date"
-            value={hazardOrRisk.createdDate.toDateString()}
+            value={new Date(hazardOrRisk.created_at).toDateString()}
             sx={{ flex: 1 }}
           />
         </Box>
@@ -143,21 +143,21 @@ function ViewHazardOrRiskContent({
             <DrawerContentItem label="Category" value={hazardOrRisk.category} />
             <DrawerContentItem
               label="Sub Category"
-              value={hazardOrRisk.subCategory}
+              value={hazardOrRisk.sub_category}
             />
 
             <DrawerContentItem
               label="ObservationType"
-              value={hazardOrRisk.observationType}
+              value={hazardOrRisk.observation_type}
             />
             <DrawerContentItem label="Division" value={hazardOrRisk.division} />
             <DrawerContentItem
               label="Location or Department"
-              value={hazardOrRisk.locationOrDepartment}
+              value={hazardOrRisk.department}
             />
             <DrawerContentItem
               label="Sub Location"
-              value={hazardOrRisk.subLocation}
+              value={hazardOrRisk.sub_location}
             />
             <DrawerContentItem
               label="Description"
@@ -202,12 +202,12 @@ function ViewHazardOrRiskContent({
         <DrawerContentItem label="Responsible" value={hazardOrRisk.assignee} />
         <DrawerContentItem
           label="Due date"
-          value={hazardOrRisk.dueDate.toDateString()}
+          value={new Date(hazardOrRisk?.dueDate).toDateString()}
         />
         <DrawerContentItem
           label="Delayed Days"
           value={
-            hazardOrRisk.dueDate
+            hazardOrRisk?.dueDate
               ? differenceInDays(new Date(), hazardOrRisk.dueDate)
               : "--"
           }

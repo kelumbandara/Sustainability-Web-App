@@ -83,7 +83,7 @@ export default function AddOrEditHazardRiskDialog({
   };
 
   const category = watch("category");
-  const subCategory = watch("subCategory");
+  const subCategory = watch("sub_category");
 
   const subCategoryOptions = useMemo(() => {
     return category
@@ -102,10 +102,12 @@ export default function AddOrEditHazardRiskDialog({
       : [];
   }, [category, subCategory]);
 
-  const handleCreateDocument = (data: HazardAndRisk) => {
+  const handleSubmitData = (data: HazardAndRisk) => {
     const submitData: Partial<HazardAndRisk> = data;
-    submitData.id = defaultValues?.id ?? uuidv4();
-    submitData.createdDate = new Date();
+    console.log("submitData", submitData);
+    if (defaultValues?.id) {
+      submitData.id = defaultValues?.id;
+    }
     submitData.createdByUser = sampleAssignees[0].name;
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
     onSubmit(submitData as HazardAndRisk);
@@ -342,20 +344,20 @@ export default function AddOrEditHazardRiskDialog({
               />
               {category && (
                 <Autocomplete
-                  {...register("subCategory", { required: true })}
+                  {...register("sub_category", { required: true })}
                   size="small"
                   options={subCategoryOptions}
-                  defaultValue={defaultValues?.subCategory}
+                  defaultValue={defaultValues?.sub_category}
                   onChange={(e, value) => {
                     console.log("e", e);
-                    setValue("subCategory", value);
+                    setValue("sub_category", value);
                   }}
                   sx={{ flex: 1, margin: "0.5rem" }}
                   renderInput={(params) => (
                     <TextField
                       {...params}
                       required
-                      error={!!errors.subCategory}
+                      error={!!errors.sub_category}
                       label="Sub Category"
                       name="subCategory"
                     />
@@ -372,7 +374,7 @@ export default function AddOrEditHazardRiskDialog({
                 }}
               >
                 <Autocomplete
-                  {...register("observationType")}
+                  {...register("observation_type")}
                   size="small"
                   noOptionsText={
                     <>
@@ -393,14 +395,14 @@ export default function AddOrEditHazardRiskDialog({
                       )}
                     </>
                   )}
-                  defaultValue={defaultValues?.observationType}
+                  defaultValue={defaultValues?.observation_type}
                   sx={{ flex: 1, margin: "0.5rem" }}
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      error={!!errors.observationType}
+                      error={!!errors.observation_type}
                       label="Observation Type"
-                      name="observationType"
+                      name="observation_type"
                     />
                   )}
                 />
@@ -430,12 +432,12 @@ export default function AddOrEditHazardRiskDialog({
               />
               <TextField
                 required
-                id="locationOrDepartment"
+                id="department"
                 label="Location or Department"
-                error={!!errors.locationOrDepartment}
+                error={!!errors.department}
                 size="small"
                 sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("locationOrDepartment", { required: true })}
+                {...register("department", { required: true })}
               />
             </Box>
             <Box
@@ -445,12 +447,12 @@ export default function AddOrEditHazardRiskDialog({
               }}
             >
               <TextField
-                id="subLocation"
+                id="sub_location"
                 label="Sub Location"
-                error={!!errors.subLocation}
+                error={!!errors.sub_location}
                 size="small"
                 sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("subLocation")}
+                {...register("sub_location")}
               />
             </Box>
             <Box
@@ -651,9 +653,7 @@ export default function AddOrEditHazardRiskDialog({
             backgroundColor: "var(--pallet-blue)",
           }}
           size="medium"
-          onClick={handleSubmit((data) => {
-            handleCreateDocument(data);
-          })}
+          onClick={handleSubmit(handleSubmitData)}
         >
           {defaultValues ? "Update Changes" : "Submit Report"}
         </CustomButton>

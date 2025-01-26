@@ -24,18 +24,65 @@ import AddOrEditDocumentDialog from "./AddOrEditHazardRiskDialog";
 import { differenceInDays, format } from "date-fns";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
-import { sampleHazardRiskData } from "../../api/sampleData/hazardRiskData";
-import { HazardAndRisk, HazardAndRiskStatus } from "../../api/hazardRiskApi";
+import {
+  createHazardAndRisk,
+  getHazardAndRiskData,
+  HazardAndRisk,
+  HazardAndRiskStatus,
+  updateHazardAndRisk,
+} from "../../api/hazardRiskApi";
 import ViewHazardOrRiskContent from "./ViewHazardRiskContent";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import queryClient from "../../state/queryClient";
 
 function HazardRiskTable() {
   const { enqueueSnackbar } = useSnackbar();
+
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<HazardAndRisk>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
-  const [riskData, setRiskData] =
-    useState<HazardAndRisk[]>(sampleHazardRiskData);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const { data: riskData, status } = useQuery({
+    queryKey: ["hazard-risk"],
+    queryFn: getHazardAndRiskData,
+  });
+
+  const {
+    mutate: createHazardAndRiskMutation,
+    isPending: creatingHazardOrRisk,
+  } = useMutation({
+    mutationFn: createHazardAndRisk,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["hazard-risk"] });
+      enqueueSnackbar("Record Created Successfully!", {
+        variant: "success",
+      });
+    },
+    onError: () => {
+      enqueueSnackbar(`Failed to Create Record`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const {
+    mutate: updateHazardAndRiskMutation,
+    isPending: updatingHazardOrRisk,
+  } = useMutation({
+    mutationFn: updateHazardAndRisk,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["hazard-risk"] });
+      enqueueSnackbar("Record Updated Successfully!", {
+        variant: "success",
+      });
+    },
+    onError: () => {
+      enqueueSnackbar(`Failed to Update Record`, {
+        variant: "error",
+      });
+    },
+  });
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
@@ -117,21 +164,23 @@ function HazardRiskTable() {
                     }}
                   >
                     <TableCell component="th" scope="row">
-                      {format(new Date(row.createdDate), "yyyy-MM-dd")}
+                      {format(new Date(row.created_at), "yyyy-MM-dd")}
                     </TableCell>
                     <TableCell align="right">{row.id}</TableCell>
                     <TableCell align="right">{row.category}</TableCell>
                     <TableCell align="right">{row.division}</TableCell>
                     <TableCell align="right">
-                      {format(new Date(row.dueDate), "yyyy-MM-dd")}
-                    </TableCell>
-                    <TableCell align="right">
-                      {row.dueDate
-                        ? differenceInDays(new Date(), row.dueDate)
+                      {row?.dueDate
+                        ? format(new Date(row?.dueDate), "yyyy-MM-dd")
                         : "--"}
                     </TableCell>
-                    <TableCell align="right">{row.createdByUser}</TableCell>
-                    <TableCell align="right">{row.assignee}</TableCell>
+                    <TableCell align="right">
+                      {row?.dueDate
+                        ? differenceInDays(new Date(), row?.dueDate)
+                        : "--"}
+                    </TableCell>
+                    <TableCell align="right">{row?.createdByUser}</TableCell>
+                    <TableCell align="right">{row?.assignee}</TableCell>
                     <TableCell align="right">
                       {row.status === HazardAndRiskStatus.OPEN ? (
                         <Typography sx={{ color: "var(--pallet-blue)" }}>
@@ -190,19 +239,11 @@ function HazardRiskTable() {
           }}
           onSubmit={(data) => {
             if (selectedRow) {
-              console.log("Updating document", data);
-              setRiskData(
-                riskData.map((risk) => (risk.id === data.id ? data : risk))
-              ); // Update the document in the list if it already exists
-              enqueueSnackbar("Details Updated Successfully!", {
-                variant: "success",
-              });
+              console.log("Updating record", data);
+              updateHazardAndRiskMutation(data);
             } else {
               console.log("Adding new hazard/risk", data);
-              setRiskData([...riskData, data]); // Add new document to the list
-              enqueueSnackbar("Hazard/Risk Created Successfully!", {
-                variant: "success",
-              });
+              createHazardAndRiskMutation(data);
             }
             setSelectedRow(null);
             setOpenViewDrawer(false);
@@ -225,7 +266,8 @@ function HazardRiskTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            setRiskData(riskData.filter((doc) => doc.id !== selectedRow.id));
+            // setRiskData(riskData.filter((doc) => doc.id !== selectedRow.id));
+            console.log("Deleting record", selectedRow);
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);

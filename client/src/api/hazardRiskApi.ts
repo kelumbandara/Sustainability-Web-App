@@ -1,3 +1,4 @@
+import axios from "axios";
 import { z } from "zod";
 
 export enum CategoryType {
@@ -185,11 +186,11 @@ export enum HazardDashboardPeriods {
 export const HazardAndRiskSchema = z.object({
   id: z.string().optional(),
   category: z.string(),
-  subCategory: z.string(),
-  observationType: z.string().optional(),
+  sub_category: z.string(),
+  observation_type: z.string().optional(),
   division: z.string(),
-  locationOrDepartment: z.string(),
-  subLocation: z.string().optional(),
+  department: z.string(),
+  sub_location: z.string().optional(),
   description: z.string().optional(),
   riskLevel: z.nativeEnum(RiskLevel),
   unsafeActOrCondition: z.nativeEnum(UnsafeActOrCondition),
@@ -198,7 +199,8 @@ export const HazardAndRiskSchema = z.object({
   documents: z
     .array(z.union([z.string().url(), z.instanceof(File)]))
     .optional(),
-  createdDate: z.date(),
+  created_at: z.date(),
+  updated_at: z.date().optional(),
   createdByUser: z.string(),
   status: z.nativeEnum(HazardAndRiskStatus),
   control: z.string().optional(),
@@ -208,3 +210,19 @@ export const HazardAndRiskSchema = z.object({
 });
 
 export type HazardAndRisk = z.infer<typeof HazardAndRiskSchema>;
+
+export async function getHazardAndRiskData() {
+  const res = await axios.get("/api/hazard-risk-list");
+  return res.data?.hazardRiskList;
+}
+
+export async function createHazardAndRisk(recordData: Partial<HazardAndRisk>) {
+  const res = await axios.post("/api/hazard-risk-recode", recordData);
+  return res.data;
+}
+
+export async function updateHazardAndRisk(recordData: Partial<HazardAndRisk>) {
+  const { id, ...data } = recordData;
+  const res = await axios.post(`/api/hazard-risk-recode/${id}`, data);
+  return res.data;
+}
