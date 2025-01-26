@@ -18,31 +18,30 @@ import { useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import { useSnackbar } from "notistack";
-import theme from "../../../theme";
-import PageTitle from "../../../components/PageTitle";
-import Breadcrumb from "../../../components/BreadCrumb";
+import theme from "../../../../theme";
+import PageTitle from "../../../../components/PageTitle";
+import Breadcrumb from "../../../../components/BreadCrumb";
 import ViewDataDrawer, {
   DrawerHeader,
-} from "../../../components/ViewDataDrawer";
-import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
-import { MedicineRequest } from "../../../api/medicineRequestApi";
-import ViewMedicineRequestContent from "./ViewMedicineRequestContent";
-import { medicineRequestSampleData } from "../../../api/sampleData/medicineRequestSampleData";
-import AddOrEditMedicineRequestDialog from "./AddOrEditMedicineRequestDialog";
+} from "../../../../components/ViewDataDrawer";
+import DeleteConfirmationModal from "../../../../components/DeleteConfirmationModal";
+import { MedicineInventory } from "../../../../api/OccupationalHealth/medicineInventoryApi";
+import { medicineInventorySampleData } from "../../../../api/sampleData/medicineInventorySampleData";
+import ViewPurchaseAndInventoryContent from "./ViewPurchaseAndInventoryContent";
 
-function MedicineRequestTable() {
+function PurchaseAndInventoryTable() {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<MedicineRequest>(null);
+  const [selectedRow, setSelectedRow] = useState<MedicineInventory>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
-  const [medicineRequests, setMedicineRequests] = useState<MedicineRequest[]>(
-    medicineRequestSampleData
-  );
+  const [medicineInventory, setMedicineInventory] = useState<
+    MedicineInventory[]
+  >(medicineInventorySampleData);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
-    { title: "Medicine Request Management" },
+    { title: "Medicine Inventory Management" },
   ];
 
   const isMobile = useMediaQuery((theme: Theme) =>
@@ -60,7 +59,7 @@ function MedicineRequestTable() {
           overflowX: "hidden",
         }}
       >
-        <PageTitle title="Medicine Request Management" />
+        <PageTitle title="Medicine Inventory Management" />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
       <Stack sx={{ alignItems: "center" }}>
@@ -88,7 +87,7 @@ function MedicineRequestTable() {
                 setOpenAddOrEditDialog(true);
               }}
             >
-              Add New Medicine Request
+              Add New Medicine Inventory Item
             </Button>
           </Box>
           <Table aria-label="simple table">
@@ -97,15 +96,19 @@ function MedicineRequestTable() {
                 <TableCell>Reference Number</TableCell>
                 <TableCell align="right">Requested Date</TableCell>
                 <TableCell align="right">Medicine Name</TableCell>
-                <TableCell align="right">Generic Name</TableCell>
-                <TableCell align="right">Division</TableCell>
+                <TableCell align="right">Medicine Type</TableCell>
+                <TableCell align="right">Reported</TableCell>
                 <TableCell align="right">Approver</TableCell>
+                <TableCell align="right">Delivered Quantity</TableCell>
+                <TableCell align="right">Issued</TableCell>
+                <TableCell align="right">Disposed</TableCell>
+                <TableCell align="right">Balance</TableCell>
                 <TableCell align="right">Status</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {medicineRequests?.length > 0 ? (
-                medicineRequests.map((row) => (
+              {medicineInventory?.length > 0 ? (
+                medicineInventory.map((row) => (
                   <TableRow
                     key={`${row.id}${row.reference_number}`}
                     sx={{
@@ -125,18 +128,32 @@ function MedicineRequestTable() {
                         ? format(new Date(row.request_date), "yyyy-MM-dd")
                         : "--"}
                     </TableCell>
-                    <TableCell align="right">{row.medicine_name}</TableCell>
-                    <TableCell align="right">{row.generic_name}</TableCell>
-                    <TableCell align="right">{row?.division ?? "--"}</TableCell>
+                    <TableCell align="right">{row?.medicine_name}</TableCell>
+                    <TableCell align="right">
+                      {row?.medicine_type ?? "--"}
+                    </TableCell>
+                    <TableCell align="right">{row?.reporter ?? "--"}</TableCell>
                     <TableCell align="right">{row?.approver ?? "--"}</TableCell>
-                    <TableCell align="right">{row.status}</TableCell>
+                    <TableCell align="right">
+                      {row?.delivered_quantity ?? "--"}
+                    </TableCell>
+                    <TableCell align="right">
+                      {row?.issued_quantity ?? "--"}
+                    </TableCell>
+                    <TableCell align="right">
+                      {row?.disposed_of_quantity ?? "--"}
+                    </TableCell>
+                    <TableCell align="right">
+                      {row?.balance_quantity ?? "--"}
+                    </TableCell>
+                    <TableCell align="right">{row?.status}</TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
                   <TableCell colSpan={11} align="center">
                     <Typography variant="body2">
-                      No Medical Request found
+                      No Medical Inventory Items found
                     </Typography>
                   </TableCell>
                 </TableRow>
@@ -147,11 +164,12 @@ function MedicineRequestTable() {
       </Stack>
       <ViewDataDrawer
         open={openViewDrawer}
+        fullScreen={true}
         handleClose={() => setOpenViewDrawer(false)}
         drawerContent={
           <Stack spacing={1} sx={{ paddingX: theme.spacing(1) }}>
             <DrawerHeader
-              title="Medicine Request Details"
+              title="Medicine Inventory Details"
               handleClose={() => setOpenViewDrawer(false)}
               onEdit={() => {
                 setSelectedRow(selectedRow);
@@ -162,13 +180,15 @@ function MedicineRequestTable() {
 
             {selectedRow && (
               <Stack>
-                <ViewMedicineRequestContent medicalRequest={selectedRow} />
+                <ViewPurchaseAndInventoryContent
+                  purchaseAndInventory={selectedRow}
+                />
               </Stack>
             )}
           </Stack>
         }
       />
-      {openAddOrEditDialog && (
+      {/* {openAddOrEditDialog && (
         <AddOrEditMedicineRequestDialog
           open={openAddOrEditDialog}
           handleClose={() => {
@@ -199,14 +219,14 @@ function MedicineRequestTable() {
           }}
           defaultValues={selectedRow}
         />
-      )}
+      )} */}
       {deleteDialogOpen && (
         <DeleteConfirmationModal
           open={deleteDialogOpen}
-          title="Remove Medicine Request Confirmation"
+          title="Remove Medicine Inventory Confirmation"
           content={
             <>
-              Are you sure you want to remove this medicine request?
+              Are you sure you want to remove this medicine inventory?
               <Alert severity="warning" style={{ marginTop: "1rem" }}>
                 This action is not reversible.
               </Alert>
@@ -214,15 +234,15 @@ function MedicineRequestTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            setMedicineRequests(
-              medicineRequests.filter((doc) => doc.id !== selectedRow.id)
+            setMedicineInventory(
+              medicineInventory.filter((doc) => doc.id !== selectedRow.id)
             );
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);
             setSelectedRow(null);
             setDeleteDialogOpen(false);
-            enqueueSnackbar("Medicine Request Deleted Successfully!", {
+            enqueueSnackbar("Medicine Inventory Deleted Successfully!", {
               variant: "success",
             });
           }}
@@ -237,4 +257,4 @@ function MedicineRequestTable() {
   );
 }
 
-export default MedicineRequestTable;
+export default PurchaseAndInventoryTable;
