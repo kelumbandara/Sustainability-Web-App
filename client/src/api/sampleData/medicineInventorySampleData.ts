@@ -1,8 +1,50 @@
 import { MedicineInventory } from "../OccupationalHealth/medicineInventoryApi";
 
+export const medicineInventoryForms = [
+  "Injection",
+  "Suppository",
+  "Patch",
+  "Inhaler",
+  "Cream/Gel/Ointment",
+  "Drops",
+  "Suspension",
+  "Liquid Syrup",
+  "Capsule",
+  "Tablet",
+];
+
+export const supplierTypes = [
+  "Agent",
+  "Manufacturer",
+  "Distributor",
+  "Supplier",
+];
+
+export const medicineTypes = [
+  "First Aid",
+  "Prescription",
+  "Over the Counter",
+  "Vaccination",
+];
+
+export const sampleMedicineSuppliers = [
+  {
+    id: "1",
+    supplier_name: "Pharma Supplier",
+    supplier_contact_number: "1234567890",
+    supplier_email_id: "sample@gma.cc",
+  },
+  {
+    id: "2",
+    supplier_name: "HealthCare Ltd.",
+    supplier_contact_number: "0987654321",
+    supplier_email_id: "sss@faa.daw",
+  },
+];
+
 export const medicineInventorySampleData: MedicineInventory[] = [
   {
-    id: 1,
+    id: "1",
     medicine_name: "Xorol 20mg",
     generic_name: "Acidity",
     division: "Vintage Denim Studio Ltd.",
@@ -49,12 +91,12 @@ export const medicineInventorySampleData: MedicineInventory[] = [
     approved_by: "Jane Doe",
   },
   {
-    id: 2,
+    id: "2",
     medicine_name: "Paracetamol 500mg",
     generic_name: "Pain Relief",
     division: "HealthCare Ltd.",
     dosage_strength: "500mg",
-    expiry_date: "2025-12-31",
+    expiry_date: new Date("2025-12-31"),
     form: "Tablet",
     manufacturer_name: "HealthCare Ltd.",
     supplier_name: "Pharma Supplier",
@@ -62,12 +104,12 @@ export const medicineInventorySampleData: MedicineInventory[] = [
     supplier_email_id: "supplier@example.com",
     supplier_type: "Distributor",
     location: "Warehouse A",
-    manufacturing_date: "2023-01-01",
-    delivery_date: "2023-01-15",
+    manufacturing_date: new Date("2023-01-01"),
+    delivery_date: new Date("2023-01-15"),
     delivered_unit: "Box",
     purchased_amount: "1000",
     threshold_limit: "100",
-    invoice_date: "2023-01-16",
+    invoice_date: new Date("2023-01-16"),
     invoice_reference: "INV-12345",
     batch_number: "BATCH-001",
     unit_cost: "0.50",

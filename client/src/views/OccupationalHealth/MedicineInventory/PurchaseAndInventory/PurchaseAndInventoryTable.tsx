@@ -28,6 +28,7 @@ import DeleteConfirmationModal from "../../../../components/DeleteConfirmationMo
 import { MedicineInventory } from "../../../../api/OccupationalHealth/medicineInventoryApi";
 import { medicineInventorySampleData } from "../../../../api/sampleData/medicineInventorySampleData";
 import ViewPurchaseAndInventoryContent from "./ViewPurchaseAndInventoryContent";
+import AddOrEditPurchaseAndInventoryDialog from "./AddOrEditPurchaseAndInventoryDialog";
 
 function PurchaseAndInventoryTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -188,8 +189,8 @@ function PurchaseAndInventoryTable() {
           </Stack>
         }
       />
-      {/* {openAddOrEditDialog && (
-        <AddOrEditMedicineRequestDialog
+      {openAddOrEditDialog && (
+        <AddOrEditPurchaseAndInventoryDialog
           open={openAddOrEditDialog}
           handleClose={() => {
             setSelectedRow(null);
@@ -198,8 +199,8 @@ function PurchaseAndInventoryTable() {
           }}
           onSubmit={(data) => {
             if (selectedRow) {
-              setMedicineRequests(
-                medicineRequests.map((request) =>
+              setMedicineInventory(
+                medicineInventory.map((request) =>
                   request.id === data.id ? data : request
                 )
               ); // Update the patient in the list if it already exists
@@ -208,7 +209,7 @@ function PurchaseAndInventoryTable() {
               });
             } else {
               console.log("Adding new document", data);
-              setMedicineRequests([...medicineRequests, data]); // Add new medicine request to the list
+              setMedicineInventory([...medicineInventory, data]); // Add new medicine request to the list
               enqueueSnackbar("Medicine Request Created Successfully!", {
                 variant: "success",
               });
@@ -219,7 +220,7 @@ function PurchaseAndInventoryTable() {
           }}
           defaultValues={selectedRow}
         />
-      )} */}
+      )}
       {deleteDialogOpen && (
         <DeleteConfirmationModal
           open={deleteDialogOpen}

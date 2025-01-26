@@ -286,22 +286,28 @@ function ViewPurchaseAndInventoryContent({
           >
             <DrawerContentItem
               label="Manufacturing Date"
-              value={purchaseAndInventory.manufacturing_date}
+              value={new Date(
+                purchaseAndInventory.manufacturing_date
+              ).toDateString()}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
               label="Expiry Date"
-              value={purchaseAndInventory.expiry_date}
+              value={new Date(purchaseAndInventory.expiry_date).toDateString()}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
               label="Delivery Date"
-              value={purchaseAndInventory.delivery_date}
+              value={new Date(
+                purchaseAndInventory.delivery_date
+              ).toDateString()}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
               label="Delivered Quantity"
-              value={purchaseAndInventory.delivered_quantity}
+              value={new Date(
+                purchaseAndInventory.delivered_quantity
+              ).toDateString()}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
@@ -321,7 +327,7 @@ function ViewPurchaseAndInventoryContent({
             />
             <DrawerContentItem
               label="Invoice Date"
-              value={purchaseAndInventory.invoice_date}
+              value={new Date(purchaseAndInventory.invoice_date).toDateString()}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
@@ -346,7 +352,7 @@ function ViewPurchaseAndInventoryContent({
             />
             <DrawerContentItem
               label="Reader Threshold"
-              value={purchaseAndInventory.expiry_date}
+              value={new Date(purchaseAndInventory.expiry_date).toDateString()}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
