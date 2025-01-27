@@ -87,7 +87,7 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
     title: "Sustainability",
     href: "/sustainability",
     icon: <SpaIcon fontSize="small" />,
-    disabled: true,
+    disabled: false,
     nestedItems: [
       {
         title: "Register",

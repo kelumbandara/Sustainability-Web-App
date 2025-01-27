@@ -51,6 +51,12 @@ const InternalAuditTable = React.lazy(
 const ExternalAuditTable = React.lazy(
   () => import("./views/AuditAndInspection/ExternalAuditTable")
 );
+
+//Sustainability
+const SustainabilityTable = React.lazy(
+  () => import("./views/Sustainability/SustainabilityTable")
+);
+
 function withLayout(Layout: any, Component: any) {
   return (
     <Layout>
@@ -122,6 +128,12 @@ const AppRoutes = () => {
         <Route
           path="/audit-inspection/external-audit"
           element={withLayout(MainLayout, ExternalAuditTable)}
+        />
+
+        {/* Sustainability */}
+        <Route
+          path="/sustainability/register"
+          element={withLayout(MainLayout, SustainabilityTable)}
         />
         {/* document */}
         <Route
