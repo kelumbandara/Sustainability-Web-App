@@ -67,6 +67,12 @@ const SustainabilityTable = React.lazy(
   () => import("./views/Sustainability/SustainabilityTable")
 );
 
+//Maternity Register
+const MaternityRegisterTable = React.lazy(
+  () =>
+    import("./views/OccupationalHealth/MedicalReports/MaternityRegisterTable")
+);
+
 function withLayout(Layout: any, Component: any) {
   return (
     <Layout>
@@ -263,9 +269,7 @@ const AppRoutes = () => {
         {/* Medical Records */}
         <Route
           path="/occupational-health/medical-records/maternity-register"
-          element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="Medical Records > Maternity Register" />
-          ))}
+          element={withLayout(MainLayout, MaternityRegisterTable)}
         />
 
       </Route>
