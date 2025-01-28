@@ -100,7 +100,8 @@ function ViewHazardOrRiskContent({
               color: "var(--pallet-blue)",
             }}
             textColor="inherit"
-            variant="fullWidth"
+            variant="scrollable"
+            scrollButtons={true}
           >
             <Tab
               label={

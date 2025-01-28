@@ -128,6 +128,8 @@ export function DrawerContentItem({
       sx={{
         ...sx,
         paddingY: "0.3rem",
+        paddingX: "0.5rem",
+        minWidth: "8rem",
       }}
     >
       <Typography

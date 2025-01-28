@@ -108,7 +108,8 @@ function ViewIncidentContent({ incident }: { incident: Incident }) {
               color: "var(--pallet-blue)",
             }}
             textColor="inherit"
-            variant="fullWidth"
+            variant="scrollable"
+            scrollButtons={true}
           >
             <Tab
               label={
