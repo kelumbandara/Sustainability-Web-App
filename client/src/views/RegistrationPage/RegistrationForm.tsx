@@ -8,17 +8,24 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
+  Autocomplete,
 } from "@mui/material";
 import { useState } from "react";
 import companyLogo from "../../assets/company-logo.jpg";
 import groupLogo from "../../assets/group-logo.png";
-import { useForm } from "react-hook-form";
+import { useForm,Controller } from "react-hook-form";
 import CustomButton from "../../components/CustomButton";
 import LoginIcon from "@mui/icons-material/Login";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { registerUser } from "../../api/userApi";
+import SwitchButton from "../../components/SwitchButton";
+import { sampleDivisions } from "../../api/sampleData/documentData";
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 function RegistrationForm() {
   const theme = useTheme();
@@ -26,7 +33,7 @@ function RegistrationForm() {
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-
+  const [selectedFactories, setSelectedFactories] = useState([]);
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -34,6 +41,7 @@ function RegistrationForm() {
     handleSubmit,
     formState: { errors },
     watch,
+    control,
   } = useForm({
     mode: "all",
     defaultValues: {
@@ -42,9 +50,15 @@ function RegistrationForm() {
       mobileNumber: null,
       name: "",
       confirmPassword: "",
+      isCompanyEmployee: false,
+      jobPosition:"",
+      department:"",
+      assignedFactory: selectedFactories,
+      employeeNumber:"",
     },
   });
 
+  const isNotEmployee = watch("isCompanyEmployee");
   const userPassword = watch("password");
 
   const { mutate: registrationMutation, isPending } = useMutation({
@@ -63,16 +77,16 @@ function RegistrationForm() {
     },
   });
 
-  const onRegistrationSubmit = (data: {
-    email: string;
-    password: string;
-    mobileNumber: string;
-    name: string;
-    confirmPassword: string;
-  }) => {
+  const onRegistrationSubmit = (data) => {
+    if (data.isCompanyEmployee && data.assignedFactory.length === 0) {
+      console.log(data)
+      enqueueSnackbar('Please select at least one factory.', { variant: 'error' });
+      return;
+    }
+    console.log(data)
     registrationMutation(data);
   };
-
+  
   return (
     <Stack
       spacing={2}
@@ -150,49 +164,12 @@ function RegistrationForm() {
 
         <TextField
           required
-          id="mobileNumber"
-          label="Mobile Number"
-          type="tel"
-          error={!!errors.mobileNumber}
-          fullWidth
-          size="small"
-          sx={{ marginTop: "1rem" }}
-          helperText={
-            errors.mobileNumber && (
-              <Typography
-                sx={{
-                  mt: "0",
-                  ml: -1,
-                }}
-                variant="caption"
-              >
-                {`${
-                  errors.mobileNumber.message || "Mobile number is required"
-                }`}
-              </Typography>
-            )
-          }
-          {...register("mobileNumber", {
-            required: true,
-            validate: (value) => {
-              if (isNaN(value)) {
-                return "Mobile number must be a number";
-              } else if (value.length < 10) {
-                return "Mobile number must be at least 10 digits";
-              }
-              return true;
-            },
-          })}
-        />
-
-        <TextField
-          required
           id="password"
           label="Password"
           type={showPassword ? "text" : "password"}
           size="small"
           fullWidth
-          sx={{ marginTop: "2rem" }}
+          sx={{ marginTop: "1rem" }}
           error={!!errors.password}
           helperText={
             errors.password && (
@@ -252,10 +229,161 @@ function RegistrationForm() {
               "& .MuiTypography-body1": {
                 fontSize: "0.85rem",
               },
-              marginTop: "0.5rem",
+              marginTop: "1rem",
             }}
           />
         </Box>
+
+        <TextField
+          required
+          id="mobileNumber"
+          label="Mobile Number"
+          type="tel"
+          error={!!errors.mobileNumber}
+          fullWidth
+          size="small"
+          sx={{ marginTop: "1rem" }}
+          helperText={
+            errors.mobileNumber && (
+              <Typography
+                sx={{
+                  mt: "0",
+                  ml: -1,
+                }}
+                variant="caption"
+              >
+                {`${
+                  errors.mobileNumber.message || "Mobile number is required"
+                }`}
+              </Typography>
+            )
+          }
+          {...register("mobileNumber", {
+            required: true,
+            validate: (value) => {
+              if (isNaN(value)) {
+                return "Mobile number must be a number";
+              } else if (value.length < 10) {
+                return "Mobile number must be at least 10 digits";
+              }
+              return true;
+            },
+          })}
+        />
+
+        <Box sx={{ marginTop: "2rem" }}>
+          <Controller
+            control={control}
+            name={"isCompanyEmployee"}
+            render={({ field }) => {
+              return (
+                <SwitchButton
+                  label="Is Company Employee"
+                  onChange={field.onChange}
+                  value={field.value}
+                />
+              );
+            }}
+          />
+        </Box>
+
+        {isNotEmployee ? (
+          <Stack
+            sx={{
+              display: "flex",
+            }}
+            
+          >
+            <Autocomplete
+              {...register("department", { required: true })}
+              size="small"
+              options={sampleDivisions?.map((supplierType) => supplierType.name)}
+              sx={{ }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  required
+                  error={!!errors.department}
+                  label="Department"
+                  name="department"
+                />
+              )}
+            /> 
+
+            <Autocomplete
+              {...register("jobPosition", { required: true })}
+              size="small"
+              options={sampleDivisions?.map((supplierType) => supplierType.name)}
+              sx={{ marginTop: "1rem" }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  required
+                  error={!!errors.jobPosition}
+                  label="Job Position"
+                  name="jobPosition"
+                />
+              )}
+            />
+            
+            <Controller
+              control={control}
+              name="assignedFactory"
+              render={({ field }) => (
+                <Autocomplete
+                  {...field} // Bind to react-hook-form
+                  multiple
+                  limitTags={2}
+                  id="checkboxes-tags-demo"
+                  options={sampleDivisions}
+                  disableCloseOnSelect
+                  getOptionLabel={(option) => option.name}
+                  onChange={(event, newValue) => {
+
+                    const selectedIds = newValue.map((item) => item.id);
+                    field.onChange(selectedIds);
+                    setSelectedFactories(selectedIds);
+                  }}
+                  value={sampleDivisions.filter((division) =>
+                    selectedFactories.includes(division.id)
+                  )}
+                  renderOption={(props, option, { selected }) => {
+                    const { key, ...optionProps } = props;
+                    return (
+                      <li key={key} {...optionProps}>
+                        <Checkbox
+                          icon={icon}
+                          checkedIcon={checkedIcon}
+                          style={{ marginRight: 8 }}
+                          checked={selected}
+                        />
+                        {option.name}
+                      </li>
+                    );
+                  }}
+                  sx={{ marginTop: "1rem" }}
+                  renderInput={(params) => (
+                    <TextField {...params} 
+                      label="Assigned Factories" 
+                      placeholder="Select factories" 
+                      size="small"
+                    />
+                  )}
+                />
+              )}
+            />
+            <TextField
+              required
+              id="employeeNumber"
+              label="Employee Number"
+              error={!!errors.employeeNumber}
+              size="small"
+              sx={{ marginTop: "1rem" }}
+              {...register("employeeNumber", { required: true })}
+            />
+
+          </Stack>
+        ) : null}
 
         <Box
           sx={{
