@@ -12,6 +12,15 @@ const InsightsPage = React.lazy(() => import("./views/Insights/Insight"));
 const UnderDevelopment = React.lazy(
   () => import("./components/UnderDevelopment")
 );
+
+//sustainability apps
+//chemical management
+const ChemicalRequestTable = React.lazy(
+  () => import("./views/ChemicalMng/ChemicalRequestTable")
+);
+
+//health and safety apps
+//document
 const DocumentRegister = React.lazy(
   () => import("./views/DocumentsPage/DocumentsTable")
 );
@@ -136,6 +145,38 @@ const AppRoutes = () => {
             <UnderDevelopment pageName="Audit & Inspection > External Audit" />
           ))}
         />
+
+        {/* sustainability apps */}
+        {/* chemical management */}
+        <Route
+          path="/chemical-mng/dashboard"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Chemical Management > Dashboard" />
+          ))}
+        />
+        <Route
+          path="/chemical-mng/chemical-requests"
+          element={withLayout(MainLayout, ChemicalRequestTable)}
+        />
+        <Route
+          path="/chemical-mng/purchase-inventory"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Chemical Management > Purchase & Inventory" />
+          ))}
+        />
+        <Route
+          path="/chemical-mng/transaction"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Chemical Management > Transaction" />
+          ))}
+        />
+        <Route
+          path="/chemical-mng/assigned-tasks"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Chemical Management > Assigned Tasks" />
+          ))}
+        />
+
         {/* document */}
         <Route
           path="/document"

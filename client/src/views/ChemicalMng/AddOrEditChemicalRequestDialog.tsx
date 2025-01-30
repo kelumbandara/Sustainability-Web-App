@@ -1,0 +1,533 @@
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import {
+  Autocomplete,
+  Box,
+  Divider,
+  IconButton,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { Controller, useForm } from "react-hook-form";
+import CloseIcon from "@mui/icons-material/Close";
+import { grey } from "@mui/material/colors";
+import { useEffect } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { ChemicalRequest } from "../../api/ChemicalManagement/ChemicalRequestApi";
+import useIsMobile from "../../customHooks/useIsMobile";
+import CustomButton from "../../components/CustomButton";
+import {
+  sampleChemicalCategoryList,
+  sampleChemicalList,
+} from "../../api/sampleData/chemicalRequestSampleData";
+
+type DialogProps = {
+  open: boolean;
+  handleClose: () => void;
+  defaultValues?: ChemicalRequest;
+  onSubmit?: (data: ChemicalRequest) => void;
+};
+
+export default function AddOrEditChemicalRequestDialog({
+  open,
+  handleClose,
+  defaultValues,
+  onSubmit,
+}: DialogProps) {
+  const { isMobile, isTablet } = useIsMobile();
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    reset,
+  } = useForm<ChemicalRequest>({
+    defaultValues,
+  });
+
+  useEffect(() => {
+    if (defaultValues) {
+      reset(defaultValues);
+    } else {
+      reset();
+    }
+  }, [defaultValues, reset]);
+
+  const resetForm = () => {
+    reset();
+  };
+
+  const handleCreateRequest = (data: ChemicalRequest) => {
+    const submitData: Partial<ChemicalRequest> = data;
+    submitData.id = defaultValues?.id ?? uuidv4();
+    onSubmit(submitData as ChemicalRequest);
+    resetForm();
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onClose={() => {
+        resetForm();
+        handleClose();
+      }}
+      fullScreen={true}
+      PaperProps={{
+        style: {
+          backgroundColor: grey[50],
+        },
+        component: "form",
+      }}
+    >
+      <DialogTitle
+        sx={{
+          paddingY: "1rem",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <Typography variant="h6" component="div">
+          {defaultValues
+            ? "Edit Chemical Request"
+            : "Add a New Chemical Request"}
+        </Typography>
+        <IconButton
+          aria-label="open drawer"
+          onClick={handleClose}
+          edge="start"
+          sx={{
+            color: "#024271",
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+      <Divider />
+      <DialogContent>
+        <Stack
+          sx={{
+            display: "flex",
+            flexDirection: isTablet ? "column" : "row",
+            padding: "1rem",
+          }}
+        >
+          <Stack
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              backgroundColor: "#fff",
+              flex: 1,
+              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+              padding: "0.5rem",
+              borderRadius: "0.3rem",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "flex-end",
+                flexDirection: "column",
+                margin: "0.5rem",
+              }}
+            >
+              <Typography variant="body2" component="div">
+                <b>Date</b>
+              </Typography>
+              <Typography variant="body2" component="div">
+                {new Date().toDateString()}
+              </Typography>
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: isMobile ? "column" : "row",
+              }}
+            >
+              <Autocomplete
+                {...register("commercial_name", { required: true })}
+                size="small"
+                options={sampleChemicalList}
+                defaultValue={defaultValues?.commercial_name}
+                sx={{ flex: 1, margin: "0.5rem" }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    error={!!errors.commercial_name}
+                    label="Commercial Name"
+                    name="commercial_name"
+                  />
+                )}
+              />
+              <TextField
+                required
+                id="substance_name"
+                label="Substance Name"
+                error={!!errors.substance_name}
+                size="small"
+                sx={{ flex: 1, margin: "0.5rem" }}
+                {...register("substance_name", { required: true })}
+              />
+            </Box>
+
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: isMobile ? "column" : "row",
+              }}
+            >
+              <TextField
+                required
+                id="formula"
+                label="Formula"
+                error={!!errors.formula}
+                size="small"
+                sx={{ flex: 1, margin: "0.5rem" }}
+                {...register("formula")}
+              />
+              <TextField
+                required
+                id="reach_registration_number"
+                label="Reach Registration Number"
+                error={!!errors.reach_registration_number}
+                size="small"
+                sx={{ flex: 1, margin: "0.5rem" }}
+                {...register("reach_registration_number")}
+              />
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: isMobile ? "column" : "row",
+              }}
+            >
+              <TextField
+                required
+                id="requested_quantity"
+                label="Requested Quantity"
+                error={!!errors.requested_quantity}
+                size="small"
+                sx={{ flex: 1, margin: "0.5rem" }}
+                {...register("requested_quantity", { required: true })}
+              />
+              <Autocomplete
+                {...register("requested_unit", { required: true })}
+                size="small"
+                options={["KG", "L", "G", "ML", "M", "CM", "MM", "PCS"]}
+                defaultValue={defaultValues?.requested_unit}
+                sx={{ flex: 1, margin: "0.5rem" }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    error={!!errors.requested_unit}
+                    label="Requested Unit"
+                    name="requested_unit"
+                  />
+                )}
+              />
+            </Box>
+
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: isMobile ? "column" : "row",
+              }}
+            >
+              {/* <Autocomplete
+                {...register("division", { required: true })}
+                size="small"
+                options={sampleDivisions?.map((division) => division.name)}
+                defaultValue={defaultValues?.division}
+                sx={{ flex: 1, margin: "0.5rem" }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    error={!!errors.division}
+                    label="Division"
+                    name="division"
+                  />
+                )}
+              /> */}
+              <Autocomplete
+                {...register("category")}
+                size="small"
+                options={sampleChemicalCategoryList}
+                defaultValue={defaultValues?.category}
+                sx={{ flex: 1, margin: "0.5rem" }}
+                renderInput={(params) => (
+                  <TextField {...params} label="Category" name="category" />
+                )}
+              />
+              <Autocomplete
+                {...register("ZDHC_use_category", { required: true })}
+                size="small"
+                options={["Cleaning", "Finishing", "Dyeing", "Washing"]}
+                defaultValue={defaultValues?.ZDHC_use_category}
+                sx={{ flex: 1, margin: "0.5rem" }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    error={!!errors.ZDHC_use_category}
+                    label="ZDHC Use Category"
+                    name="ZDHC_use_category"
+                  />
+                )}
+              />
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: isMobile ? "column" : "row",
+              }}
+            >
+              <Autocomplete
+                {...register("chemical_form_type", { required: true })}
+                size="small"
+                options={["Liquid", "Solid", "Gas", "Plasma"]}
+                defaultValue={defaultValues?.chemical_form_type}
+                sx={{ flex: 1, margin: "0.5rem" }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    error={!!errors.chemical_form_type}
+                    label="Chemical Form Type"
+                    name="chemical_form_type"
+                  />
+                )}
+              />
+              <TextField
+                id="usage"
+                label="Where and Why it is used?"
+                error={!!errors.usage}
+                size="small"
+                sx={{ flex: 1, margin: "0.5rem" }}
+                {...register("usage", { required: true })}
+              />
+            </Box>
+          </Stack>
+          <Stack
+            sx={{
+              display: "flex",
+              flex: 1,
+              flexDirection: "column",
+              backgroundColor: "#fff",
+              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+              padding: "0.5rem",
+              borderRadius: "0.3rem",
+              marginY: isTablet ? "0.5rem" : 0,
+              marginLeft: isTablet ? 0 : "0.5rem",
+              height: "fit-content",
+            }}
+          >
+            <Box sx={{ margin: "0.5rem" }}>
+              <Controller
+                control={control}
+                {...register("check_in_date", { required: true })}
+                name={"check_in_date"}
+                render={({ field }) => {
+                  return (
+                    <DatePickerComponent
+                      onChange={(e) => field.onChange(e)}
+                      value={field.value}
+                      label="Check In Date"
+                      error={errors?.check_in_date ? "Required" : ""}
+                    />
+                  );
+                }}
+              />
+              <Controller
+                control={control}
+                {...register("check_in", { required: true })}
+                name={"check_in"}
+                render={({ field }) => {
+                  return (
+                    <TimePickerComponent
+                      onChange={(e) => field.onChange(e)}
+                      value={field.value}
+                      label="Check In Time"
+                      error={errors?.check_in ? "Required" : ""}
+                    />
+                  );
+                }}
+              />
+            </Box>
+            <Typography
+              variant="body2"
+              sx={{
+                marginLeft: "0.5rem",
+                marginTop: "0.5rem",
+              }}
+            >
+              Preliminary Checkup Data
+            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: isMobile ? "column" : "row",
+                margin: "0.5rem",
+              }}
+            >
+              <TextField
+                required
+                id="body_temperature"
+                label="Body Temperature (°C)"
+                error={!!errors.body_temperature}
+                type="number"
+                size="small"
+                sx={{ flex: 1, margin: "0.5rem" }}
+                {...register("body_temperature", { required: true })}
+              />
+              <TextField
+                required
+                id="weight"
+                label="Weight (Kg)"
+                error={!!errors.weight}
+                type="number"
+                size="small"
+                sx={{ flex: 1, margin: "0.5rem" }}
+                {...register("weight", { required: true })}
+              />
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: isMobile ? "column" : "row",
+                margin: "0.5rem",
+              }}
+            >
+              <TextField
+                required
+                id="height"
+                label="Height (cm)"
+                error={!!errors.height}
+                type="number"
+                size="small"
+                sx={{ flex: 1, margin: "0.5rem" }}
+                {...register("height", { required: true })}
+              />
+              <TextField
+                required
+                id="blood_pressure"
+                label="Blood Pressure (mmHg)"
+                error={!!errors.blood_pressure}
+                size="small"
+                sx={{ flex: 1, margin: "0.5rem" }}
+                {...register("blood_pressure", { required: true })}
+              />
+            </Box>
+            <Box sx={{ margin: "0.5rem" }}>
+              <TextField
+                required
+                id="random_blood_sugar"
+                label="Random Blood Sugar (mg/dL)"
+                error={!!errors.random_blood_sugar}
+                size="small"
+                sx={{ flex: 1, margin: "0.5rem" }}
+                {...register("random_blood_sugar", { required: true })}
+              />
+            </Box>
+            <Box sx={{ margin: "0.5rem" }}>
+              <Autocomplete
+                {...register("consulting_doctor", { required: true })}
+                size="small"
+                options={sampleDoctorData.map(
+                  (doctor) => doctor.first_name + " " + doctor.last_name
+                )}
+                defaultValue={defaultValues?.consulting_doctor}
+                sx={{ flex: 1, margin: "0.5rem" }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    error={!!errors.consulting_doctor}
+                    label="Consulting Doctor"
+                    name="consulting_doctor"
+                  />
+                )}
+              />
+              {/* <Autocomplete
+                {...register("consulting_doctor", { required: true })}
+                size="small"
+                options={sampleDoctorData}
+                getOptionLabel={(option) =>
+                  `${option.first_name} ${option.last_name}`
+                }
+                renderOption={(props, option) => (
+                  <li
+                    {...props}
+                    onSelect={() => setValue("consulting_doctor", option)}
+                  >
+                    {`${option.first_name} ${option.last_name}`}
+                  </li>
+                )}
+                defaultValue={defaultValues?.consulting_doctor}
+                sx={{ flex: 1, margin: "0.5rem" }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    error={!!errors.consulting_doctor}
+                    label="Consulting Doctor"
+                    name="consulting_doctor"
+                  />
+                )}
+              /> */}
+            </Box>
+            <Box sx={{ margin: "0.5rem" }}>
+              <Autocomplete
+                {...register("clinic_division", { required: true })}
+                size="small"
+                options={sampleDivisions?.map((division) => division.name)}
+                defaultValue={defaultValues?.clinic_division}
+                sx={{ flex: 1, margin: "0.5rem" }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    error={!!errors.clinic_division}
+                    label="Clinic Division"
+                    name="clinic_division"
+                  />
+                )}
+              />
+            </Box>
+          </Stack>
+        </Stack>
+      </DialogContent>
+      <Divider />
+      <DialogActions sx={{ padding: "1rem" }}>
+        <Button
+          onClick={() => {
+            resetForm();
+            handleClose();
+          }}
+          sx={{ color: "var(--pallet-blue)" }}
+        >
+          Cancel
+        </Button>
+        <CustomButton
+          variant="contained"
+          sx={{
+            backgroundColor: "var(--pallet-blue)",
+          }}
+          size="medium"
+          onClick={handleSubmit((data) => {
+            handleCreateRequest(data);
+          })}
+        >
+          {defaultValues ? "Update Changes" : "Save Patient"}
+        </CustomButton>
+      </DialogActions>
+    </Dialog>
+  );
+}

@@ -171,7 +171,6 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
     title: "Chemical MNG",
     href: "/chemical-mng",
     icon: <ScienceIcon fontSize="small" />,
-    disabled: true,
     nestedItems: [
       {
         title: "Dashboard",
@@ -179,13 +178,8 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
       },
       {
-        title: "Request History",
-        href: "/chemical-mng/request-history",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-      },
-      {
-        title: "New Request",
-        href: "/chemical-mng/new-request",
+        title: "Chemical Requests",
+        href: "/chemical-mng/chemical-requests",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
       },
       {
