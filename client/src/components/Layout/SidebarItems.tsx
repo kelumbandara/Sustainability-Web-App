@@ -338,6 +338,7 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
     title: "Document",
     href: "/document",
     icon: <FolderIcon fontSize="small" />,
+    section: 3022,
   },
   {
     title: "Equipment MNG",

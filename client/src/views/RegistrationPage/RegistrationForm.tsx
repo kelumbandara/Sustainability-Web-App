@@ -10,7 +10,7 @@ import {
   useTheme,
   Autocomplete,
 } from "@mui/material";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import companyLogo from "../../assets/company-logo.jpg";
 import groupLogo from "../../assets/group-logo.png";
 import { useForm,Controller } from "react-hook-form";
@@ -21,11 +21,12 @@ import { useNavigate } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { registerUser } from "../../api/userApi";
 import SwitchButton from "../../components/SwitchButton";
-import { sampleDivisions } from "../../api/sampleData/documentData";
-import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@mui/icons-material/CheckBox';
-const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-const checkedIcon = <CheckBoxIcon fontSize="small" />;
+import AutoCheckBox from "../../components/AutoCheckbox";
+
+//API Imports
+import { departmentSchema,fetchDepartmentData } from "../../api/departmentApi";
+import { factorySchema,fetchFactoryData } from "../../api/factoryApi";
+import { jobPositionSchema,fetchJobPositionData } from "../../api/jobPositionApi";
 
 function RegistrationForm() {
   const theme = useTheme();
@@ -35,6 +36,11 @@ function RegistrationForm() {
   const queryClient = useQueryClient();
   const [selectedFactories, setSelectedFactories] = useState([]);
   const [showPassword, setShowPassword] = useState(false);
+
+  //API Fetch Data
+  const [departments, setDepartments] = useState<departmentSchema[]>([]);
+  const [factory, setFactory] = useState<factorySchema[]>([]);
+  const [jobPositions, setJobPositions] = useState<jobPositionSchema[]>([]);
 
   const {
     register,
@@ -86,6 +92,31 @@ function RegistrationForm() {
     console.log(data)
     registrationMutation(data);
   };
+
+  //API functions to get data
+  useEffect(() => {
+    async function getDepartments() {
+      const data = await fetchDepartmentData();
+      setDepartments(data);
+    }
+    getDepartments();
+  }, []);
+
+  useEffect(() => {
+    async function getFactory() {
+      const data = await fetchFactoryData();
+      setFactory(data);
+    }
+    getFactory();
+  }, []);
+
+  useEffect(() => {
+    async function getJobPosition() {
+      const data = await fetchJobPositionData();
+      setJobPositions(data);
+    }
+    getJobPosition();
+  }, []);
   
   return (
     <Stack
@@ -297,7 +328,7 @@ function RegistrationForm() {
             <Autocomplete
               {...register("department", { required: true })}
               size="small"
-              options={sampleDivisions?.map((supplierType) => supplierType.name)}
+              options={departments?.map((supplierType) => supplierType.department)}
               sx={{ }}
               renderInput={(params) => (
                 <TextField
@@ -313,7 +344,7 @@ function RegistrationForm() {
             <Autocomplete
               {...register("jobPosition", { required: true })}
               size="small"
-              options={sampleDivisions?.map((supplierType) => supplierType.name)}
+              options={jobPositions?.map((supplierType) => supplierType.jobPosition)}
               sx={{ marginTop: "1rem" }}
               renderInput={(params) => (
                 <TextField
@@ -325,53 +356,20 @@ function RegistrationForm() {
                 />
               )}
             />
-            
-            <Controller
-              control={control}
-              name="assignedFactory"
-              render={({ field }) => (
-                <Autocomplete
-                  {...field} // Bind to react-hook-form
-                  multiple
-                  limitTags={2}
-                  id="checkboxes-tags-demo"
-                  options={sampleDivisions}
-                  disableCloseOnSelect
-                  getOptionLabel={(option) => option.name}
-                  onChange={(event, newValue) => {
 
-                    const selectedIds = newValue.map((item) => item.id);
-                    field.onChange(selectedIds);
-                    setSelectedFactories(selectedIds);
-                  }}
-                  value={sampleDivisions.filter((division) =>
-                    selectedFactories.includes(division.id)
-                  )}
-                  renderOption={(props, option, { selected }) => {
-                    const { key, ...optionProps } = props;
-                    return (
-                      <li key={key} {...optionProps}>
-                        <Checkbox
-                          icon={icon}
-                          checkedIcon={checkedIcon}
-                          style={{ marginRight: 8 }}
-                          checked={selected}
-                        />
-                        {option.name}
-                      </li>
-                    );
-                  }}
-                  sx={{ marginTop: "1rem" }}
-                  renderInput={(params) => (
-                    <TextField {...params} 
-                      label="Assigned Factories" 
-                      placeholder="Select factories" 
-                      size="small"
-                    />
-                  )}
-                />
-              )}
+            <AutoCheckBox
+              {...register("assignedFactory", { required: true })}
+              error={!!errors.assignedFactory}
+              control={control}
+              limitTags={1}
+              name="assignedFactory"
+              options={factory}
+              selectedValues={selectedFactories}
+              setSelectedValues={setSelectedFactories}
+              label="Assigned Factories"
+              placeholder="Select factories"
             />
+
             <TextField
               required
               id="employeeNumber"
