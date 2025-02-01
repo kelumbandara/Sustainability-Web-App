@@ -38,7 +38,7 @@ import { useState } from "react";
 import { useSnackbar } from "notistack";
 
 const drawerWidth = 265;
-
+const section = [10,101,102,103,104,3022];
 const openedMixin = (theme: Theme): CSSObject => ({
   width: drawerWidth,
   transition: theme.transitions.create("width", {
@@ -285,6 +285,9 @@ const DrawerContent = ({
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+
+
+  
   return (
     <>
       <DrawerHeader sx={{ justifyContent: "flex-start" }}>
@@ -321,7 +324,9 @@ const DrawerContent = ({
           overflowX: "hidden",
         }}
       >
-        {sidebarItems.map((item, i) => {
+        {sidebarItems
+        .filter(item => section.includes(item.section))
+        .map((item, i) => {
           if (item?.headline) {
             return (
               <Typography
@@ -467,8 +472,10 @@ const NestedItem = React.memo(
         </Button>
         <Collapse in={open} unmountOnExit>
           <List>
-            {item.nestedItems.map((item) => {
-              if (item.nestedItems) {
+            {item.nestedItems
+            .filter(item => section.includes(item.section))
+            .map((item) => {
+              if (item.nestedItems && section.includes(item.section)) {
                 return (
                   <Box key={item.href} sx={{ marginLeft: "0.5rem" }}>
                     <NestedItem
@@ -507,14 +514,16 @@ interface LinkButtonProps {
   icon: any;
   title: string;
   disabled?: boolean;
+  section?: Number;
   handleDrawerClose: () => void;
 }
 
 export const LinkButton = React.memo(
-  ({ to, icon, title, disabled, handleDrawerClose }: LinkButtonProps) => {
+  ({ to, icon, title, disabled,section, handleDrawerClose }: LinkButtonProps) => {
     const { pathname } = useLocation();
     const { isTablet } = useIsMobile();
 
+    
     const isMatch = to === "/" ? pathname === to : pathname.startsWith(to);
 
     return (
