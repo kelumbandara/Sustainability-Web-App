@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import useIsMobile from "../../customHooks/useIsMobile";
 import { Controller, useForm } from "react-hook-form";
+import { useNavigate } from "react-router";
 import CloseIcon from "@mui/icons-material/Close";
 import { sampleDivisions } from "../../api/sampleData/documentData";
 import RichTextComponent from "../../components/RichTextComponent";
@@ -32,8 +33,17 @@ import {
   HazardOrRiskCategories,
   RiskLevel,
   UnsafeActOrCondition,
+  createHazardRisk,
 } from "../../api/hazardRiskApi";
 import { sampleAssignees } from "../../api/sampleData/usersSampleDate";
+import { useMutation } from "@tanstack/react-query";
+import queryClient from "../../state/queryClient";
+import { enqueueSnackbar } from "notistack";
+
+//API imports
+import useCurrentUser from "../../hooks/useCurrentUser";
+import { getAllUsers, User } from "../../api/userApi";
+import { categorySchema, fetchMainCategory, fetchSubCategory, fetchObservationType } from "../../api/categoryApi";
 
 type DialogProps = {
   open: boolean;
@@ -51,6 +61,16 @@ export default function AddOrEditHazardRiskDialog({
   const { isMobile, isTablet } = useIsMobile();
   const [files, setFiles] = useState<File[]>([]);
   const [addNewContactDialogOpen, setAddNewContactDialogOpen] = useState(false);
+  const { user } = useCurrentUser();
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [mainCategory, setMainCategory] = useState<categorySchema[]>([]);
+  const [subCategoryData, setSubCategory] = useState<categorySchema[]>([]);
+  const [observationTypeData, setObservationType] = useState<categorySchema[]>([]);
+  const navigate = useNavigate();
+
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedSubCategory, setSelectedSubCategory] = useState(null);
+  const [selectedObservationType, setSelectedObservationType] = useState(null);
 
   const {
     register,
@@ -85,28 +105,103 @@ export default function AddOrEditHazardRiskDialog({
   const category = watch("category");
   const subCategory = watch("subCategory");
 
+  //API call to get all users
+  useEffect(() => {
+    async function fetchUsers() {
+      try {
+        const data = await getAllUsers();
+        if (data && Array.isArray(data.user)) {
+          setAllUsers(data.user);
+          console.log(data);
+        } else {
+          setAllUsers([]);
+        }
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        setAllUsers([]);
+      }
+    }
+    fetchUsers();
+  }, []);
+
+  useEffect(() => {
+    async function getMainCategory() {
+      const data = await fetchMainCategory();
+      setMainCategory(data);
+    }
+    getMainCategory();
+  }, []);
+
+  useEffect(() => {
+    if (selectedCategory != null) {
+      async function getSubCategory() {
+        try {
+          const data = await fetchSubCategory(selectedCategory);
+          setSubCategory(data);
+        } catch (error) {
+          console.error("Error fetching subcategories:", error);
+        }
+      }
+
+      getSubCategory();
+    }
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    if (selectedSubCategory != null) {
+      async function getObservationType() {
+        try {
+          const data = await fetchObservationType(selectedSubCategory);
+          setObservationType(data);
+        } catch (error) {
+          console.error("Error fetching subcategories:", error);
+        }
+      }
+
+      getObservationType();
+    }
+  }, [selectedSubCategory]);
+
   const subCategoryOptions = useMemo(() => {
     return category
       ? HazardOrRiskCategories?.find(
-          (d) => d.name === category
-        )?.subCategories?.map((sc) => sc.name) || []
+        (d) => d.name === category
+      )?.subCategories?.map((sc) => sc.name) || []
       : [];
   }, [category]);
 
   const observationTypeOptions = useMemo(() => {
     return category && subCategory
       ? HazardOrRiskCategories?.find(
-          (d) => d.name === category
-        )?.subCategories?.find((sc) => sc.name === subCategory)
-          ?.observationTypes
+        (d) => d.name === category
+      )?.subCategories?.find((sc) => sc.name === subCategory)
+        ?.observationTypes
       : [];
   }, [category, subCategory]);
 
+  const { mutate: createHazardRiskDocument } = useMutation({
+    mutationFn: createHazardRisk,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["current-user"] });
+      localStorage.setItem("token", data?.access_token);
+      enqueueSnackbar("Account Created Successfully!", { variant: "success" });
+      navigate("/home");
+    },
+    onError: (error: any) => {
+      console.log(error);
+      enqueueSnackbar(error?.data?.message ?? `Registration Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
   const handleCreateDocument = (data: HazardAndRisk) => {
+    console.log(data)
+    createHazardRiskDocument(data);
     const submitData: Partial<HazardAndRisk> = data;
     submitData.id = defaultValues?.id ?? uuidv4();
     submitData.createdDate = new Date();
-    submitData.createdByUser = sampleAssignees[0].name;
+    submitData.createdByUser = user.name;
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
     onSubmit(submitData as HazardAndRisk);
     resetForm();
@@ -154,7 +249,6 @@ export default function AddOrEditHazardRiskDialog({
     const handleCreateObservationType = (data: { observation: string }) => {
       console.log("Creating observation type", data, category, subCategory);
     };
-
     return (
       <Dialog
         open={addNewContactDialogOpen}
@@ -321,14 +415,15 @@ export default function AddOrEditHazardRiskDialog({
               <Autocomplete
                 {...register("category", { required: true })}
                 size="small"
-                options={HazardOrRiskCategories?.map(
-                  (category) => category.name
-                )}
+                options={mainCategory?.map((category) => category.categoryName)}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 defaultValue={defaultValues?.category}
                 onChange={(e, value) => {
-                  console.log("e", e);
+                  console.log("Category selected:", value);
+                  setSelectedCategory(value);
                   setValue("category", value);
+                  setValue("subCategory", null);
+                  setSelectedSubCategory(null);
                 }}
                 renderInput={(params) => (
                   <TextField
@@ -344,12 +439,16 @@ export default function AddOrEditHazardRiskDialog({
                 <Autocomplete
                   {...register("subCategory", { required: true })}
                   size="small"
-                  options={subCategoryOptions}
-                  defaultValue={defaultValues?.subCategory}
+                  options={subCategoryData?.map((category) => category.subCategory)}
+                  value={selectedSubCategory}
                   onChange={(e, value) => {
-                    console.log("e", e);
+                    console.log("Sub Category selected:", value);
+                    setSelectedSubCategory(value);
                     setValue("subCategory", value);
+                    setSelectedObservationType(null);
+                    setValue("observationType", null);
                   }}
+
                   sx={{ flex: 1, margin: "0.5rem" }}
                   renderInput={(params) => (
                     <TextField
@@ -363,7 +462,6 @@ export default function AddOrEditHazardRiskDialog({
                 />
               )}
             </Box>
-
             {category && subCategory && (
               <Box
                 sx={{
@@ -375,25 +473,24 @@ export default function AddOrEditHazardRiskDialog({
                   {...register("observationType")}
                   size="small"
                   noOptionsText={
-                    <>
-                      <Typography variant="body2" color="inherit" gutterBottom>
-                        No matching Items
-                      </Typography>
-                    </>
+                    <Typography variant="body2" color="inherit" gutterBottom>
+                      No matching items
+                    </Typography>
                   }
-                  options={[...observationTypeOptions, "$ADD_NEW_ITEM"]}
-                  renderOption={(props, option) => (
-                    <>
-                      {option === "$ADD_NEW_ITEM" ? (
-                        <AddNewObservationButton {...props} />
-                      ) : (
-                        <li {...props} key={option}>
-                          {option}
-                        </li>
-                      )}
-                    </>
-                  )}
-                  defaultValue={defaultValues?.observationType}
+                  options={[...observationTypeData?.map((category) => category.observationType), "$ADD_NEW_ITEM"]}
+                  value={selectedObservationType}
+                  renderOption={(props, option) =>
+                    option === "$ADD_NEW_ITEM" ? (
+                      <AddNewObservationButton {...props} />
+                    ) : (
+                      <li {...props} key={option}>{option}</li>
+                    )
+                  }
+                  onChange={(e, value) => {
+                    console.log("Observation Type selected:", value);
+                    setSelectedObservationType(value);
+                    setValue("observationType", value);
+                  }}
                   sx={{ flex: 1, margin: "0.5rem" }}
                   renderInput={(params) => (
                     <TextField
@@ -614,10 +711,19 @@ export default function AddOrEditHazardRiskDialog({
               />
             </Box>
             <Box sx={{ margin: "0.5rem" }}>
+
               <Autocomplete
                 {...register("assignee", { required: true })}
                 size="small"
-                options={sampleAssignees?.map((category) => category.name)}
+                options={
+                  (allUsers || [])
+                    .filter((assign) =>
+                      assign?.assigneeLevel === (user?.assigneeLevel + 1) &&
+                      Array.isArray(assign?.assignedFactory) &&
+                      (assign.assignedFactory === null || assign.assignedFactory.includes("ABC Group"))
+                    )
+                    .map((assign) => assign?.name || "Unknown")
+                }
                 sx={{ flex: 1 }}
                 defaultValue={defaultValues?.assignee}
                 renderInput={(params) => (

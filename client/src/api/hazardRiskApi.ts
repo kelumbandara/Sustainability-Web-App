@@ -1,4 +1,5 @@
 import { z } from "zod";
+import axios from "axios";
 
 export enum CategoryType {
   HEALTH_AND_HSE_MANAGEMENT = "Health and HSE Management",
@@ -207,4 +208,8 @@ export const HazardAndRiskSchema = z.object({
   actionTaken: z.string().optional(),
 });
 
+export async function createHazardRisk(data: HazardAndRisk) {
+  const res = await axios.post("/api/hazard-and-risk", data);
+  return res.data;
+}
 export type HazardAndRisk = z.infer<typeof HazardAndRiskSchema>;

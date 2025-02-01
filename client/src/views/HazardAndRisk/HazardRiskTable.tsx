@@ -27,7 +27,7 @@ import { useSnackbar } from "notistack";
 import { sampleHazardRiskData } from "../../api/sampleData/hazardRiskData";
 import { HazardAndRisk, HazardAndRiskStatus } from "../../api/hazardRiskApi";
 import ViewHazardOrRiskContent from "./ViewHazardRiskContent";
-
+import useCurrentUser from "../../hooks/useCurrentUser";
 function HazardRiskTable() {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
@@ -36,6 +36,7 @@ function HazardRiskTable() {
   const [riskData, setRiskData] =
     useState<HazardAndRisk[]>(sampleHazardRiskData);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const { user } = useCurrentUser();
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
@@ -87,6 +88,7 @@ function HazardRiskTable() {
             >
               Report a Hazard or Risk
             </Button>
+            {user.email} {user.assigneeLevel}
           </Box>
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
