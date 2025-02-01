@@ -33,7 +33,7 @@ import {
   RiskLevel,
   UnsafeActOrCondition,
 } from "../../api/hazardRiskApi";
-import { sampleAssignees } from "../../api/sampleData/usersSampleDate";
+import { sampleAssignees } from "../../api/sampleData/usersSampleData";
 
 type DialogProps = {
   open: boolean;

@@ -20,7 +20,7 @@ import { MedicineRequest } from "../../../../api/medicineRequestApi";
 import useIsMobile from "../../../../customHooks/useIsMobile";
 import { sampleMedicines } from "../../../../api/sampleData/medicineRequestSampleData";
 import { sampleDivisions } from "../../../../api/sampleData/documentData";
-import { sampleAssignees } from "../../../../api/sampleData/usersSampleDate";
+import { sampleAssignees } from "../../../../api/sampleData/usersSampleData";
 import CustomButton from "../../../../components/CustomButton";
 
 type DialogProps = {

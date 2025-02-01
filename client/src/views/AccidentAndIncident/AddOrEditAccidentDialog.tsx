@@ -38,7 +38,7 @@ import { useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import AddIcon from "@mui/icons-material/Add";
 import { HazardAndRiskStatus } from "../../api/hazardRiskApi";
-import { sampleAssignees } from "../../api/sampleData/usersSampleDate";
+import { sampleAssignees } from "../../api/sampleData/usersSampleData";
 import {
   Accident,
   AccidentEffectedIndividual,

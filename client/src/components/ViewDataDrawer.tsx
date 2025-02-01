@@ -10,6 +10,8 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import useIsMobile from "../customHooks/useIsMobile";
+import CustomButton from "./CustomButton";
 
 function ViewDataDrawer({
   open,
@@ -61,7 +63,7 @@ export function DrawerHeader({
         justifyContent: "space-between",
       }}
     >
-      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", my: 1 }}>
         <IconButton aria-label="delete" onClick={handleClose}>
           <CloseIcon sx={{ color: "var(--pallet-light-grey)" }} />
         </IconButton>
@@ -87,6 +89,7 @@ export function DrawerEditAndDeleteButtons({
   onEdit: () => void;
   onDelete: () => void;
 }) {
+  const { isTablet } = useIsMobile();
   return (
     <Box
       sx={{
@@ -95,18 +98,55 @@ export function DrawerEditAndDeleteButtons({
       }}
     >
       {onEdit && (
-        <IconButton aria-label="edit" onClick={onEdit} sx={{ marginX: 1 }}>
-          <EditIcon
-            sx={{
-              color: "var(--pallet-blue)",
-            }}
-          />
-        </IconButton>
+        <>
+          {isTablet ? (
+            <IconButton aria-label="edit" onClick={onEdit}>
+              <EditIcon
+                sx={{
+                  color: "var(--pallet-blue)",
+                }}
+              />
+            </IconButton>
+          ) : (
+            <CustomButton
+              variant="contained"
+              sx={{
+                backgroundColor: "var(--pallet-blue)",
+              }}
+              size="medium"
+              onClick={onEdit}
+              startIcon={<EditIcon />}
+            >
+              Edit
+            </CustomButton>
+          )}
+        </>
       )}
       {onDelete && (
-        <IconButton aria-label="delete" onClick={onDelete}>
-          <DeleteIcon sx={{ color: "var(--pallet-red)" }} />
-        </IconButton>
+        <>
+          {isTablet ? (
+            <IconButton
+              aria-label="delete"
+              onClick={onDelete}
+              sx={{ marginX: 1 }}
+            >
+              <DeleteIcon sx={{ color: "var(--pallet-red)" }} />
+            </IconButton>
+          ) : (
+            <CustomButton
+              variant="contained"
+              sx={{
+                backgroundColor: "var(--pallet-red)",
+                marginX: 1,
+              }}
+              size="medium"
+              onClick={onDelete}
+              startIcon={<DeleteIcon />}
+            >
+              Delete
+            </CustomButton>
+          )}
+        </>
       )}
     </Box>
   );

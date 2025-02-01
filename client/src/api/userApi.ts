@@ -1,10 +1,15 @@
 import axios from "axios";
 import { z } from "zod";
+import { PermissionKeysObjectSchema } from "../views/Administration/SectionList";
 
-export enum UserRoles {
-  ADMIN = "1",
-  USER = "2",
-}
+export const userRoleSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  accessSettings: PermissionKeysObjectSchema,
+});
+
+export type UserRole = z.infer<typeof userRoleSchema>;
 
 export const userSchema = z.object({
   id: z.string(),
@@ -12,7 +17,7 @@ export const userSchema = z.object({
   name: z.string(),
   mobile: z.string(),
   emailVerifiedAt: z.string().nullable(),
-  role: z.nativeEnum(UserRoles),
+  role: z.string(),
   profileImage: z.string().nullable(),
   status: z.string(),
   createdAt: z.string(),
