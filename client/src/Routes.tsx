@@ -54,6 +54,19 @@ const PurchaseAndInventoryTable = React.lazy(
     )
 );
 
+//Audit and Inspection
+const InternalAuditTable = React.lazy(
+  () => import("./views/AuditAndInspection/InternalAudit")
+);
+const ExternalAuditTable = React.lazy(
+  () => import("./views/AuditAndInspection/ExternalAuditTable")
+);
+
+//Sustainability
+const SustainabilityTable = React.lazy(
+  () => import("./views/Sustainability/SustainabilityTable")
+);
+
 //Maternity Register
 const MaternityRegisterTable = React.lazy(
   () =>
@@ -125,16 +138,18 @@ const AppRoutes = () => {
           ))}
         />
         <Route
-          path="/audit-inspection/internal-audit"
-          element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="Audit & Inspection > Internal Audit" />
-          ))}
+          path="audit-inspection/internal-audit"
+          element={withLayout(MainLayout, InternalAuditTable)}
         />
         <Route
           path="/audit-inspection/external-audit"
-          element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="Audit & Inspection > External Audit" />
-          ))}
+          element={withLayout(MainLayout, ExternalAuditTable)}
+        />
+
+        {/* Sustainability */}
+        <Route
+          path="/sustainability/register"
+          element={withLayout(MainLayout, SustainabilityTable)}
         />
         {/* document */}
         <Route
@@ -256,6 +271,7 @@ const AppRoutes = () => {
           path="/occupational-health/medical-records/maternity-register"
           element={withLayout(MainLayout, MaternityRegisterTable)}
         />
+
       </Route>
     </Routes>
   );
