@@ -18,6 +18,8 @@ import DatasetLinkedOutlinedIcon from "@mui/icons-material/DatasetLinkedOutlined
 import SentimentSatisfiedAltOutlinedIcon from "@mui/icons-material/SentimentSatisfiedAltOutlined";
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import SubdirectoryArrowRightIcon from "@mui/icons-material/SubdirectoryArrowRight";
+import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
+import KeyIcon from "@mui/icons-material/Key";
 
 export interface SidebarItem {
   title?: string;
@@ -50,6 +52,19 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
     href: "/home",
     icon: <HomeIcon fontSize="small" />,
     // Add the data-cy attribute here
+  },
+  {
+    headline: "Administration",
+  },
+  {
+    title: "Users",
+    icon: <PeopleAltIcon fontSize="small" />,
+    href: "/admin/users",
+  },
+  {
+    title: "Access Management",
+    icon: <KeyIcon fontSize="small" />,
+    href: "/admin/access-management",
   },
   {
     headline: "Sustainability Apps",

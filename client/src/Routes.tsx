@@ -9,6 +9,13 @@ const RegistrationPage = React.lazy(
   () => import("./views/RegistrationPage/RegistrationPage")
 );
 const InsightsPage = React.lazy(() => import("./views/Insights/Insight"));
+
+//Administration
+const UserTable = React.lazy(() => import("./views/Administration/UserTable"));
+const AccessManagementTable = React.lazy(
+  () => import("./views/Administration/AccessManagementTable")
+);
+
 const UnderDevelopment = React.lazy(
   () => import("./components/UnderDevelopment")
 );
@@ -112,6 +119,18 @@ const AppRoutes = () => {
       <Route path="/register" element={withoutLayout(RegistrationPage)} />
       <Route element={<ProtectedRoute />}>
         <Route path="/home" element={withLayout(MainLayout, InsightsPage)} />
+
+        {/* Administration */}
+        <Route
+          path="/admin/users"
+          element={withLayout(MainLayout, UserTable)}
+        />
+        <Route
+          path="/admin/access-management"
+          element={withLayout(MainLayout, AccessManagementTable)}
+        />
+
+        {/* Audit & Inspection */}
         <Route
           path="/audit-inspection/dashboard"
           element={withLayout(MainLayout, () => (
