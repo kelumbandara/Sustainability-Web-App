@@ -185,6 +185,7 @@ export enum HazardDashboardPeriods {
 
 export const HazardAndRiskSchema = z.object({
   id: z.string().optional(),
+  referenceNumber: z.string(),
   category: z.string(),
   subCategory: z.string(),
   observationType: z.string().optional(),
@@ -206,10 +207,14 @@ export const HazardAndRiskSchema = z.object({
   cost: z.string().optional(),
   remarks: z.string().optional(),
   actionTaken: z.string().optional(),
+  serverDateAndTime: z.date(),
+  responsibleSection: z.string(),
+  asigneeLevel: z.number(),
 });
 
 export async function createHazardRisk(data: HazardAndRisk) {
   const res = await axios.post("/api/hazard-and-risk", data);
   return res.data;
 }
+
 export type HazardAndRisk = z.infer<typeof HazardAndRiskSchema>;

@@ -71,6 +71,7 @@ export default function AddOrEditHazardRiskDialog({
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedSubCategory, setSelectedSubCategory] = useState(null);
   const [selectedObservationType, setSelectedObservationType] = useState(null);
+  // const asigneeLevel = user.assigneeLevel
 
   const {
     register,
@@ -185,7 +186,7 @@ export default function AddOrEditHazardRiskDialog({
       queryClient.invalidateQueries({ queryKey: ["current-user"] });
       localStorage.setItem("token", data?.access_token);
       enqueueSnackbar("Account Created Successfully!", { variant: "success" });
-      navigate("/home");
+      // navigate("/home");
     },
     onError: (error: any) => {
       console.log(error);
@@ -201,7 +202,7 @@ export default function AddOrEditHazardRiskDialog({
     const submitData: Partial<HazardAndRisk> = data;
     submitData.id = defaultValues?.id ?? uuidv4();
     submitData.createdDate = new Date();
-    submitData.createdByUser = user.name;
+    // submitData.asigneeLevel = asigneeLevel;
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
     onSubmit(submitData as HazardAndRisk);
     resetForm();
