@@ -18,6 +18,7 @@ export const userSchema = z.object({
   mobile: z.string(),
   emailVerifiedAt: z.string().nullable(),
   role: z.string(),
+  roleId: z.string(),
   profileImage: z.string().nullable(),
   status: z.string(),
   isCompanyEmployee: z.boolean(),
@@ -26,7 +27,7 @@ export const userSchema = z.object({
   department: z.string(),
   assignedFactory: z.array(z.string()),
   employeeNumber: z.string(),
-  jobPosition:z.string(),
+  jobPosition: z.string(),
 });
 
 export type User = z.infer<typeof userSchema>;

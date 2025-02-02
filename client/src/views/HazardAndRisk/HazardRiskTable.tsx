@@ -27,6 +27,8 @@ import { useSnackbar } from "notistack";
 import { sampleHazardRiskData } from "../../api/sampleData/hazardRiskData";
 import { HazardAndRisk, HazardAndRiskStatus } from "../../api/hazardRiskApi";
 import ViewHazardOrRiskContent from "./ViewHazardRiskContent";
+import PermissionWrapper from "../../components/PermissionWrapper";
+import { PermissionKeys } from "../Administration/SectionList";
 
 function HazardRiskTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -76,17 +78,21 @@ function HazardRiskTable() {
               justifyContent: "flex-end",
             }}
           >
-            <Button
-              variant="contained"
-              sx={{ backgroundColor: "var(--pallet-blue)" }}
-              startIcon={<AddIcon />}
-              onClick={() => {
-                setSelectedRow(null);
-                setOpenAddOrEditDialog(true);
-              }}
+            <PermissionWrapper
+              accessKey={PermissionKeys.HAZARD_RISK_REGISTER_CREATE}
             >
-              Report a Hazard or Risk
-            </Button>
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: "var(--pallet-blue)" }}
+                startIcon={<AddIcon />}
+                onClick={() => {
+                  setSelectedRow(null);
+                  setOpenAddOrEditDialog(true);
+                }}
+              >
+                Report a Hazard or Risk
+              </Button>
+            </PermissionWrapper>
           </Box>
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
