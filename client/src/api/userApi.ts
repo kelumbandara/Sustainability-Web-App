@@ -23,7 +23,7 @@ export const userSchema = z.object({
   assigneeLevel: z.number(),
   profileImage: z.string().nullable(),
   availability: z.number(), // Changed from boolean to number (0 or 1)
-  assignedFactory: z.union([z.array(z.string()), z.string()]), // Handles both array and single string
+  assignedFactory: z.array(z.string()), // Handles both array and single string
   created_at: z.string().nullable(),
   updated_at: z.string().nullable(),
 });
