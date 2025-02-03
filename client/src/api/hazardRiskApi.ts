@@ -217,4 +217,9 @@ export async function createHazardRisk(data: HazardAndRisk) {
   return res.data;
 }
 
+export async function fetchHazardRiskData() {
+  const res = await axios.get("/api/hazard-and-risk");
+  return res.data;
+}
+
 export type HazardAndRisk = z.infer<typeof HazardAndRiskSchema>;
