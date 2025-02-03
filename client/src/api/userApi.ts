@@ -28,6 +28,11 @@ export const userSchema = z.object({
   assignedFactory: z.array(z.string()),
   employeeNumber: z.string(),
   jobPosition: z.string(),
+  otp: z.string().nullable(),
+  otp_expires_at: z.string().nullable(),
+  userType: z.string(),
+  created_at: z.string().nullable(),
+  updated_at: z.string().nullable(),
 });
 
 export type User = z.infer<typeof userSchema>;
@@ -86,5 +91,35 @@ export async function registerUser({
 
 export async function validateUser() {
   const res = await axios.get("/api/user");
+  return res.data;
+}
+
+export async function forgotPassword({
+  email,
+}: {
+  email: string;
+}) {
+  const res = await axios.post("/api/forgot-password", {
+    email,
+  });
+  return res.data;
+}
+
+export async function otpVerification({
+  email,
+  otp,
+}: {
+  email: string;
+  otp: string;
+}) {
+  const res = await axios.post("/api/reset-password", {
+    email,
+    otp,
+  });
+  return res.data;
+}
+
+export async function getAllUsers() {
+  const res = await axios.get("/api/all-users");
   return res.data;
 }
