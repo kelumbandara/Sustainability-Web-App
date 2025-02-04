@@ -9,6 +9,7 @@ import {
   Alert,
   Box,
   Button,
+  LinearProgress,
   Stack,
   Theme,
   Typography,
@@ -28,11 +29,19 @@ import { useSnackbar } from "notistack";
 import AddIcon from "@mui/icons-material/Add";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import AddOrEditAccessRoleDialog from "./AddOrEditAccessRoleDialog";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  createAccessRole,
+  deleteAccessRole,
+  getAccessRolesList,
+  updateAccessRole,
+} from "../../api/accessManagementApi";
+import queryClient from "../../state/queryClient";
 
 function AccessManagementTable() {
   const { enqueueSnackbar } = useSnackbar();
   const [selectedRole, setSelectedRole] = useState<UserRole>(null);
-  const [roles, setRoles] = useState<UserRole[]>(sampleRoles);
+  // const [roles, setRoles] = useState<UserRole[]>(sampleRoles);
   const [openAccessManagementViewDrawer, setOpenAccessManagementViewDrawer] =
     useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -48,6 +57,66 @@ function AccessManagementTable() {
     theme.breakpoints.down("md")
   );
 
+  const { data: roles, isFetching: isFetchingRoles } = useQuery({
+    queryKey: ["access-roles"],
+    queryFn: getAccessRolesList,
+  });
+
+  const { mutate: createAccessRoleMutation } = useMutation({
+    mutationFn: createAccessRole,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["access-roles"] });
+      enqueueSnackbar("Access Role Created Successfully!", {
+        variant: "success",
+      });
+      setSelectedRole(null);
+      setOpenAccessManagementViewDrawer(false);
+      setAddOrEditAccessRoleDialogOpen(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Access Role Creation Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: updateAccessRoleMutation } = useMutation({
+    mutationFn: updateAccessRole,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["access-roles"] });
+      enqueueSnackbar("Accident Report Updated Successfully!", {
+        variant: "success",
+      });
+      setSelectedRole(null);
+      setOpenAccessManagementViewDrawer(false);
+      setAddOrEditAccessRoleDialogOpen(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Access Role Update Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: deleteAccessMutation } = useMutation({
+    mutationFn: deleteAccessRole,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["access-roles"] });
+      enqueueSnackbar("Access Role Deleted Successfully!", {
+        variant: "success",
+      });
+      setSelectedRole(null);
+      setOpenAccessManagementViewDrawer(false);
+      setDeleteDialogOpen(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Access Role Delete Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  console.log(roles);
   return (
     <Stack>
       <Box
@@ -90,6 +159,7 @@ function AccessManagementTable() {
               Create New Role
             </Button>
           </Box>
+          {isFetchingRoles && <LinearProgress sx={{ width: "100%" }} />}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -109,7 +179,7 @@ function AccessManagementTable() {
                     }}
                   >
                     <TableCell component="th" scope="row">
-                      {row.name}
+                      {row.userType}
                     </TableCell>
                     <TableCell align="left">{row.description}</TableCell>
                     <TableCell align="center">
@@ -169,22 +239,10 @@ function AccessManagementTable() {
           handleClose={() => setAddOrEditAccessRoleDialogOpen(false)}
           onSubmit={(data) => {
             if (selectedRole) {
-              console.log("Updating document", data);
-              setRoles(
-                roles.map((role) => (role.id === data.id ? data : role))
-              ); // Update the role in the list if it already exists
-              enqueueSnackbar("Details Updated Successfully!", {
-                variant: "success",
-              });
+              updateAccessRoleMutation(data);
             } else {
-              setRoles([...roles, data]); // Add new role to the list
-              enqueueSnackbar("Hazard/Risk Created Successfully!", {
-                variant: "success",
-              });
+              createAccessRoleMutation(data);
             }
-            setSelectedRole(null);
-            setOpenAccessManagementViewDrawer(false);
-            setAddOrEditAccessRoleDialogOpen(false);
           }}
           defaultValues={selectedRole}
         />
@@ -204,8 +262,7 @@ function AccessManagementTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            console.log(roles.filter((doc) => doc.id !== selectedRole.id));
-            setRoles(roles.filter((doc) => doc.id !== selectedRole.id));
+            deleteAccessMutation(selectedRole.id);
           }}
           onSuccess={() => {
             setOpenAccessManagementViewDrawer(false);

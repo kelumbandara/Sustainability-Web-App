@@ -42,12 +42,12 @@ function AccessManagementDrawerContent({
       >
         <DrawerContentItem
           label="Name"
-          value={selectedRole.name}
+          value={selectedRole.userType}
           sx={{ flex: 1 }}
         />
         <DrawerContentItem
           label="Description"
-          value={selectedRole.description}
+          value={selectedRole?.description}
           sx={{ flex: 1 }}
         />
       </Box>
@@ -63,7 +63,7 @@ function AccessManagementDrawerContent({
         {PermissionSectionsMap.map((permissionSection) => (
           <SectionAccordion
             permissionSection={permissionSection}
-            selectedRolePermissions={selectedRole.accessSettings}
+            selectedRolePermissions={selectedRole.permissionObject}
           />
         ))}
       </Stack>
