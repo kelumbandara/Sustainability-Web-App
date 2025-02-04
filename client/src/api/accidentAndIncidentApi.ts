@@ -1,3 +1,4 @@
+import axios from "axios";
 import { z } from "zod";
 
 export enum Severity {
@@ -43,6 +44,16 @@ export enum InjuryType {
   FIRST_AID = "First Aid",
   REPORTABLE_ACCIDENT = "Reportable Accident",
   NON_REPORTABLE_ACCIDENT = "Non-Reportable Accident",
+}
+
+export enum BodyPrimaryRegion {
+  ADDITIONAL = "Additional",
+  BACK = "Back",
+  LOWER_LIMBS = "Lower Limbs",
+  LOWER_BODY = "Lower Body",
+  UPPER_LIMBS = "Upper Limbs",
+  UPPER_BODY = "Upper Body",
+  HEAD_AND_FACE = "Head and Face",
 }
 
 export const AccidentWitnessSchema = z.object({
@@ -170,3 +181,69 @@ export const IncidentSchema = z.object({
 });
 
 export type Incident = z.infer<typeof IncidentSchema>;
+
+export async function getAccidentsList() {
+  const res = await axios.get("/api/accidents");
+  return res.data;
+}
+
+export const createAccident = async (accident: Accident) => {
+  const formData = new FormData();
+
+  // Append each property of the accident object to the form data
+  Object.keys(accident).forEach((key) => {
+    const value = accident[key as keyof typeof accident];
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        formData.append(`${key}[${index}]`, JSON.stringify(item));
+      });
+    } else if (value instanceof Date) {
+      formData.append(key, value.toISOString());
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  const res = await axios.post("/api/accidents", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return res.data;
+};
+
+export const updateAccident = async (accident: Accident) => {
+  const formData = new FormData();
+
+  // Append each property of the accident object to the form data
+  Object.keys(accident).forEach((key) => {
+    const value = accident[key as keyof typeof accident];
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        formData.append(`${key}[${index}]`, JSON.stringify(item));
+      });
+    } else if (value instanceof Date) {
+      formData.append(key, value.toISOString());
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  const res = await axios.put(
+    `/api/accidents/${accident.id}/update`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return res.data;
+};
+
+export const deleteAccident = async (id: string) => {
+  const res = await axios.delete(`/api/accidents/${id}/delete`);
+  return res.data;
+};

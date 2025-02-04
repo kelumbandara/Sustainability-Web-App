@@ -9,6 +9,7 @@ import {
   Alert,
   Box,
   Button,
+  LinearProgress,
   Stack,
   Theme,
   Typography,
@@ -23,18 +24,23 @@ import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
-import { Accident } from "../../api/accidentAndIncidentApi";
+import {
+  Accident,
+  createAccident,
+  deleteAccident,
+  getAccidentsList,
+  updateAccident,
+} from "../../api/accidentAndIncidentApi";
 import ViewAccidentContent from "./ViewAccidentContent";
 import AddOrEditAccidentDialog from "./AddOrEditAccidentDialog";
-import { sampleAccidentData } from "../../api/sampleData/accidentData";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import queryClient from "../../state/queryClient";
 
 function AccidentTable() {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<Accident>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
-  const [accidentData, setAccidentData] =
-    useState<Accident[]>(sampleAccidentData);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const breadcrumbItems = [
@@ -42,9 +48,68 @@ function AccidentTable() {
     { title: "Accident Management" },
   ];
 
+  const { data: accidentData, isFetching: isAccidentDataFetching } = useQuery({
+    queryKey: ["accidents"],
+    queryFn: getAccidentsList,
+  });
+
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("md")
   );
+
+  const { mutate: createAccidentMutation } = useMutation({
+    mutationFn: createAccident,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["accidents"] });
+      enqueueSnackbar("Accident Report Created Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Accident Creation Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: updateAccidentMutation } = useMutation({
+    mutationFn: updateAccident,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["accidents"] });
+      enqueueSnackbar("Accident Report Updated Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Accident Update Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: deleteAccidentMutation } = useMutation({
+    mutationFn: deleteAccident,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["accidents"] });
+      enqueueSnackbar("Accident Report Deleted Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Accident Delete Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   return (
     <Stack>
@@ -88,6 +153,7 @@ function AccidentTable() {
               Report an accident
             </Button>
           </Box>
+          {isAccidentDataFetching && <LinearProgress sx={{ width: "100%" }} />}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -186,23 +252,10 @@ function AccidentTable() {
           }}
           onSubmit={(data) => {
             if (selectedRow) {
-              console.log("Updating document", data);
-              setAccidentData(
-                accidentData.map((risk) => (risk.id === data.id ? data : risk))
-              ); // Update the document in the list if it already exists
-              enqueueSnackbar("Accident Details Updated Successfully!", {
-                variant: "success",
-              });
+              updateAccidentMutation(data);
             } else {
-              console.log("Adding new accident", data);
-              setAccidentData([...accidentData, data]); // Add new document to the list
-              enqueueSnackbar("Accident Report Created Successfully!", {
-                variant: "success",
-              });
+              createAccidentMutation(data);
             }
-            setSelectedRow(null);
-            setOpenViewDrawer(false);
-            setOpenAddOrEditDialog(false);
           }}
           defaultValues={selectedRow}
         />
@@ -221,9 +274,7 @@ function AccidentTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            setAccidentData(
-              accidentData.filter((doc) => doc.id !== selectedRow.id)
-            );
+            deleteAccidentMutation(selectedRow.id);
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);

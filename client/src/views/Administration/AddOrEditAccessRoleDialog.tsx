@@ -46,32 +46,42 @@ function AddOrEditAccessRoleDialog({
   handleClose: () => void;
   onSubmit: (data: UserRole) => void;
 }) {
-  const [rolePermissions, setRolePermissions] = useState(
-    defaultValues?.accessSettings
-      ? defaultValues?.accessSettings
-      : defaultAdminPermissions
-  );
+  // const [rolePermissions, setRolePermissions] = useState(
+  //   defaultValues?.permissionObject
+  //     ? defaultValues?.permissionObject
+  //     : defaultAdminPermissions
+  // );
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
+    setValue,
   } = useForm<{
-    name: string;
+    userType: string;
     description: string;
+    permissionObject: PermissionKeysObject;
   }>({
     defaultValues: {
-      name: defaultValues?.name,
+      userType: defaultValues?.userType,
       description: defaultValues?.description,
+      permissionObject:
+        defaultValues?.permissionObject ?? defaultAdminPermissions,
     },
   });
 
-  const handleSubmitRole = (data: { name: string; description: string }) => {
+  const rolePermissions = watch("permissionObject");
+
+  const handleSubmitRole = (data: {
+    userType: string;
+    description: string;
+  }) => {
     const submitData: UserRole = {
       id: defaultValues?.id ?? uuid(),
-      name: data.name,
+      userType: data.userType,
       description: data.description,
-      accessSettings: rolePermissions,
+      permissionObject: rolePermissions,
     };
     onSubmit(submitData);
     handleClose();
@@ -127,9 +137,9 @@ function AddOrEditAccessRoleDialog({
               label="Role Name"
               size="small"
               sx={{ margin: "0.5rem" }}
-              error={!!errors.name}
-              {...register("name", { required: true })}
-              helperText={errors.name ? "Role Name is required" : ""}
+              error={!!errors.userType}
+              {...register("userType", { required: true })}
+              helperText={errors.userType ? "Role Name is required" : ""}
             />
             <TextField
               required
@@ -157,7 +167,9 @@ function AddOrEditAccessRoleDialog({
                 key={permissionSection.mainSection}
                 permissionSection={permissionSection}
                 rolePermissions={rolePermissions}
-                setRolePermissions={setRolePermissions}
+                setRolePermissions={(rolePermissions) => {
+                  setValue("permissionObject", rolePermissions);
+                }}
               />
             ))}
           </Stack>

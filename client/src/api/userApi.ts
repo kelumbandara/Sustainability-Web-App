@@ -4,9 +4,9 @@ import { PermissionKeysObjectSchema } from "../views/Administration/SectionList"
 
 export const userRoleSchema = z.object({
   id: z.string(),
-  name: z.string(),
+  userType: z.string(),
   description: z.string().optional(),
-  accessSettings: PermissionKeysObjectSchema,
+  permissionObject: PermissionKeysObjectSchema,
 });
 
 export type UserRole = z.infer<typeof userRoleSchema>;
