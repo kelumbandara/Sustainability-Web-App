@@ -10,23 +10,26 @@ import {
   useTheme,
   Autocomplete,
 } from "@mui/material";
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import companyLogo from "../../assets/company-logo.jpg";
 import groupLogo from "../../assets/group-logo.png";
-import { useForm,Controller } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import CustomButton from "../../components/CustomButton";
 import LoginIcon from "@mui/icons-material/Login";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { registerUser } from "../../api/userApi";
 import SwitchButton from "../../components/SwitchButton";
 import AutoCheckBox from "../../components/AutoCheckbox";
 
 //API Imports
-import { departmentSchema,fetchDepartmentData } from "../../api/departmentApi";
-import { factorySchema,fetchFactoryData } from "../../api/factoryApi";
-import { jobPositionSchema,fetchJobPositionData } from "../../api/jobPositionApi";
+import { departmentSchema, fetchDepartmentData } from "../../api/departmentApi";
+import { factorySchema, fetchFactoryData } from "../../api/factoryApi";
+import {
+  jobPositionSchema,
+  fetchJobPositionData,
+} from "../../api/jobPositionApi";
 
 function RegistrationForm() {
   const theme = useTheme();
@@ -38,9 +41,24 @@ function RegistrationForm() {
   const [showPassword, setShowPassword] = useState(false);
 
   //API Fetch Data
-  const [departments, setDepartments] = useState<departmentSchema[]>([]);
-  const [factory, setFactory] = useState<factorySchema[]>([]);
-  const [jobPositions, setJobPositions] = useState<jobPositionSchema[]>([]);
+  // const [departments, setDepartments] = useState<departmentSchema[]>([]);
+  // const [factory, setFactory] = useState<factorySchema[]>([]);
+  // const [jobPositions, setJobPositions] = useState<jobPositionSchema[]>([]);
+
+  const { data: departments, isFetched: isDepartmentsFetched } = useQuery({
+    queryKey: ["departments"],
+    queryFn: fetchDepartmentData,
+  });
+
+  const { data: factories, isFetched: isFactoryFetched } = useQuery({
+    queryKey: ["factories"],
+    queryFn: fetchFactoryData,
+  });
+
+  const { data: jobPositions, isFetched: isJobPositionsFetched } = useQuery({
+    queryKey: ["jobPositions"],
+    queryFn: fetchJobPositionData,
+  });
 
   const {
     register,
@@ -57,10 +75,10 @@ function RegistrationForm() {
       name: "",
       confirmPassword: "",
       isCompanyEmployee: false,
-      jobPosition:"",
-      department:"",
+      jobPosition: "",
+      department: "",
       assignedFactory: selectedFactories,
-      employeeNumber:"",
+      employeeNumber: "",
     },
   });
 
@@ -85,39 +103,41 @@ function RegistrationForm() {
 
   const onRegistrationSubmit = (data) => {
     if (data.isCompanyEmployee && data.assignedFactory.length === 0) {
-      console.log(data)
-      enqueueSnackbar('Please select at least one factory.', { variant: 'error' });
+      console.log(data);
+      enqueueSnackbar("Please select at least one factory.", {
+        variant: "error",
+      });
       return;
     }
-    console.log(data)
+    console.log(data);
     registrationMutation(data);
   };
 
   //API functions to get data
-  useEffect(() => {
-    async function getDepartments() {
-      const data = await fetchDepartmentData();
-      setDepartments(data);
-    }
-    getDepartments();
-  }, []);
+  // useEffect(() => {
+  //   async function getDepartments() {
+  //     const data = await fetchDepartmentData();
+  //     setDepartments(data);
+  //   }
+  //   getDepartments();
+  // }, []);
 
-  useEffect(() => {
-    async function getFactory() {
-      const data = await fetchFactoryData();
-      setFactory(data);
-    }
-    getFactory();
-  }, []);
+  // useEffect(() => {
+  //   async function getFactory() {
+  //     const data = await fetchFactoryData();
+  //     setFactory(data);
+  //   }
+  //   getFactory();
+  // }, []);
 
-  useEffect(() => {
-    async function getJobPosition() {
-      const data = await fetchJobPositionData();
-      setJobPositions(data);
-    }
-    getJobPosition();
-  }, []);
-  
+  // useEffect(() => {
+  //   async function getJobPosition() {
+  //     const data = await fetchJobPositionData();
+  //     setJobPositions(data);
+  //   }
+  //   getJobPosition();
+  // }, []);
+
   return (
     <Stack
       spacing={2}
@@ -323,52 +343,63 @@ function RegistrationForm() {
             sx={{
               display: "flex",
             }}
-            
           >
-            <Autocomplete
-              {...register("department", { required: true })}
-              size="small"
-              options={departments?.map((supplierType) => supplierType.department)}
-              sx={{ }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  required
-                  error={!!errors.department}
-                  label="Department"
-                  name="department"
-                />
-              )}
-            /> 
+            {isDepartmentsFetched && departments && (
+              <Autocomplete
+                {...register("department", { required: true })}
+                size="small"
+                options={
+                  departments?.map((supplierType) => supplierType.department) ||
+                  []
+                }
+                sx={{}}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    error={!!errors.department}
+                    label="Department"
+                    name="department"
+                  />
+                )}
+              />
+            )}
+            {isJobPositionsFetched && jobPositions && (
+              <Autocomplete
+                {...register("jobPosition", { required: true })}
+                size="small"
+                options={
+                  jobPositions?.map(
+                    (supplierType) => supplierType.jobPosition
+                  ) || []
+                }
+                sx={{ marginTop: "1rem" }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    error={!!errors.jobPosition}
+                    label="Job Position"
+                    name="jobPosition"
+                  />
+                )}
+              />
+            )}
 
-            <Autocomplete
-              {...register("jobPosition", { required: true })}
-              size="small"
-              options={jobPositions?.map((supplierType) => supplierType.jobPosition)}
-              sx={{ marginTop: "1rem" }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  required
-                  error={!!errors.jobPosition}
-                  label="Job Position"
-                  name="jobPosition"
-                />
-              )}
-            />
-
-            <AutoCheckBox
-              {...register("assignedFactory", { required: true })}
-              error={!!errors.assignedFactory}
-              control={control}
-              limitTags={1}
-              name="assignedFactory"
-              options={factory}
-              selectedValues={selectedFactories}
-              setSelectedValues={setSelectedFactories}
-              label="Assigned Factories"
-              placeholder="Select factories"
-            />
+            {isFactoryFetched && factories && (
+              <AutoCheckBox
+                {...register("assignedFactory", { required: true })}
+                error={!!errors.assignedFactory}
+                control={control}
+                limitTags={1}
+                name="assignedFactory"
+                options={factories}
+                selectedValues={selectedFactories}
+                setSelectedValues={setSelectedFactories}
+                label="Assigned Factories"
+                placeholder="Select factories"
+              />
+            )}
 
             <TextField
               required
@@ -379,7 +410,6 @@ function RegistrationForm() {
               sx={{ marginTop: "1rem" }}
               {...register("employeeNumber", { required: true })}
             />
-
           </Stack>
         ) : null}
 
