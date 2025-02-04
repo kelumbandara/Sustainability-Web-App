@@ -320,8 +320,8 @@ export const PermissionSectionsMap: PermissionSection[] = [
         },
       },
       {
-        name: "Register",
-        key: "INCIDENT_ACCIDENT_REGISTER",
+        name: "Register > Accident",
+        key: "INCIDENT_ACCIDENT_REGISTER_ACCIDENT",
         permissionsExists: {
           VIEW: true,
           CREATE: true,
@@ -330,8 +330,28 @@ export const PermissionSectionsMap: PermissionSection[] = [
         },
       },
       {
-        name: "Assigned Tasks",
-        key: "INCIDENT_ACCIDENT_ASSIGNED_TASKS",
+        name: "Register > Incident",
+        key: "INCIDENT_ACCIDENT_REGISTER_INCIDENT",
+        permissionsExists: {
+          VIEW: true,
+          CREATE: true,
+          EDIT: true,
+          DELETE: true,
+        },
+      },
+      {
+        name: "Assigned Tasks > Accident",
+        key: "INCIDENT_ACCIDENT_ASSIGNED_TASKS_ACCIDENT",
+        permissionsExists: {
+          VIEW: true,
+          CREATE: true,
+          EDIT: true,
+          DELETE: true,
+        },
+      },
+      {
+        name: "Assigned Tasks > Incident",
+        key: "INCIDENT_ACCIDENT_ASSIGNED_TASKS_INCIDENT",
         permissionsExists: {
           VIEW: true,
           CREATE: true,
