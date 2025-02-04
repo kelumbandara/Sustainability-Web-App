@@ -2,7 +2,17 @@ import React from "react";
 import { Controller } from "react-hook-form";
 import { Autocomplete, Checkbox, TextField } from "@mui/material";
 
-const AutoCheckBox = ({ control, name, options, selectedValues, setSelectedValues, label, placeholder, limitTags, error }) => {
+const AutoCheckBox = ({
+  control,
+  name,
+  options,
+  selectedValues,
+  setSelectedValues,
+  label,
+  placeholder,
+  limitTags,
+  error,
+}) => {
   return (
     <Controller
       control={control}
@@ -18,11 +28,15 @@ const AutoCheckBox = ({ control, name, options, selectedValues, setSelectedValue
           disableCloseOnSelect
           getOptionLabel={(option) => option.factoryName}
           onChange={(event, newValue) => {
-            const selectedFactoryNames = newValue.map((item) => item.factoryName);
+            const selectedFactoryNames = newValue.map(
+              (item) => item.factoryName
+            );
             field.onChange(selectedFactoryNames);
             setSelectedValues(selectedFactoryNames);
           }}
-          value={options.filter((option) => selectedValues.includes(option.factoryName))}
+          value={options?.filter((option) =>
+            selectedValues.includes(option.factoryName)
+          )}
           renderOption={(props, option, { selected }) => {
             const { key, ...optionProps } = props;
             return (

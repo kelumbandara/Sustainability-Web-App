@@ -28,7 +28,10 @@ import { sampleHazardRiskData } from "../../api/sampleData/hazardRiskData";
 import { HazardAndRisk, HazardAndRiskStatus } from "../../api/hazardRiskApi";
 import ViewHazardOrRiskContent from "./ViewHazardRiskContent";
 import PermissionWrapper from "../../components/PermissionWrapper";
-import { PermissionKeys } from "../Administration/SectionList";
+import {
+  defaultViewerPermissions,
+  PermissionKeys,
+} from "../Administration/SectionList";
 
 function HazardRiskTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -38,6 +41,8 @@ function HazardRiskTable() {
   const [riskData, setRiskData] =
     useState<HazardAndRisk[]>(sampleHazardRiskData);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const userPermissionObject = defaultViewerPermissions;
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
@@ -78,21 +83,20 @@ function HazardRiskTable() {
               justifyContent: "flex-end",
             }}
           >
-            <PermissionWrapper
-              accessKey={PermissionKeys.HAZARD_RISK_REGISTER_CREATE}
+            <Button
+              variant="contained"
+              sx={{ backgroundColor: "var(--pallet-blue)" }}
+              startIcon={<AddIcon />}
+              onClick={() => {
+                setSelectedRow(null);
+                setOpenAddOrEditDialog(true);
+              }}
+              disabled={
+                userPermissionObject[PermissionKeys.HAZARD_RISK_REGISTER_CREATE]
+              }
             >
-              <Button
-                variant="contained"
-                sx={{ backgroundColor: "var(--pallet-blue)" }}
-                startIcon={<AddIcon />}
-                onClick={() => {
-                  setSelectedRow(null);
-                  setOpenAddOrEditDialog(true);
-                }}
-              >
-                Report a Hazard or Risk
-              </Button>
-            </PermissionWrapper>
+              Report a Hazard or Risk
+            </Button>
           </Box>
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
