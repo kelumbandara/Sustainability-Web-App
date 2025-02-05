@@ -145,6 +145,7 @@ export const AccidentSchema = z.object({
   assignee: z.string(),
   witnesses: z.array(AccidentWitnessSchema),
   effectedIndividuals: z.array(AccidentEffectedIndividualSchema),
+  imageUrl: z.string().optional(),
   reporter: z.string(),
 });
 
@@ -172,6 +173,7 @@ export const IncidentSchema = z.object({
   witnesses: z.array(AccidentWitnessSchema),
   effectedIndividuals: z.array(AccidentEffectedIndividualSchema),
   reporter: z.string(),
+  imageUrl: z.string().optional(),
   circumstances: z.string(),
   incidentDetails: z.string().optional(),
   typeOfNearMiss: z.nativeEnum(IncidentTypeOfNearMiss),

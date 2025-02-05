@@ -31,7 +31,6 @@ import theme from "../../theme";
 import { PermissionKeysObject, PermissionSectionsMap } from "./SectionList";
 import { grey } from "@mui/material/colors";
 import CustomButton from "../../components/CustomButton";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { v4 as uuid } from "uuid";
 
@@ -46,12 +45,6 @@ function AddOrEditAccessRoleDialog({
   handleClose: () => void;
   onSubmit: (data: UserRole) => void;
 }) {
-  // const [rolePermissions, setRolePermissions] = useState(
-  //   defaultValues?.permissionObject
-  //     ? defaultValues?.permissionObject
-  //     : defaultAdminPermissions
-  // );
-
   const {
     register,
     handleSubmit,
@@ -271,7 +264,9 @@ const SectionAccordion = ({
                       {row.permissionsExists.VIEW ? (
                         <TableCell align="center">
                           <Checkbox
-                            checked={rolePermissions[`${row.key}_VIEW`]}
+                            checked={Boolean(
+                              rolePermissions[`${row.key}_VIEW`]
+                            )}
                             onChange={() => {
                               if (rolePermissions[`${row.key}_VIEW`]) {
                                 setRolePermissions({
@@ -301,7 +296,9 @@ const SectionAccordion = ({
                       row.permissionsExists.VIEW ? (
                         <TableCell align="center">
                           <Checkbox
-                            checked={rolePermissions[`${row.key}_CREATE`]}
+                            checked={Boolean(
+                              rolePermissions[`${row.key}_CREATE`]
+                            )}
                             onChange={() => {
                               if (rolePermissions[`${row.key}_CREATE`]) {
                                 setRolePermissions({
@@ -326,7 +323,9 @@ const SectionAccordion = ({
                       row.permissionsExists.VIEW ? (
                         <TableCell align="center">
                           <Checkbox
-                            checked={rolePermissions[`${row.key}_EDIT`]}
+                            checked={Boolean(
+                              rolePermissions[`${row.key}_EDIT`]
+                            )}
                             onChange={() => {
                               if (rolePermissions[`${row.key}_EDIT`]) {
                                 setRolePermissions({
@@ -351,7 +350,9 @@ const SectionAccordion = ({
                       row.permissionsExists.VIEW ? (
                         <TableCell align="center">
                           <Checkbox
-                            checked={rolePermissions[`${row.key}_DELETE`]}
+                            checked={Boolean(
+                              rolePermissions[`${row.key}_DELETE`]
+                            )}
                             onChange={() => {
                               if (rolePermissions[`${row.key}_DELETE`]) {
                                 setRolePermissions({

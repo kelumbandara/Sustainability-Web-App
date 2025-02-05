@@ -20,7 +20,6 @@ import theme from "../../theme";
 import Breadcrumb from "../../components/BreadCrumb";
 import PageTitle from "../../components/PageTitle";
 import { UserRole } from "../../api/userApi";
-import { sampleRoles } from "../../api/sampleData/usersSampleData";
 import CustomButton from "../../components/CustomButton";
 import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import AccessManagementDrawerContent from "./AccessManagementDrawerContent";
@@ -41,7 +40,6 @@ import queryClient from "../../state/queryClient";
 function AccessManagementTable() {
   const { enqueueSnackbar } = useSnackbar();
   const [selectedRole, setSelectedRole] = useState<UserRole>(null);
-  // const [roles, setRoles] = useState<UserRole[]>(sampleRoles);
   const [openAccessManagementViewDrawer, setOpenAccessManagementViewDrawer] =
     useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -116,7 +114,6 @@ function AccessManagementTable() {
     },
   });
 
-  console.log(roles);
   return (
     <Stack>
       <Box

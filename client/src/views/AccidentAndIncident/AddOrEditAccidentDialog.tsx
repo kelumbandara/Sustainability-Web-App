@@ -157,8 +157,6 @@ export default function AddOrEditAccidentDialog({
   const handleCreateDocument = (data: Accident) => {
     const submitData: Partial<Accident> = data;
     submitData.id = defaultValues?.id ?? uuidv4();
-    // submitData.createdDate = new Date();
-    // submitData.createdByUser = sampleAssignees[0].name;
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
     onSubmit(submitData as Accident);
     resetForm();
