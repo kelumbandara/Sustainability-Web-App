@@ -1,3 +1,4 @@
+import axios from "axios";
 import { z } from "zod";
 
 export const MedicalDisposalSchema = z.object({
@@ -59,3 +60,73 @@ export const MedicineInventorySchema = z.object({
 });
 
 export type MedicineInventory = z.infer<typeof MedicineInventorySchema>;
+
+export async function getMedicineInventoriesList() {
+  const res = await axios.get("/api/medicine-inventories");
+  return res.data;
+}
+
+export const createMedicineInventory = async (
+  medicineInventory: MedicineInventory
+) => {
+  const formData = new FormData();
+
+  // Append each property of the maternity Register object to the form data
+  Object.keys(medicineInventory).forEach((key) => {
+    const value = medicineInventory[key as keyof typeof medicineInventory];
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        formData.append(`${key}[${index}]`, JSON.stringify(item));
+      });
+    } else if (value instanceof Date) {
+      formData.append(key, value.toISOString());
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  const res = await axios.post("/api/medicine-inventories", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return res.data;
+};
+
+export const updateMedicineInventory = async (
+  medicineInventory: MedicineInventory
+) => {
+  const formData = new FormData();
+
+  // Append each property of the maternity Register object to the form data
+  Object.keys(medicineInventory).forEach((key) => {
+    const value = medicineInventory[key as keyof typeof medicineInventory];
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        formData.append(`${key}[${index}]`, JSON.stringify(item));
+      });
+    } else if (value instanceof Date) {
+      formData.append(key, value.toISOString());
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  const res = await axios.put(
+    `/api/medicine-inventories/${medicineInventory.id}/update`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return res.data;
+};
+
+export const deleteMedicineInventory = async (id: string) => {
+  const res = await axios.delete(`/api/medicine-inventories/${id}/delete`);
+  return res.data;
+};

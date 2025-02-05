@@ -25,17 +25,24 @@ import ViewDataDrawer, {
   DrawerHeader,
 } from "../../../components/ViewDataDrawer";
 import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
-import { Patient } from "../../../api/OccupationalHealth/patientApi";
-import { samplePatientData } from "../../../api/sampleData/patientData";
+import {
+  createPatient,
+  deletePatient,
+  getPatientsList,
+  Patient,
+  updatePatient,
+} from "../../../api/OccupationalHealth/patientApi";
 import ViewPatientContent from "./ViewPatientContent";
 import AddOrEditPatientDialog from "./AddOrEditPatientDialog";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import queryClient from "../../../state/queryClient";
 
 function PatientTable() {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<Patient>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
-  const [patients, setPatients] = useState<Patient[]>(samplePatientData);
+  // const [patients, setPatients] = useState<Patient[]>(samplePatientData);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const breadcrumbItems = [
@@ -46,6 +53,65 @@ function PatientTable() {
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("md")
   );
+
+  const { data: patients } = useQuery({
+    queryKey: ["patients"],
+    queryFn: getPatientsList,
+  });
+
+  const { mutate: createPatientMutation } = useMutation({
+    mutationFn: createPatient,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["patients"] });
+      enqueueSnackbar("Patient Report Created Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Patient Creation Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: updatePatientMutation } = useMutation({
+    mutationFn: updatePatient,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["patients"] });
+      enqueueSnackbar("Patient Report Updated Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Patient Update Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: deletePatientMutation } = useMutation({
+    mutationFn: deletePatient,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["patients"] });
+      enqueueSnackbar("Patient Report Deleted Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Patient Delete Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   return (
     <Stack>
@@ -185,22 +251,10 @@ function PatientTable() {
           }}
           onSubmit={(data) => {
             if (selectedRow) {
-              setPatients(
-                patients.map((doc) => (doc.id === data.id ? data : doc))
-              ); // Update the patient in the list if it already exists
-              enqueueSnackbar("Patient Details Updated Successfully!", {
-                variant: "success",
-              });
+              updatePatientMutation(data);
             } else {
-              console.log("Adding new patient", data);
-              setPatients([...patients, data]); // Add new patient to the list
-              enqueueSnackbar("Patient Created Successfully!", {
-                variant: "success",
-              });
+              createPatientMutation(data);
             }
-            setSelectedRow(null);
-            setOpenViewDrawer(false);
-            setOpenAddOrEditDialog(false);
           }}
           defaultValues={selectedRow}
         />
@@ -219,7 +273,7 @@ function PatientTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            setPatients(patients.filter((doc) => doc.id !== selectedRow.id));
+            deletePatientMutation(selectedRow.id);
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);

@@ -1,3 +1,4 @@
+import axios from "axios";
 import { z } from "zod";
 
 export enum Gender {
@@ -105,3 +106,65 @@ export const PatientSchema = z.object({
 });
 
 export type Patient = z.infer<typeof PatientSchema>;
+
+export async function getPatientsList() {
+  const res = await axios.get("/api/patient");
+  return res.data;
+}
+
+export const createPatient = async (patient: Patient) => {
+  const formData = new FormData();
+
+  // Append each property of the patient object to the form data
+  Object.keys(patient).forEach((key) => {
+    const value = patient[key as keyof typeof patient];
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        formData.append(`${key}[${index}]`, JSON.stringify(item));
+      });
+    } else if (value instanceof Date) {
+      formData.append(key, value.toISOString());
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  const res = await axios.post("/api/patient", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return res.data;
+};
+
+export const updatePatient = async (patient: Patient) => {
+  const formData = new FormData();
+
+  // Append each property of the patient object to the form data
+  Object.keys(patient).forEach((key) => {
+    const value = patient[key as keyof typeof patient];
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        formData.append(`${key}[${index}]`, JSON.stringify(item));
+      });
+    } else if (value instanceof Date) {
+      formData.append(key, value.toISOString());
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  const res = await axios.put(`/api/patient/${patient.id}/update`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return res.data;
+};
+
+export const deletePatient = async (id: string) => {
+  const res = await axios.delete(`/api/patient/${id}/delete`);
+  return res.data;
+};

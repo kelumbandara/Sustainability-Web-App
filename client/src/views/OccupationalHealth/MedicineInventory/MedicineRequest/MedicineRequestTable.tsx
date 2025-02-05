@@ -25,19 +25,23 @@ import ViewDataDrawer, {
   DrawerHeader,
 } from "../../../../components/ViewDataDrawer";
 import DeleteConfirmationModal from "../../../../components/DeleteConfirmationModal";
-import { MedicineRequest } from "../../../../api/medicineRequestApi";
-import { medicineRequestSampleData } from "../../../../api/sampleData/medicineRequestSampleData";
+import {
+  createMedicineRequest,
+  deleteMedicineRequest,
+  getMedicineRequestsList,
+  MedicineRequest,
+  updateMedicineRequest,
+} from "../../../../api/medicineRequestApi";
 import AddOrEditMedicineRequestDialog from "./AddOrEditMedicineRequestDialog";
 import ViewMedicineRequestContent from "./ViewMedicineRequestContent";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import queryClient from "../../../../state/queryClient";
 
 function MedicineRequestTable() {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<MedicineRequest>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
-  const [medicineRequests, setMedicineRequests] = useState<MedicineRequest[]>(
-    medicineRequestSampleData
-  );
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const breadcrumbItems = [
@@ -48,6 +52,65 @@ function MedicineRequestTable() {
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("md")
   );
+
+  const { data: medicineRequests } = useQuery({
+    queryKey: ["medicine-request"],
+    queryFn: getMedicineRequestsList,
+  });
+
+  const { mutate: createMedicineRequestMutation } = useMutation({
+    mutationFn: createMedicineRequest,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["medicine-request"] });
+      enqueueSnackbar("Medicine Request Report Created Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Medicine Request Creation Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: updateMedicineRequestMutation } = useMutation({
+    mutationFn: updateMedicineRequest,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["medicine-request"] });
+      enqueueSnackbar("Medicine Request Report Updated Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Medicine Request Update Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: deleteMedicineRequestMutation } = useMutation({
+    mutationFn: deleteMedicineRequest,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["medicine-request"] });
+      enqueueSnackbar("Medicine Request Report Deleted Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Medicine Request Delete Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   return (
     <Stack>
@@ -178,24 +241,10 @@ function MedicineRequestTable() {
           }}
           onSubmit={(data) => {
             if (selectedRow) {
-              setMedicineRequests(
-                medicineRequests.map((request) =>
-                  request.id === data.id ? data : request
-                )
-              ); // Update the patient in the list if it already exists
-              enqueueSnackbar("Medicine Request Updated Successfully!", {
-                variant: "success",
-              });
+              updateMedicineRequestMutation(data);
             } else {
-              console.log("Adding new document", data);
-              setMedicineRequests([...medicineRequests, data]); // Add new medicine request to the list
-              enqueueSnackbar("Medicine Request Created Successfully!", {
-                variant: "success",
-              });
+              createMedicineRequestMutation(data);
             }
-            setSelectedRow(null);
-            setOpenViewDrawer(false);
-            setOpenAddOrEditDialog(false);
           }}
           defaultValues={selectedRow}
         />
@@ -214,9 +263,9 @@ function MedicineRequestTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            setMedicineRequests(
-              medicineRequests.filter((doc) => doc.id !== selectedRow.id)
-            );
+            if (selectedRow) {
+              deleteMedicineRequestMutation(selectedRow.id);
+            }
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);
