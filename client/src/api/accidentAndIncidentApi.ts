@@ -191,13 +191,18 @@ export async function getAccidentsList() {
 
 export const createAccident = async (accident: Accident) => {
   const formData = new FormData();
-
-  // Append each property of the accident object to the form data
   Object.keys(accident).forEach((key) => {
     const value = accident[key as keyof typeof accident];
+
     if (Array.isArray(value)) {
       value.forEach((item, index) => {
-        formData.append(`${key}[${index}]`, JSON.stringify(item));
+        if (key === 'witnesses' || key === 'effectedIndividuals') {
+          Object.keys(item).forEach((nestedKey) => {
+            formData.append(`${key}[${index}][${nestedKey}]`, item[nestedKey].toString());
+          });
+        } else {
+          formData.append(`${key}[${index}]`, JSON.stringify(item));
+        }
       });
     } else if (value instanceof Date) {
       formData.append(key, value.toISOString());
@@ -218,12 +223,18 @@ export const createAccident = async (accident: Accident) => {
 export const updateAccident = async (accident: Accident) => {
   const formData = new FormData();
 
-  // Append each property of the accident object to the form data
   Object.keys(accident).forEach((key) => {
     const value = accident[key as keyof typeof accident];
+
     if (Array.isArray(value)) {
       value.forEach((item, index) => {
-        formData.append(`${key}[${index}]`, JSON.stringify(item));
+        if (key === 'witnesses' || key === 'effectedIndividuals') {
+          Object.keys(item).forEach((nestedKey) => {
+            formData.append(`${key}[${index}][${nestedKey}]`, item[nestedKey].toString());
+          });
+        } else {
+          formData.append(`${key}[${index}]`, JSON.stringify(item));
+        }
       });
     } else if (value instanceof Date) {
       formData.append(key, value.toISOString());
@@ -232,6 +243,11 @@ export const updateAccident = async (accident: Accident) => {
     }
   });
 
+  console.log("🚀 Submitted FormData:");
+  for (const [key, value] of formData.entries()) {
+    console.log(`   ${key}:`, value);
+  }
+  
   const res = await axios.put(
     `/api/accidents/${accident.id}/update`,
     formData,
@@ -244,6 +260,7 @@ export const updateAccident = async (accident: Accident) => {
 
   return res.data;
 };
+
 
 export const deleteAccident = async (id: string) => {
   const res = await axios.delete(`/api/accidents/${id}/delete`);

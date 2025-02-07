@@ -20,7 +20,7 @@ import DatePickerComponent from "../../components/DatePickerComponent";
 import CustomButton from "../../components/CustomButton";
 import { useEffect } from "react";
 import { AccidentEffectedIndividual } from "../../api/accidentAndIncidentApi";
-import { genderOptions, personTypes } from "../../constants/accidentConstants";
+import { genderOptions, personTypes, industryExperience } from "../../constants/accidentConstants";
 
 type DialogProps = {
   open: boolean;
@@ -245,7 +245,7 @@ export default function AddOrEditPersonDialog({
             <Autocomplete
               {...register("industryExperience", { required: true })}
               size="small"
-              options={personTypes}
+              options={industryExperience}
               sx={{ flex: 1, margin: "0.5rem" }}
               defaultValue={defaultValues?.industryExperience}
               onChange={(e, value) => {
