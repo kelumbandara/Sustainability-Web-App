@@ -85,4 +85,35 @@ export const createDocumentRecord = async (document: Document) => {
 
 };
 
+export const updateDocumentRecord = async (document: Document) => {
+  const formData = new FormData();
+
+  Object.keys(document).forEach((key) => {
+    const value = document[key as keyof Document];
+
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        formData.append(`${key}[${index}]`, JSON.stringify(item));
+      });
+    } else if (value instanceof Date) {
+      formData.append(key, value.toISOString());
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  console.log(formData)
+  const res = await axios.post(`/documents/${document.id}/update`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return res.data;
+};
+
+export const deleteDocumentRecord = async (id: string) => {
+  const res = await axios.delete(`/api/documents/${id}/delete`);
+  return res.data;
+};
+
 export type Document = z.infer<typeof DocumentSchema>;

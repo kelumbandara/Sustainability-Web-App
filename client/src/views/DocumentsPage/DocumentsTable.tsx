@@ -23,7 +23,13 @@ import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import AddIcon from "@mui/icons-material/Add";
 import AddOrEditDocumentDialog from "./AddOrEditDocumentDialog";
 import { sampleDocuments } from "../../api/sampleData/documentData";
-import { Document,createDocumentRecord,getDocumentList } from "../../api/documentApi";
+import { 
+  Document,
+  createDocumentRecord,
+  getDocumentList,
+  updateDocumentRecord,
+  deleteDocumentRecord
+} from "../../api/documentApi";
 import { differenceInDays, format } from "date-fns";
 import ViewDocumentContent from "./ViewDocumentContent";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
@@ -53,7 +59,7 @@ function DocumentTable() {
     queryFn: getDocumentList,
   });
 
-  const { mutate: createHazardRiskMutation, } = useMutation({
+  const { mutate: createDocumentMutation, } = useMutation({
     mutationFn: createDocumentRecord,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documentRecords"] });
@@ -66,6 +72,42 @@ function DocumentTable() {
     },
     onError: () => {
       enqueueSnackbar(`Document Record Creation Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: updateDocumentMutation, } = useMutation({
+    mutationFn: updateDocumentRecord,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["documentRecords"] });
+      enqueueSnackbar("Document Record Updated Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Document Record Updation Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: deleteDocumentMutation } = useMutation({
+    mutationFn: deleteDocumentRecord,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["documentRecords"] });
+      enqueueSnackbar("Document Records Deleted Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Documwnt Delete Delete Failed`, {
         variant: "error",
       });
     },
@@ -229,15 +271,16 @@ function DocumentTable() {
           onSubmit={(data) => {
             if (selectedRow) {
               console.log("Updating document", data);
+              updateDocumentMutation(data)
               // setDocuments(
               //   documents.map((doc) => (doc.id === data.id ? data : doc))
               // ); // Update the document in the list if it already exists
-              enqueueSnackbar("Document Details Updated Successfully!", {
-                variant: "success",
-              });
+              // enqueueSnackbar("Document Details Updated Successfully!", {
+              //   variant: "success",
+              // });
             } else {
               console.log("Adding new document", data);
-              createHazardRiskMutation(data)
+              createDocumentMutation(data)
               // setDocuments([...documents, data]); // Add new document to the list
               // enqueueSnackbar("Document Created Successfully!", {
               //   variant: "success",
@@ -265,14 +308,15 @@ function DocumentTable() {
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
             // setDocuments(documents.filter((doc) => doc.id !== selectedRow.id));
+            deleteDocumentMutation(selectedRow.id)
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);
             setSelectedRow(null);
             setDeleteDialogOpen(false);
-            enqueueSnackbar("Document Deleted Successfully!", {
-              variant: "success",
-            });
+            // enqueueSnackbar("Document Deleted Successfully!", {
+            //   variant: "success",
+            // });
           }}
           handleReject={() => {
             setOpenViewDrawer(false);
