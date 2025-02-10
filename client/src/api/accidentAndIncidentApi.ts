@@ -241,14 +241,8 @@ export const updateAccident = async (accident: Accident) => {
     } else if (value !== null && value !== undefined) {
       formData.append(key, value.toString());
     }
-  });
-
-  console.log("🚀 Submitted FormData:");
-  for (const [key, value] of formData.entries()) {
-    console.log(`   ${key}:`, value);
-  }
-  
-  const res = await axios.put(
+  });  
+  const res = await axios.post(
     `/api/accidents/${accident.id}/update`,
     formData,
     {
@@ -260,7 +254,6 @@ export const updateAccident = async (accident: Accident) => {
 
   return res.data;
 };
-
 
 export const deleteAccident = async (id: string) => {
   const res = await axios.delete(`/api/accidents/${id}/delete`);

@@ -1,7 +1,7 @@
 import { AppBar, Box, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { DrawerContentItem } from "../../components/ViewDataDrawer";
 import { HazardAndRisk } from "../../api/hazardRiskApi";
-import { differenceInDays } from "date-fns";
+import { differenceInDays,format } from "date-fns";
 import { useState } from "react";
 import theme from "../../theme";
 import useIsMobile from "../../customHooks/useIsMobile";
@@ -83,7 +83,7 @@ function ViewHazardOrRiskContent({
           />
           <DrawerContentItem
             label="Reported Date"
-            value={hazardOrRisk.createdDate.toDateString()}
+              value={hazardOrRisk.createdDate ? format(new Date(hazardOrRisk.createdDate), "yyyy-MM-dd") : "N/A"}
             sx={{ flex: 1 }}
           />
         </Box>
@@ -203,7 +203,7 @@ function ViewHazardOrRiskContent({
         <DrawerContentItem label="Responsible" value={hazardOrRisk.assignee} />
         <DrawerContentItem
           label="Due date"
-          value={hazardOrRisk.dueDate.toDateString()}
+          value={hazardOrRisk.dueDate ? format(new Date(hazardOrRisk.dueDate), "yyyy-MM-dd") : "N/A"}
         />
         <DrawerContentItem
           label="Delayed Days"

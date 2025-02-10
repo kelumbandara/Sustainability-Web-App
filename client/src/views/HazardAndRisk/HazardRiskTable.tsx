@@ -9,6 +9,7 @@ import {
   Alert,
   Box,
   Button,
+  LinearProgress,
   Stack,
   Theme,
   Typography,
@@ -25,21 +26,29 @@ import { differenceInDays, format } from "date-fns";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
 import { sampleHazardRiskData } from "../../api/sampleData/hazardRiskData";
-import { HazardAndRisk, HazardAndRiskStatus } from "../../api/hazardRiskApi";
+import { 
+  HazardAndRisk, 
+  HazardAndRiskStatus, 
+  createHazardRisk, 
+  getHazardRiskList,
+  updateHazardRisk,
+  deleteHazardRisk  
+} from "../../api/hazardRiskApi";
 import ViewHazardOrRiskContent from "./ViewHazardRiskContent";
 import PermissionWrapper from "../../components/PermissionWrapper";
 import {
   defaultViewerPermissions,
   PermissionKeys,
 } from "../Administration/SectionList";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import queryClient from "../../state/queryClient";
 
 function HazardRiskTable() {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<HazardAndRisk>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
-  const [riskData, setRiskData] =
-    useState<HazardAndRisk[]>(sampleHazardRiskData);
+  // const [riskData, setRiskData] = useState<HazardAndRisk[]>(sampleHazardRiskData);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const userPermissionObject = defaultViewerPermissions;
@@ -52,6 +61,66 @@ function HazardRiskTable() {
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("md")
   );
+
+  const { data: riskData, isFetching: isRiskDataFetching } = useQuery({
+    queryKey: ["hazardRisks"],
+    queryFn: getHazardRiskList,
+  });
+
+  const { mutate: createHazardRiskMutation, } = useMutation({
+    mutationFn: createHazardRisk,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
+      enqueueSnackbar("Hazard Risk Report Created Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Hazard Risk Creation Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: updateHazardRiskMutation } = useMutation({
+    mutationFn: updateHazardRisk,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
+      enqueueSnackbar("Hazard Risk Report Update Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Hazard Risk Update Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: deleteHazardRiskMutation } = useMutation({
+    mutationFn: deleteHazardRisk,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
+      enqueueSnackbar("Hazard Risk Report Deleted Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Hazard Risk Delete Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
 
   return (
     <Stack>
@@ -92,12 +161,13 @@ function HazardRiskTable() {
                 setOpenAddOrEditDialog(true);
               }}
               disabled={
-                userPermissionObject[PermissionKeys.HAZARD_RISK_REGISTER_CREATE]
+               ! userPermissionObject[PermissionKeys.HAZARD_RISK_REGISTER_CREATE] //permission !
               }
             >
               Report a Hazard or Risk
             </Button>
           </Box>
+          {isRiskDataFetching && <LinearProgress sx={{ width: "100%" }} />}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -127,7 +197,7 @@ function HazardRiskTable() {
                     }}
                   >
                     <TableCell component="th" scope="row">
-                      {format(new Date(row.createdDate), "yyyy-MM-dd")}
+                      {row.createdDate ? format(new Date(row.createdDate), "yyyy-MM-dd") : "N/A"}
                     </TableCell>
                     <TableCell align="right">{row.id}</TableCell>
                     <TableCell align="right">{row.category}</TableCell>
@@ -201,18 +271,20 @@ function HazardRiskTable() {
           onSubmit={(data) => {
             if (selectedRow) {
               console.log("Updating document", data);
-              setRiskData(
-                riskData.map((risk) => (risk.id === data.id ? data : risk))
-              ); // Update the document in the list if it already exists
-              enqueueSnackbar("Details Updated Successfully!", {
-                variant: "success",
-              });
+              updateHazardRiskMutation(data)
+              // setRiskData(
+              //   riskData.map((risk) => (risk.id === data.id ? data : risk))
+              // ); // Update the document in the list if it already exists
+              // enqueueSnackbar("Details Updated Successfully!", {
+              //   variant: "success",
+              // });
             } else {
               console.log("Adding new hazard/risk", data);
-              setRiskData([...riskData, data]); // Add new document to the list
-              enqueueSnackbar("Hazard/Risk Created Successfully!", {
-                variant: "success",
-              });
+              // setRiskData([...riskData, data]); // Add new document to the list
+              createHazardRiskMutation(data)
+              // enqueueSnackbar("Hazard/Risk Created Successfully!", {
+              //   variant: "success",
+              // });
             }
             setSelectedRow(null);
             setOpenViewDrawer(false);
@@ -235,13 +307,14 @@ function HazardRiskTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            setRiskData(riskData.filter((doc) => doc.id !== selectedRow.id));
+            // setRiskData(riskData.filter((doc) => doc.id !== selectedRow.id));
+            deleteHazardRisk(selectedRow.id);
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);
             setSelectedRow(null);
             setDeleteDialogOpen(false);
-            enqueueSnackbar("Record Deleted Successfully!", {
+            enqueueSnackbar("Hazard Risk Record Deleted Successfully!", {
               variant: "success",
             });
           }}

@@ -105,7 +105,7 @@ export default function AddOrEditHazardRiskDialog({
   const handleCreateDocument = (data: HazardAndRisk) => {
     const submitData: Partial<HazardAndRisk> = data;
     submitData.id = defaultValues?.id ?? uuidv4();
-    submitData.createdDate = new Date();
+    // submitData.createdDate = new Date();
     submitData.createdByUser = sampleAssignees[0].name;
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
     onSubmit(submitData as HazardAndRisk);
@@ -605,7 +605,7 @@ export default function AddOrEditHazardRiskDialog({
                   return (
                     <DatePickerComponent
                       onChange={(e) => field.onChange(e)}
-                      value={field.value}
+                      value={field.value ? new Date(field.value) : undefined}
                       label="Due Date"
                       error={errors?.dueDate ? "Required" : ""}
                     />

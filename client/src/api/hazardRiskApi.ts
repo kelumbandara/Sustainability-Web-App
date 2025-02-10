@@ -1,4 +1,5 @@
 import { z } from "zod";
+import axios from "axios";
 
 export enum CategoryType {
   HEALTH_AND_HSE_MANAGEMENT = "Health and HSE Management",
@@ -208,3 +209,71 @@ export const HazardAndRiskSchema = z.object({
 });
 
 export type HazardAndRisk = z.infer<typeof HazardAndRiskSchema>;
+
+export async function getHazardRiskList() {
+  const res = await axios.get("/api/hazard-and-risk");
+  return res.data;
+}
+
+export const createHazardRisk = async (hazardRisk: HazardAndRisk) => {
+  const formData = new FormData();
+
+  Object.keys(hazardRisk).forEach((key) => {
+    const value = hazardRisk[key as keyof HazardAndRisk];
+
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        formData.append(`${key}[${index}]`, JSON.stringify(item));
+      });
+    } else if (value instanceof Date) {
+      formData.append(key, value.toISOString());
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  const res = await axios.post("/api/hazard-and-risk", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return res.data;
+
+};
+
+export const updateHazardRisk = async (hazardRisk: HazardAndRisk) => {
+  if (!hazardRisk.id) {
+    throw new Error("HazardAndRisk must have an ID for an update.");
+  }
+
+  const formData = new FormData();
+  Object.keys(hazardRisk).forEach((key) => {
+    const value = hazardRisk[key as keyof HazardAndRisk];
+
+    if (value instanceof File) {
+      formData.append(key, value);
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  try {
+    const response = await axios.post(
+      `/api/hazard-risk/${hazardRisk.id}/update`, 
+      formData, 
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error updating hazard risk:", error);
+    throw error;
+  }
+};
+
+export const deleteHazardRisk = async (id: string) => {
+  const res = await axios.delete(`/api/hazard-risk/${id}/delete`);
+  return res.data;
+};
+
