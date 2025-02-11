@@ -799,6 +799,43 @@ export default function AddOrEditMaternityRegisterDialog({
                       </TableBody>
                     </Table>
                   </TableContainer>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: isMobile ? "column" : "row",
+                      margin: "0.5rem",
+                      justifyContent: "flex-end",
+                      marginTop: "1.2rem",
+                    }}
+                  >
+                    <CustomButton
+                      variant="contained"
+                      sx={{
+                        backgroundColor: "var(--pallet-blue)",
+                      }}
+                      size="medium"
+                      onClick={() => {
+                        setActiveTab(1);
+                      }}
+                      endIcon={<ArrowBackIcon />}
+                    >
+                      Previous
+                    </CustomButton>
+                    <CustomButton
+                      variant="contained"
+                      sx={{
+                        backgroundColor: "var(--pallet-blue)",
+                        marginLeft: "0.5rem",
+                      }}
+                      size="medium"
+                      onClick={() => {
+                        setActiveTab(3);
+                      }}
+                      endIcon={<ArrowForwardIcon />}
+                    >
+                      Next
+                    </CustomButton>
+                  </Box>
                 </Stack>
               </TabPanel>
               <TabPanel value={activeTab} index={3} dir={theme.direction}>
@@ -909,6 +946,20 @@ export default function AddOrEditMaternityRegisterDialog({
                       endIcon={<ArrowBackIcon />}
                     >
                       Previous
+                    </CustomButton>{" "}
+                    <CustomButton
+                      variant="contained"
+                      sx={{
+                        backgroundColor: "var(--pallet-blue)",
+                        marginLeft: "0.5rem",
+                      }}
+                      size="medium"
+                      onClick={() => {
+                        setActiveTab(4);
+                      }}
+                      endIcon={<ArrowForwardIcon />}
+                    >
+                      Next
                     </CustomButton>
                   </Box>
                 </Stack>
@@ -1027,6 +1078,29 @@ export default function AddOrEditMaternityRegisterDialog({
                       </TableBody>
                     </Table>
                   </TableContainer>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: isMobile ? "column" : "row",
+                      margin: "0.5rem",
+                      justifyContent: "flex-end",
+                      marginTop: "1.2rem",
+                    }}
+                  >
+                    <CustomButton
+                      variant="contained"
+                      sx={{
+                        backgroundColor: "var(--pallet-blue)",
+                      }}
+                      size="medium"
+                      onClick={() => {
+                        setActiveTab(3);
+                      }}
+                      endIcon={<ArrowBackIcon />}
+                    >
+                      Previous
+                    </CustomButton>
+                  </Box>
                 </Stack>
               </TabPanel>
             </Box>
