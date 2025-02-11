@@ -221,7 +221,11 @@ export const createHazardRisk = async (hazardRisk: HazardAndRisk) => {
   Object.keys(hazardRisk).forEach((key) => {
     const value = hazardRisk[key as keyof HazardAndRisk];
 
-    if (Array.isArray(value)) {
+    if (key === "documents" && Array.isArray(value)) {
+      value.forEach((file, index) => {
+        formData.append(`documents[${index}]`, file);
+      });
+    } else if (Array.isArray(value)) {
       value.forEach((item, index) => {
         formData.append(`${key}[${index}]`, JSON.stringify(item));
       });
@@ -239,7 +243,6 @@ export const createHazardRisk = async (hazardRisk: HazardAndRisk) => {
   });
 
   return res.data;
-
 };
 
 export const updateHazardRisk = async (hazardRisk: HazardAndRisk) => {
@@ -260,8 +263,8 @@ export const updateHazardRisk = async (hazardRisk: HazardAndRisk) => {
 
   try {
     const response = await axios.post(
-      `/api/hazard-risk/${hazardRisk.id}/update`, 
-      formData, 
+      `/api/hazard-risk/${hazardRisk.id}/update`,
+      formData,
       { headers: { "Content-Type": "multipart/form-data" } }
     );
 
@@ -276,4 +279,3 @@ export const deleteHazardRisk = async (id: string) => {
   const res = await axios.delete(`/api/hazard-risk/${id}/delete`);
   return res.data;
 };
-
