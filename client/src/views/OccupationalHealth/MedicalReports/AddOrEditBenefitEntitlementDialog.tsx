@@ -118,41 +118,41 @@ export default function AddOrEditBenefitEntitlementDialog({
             }}
           >
             <Autocomplete
-              {...register("benefit_type", { required: true })}
+              {...register("benefitType", { required: true })}
               size="small"
               options={sampleMaternityBenefitTypes}
               sx={{ flex: 1, margin: "0.5rem" }}
-              defaultValue={defaultValues?.benefit_type}
+              defaultValue={defaultValues?.benefitType}
               onChange={(e, value) => {
                 console.log("e", e);
-                setValue("benefit_type", value);
+                setValue("benefitType", value);
               }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   required
-                  error={!!errors.benefit_type}
+                  error={!!errors.benefitType}
                   label="Benefit Type"
-                  name="benefit_type"
+                  name="benefitType"
                 />
               )}
             />
             <TextField
-              id="amount_value"
+              id="amountValue"
               label="Employee Id"
-              error={!!errors.amount_value}
+              error={!!errors.amountValue}
               size="small"
               sx={{ flex: 1, margin: "0.5rem" }}
-              {...register("amount_value", { required: true })}
+              {...register("amountValue", { required: true })}
             />
             <TextField
-              id="total_days_paid"
+              id="totalDaysPaid"
               label="Total Days Paid"
-              error={!!errors.total_days_paid}
+              error={!!errors.totalDaysPaid}
               type="number"
               size="small"
               sx={{ flex: 1, margin: "0.5rem" }}
-              {...register("total_days_paid", { required: true })}
+              {...register("totalDaysPaid", { required: true })}
             />
           </Box>
           <Box
@@ -162,9 +162,9 @@ export default function AddOrEditBenefitEntitlementDialog({
             }}
           >
             <TextField
-              id="amount_of_first_installment"
+              id="amountOfFirstInstallment"
               label="Amount of First Installment"
-              error={!!errors.amount_of_first_installment}
+              error={!!errors.amountOfFirstInstallment}
               type="number"
               size="small"
               sx={{
@@ -172,12 +172,12 @@ export default function AddOrEditBenefitEntitlementDialog({
                 margin: "0.5rem",
                 marginTop: isTablet ? "0.5rem" : "1.4rem",
               }}
-              {...register("amount_of_first_installment", { required: true })}
+              {...register("amountOfFirstInstallment", { required: true })}
             />
             <Controller
               control={control}
-              {...register("date_of_first_installment", { required: true })}
-              name={"date_of_first_installment"}
+              {...register("dateOfFirstInstallment", { required: true })}
+              name={"dateOfFirstInstallment"}
               render={({ field }) => {
                 return (
                   <Box sx={{ flex: 1, marginX: "0.5rem" }}>
@@ -186,7 +186,7 @@ export default function AddOrEditBenefitEntitlementDialog({
                       value={field.value}
                       label="Date of First Installment"
                       error={
-                        errors?.date_of_first_installment ? "Required" : ""
+                        errors?.dateOfFirstInstallment ? "Required" : ""
                       }
                     />
                   </Box>
@@ -194,9 +194,9 @@ export default function AddOrEditBenefitEntitlementDialog({
               }}
             />
             <TextField
-              id="amount_of_second_installment"
+              id="amountOfSecondInstallment"
               label="Amount of Second Installment"
-              error={!!errors.amount_of_second_installment}
+              error={!!errors.amountOfSecondInstallment}
               type="number"
               size="small"
               sx={{
@@ -204,7 +204,7 @@ export default function AddOrEditBenefitEntitlementDialog({
                 margin: "0.5rem",
                 marginTop: isTablet ? "0.5rem" : "1.4rem",
               }}
-              {...register("amount_of_second_installment")}
+              {...register("amountOfSecondInstallment")}
             />
           </Box>
 
@@ -216,22 +216,22 @@ export default function AddOrEditBenefitEntitlementDialog({
           >
             <Controller
               control={control}
-              {...register("date_of_second_installment")}
-              name={"date_of_second_installment"}
+              {...register("dateOfSecondInstallment")}
+              name={"dateOfSecondInstallment"}
               render={({ field }) => {
                 return (
                   <Box sx={{ flex: 1, marginX: "0.5rem" }}>
                     <DatePickerComponent
                       onChange={(e) => field.onChange(e)}
                       value={field.value}
-                      label="Date of First Installment"
+                      label="Date of Second Installment"
                     />
                   </Box>
                 );
               }}
             />
             <Autocomplete
-              {...register("if_benefit_received_someone_else", {
+              {...register("ifBenefitReceivedSomeoneElse", {
                 required: true,
               })}
               size="small"
@@ -241,33 +241,33 @@ export default function AddOrEditBenefitEntitlementDialog({
                 margin: "0.5rem",
                 marginTop: isTablet ? "0.5rem" : "1.4rem",
               }}
-              defaultValue={defaultValues?.if_benefit_received_someone_else}
+              defaultValue={defaultValues?.ifBenefitReceivedSomeoneElse}
               onChange={(e, value) => {
                 console.log("e", e);
-                setValue("if_benefit_received_someone_else", value);
+                setValue("ifBenefitReceivedSomeoneElse", value);
               }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   required
-                  error={!!errors.if_benefit_received_someone_else}
+                  error={!!errors.ifBenefitReceivedSomeoneElse}
                   label="If Benefit Received Someone Else"
-                  name="if_benefit_received_someone_else"
+                  name="ifBenefitReceivedSomeoneElse"
                 />
               )}
             />
             <TextField
               required
-              id="beneficiary_name"
+              id="beneficiaryName"
               label="Beneficiary Name"
-              error={!!errors.beneficiary_name}
+              error={!!errors.beneficiaryName}
               size="small"
               sx={{
                 flex: 1,
                 margin: "0.5rem",
                 marginTop: isTablet ? "0.5rem" : "1.4rem",
               }}
-              {...register("beneficiary_name", { required: true })}
+              {...register("beneficiaryName", { required: true })}
             />
           </Box>
 
@@ -280,27 +280,27 @@ export default function AddOrEditBenefitEntitlementDialog({
           >
             <TextField
               required
-              id="beneficiary_address"
+              id="beneficiaryAddress"
               label="Beneficiary Address"
-              error={!!errors.beneficiary_address}
+              error={!!errors.beneficiaryAddress}
               size="small"
               sx={{ flex: 1, marginX: "0.5rem", marginTop: "1.3rem" }}
-              {...register("beneficiary_address", { required: true })}
+              {...register("beneficiaryAddress", { required: true })}
             />
             <TextField
               required
-              id="beneficiary_total_amount"
+              id="beneficiaryTotalAmount"
               label="Beneficiary Total Amount"
-              error={!!errors.beneficiary_total_amount}
+              error={!!errors.beneficiaryTotalAmount}
               type="number"
               size="small"
               sx={{ flex: 1, marginX: "0.5rem", marginTop: "1.3rem" }}
-              {...register("beneficiary_total_amount", { required: true })}
+              {...register("beneficiaryTotalAmount", { required: true })}
             />
             <Controller
               control={control}
-              {...register("beneficiary_date", { required: true })}
-              name={"beneficiary_date"}
+              {...register("beneficiaryDate", { required: true })}
+              name={"beneficiaryDate"}
               render={({ field }) => {
                 return (
                   <Box sx={{ flex: 1, marginX: "0.5rem" }}>
@@ -308,7 +308,7 @@ export default function AddOrEditBenefitEntitlementDialog({
                       onChange={(e) => field.onChange(e)}
                       value={field.value}
                       label="Beneficiary Date"
-                      error={errors?.beneficiary_date ? "Required" : ""}
+                      error={errors?.beneficiaryDate ? "Required" : ""}
                     />
                   </Box>
                 );

@@ -1,14 +1,16 @@
 import { MedicineRequest } from "../medicineRequestApi";
 
 export const sampleMedicines = [
-  "Biogesic",
-  "Neozep",
-  "Solmux",
-  "Alaxan",
-  "Bioflu",
-  "Dolfenal",
-  "Decolgen",
+  { "id": "1", "medicineName": "Biogesic" },
+  { "id": "2", "medicineName": "Neozep" },
+  { "id": "3", "medicineName": "Solmux" },
+  { "id": "4", "medicineName": "Alaxan" },
+  { "id": "5", "medicineName": "Bioflu" },
+  { "id": "6", "medicineName": "Dolfenal" },
+  { "id": "7", "medicineName": "Decolgen" }
 ];
+
+  
 
 export const medicineRequestSampleData: MedicineRequest[] = [
   {

@@ -79,7 +79,7 @@ function ViewPatientContent({ patient }: { patient: Patient }) {
           />
           <DrawerContentItem
             label="Check in Date & Time"
-            value={format(patient.check_in_date, "dd/MM/yyyy hh:mm a")}
+            value={format(patient.checkInDate, "dd/MM/yyyy hh:mm a")}
             sx={{ flex: 1 }}
           />
         </Box>
@@ -147,12 +147,12 @@ function ViewPatientContent({ patient }: { patient: Patient }) {
             >
               <DrawerContentItem
                 label="Employee ID"
-                value={patient.employee_id}
+                value={patient.employeeId}
                 sx={{ flex: 1 }}
               />
               <DrawerContentItem
                 label="Employee Name"
-                value={patient.employee_name}
+                value={patient.employeeName}
                 sx={{ flex: 1 }}
               />
             </Box>
@@ -206,13 +206,13 @@ function ViewPatientContent({ patient }: { patient: Patient }) {
               />
               <DrawerContentItem
                 label="Sub Department"
-                value={patient.sub_department}
+                value={patient.subDepartment}
                 sx={{ flex: 1 }}
               />
             </Box>
             <DrawerContentItem
               label="Work Status"
-              value={patient.work_status}
+              value={patient.workStatus}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
@@ -231,7 +231,7 @@ function ViewPatientContent({ patient }: { patient: Patient }) {
           />
           <DrawerContentItem
             label="Severity Level"
-            value={patient.severity_level}
+            value={patient.severityLevel}
             sx={{ flex: 1 }}
           />
           <DrawerContentItem
@@ -242,12 +242,12 @@ function ViewPatientContent({ patient }: { patient: Patient }) {
           />
           <DrawerContentItem
             label="Required Follow Up"
-            value={patient.follow_up_status ? "Yes" : "No"}
+            value={patient.followUpStatus ? "Yes" : "No"}
             sx={{ flex: 1 }}
           />
           <DrawerContentItem
             label="Refer to Another Hospital"
-            value={patient.refer_to_another_hospital ? "Yes" : "No"}
+            value={patient.referToAnotherHospital ? "Yes" : "No"}
             sx={{ flex: 1 }}
           />
         </TabPanel>
@@ -274,28 +274,28 @@ function ViewPatientContent({ patient }: { patient: Patient }) {
           //   " " +
           //   patient.consulting_doctor?.last_name
           // }
-          value={patient.consulting_doctor}
+          value={patient.consultingDoctor}
         />
         <Typography variant="body1" sx={{ marginTop: "1rem" }}>
           Preliminary Checkup
         </Typography>
         <DrawerContentItem
           label="Body Temperature"
-          value={patient.body_temperature + " °C"}
+          value={patient.bodyTemperature + " °C"}
         />
         <DrawerContentItem label="Weight" value={patient.weight + " kg"} />
         <DrawerContentItem label="Height" value={patient.height + " cm"} />
         <DrawerContentItem
           label="Blood Pressure"
-          value={patient.blood_pressure + " mmHg"}
+          value={patient.bloodPressure + " mmHg"}
         />
         <DrawerContentItem
           label="Random Blood Sugar"
-          value={patient.random_blood_sugar + " mg/dL"}
+          value={patient.randomBloodSugar + " mg/dL"}
         />
         <DrawerContentItem
           label="Clinical Division"
-          value={patient.clinic_division}
+          value={patient.clinicDivision}
         />
         <DrawerContentItem
           label="Body Mass Index (BMI)"
