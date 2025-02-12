@@ -41,6 +41,7 @@ import {
   fetchMainCategory
 } from "../../api/categoryApi";
 import { useQuery } from "@tanstack/react-query";
+import useCurrentUser from "../../hooks/useCurrentUser";
 
 type DialogProps = {
   open: boolean;
@@ -91,6 +92,7 @@ export default function AddOrEditHazardRiskDialog({
 
   const category = watch("category");
   const subCategory = watch("subCategory");
+  const { user } = useCurrentUser();
 
   const { data: categoryData, isFetching: isCategoryDataFetching } = useQuery({
     queryKey: ["categories"],
@@ -129,6 +131,7 @@ export default function AddOrEditHazardRiskDialog({
   const handleCreateDocument = (data: HazardAndRisk) => {
     const submitData: Partial<HazardAndRisk> = data;
     submitData.id = defaultValues?.id ?? uuidv4();
+    submitData.createdByUser = user.id
     // submitData.createdDate = new Date();
     submitData.createdByUser = sampleAssignees[0].name;
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
