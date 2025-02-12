@@ -210,10 +210,10 @@ function HazardRiskTable() {
                       {row.dueDate
                         ? (() => {
                           const daysRemaining = differenceInDays(new Date(), row.dueDate);
-                          if (daysRemaining < 0) {
+                          if (daysRemaining > 0) {
                             return "No Remains";  // No remaining days
                           }
-                          return `${daysRemaining}`;  // Show remaining days if positive
+                          return `${Math.abs(daysRemaining)}`;  // Show remaining days if positive
                         })()
                         : null}  {/* Show nothing if no due date */}
                     </TableCell>
@@ -221,11 +221,11 @@ function HazardRiskTable() {
                     <TableCell align="center">
                       {row.dueDate
                         ? (() => {
-                          const daysRemaining = differenceInDays(new Date(), row.dueDate);
-                          if (daysRemaining >= 0) {
+                          const daysDelay = differenceInDays(new Date(), row.dueDate);
+                          if (daysDelay <= 0) {
                             return "No Delays";  // No delayed days
                           }
-                          return `${Math.abs(daysRemaining)}`;  // Show delayed days if negative
+                          return `${Math.abs(daysDelay)}`;  // Show delayed days if negative
                         })()
                         : null}  {/* Show nothing if no due date */}
                     </TableCell>

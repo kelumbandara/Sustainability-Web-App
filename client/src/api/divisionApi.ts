@@ -8,7 +8,7 @@ export const divisionSchema = z.object({
 
 export type divisionSchema = z.infer<typeof divisionSchema>;
 
-export async function fetchDepartmentData() {
+export async function fetchDivision() {
   const res = await axios.get("/api/hshr-divisions");
   return res.data;
 }

@@ -218,7 +218,10 @@ export async function getHazardRiskList() {
 }
 
 export const createHazardRisk = async (hazardRisk: HazardAndRisk) => {
+  const token = localStorage.getItem("token") || "";
   const formData = new FormData();
+
+  formData.append("token", token);
 
   Object.keys(hazardRisk).forEach((key) => {
     const value = hazardRisk[key as keyof HazardAndRisk];
@@ -239,10 +242,10 @@ export const createHazardRisk = async (hazardRisk: HazardAndRisk) => {
       "Content-Type": "multipart/form-data",
     },
   });
-
+  
   return res.data;
-
 };
+
 
 export const updateHazardRisk = async (hazardRisk: HazardAndRisk) => {
   if (!hazardRisk.id) {

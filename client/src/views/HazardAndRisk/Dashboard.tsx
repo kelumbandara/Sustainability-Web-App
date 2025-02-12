@@ -246,7 +246,7 @@ function HazardAndRiskDashboard() {
           <DashboardCard
             title="Total"
             titleIcon={<FunctionsIcon fontSize="small" />}
-            value={10}
+            value={12}
             subDescription="10% From previous period"
           />
         </Box>

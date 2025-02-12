@@ -62,6 +62,8 @@ import RichTextComponent from "../../components/RichTextComponent";
 import AddOrEditWitnessDialog from "./AddOrEditWitnessDialog";
 import AddOrEditPersonDialog from "./AddOrEditPersonDialog";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useQuery } from "@tanstack/react-query";
+import { fetchDivision } from "../../api/divisionApi";
 
 type DialogProps = {
   open: boolean;
@@ -153,6 +155,11 @@ export default function AddOrEditAccidentDialog({
     reset();
     setFiles([]);
   };
+
+  const { data: divisionData, isFetching: isCategoryDataFetching } = useQuery({
+    queryKey: ["divisions"],
+    queryFn: fetchDivision,
+  });
 
   const handleCreateDocument = (data: Accident) => {
     const submitData: Partial<Accident> = data;
