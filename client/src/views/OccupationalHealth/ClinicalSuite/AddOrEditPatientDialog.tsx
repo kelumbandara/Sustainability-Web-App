@@ -342,7 +342,7 @@ export default function AddOrEditPatientDialog({
                   return (
                     <DatePickerComponent
                       onChange={(e) => field.onChange(e)}
-                      value={field.value}
+                      value={field.value ? new Date(field.value) : undefined}
                       label="Check In Date"
                       error={errors?.checkInDate ? "Required" : ""}
                     />
@@ -351,15 +351,15 @@ export default function AddOrEditPatientDialog({
               />
               <Controller
                 control={control}
-                {...register("checkIn", { required: true })}
-                name={"checkIn"}
+                {...register("checkInTime", { required: true })}
+                name={"checkInTime"}
                 render={({ field }) => {
                   return (
                     <TimePickerComponent
                       onChange={(e) => field.onChange(e)}
-                      value={field.value}
+                      value={field.value ? new Date(field.value) : undefined}
                       label="Check In Time"
-                      error={errors?.checkIn ? "Required" : ""}
+                      error={errors?.checkInTime ? "Required" : ""}
                     />
                   );
                 }}

@@ -62,12 +62,12 @@ export default function AddOrEditMedicineRequestDialog({
   const handleCreateDocument = (data: MedicineRequest) => {
     const submitData: Partial<MedicineRequest> = data;
     submitData.id = defaultValues?.id ?? uuidv4();
-    submitData.reference_number = defaultValues?.reference_number ?? uuidv4();
-    submitData.request_date =
-      defaultValues?.request_date ?? new Date().toDateString();
+    submitData.referenceNumber = defaultValues?.referenceNumber ?? uuidv4();
+    submitData.requestDate =
+      defaultValues?.requestDate ?? new Date().toDateString();
     submitData.status = defaultValues?.status ?? "Approved";
-    submitData.created_at =
-      defaultValues?.created_at ?? new Date().toDateString();
+    submitData.createdAt =
+      defaultValues?.createdAt ?? new Date().toDateString();
 
     onSubmit(submitData as MedicineRequest);
     resetForm();
@@ -133,18 +133,18 @@ export default function AddOrEditMedicineRequestDialog({
             }}
           >
             <Autocomplete
-              {...register("medicine_name", { required: true })}
+              {...register("medicineName", { required: false })}
               size="small"
-              options={sampleMedicines}
-              defaultValue={defaultValues?.medicine_name}
+              options={sampleMedicines.map((medicine) => medicine.medicineName)}
+              defaultValue={defaultValues?.medicineName}
               sx={{ flex: 1, margin: "0.5rem" }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   required
-                  error={!!errors.medicine_name}
+                  error={!!errors.medicineName}
                   label="Medicine Name"
-                  name="medicine_name"
+                  name="medicineName"
                 />
               )}
             />
@@ -152,10 +152,10 @@ export default function AddOrEditMedicineRequestDialog({
               required
               id="generic_name"
               label="Generic Name"
-              error={!!errors.generic_name}
+              error={!!errors.genericName}
               size="small"
               sx={{ flex: 1, margin: "0.5rem" }}
-              {...register("generic_name", { required: true })}
+              {...register("genericName", { required: true })}
             />
             <Autocomplete
               {...register("division", { required: true })}
@@ -175,13 +175,13 @@ export default function AddOrEditMedicineRequestDialog({
             />
             <TextField
               required
-              id="requested_quantity"
+              id="requestQuantity"
               label="Requested Quantity"
-              error={!!errors.requested_quantity}
+              error={!!errors.requestQuantity}
               type="number"
               size="small"
               sx={{ flex: 1, margin: "0.5rem" }}
-              {...register("requested_quantity", { required: true })}
+              {...register("requestQuantity", { required: true })}
             />
             <Autocomplete
               {...register("approver", { required: true })}

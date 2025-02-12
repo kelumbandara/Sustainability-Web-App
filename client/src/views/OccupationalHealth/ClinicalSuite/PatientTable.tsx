@@ -52,14 +52,14 @@ function PatientTable() {
   );
 
   const { data: patientData, isFetching: isPatientDataFetching } = useQuery({
-    queryKey: ["hazardRisks"],
+    queryKey: ["patients"],
     queryFn: getPatientList,
   });
 
   const { mutate: createPatientMutation, } = useMutation({
     mutationFn: createPatient,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
+      queryClient.invalidateQueries({ queryKey: ["patients"] });
       enqueueSnackbar("Patient Report Created Successfully!", {
         variant: "success",
       });
@@ -77,7 +77,7 @@ function PatientTable() {
   const { mutate: updatePatientMutation, } = useMutation({
     mutationFn: updatePatient,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
+      queryClient.invalidateQueries({ queryKey: ["patients"] });
       enqueueSnackbar("Patient Report Update Successfully!", {
         variant: "success",
       });
@@ -95,7 +95,7 @@ function PatientTable() {
   const { mutate: deletePatientMutation, } = useMutation({
     mutationFn: deletePatient,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
+      queryClient.invalidateQueries({ queryKey: ["patients"] });
       enqueueSnackbar("Patient Report Delete Successfully!", {
         variant: "success",
       });

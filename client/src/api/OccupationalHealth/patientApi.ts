@@ -66,7 +66,7 @@ export const PatientSchema = z.object({
   age: z.number(),
   subDepartment: z.string(),
   symptoms: z.string(),
-  checkIn: z.date(),
+  checkInTime: z.date(),
   checkOut: z.date().optional(),
   checkInDate: z.date(),
   checkOutDate: z.date().optional(),

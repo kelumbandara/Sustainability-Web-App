@@ -99,18 +99,18 @@ const AddOrEditDocumentDialog = ({
           }}
         >
           <Autocomplete
-            {...register("document_type", { required: true })}
+            {...register("documentType", { required: true })}
             size="small"
             options={["Pregnancy Certificate", "Fitness Certificate"]}
-            defaultValue={defaultDocument?.document_type || ""}
+            defaultValue={defaultDocument?.documentType || ""}
             sx={{ flex: 1 }}
             renderInput={(params) => (
               <TextField
                 {...params}
                 required
-                error={!!errors.document_type}
+                error={!!errors.documentType}
                 label="Document Type"
-                name="document_type"
+                name="documentType"
               />
             )}
           />

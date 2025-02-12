@@ -118,19 +118,19 @@ function MaternityRegisterTable() {
                     }}
                   >
                     <TableCell component="th" scope="row">
-                      {row.employee_id}
+                      {row.employeeId}
                     </TableCell>
                     <TableCell align="right">{row.name}</TableCell>
-                    <TableCell align="right">{row.application_id}</TableCell>
+                    <TableCell align="right">{row.applicationId}</TableCell>
                     <TableCell align="right">
-                      {row?.application_date
-                        ? format(new Date(row.application_date), "yyyy-MM-dd")
+                      {row?.applicationDate
+                        ? format(new Date(row.applicationDate), "yyyy-MM-dd")
                         : "--"}
                     </TableCell>
-                    <TableCell align="right">{row?.leave_status}</TableCell>
+                    <TableCell align="right">{row?.leaveStatus}</TableCell>
                     <TableCell align="right">
-                      {row?.rejoining_date
-                        ? format(new Date(row.rejoining_date), "yyyy-MM-dd")
+                      {row?.rejoiningDate
+                        ? format(new Date(row.rejoiningDate), "yyyy-MM-dd")
                         : "--"}
                     </TableCell>
                     <TableCell align="right">{row?.status}</TableCell>
