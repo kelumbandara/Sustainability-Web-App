@@ -26,11 +26,15 @@ import ViewDataDrawer, {
   DrawerHeader,
 } from "../../../components/ViewDataDrawer";
 import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
-import { Patient } from "../../../api/OccupationalHealth/patientApi";
-import { samplePatientData } from "../../../api/sampleData/patientData";
+import {
+  createPatient,
+  deletePatient,
+  getPatientList,
+  Patient,
+  updatePatient,
+} from "../../../api/OccupationalHealth/patientApi";
 import ViewPatientContent from "./ViewPatientContent";
 import AddOrEditPatientDialog from "./AddOrEditPatientDialog";
-import { getPatientList,createPatient,updatePatient,deletePatient } from "../../../api/OccupationalHealth/patientApi";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../../state/queryClient";
 
@@ -56,7 +60,7 @@ function PatientTable() {
     queryFn: getPatientList,
   });
 
-  const { mutate: createPatientMutation, } = useMutation({
+  const { mutate: createPatientMutation } = useMutation({
     mutationFn: createPatient,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["patients"] });
@@ -74,7 +78,7 @@ function PatientTable() {
     },
   });
 
-  const { mutate: updatePatientMutation, } = useMutation({
+  const { mutate: updatePatientMutation } = useMutation({
     mutationFn: updatePatient,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["patients"] });
@@ -92,7 +96,7 @@ function PatientTable() {
     },
   });
 
-  const { mutate: deletePatientMutation, } = useMutation({
+  const { mutate: deletePatientMutation } = useMutation({
     mutationFn: deletePatient,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["patients"] });
@@ -192,9 +196,7 @@ function PatientTable() {
                         ? format(new Date(row.checkInDate), "yyyy-MM-dd")
                         : "--"}
                     </TableCell>
-                    <TableCell align="right">
-                      {row?.consultingDoctor}
-                    </TableCell>
+                    <TableCell align="right">{row?.consultingDoctor}</TableCell>
                     <TableCell align="right">{row.disease ?? "--"}</TableCell>
                     <TableCell align="right">
                       {row?.checkOutDate
@@ -249,24 +251,10 @@ function PatientTable() {
           }}
           onSubmit={(data) => {
             if (selectedRow) {
-              updatePatientMutation(data)
-              // setPatients(
-              //   patients.map((doc) => (doc.id === data.id ? data : doc))
-              // ); // Update the patient in the list if it already exists
-              // enqueueSnackbar("Patient Details Updated Successfully!", {
-              //   variant: "success",
-              // });
+              updatePatientMutation(data);
             } else {
-              console.log("Adding new patient", data);
-              createPatientMutation(data)
-              // setPatients([...patients, data]); // Add new patient to the list
-              // enqueueSnackbar("Patient Created Successfully!", {
-              //   variant: "success",
-              // });
+              createPatientMutation(data);
             }
-            setSelectedRow(null);
-            setOpenViewDrawer(false);
-            setOpenAddOrEditDialog(false);
           }}
           defaultValues={selectedRow}
         />
@@ -285,8 +273,7 @@ function PatientTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            // setPatients(patients.filter((doc) => doc.id !== selectedRow.id));
-            deletePatientMutation(selectedRow.id)
+            deletePatientMutation(selectedRow.id);
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);

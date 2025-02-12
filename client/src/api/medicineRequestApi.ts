@@ -86,5 +86,3 @@ export const deleteMedicine = async (id: string) => {
   const res = await axios.delete(`/api/medicine-request/${id}/delete`);
   return res.data;
 };
-
-

@@ -1,3 +1,4 @@
+import axios from "axios";
 import { z } from "zod";
 import axios from "axios";
 
@@ -103,7 +104,6 @@ export const PatientSchema = z.object({
   consultingDoctor: z.string(),
   createdBy: z.string(),
 });
-
 
 export type Patient = z.infer<typeof PatientSchema>;
 

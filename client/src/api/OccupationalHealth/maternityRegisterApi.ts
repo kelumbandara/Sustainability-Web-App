@@ -1,3 +1,4 @@
+import axios from "axios";
 import { z } from "zod";
 
 export const benefitAndEntitlementsSchema = z.object({
@@ -40,7 +41,7 @@ export enum LeaveStatus {
 
 export type MedicalDocument = z.infer<typeof medicalDocumentSchema>;
 
-export const maternityRegisterSchema = z.object({
+export const MaternityRegisterSchema = z.object({
   id: z.string(),
   employeeId: z.string(),
   name: z.string(),
@@ -73,4 +74,74 @@ export const maternityRegisterSchema = z.object({
   division: z.string().optional(),
 });
 
-export type MaternityRegister = z.infer<typeof maternityRegisterSchema>;
+export type MaternityRegister = z.infer<typeof MaternityRegisterSchema>;
+
+export async function getMaternityRegistersList() {
+  const res = await axios.get("/api/maternity-registers");
+  return res.data;
+}
+
+export const createMaternityRegister = async (
+  maternityRegister: MaternityRegister
+) => {
+  const formData = new FormData();
+
+  // Append each property of the maternity Register object to the form data
+  Object.keys(maternityRegister).forEach((key) => {
+    const value = maternityRegister[key as keyof typeof maternityRegister];
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        formData.append(`${key}[${index}]`, JSON.stringify(item));
+      });
+    } else if (value instanceof Date) {
+      formData.append(key, value.toISOString());
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  const res = await axios.post("/api/maternity-registers", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return res.data;
+};
+
+export const updateMaternityRegister = async (
+  maternityRegister: MaternityRegister
+) => {
+  const formData = new FormData();
+
+  // Append each property of the maternity Register object to the form data
+  Object.keys(maternityRegister).forEach((key) => {
+    const value = maternityRegister[key as keyof typeof maternityRegister];
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        formData.append(`${key}[${index}]`, JSON.stringify(item));
+      });
+    } else if (value instanceof Date) {
+      formData.append(key, value.toISOString());
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  const res = await axios.put(
+    `/api/maternity-registers/${maternityRegister.id}/update`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return res.data;
+};
+
+export const deleteMaternityRegister = async (id: string) => {
+  const res = await axios.delete(`/api/maternity-registers/${id}/delete`);
+  return res.data;
+};

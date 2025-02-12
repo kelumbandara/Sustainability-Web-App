@@ -27,10 +27,14 @@ import ViewDataDrawer, {
 } from "../../../../components/ViewDataDrawer";
 import DeleteConfirmationModal from "../../../../components/DeleteConfirmationModal";
 import { MedicineRequest } from "../../../../api/medicineRequestApi";
-import { medicineRequestSampleData } from "../../../../api/sampleData/medicineRequestSampleData";
 import AddOrEditMedicineRequestDialog from "./AddOrEditMedicineRequestDialog";
 import ViewMedicineRequestContent from "./ViewMedicineRequestContent";
-import { getMedicineList,createMedicine,updateMedicine,deleteMedicine } from "../../../../api/medicineRequestApi";
+import {
+  getMedicineList,
+  createMedicine,
+  updateMedicine,
+  deleteMedicine,
+} from "../../../../api/medicineRequestApi";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../../../state/queryClient";
 
@@ -58,7 +62,7 @@ function MedicineRequestTable() {
     queryFn: getMedicineList,
   });
 
-  const { mutate: createMedicineMutation, } = useMutation({
+  const { mutate: createMedicineMutation } = useMutation({
     mutationFn: createMedicine,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["medicines"] });
@@ -76,7 +80,7 @@ function MedicineRequestTable() {
     },
   });
 
-  const { mutate: updateMedicineMutation, } = useMutation({
+  const { mutate: updateMedicineMutation } = useMutation({
     mutationFn: updateMedicine,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["medicines"] });
@@ -94,7 +98,7 @@ function MedicineRequestTable() {
     },
   });
 
-  const { mutate: deleteMedicineMutation, } = useMutation({
+  const { mutate: deleteMedicineMutation } = useMutation({
     mutationFn: deleteMedicine,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["medicines"] });
@@ -242,26 +246,10 @@ function MedicineRequestTable() {
           }}
           onSubmit={(data) => {
             if (selectedRow) {
-              updateMedicineMutation(data)
-              // setMedicineRequests(
-              //   medicineRequests.map((request) =>
-              //     request.id === data.id ? data : request
-              //   )
-              // ); // Update the patient in the list if it already exists
-              // enqueueSnackbar("Medicine Request Updated Successfully!", {
-              //   variant: "success",
-              // });
+              updateMedicineMutation(data);
             } else {
-              console.log("Adding new document", data);
-              createMedicineMutation(data)
-              // setMedicineRequests([...medicineRequests, data]); // Add new medicine request to the list
-              // enqueueSnackbar("Medicine Request Created Successfully!", {
-              //   variant: "success",
-              // });
+              createMedicineMutation(data);
             }
-            setSelectedRow(null);
-            setOpenViewDrawer(false);
-            setOpenAddOrEditDialog(false);
           }}
           defaultValues={selectedRow}
         />
@@ -280,10 +268,9 @@ function MedicineRequestTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            deleteMedicineMutation(selectedRow.id)
-            // setMedicineRequests(
-            //   // medicineRequests.filter((doc) => doc.id !== selectedRow.id)
-            // );
+            if (selectedRow) {
+              deleteMedicineMutation(selectedRow.id);
+            }
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);
