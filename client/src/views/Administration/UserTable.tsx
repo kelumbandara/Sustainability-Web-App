@@ -20,11 +20,12 @@ import { useState } from "react";
 import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
-import { User } from "../../api/userApi";
+import { getAllUsers, User } from "../../api/userApi";
 import { sampleUsers } from "../../api/sampleData/usersSampleData";
 import ViewUserContent from "./ViewUserContent";
 import EditUserRoleDialog from "./EditUserRoleDialog";
 import { defaultViewerPermissions, PermissionKeys } from "./SectionList";
+import { useQuery } from "@tanstack/react-query";
 
 function UserTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -35,6 +36,11 @@ function UserTable() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const userPermissionObject = defaultViewerPermissions;
+
+  const { data: users, isFetching: isFetchingRoles } = useQuery({
+    queryKey: ["users"],
+    queryFn: getAllUsers,
+  });
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },

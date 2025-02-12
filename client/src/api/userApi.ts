@@ -88,3 +88,8 @@ export async function validateUser() {
   const res = await axios.get("/api/user");
   return res.data;
 }
+
+export async function getAllUsers() {
+  const res = await axios.get("/api/all-users");
+  return res.data;
+}
