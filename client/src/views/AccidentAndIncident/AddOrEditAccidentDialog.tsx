@@ -64,6 +64,7 @@ import AddOrEditPersonDialog from "./AddOrEditPersonDialog";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../api/divisionApi";
+import { fetchDepartmentData } from "../../api/departmentApi";
 
 type DialogProps = {
   open: boolean;
@@ -159,6 +160,11 @@ export default function AddOrEditAccidentDialog({
   const { data: divisionData, isFetching: isCategoryDataFetching } = useQuery({
     queryKey: ["divisions"],
     queryFn: fetchDivision,
+  });
+
+  const { data: departmentData, isFetching: isDepartmentDataFetching } = useQuery({
+    queryKey: ["departments"],
+    queryFn: fetchDepartmentData,
   });
 
   const handleCreateDocument = (data: Accident) => {
@@ -326,9 +332,7 @@ export default function AddOrEditAccidentDialog({
                             field.onChange(newValue)
                           }
                           size="small"
-                          options={sampleDivisions?.map(
-                            (division) => division.name
-                          )}
+                          options={divisionData?.length ? divisionData.map((division) => division.divisionName) : []}
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -372,9 +376,7 @@ export default function AddOrEditAccidentDialog({
                             field.onChange(newValue)
                           }
                           size="small"
-                          options={sampleDepartments?.map(
-                            (department) => department.name
-                          )}
+                          options={departmentData?.length ? departmentData.map((department) => department.department) : []}
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField

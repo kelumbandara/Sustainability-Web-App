@@ -218,10 +218,11 @@ export async function getHazardRiskList() {
 }
 
 export const createHazardRisk = async (hazardRisk: HazardAndRisk) => {
-  const token = localStorage.getItem("token") || "";
+  const token = `Bearer ${localStorage.getItem("token") || ""}`;
   const formData = new FormData();
 
   formData.append("token", token);
+  console.log('submit',token)
 
   Object.keys(hazardRisk).forEach((key) => {
     const value = hazardRisk[key as keyof HazardAndRisk];
