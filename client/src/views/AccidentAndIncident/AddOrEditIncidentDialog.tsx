@@ -57,6 +57,7 @@ import AddOrEditWitnessDialog from "./AddOrEditWitnessDialog";
 import AddOrEditPersonDialog from "./AddOrEditPersonDialog";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { circumstancesOptions } from "../../api/sampleData/incidentData";
+import useCurrentUser from "../../hooks/useCurrentUser";
 
 type DialogProps = {
   open: boolean;
@@ -110,6 +111,7 @@ export default function AddOrEditIncidentDialog({
   const [selectedWitness, setSelectedWitness] = useState<AccidentWitness>(null);
   const [selectedPerson, setSelectedPerson] =
     useState<AccidentEffectedIndividual>(null);
+  const { user } = useCurrentUser();
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     console.log("event", event);
@@ -147,6 +149,7 @@ export default function AddOrEditIncidentDialog({
     submitData.id = defaultValues?.id ?? uuidv4();
     // submitData.createdDate = new Date();
     // submitData.createdByUser = sampleAssignees[0].name;
+    submitData.createdByUser = user.id
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
     onSubmit(submitData as Incident);
     resetForm();

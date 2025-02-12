@@ -103,7 +103,7 @@ export const updateDocumentRecord = async (document: Document) => {
   });
 
   console.log(formData)
-  const res = await axios.post(`/documents/${document.id}/update`, formData, {
+  const res = await axios.post(`/api/documents/${document.id}/update`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },

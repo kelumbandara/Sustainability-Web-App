@@ -95,14 +95,11 @@ function AccidentTable() {
 
   const { mutate: deleteAccidentMutation } = useMutation({
     mutationFn: deleteAccident,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["accidents"] });
+    onSuccess:async () => {
+      await queryClient.invalidateQueries({ queryKey: ["accidents"] });
       enqueueSnackbar("Accident Report Deleted Successfully!", {
         variant: "success",
       });
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
     },
     onError: () => {
       enqueueSnackbar(`Accident Delete Failed`, {
@@ -280,9 +277,9 @@ function AccidentTable() {
             setOpenViewDrawer(false);
             setSelectedRow(null);
             setDeleteDialogOpen(false);
-            enqueueSnackbar("Accident Deleted Successfully!", {
-              variant: "success",
-            });
+            // enqueueSnackbar("Accident Deleted Successfully!", {
+            //   variant: "success",
+            // });
           }}
           handleReject={() => {
             setOpenViewDrawer(false);

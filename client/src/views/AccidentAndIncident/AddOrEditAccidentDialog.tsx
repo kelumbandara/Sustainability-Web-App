@@ -65,6 +65,8 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../api/divisionApi";
 import { fetchDepartmentData } from "../../api/departmentApi";
+import { fetchAccidentSubCategory, fetchMainAccidentCategory } from "../../api/accidentCategory";
+import useCurrentUser from "../../hooks/useCurrentUser";
 
 type DialogProps = {
   open: boolean;
@@ -132,11 +134,12 @@ export default function AddOrEditAccidentDialog({
     formState: { errors },
     reset,
     setValue,
-  } = useForm<Accident>({});
+  } = useForm<Accident>({defaultValues});
 
   const witnessesWatch = watch("witnesses");
   const categoryWatch = watch("category");
   const effectedIndividualsWatch = watch("effectedIndividuals");
+  const { user } = useCurrentUser();
 
   const relatedSubCategories = useMemo(() => {
     return accidentCategories?.find(
@@ -144,13 +147,13 @@ export default function AddOrEditAccidentDialog({
     )?.subCategories;
   }, [categoryWatch]);
 
-  useEffect(() => {
-    if (defaultValues) {
-      reset(defaultValues);
-    } else {
-      reset();
-    }
-  }, [defaultValues, reset]);
+  // useEffect(() => {
+  //   if (defaultValues) {
+  //     reset(defaultValues);
+  //   } else {
+  //     reset();
+  //   }
+  // }, [defaultValues, reset]);
 
   const resetForm = () => {
     reset();
@@ -167,11 +170,27 @@ export default function AddOrEditAccidentDialog({
     queryFn: fetchDepartmentData,
   });
 
+
+  const category = watch("category");
+  const subCategory = watch("subCategory");
+
+  const { data: accidentCategoryData, isFetching: isAccidentCategoryDataFetching } = useQuery({
+    queryKey: ["accidentCategory"],
+    queryFn: fetchMainAccidentCategory,
+  });
+
+  const { data: accidentSubCategoryData, isFetching: isAccidentSubCategoryDataFetching } = useQuery({
+    queryKey: ["accidentSubCategory", category],
+    queryFn: () => fetchAccidentSubCategory(category),
+    enabled: !!category, // Prevents fetching when category is empty
+  });
+
   const handleCreateDocument = (data: Accident) => {
     const submitData: Partial<Accident> = data;
     // submitData.id = defaultValues?.id ?? uuidv4();
     // submitData.createdDate = new Date();
     // submitData.createdByUser = sampleAssignees[0].name;
+    submitData.createdByUser = user.id
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
     onSubmit(submitData as Accident);
     // console.log(submitData)
@@ -323,7 +342,7 @@ export default function AddOrEditAccidentDialog({
                     <Controller
                       name="division"
                       control={control}
-                      defaultValue={defaultValues?.division}
+                      defaultValue={defaultValues?.division ?? ""}
                       rules={{ required: true }}
                       render={({ field }) => (
                         <Autocomplete
@@ -693,13 +712,15 @@ export default function AddOrEditAccidentDialog({
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
-                          onChange={(event, newValue) =>
-                            field.onChange(newValue)
-                          }
+                          onChange={(event, newValue) => {
+                            field.onChange(newValue);
+                            reset({
+                              category: newValue,
+                              subCategory: null, // Reset subcategory when category changes
+                            });
+                          }}
                           size="small"
-                          options={accidentCategories?.map(
-                            (category) => category.name
-                          )}
+                          options={accidentCategoryData?.length ? accidentCategoryData.map((cat) => cat.categoryName) : []}
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -714,7 +735,7 @@ export default function AddOrEditAccidentDialog({
                         />
                       )}
                     />
-                    {categoryWatch && (
+                    {category && ( // Correctly using category here
                       <Controller
                         name="subCategory"
                         control={control}
@@ -723,13 +744,15 @@ export default function AddOrEditAccidentDialog({
                         render={({ field }) => (
                           <Autocomplete
                             {...field}
-                            onChange={(event, newValue) =>
-                              field.onChange(newValue)
-                            }
+                            onChange={(event, newValue) => {
+                              field.onChange(newValue);
+                              reset({
+                                category: watch("category"), // Preserve category
+                                subCategory: newValue,
+                              });
+                            }}
                             size="small"
-                            options={relatedSubCategories?.map(
-                              (subCategory) => subCategory.name
-                            )}
+                            options={accidentSubCategoryData?.length ? accidentSubCategoryData.map((cat) => cat.subCategoryName) : []}
                             sx={{ flex: 1, margin: "0.5rem" }}
                             renderInput={(params) => (
                               <TextField
@@ -905,6 +928,7 @@ export default function AddOrEditAccidentDialog({
                     <TextField
                       required
                       id="rootCause"
+                      name="rootCause"
                       label="Cause"
                       error={!!errors.rootCause}
                       helperText={errors.rootCause && "Required"}
@@ -1058,7 +1082,7 @@ export default function AddOrEditAccidentDialog({
                     return (
                       <DatePickerComponent
                         onChange={(e) => field.onChange(e)}
-                        value={field.value}
+                        value={field.value ? new Date(field.value) : undefined}
                         label="Accident Date"
                         error={errors?.accidentDate ? "Required" : ""}
                       />
@@ -1075,7 +1099,7 @@ export default function AddOrEditAccidentDialog({
                     return (
                       <TimePickerComponent
                         onChange={(e) => field.onChange(e)}
-                        value={field.value}
+                        value={field.value ? new Date(field.value) : undefined}
                         label="Accident Time"
                         error={errors?.accidentTime ? "Required" : ""}
                       />

@@ -83,7 +83,7 @@ function ViewHazardOrRiskContent({
           />
           <DrawerContentItem
             label="Reported Date"
-              value={hazardOrRisk.createdDate ? format(new Date(hazardOrRisk.createdDate), "yyyy-MM-dd") : "N/A"}
+              value={hazardOrRisk.created_at ? format(new Date(hazardOrRisk.created_at), "yyyy-MM-dd") : "N/A"}
             sx={{ flex: 1 }}
           />
         </Box>
@@ -198,7 +198,7 @@ function ViewHazardOrRiskContent({
         />
         <DrawerContentItem
           label="Reporter"
-          value={hazardOrRisk.createdByUser}
+          value={hazardOrRisk.createdByUserName}
         />
         <DrawerContentItem label="Responsible" value={hazardOrRisk.assignee} />
         <DrawerContentItem

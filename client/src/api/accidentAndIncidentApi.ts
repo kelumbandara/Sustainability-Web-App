@@ -147,6 +147,7 @@ export const AccidentSchema = z.object({
   effectedIndividuals: z.array(AccidentEffectedIndividualSchema),
   imageUrl: z.string().optional(),
   reporter: z.string(),
+  createdByUser: z.string(),
 });
 
 export type Accident = z.infer<typeof AccidentSchema>;
@@ -180,6 +181,7 @@ export const IncidentSchema = z.object({
   typeOfConcern: z.nativeEnum(IncidentTypeOfConcern),
   factors: z.nativeEnum(IncidentFactors),
   causes: z.string().optional(),
+  createdByUser: z.string(),
 });
 
 export type Incident = z.infer<typeof IncidentSchema>;

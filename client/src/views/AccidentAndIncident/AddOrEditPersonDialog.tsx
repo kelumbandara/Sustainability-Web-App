@@ -218,7 +218,7 @@ export default function AddOrEditPersonDialog({
                 return (
                   <DatePickerComponent
                     onChange={(e) => field.onChange(e)}
-                    value={field.value}
+                    value={field.value ? new Date(field.value) : undefined}
                     label="Date of Join"
                     error={errors?.dateOfJoin ? "Required" : ""}
                   />
