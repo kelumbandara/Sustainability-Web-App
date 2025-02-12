@@ -133,9 +133,10 @@ export default function AddOrEditHazardRiskDialog({
     submitData.id = defaultValues?.id ?? uuidv4();
     submitData.createdByUser = user.id
     // submitData.createdDate = new Date();
-    submitData.createdByUser = sampleAssignees[0].name;
+    // submitData.createdByUser = sampleAssignees[0].name;
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
     onSubmit(submitData as HazardAndRisk);
+    console.log(submitData)
     resetForm();
   };
 
@@ -337,6 +338,7 @@ export default function AddOrEditHazardRiskDialog({
               </Typography>
               <Typography variant="body2" component="div">
                 {new Date().toDateString()}
+                {user.id}
               </Typography>
             </Box>
             <Box
