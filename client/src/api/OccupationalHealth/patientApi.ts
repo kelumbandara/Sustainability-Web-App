@@ -1,6 +1,5 @@
 import axios from "axios";
 import { z } from "zod";
-import axios from "axios";
 
 export enum Gender {
   MALE = "Male",
