@@ -328,5 +328,5 @@ export const updateIncident = async (incident: Incident) => {
 export const deleteIncident = async (id: string) => {
   const res = await axios.delete(`/api/incidents/${id}/delete`);
   return res.data;
-};
+};//push
 
