@@ -229,7 +229,7 @@ function HazardRiskTable() {
                         })()
                         : null}  {/* Show nothing if no due date */}
                     </TableCell>
-                    <TableCell align="right">{row.createdByUser}</TableCell>
+                    <TableCell align="right">{row.createdByUserName}</TableCell>
                     <TableCell align="right">{row.assignee}</TableCell>
                     <TableCell align="right">
                       {row.status === HazardAndRiskStatus.OPEN ? (
