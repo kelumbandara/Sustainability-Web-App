@@ -259,3 +259,84 @@ export const deleteAccident = async (id: string) => {
   const res = await axios.delete(`/api/accidents/${id}/delete`);
   return res.data;
 };
+
+//Incident Apis
+export async function getIncidentsList() {
+  const res = await axios.get("/api/incidents");
+  return res.data;
+}
+
+export const createIncidents = async (incidents: Incident) => {
+  const formData = new FormData();
+
+  Object.keys(incidents).forEach((key) => {
+    const value = incidents[key as keyof typeof incidents];
+
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        if (key === "witnesses" || key === "effectedIndividuals") {
+          Object.keys(item).forEach((nestedKey) => {
+            formData.append(`${key}[${index}][${nestedKey}]`, item[nestedKey].toString());
+          });
+        } else {
+          formData.append(`${key}[${index}]`, JSON.stringify(item));
+        }
+      });
+    } else if (value instanceof Date) {
+      formData.append(key, value.toISOString());
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  const res = await axios.post("/api/incidents", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return res.data;
+};
+
+export const updateIncident = async (incident: Incident) => {
+  const formData = new FormData();
+
+  // Append each property of the incident object to the form data
+  Object.keys(incident).forEach((key) => {
+    const value = incident[key as keyof typeof incident];
+
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        if (key === "witnesses" || key === "effectedIndividuals") {
+          Object.keys(item).forEach((nestedKey) => {
+            formData.append(`${key}[${index}][${nestedKey}]`, item[nestedKey].toString());
+          });
+        } else {
+          formData.append(`${key}[${index}]`, JSON.stringify(item));
+        }
+      });
+    } else if (value instanceof Date) {
+      formData.append(key, value.toISOString());
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  const res = await axios.post(
+    `/api/incidents/${incident.id}/update`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return res.data;
+};
+
+export const deleteIncident = async (id: string) => {
+  const res = await axios.delete(`/api/incidents/${id}/delete`);
+  return res.data;
+};//push
+

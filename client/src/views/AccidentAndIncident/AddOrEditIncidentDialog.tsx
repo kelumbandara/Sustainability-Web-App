@@ -753,7 +753,7 @@ export default function AddOrEditIncidentDialog({
                     return (
                       <DatePickerComponent
                         onChange={(e) => field.onChange(e)}
-                        value={field.value}
+                        value={field.value ? new Date(field.value) : undefined}
                         label="Incident Date"
                         error={errors?.incidentDate ? "Required" : ""}
                       />
@@ -770,7 +770,7 @@ export default function AddOrEditIncidentDialog({
                     return (
                       <TimePickerComponent
                         onChange={(e) => field.onChange(e)}
-                        value={field.value}
+                        value={field.value ? new Date(field.value) : undefined}
                         label="Incident Time"
                         error={errors?.incidentTime ? "Required" : ""}
                       />

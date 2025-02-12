@@ -18,7 +18,7 @@ import useIsMobile from "../../customHooks/useIsMobile";
 import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import { Incident } from "../../api/accidentAndIncidentApi";
 import WarningIcon from "@mui/icons-material/Warning";
-import { formatDate } from "date-fns";
+import { format, formatDate } from "date-fns";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -91,7 +91,7 @@ function ViewIncidentContent({ incident }: { incident: Incident }) {
           />
           <DrawerContentItem
             label="Reported Date"
-            value={incident.incidentDate.toDateString()}
+            value={format(incident.incidentDate, "yyyy-MM-dd")}
             sx={{ flex: 1 }}
           />
         </Box>
@@ -353,7 +353,7 @@ function ViewIncidentContent({ incident }: { incident: Incident }) {
         />
         <DrawerContentItem
           label="Incident Time"
-          value={incident.incidentTime.toLocaleTimeString()}
+          value={format(incident.incidentTime, "HH-mm")}
         />
         <DrawerContentItem label="Severity" value={incident.severity} />
       </Box>
