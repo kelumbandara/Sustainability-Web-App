@@ -206,6 +206,8 @@ export const HazardAndRiskSchema = z.object({
   cost: z.string().optional(),
   remarks: z.string().optional(),
   actionTaken: z.string().optional(),
+  created_at: z.string(),
+  referenceNumber: z.string(),
 });
 
 export type HazardAndRisk = z.infer<typeof HazardAndRiskSchema>;

@@ -26,13 +26,13 @@ import { differenceInDays, format } from "date-fns";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
 import { sampleHazardRiskData } from "../../api/sampleData/hazardRiskData";
-import { 
-  HazardAndRisk, 
-  HazardAndRiskStatus, 
-  createHazardRisk, 
+import {
+  HazardAndRisk,
+  HazardAndRiskStatus,
+  createHazardRisk,
   getHazardRiskList,
   updateHazardRisk,
-  deleteHazardRisk  
+  deleteHazardRisk
 } from "../../api/hazardRiskApi";
 import ViewHazardOrRiskContent from "./ViewHazardRiskContent";
 import PermissionWrapper from "../../components/PermissionWrapper";
@@ -161,7 +161,7 @@ function HazardRiskTable() {
                 setOpenAddOrEditDialog(true);
               }}
               disabled={
-               userPermissionObject[PermissionKeys.HAZARD_RISK_REGISTER_CREATE] //permission !
+                userPermissionObject[PermissionKeys.HAZARD_RISK_REGISTER_CREATE] //permission !
               }
             >
               Report a Hazard or Risk
@@ -176,6 +176,7 @@ function HazardRiskTable() {
                 <TableCell align="right">Category</TableCell>
                 <TableCell align="right">Division</TableCell>
                 <TableCell align="right">Due Date</TableCell>
+                <TableCell align="right">Remaining Days</TableCell>
                 <TableCell align="right">Delayed Days</TableCell>
                 <TableCell align="right">Reporter</TableCell>
                 <TableCell align="right">Responsible</TableCell>
@@ -197,18 +198,36 @@ function HazardRiskTable() {
                     }}
                   >
                     <TableCell component="th" scope="row">
-                      {row.createdDate ? format(new Date(row.createdDate), "yyyy-MM-dd") : "N/A"}
+                      {row.created_at ? format(new Date(row.created_at), "yyyy-MM-dd") : "N/A"}
                     </TableCell>
-                    <TableCell align="right">{row.id}</TableCell>
+                    <TableCell align="right">{row.referenceNumber}</TableCell>
                     <TableCell align="right">{row.category}</TableCell>
                     <TableCell align="right">{row.division}</TableCell>
                     <TableCell align="right">
                       {format(new Date(row.dueDate), "yyyy-MM-dd")}
                     </TableCell>
-                    <TableCell align="right">
+                    <TableCell align="center">
                       {row.dueDate
-                        ? differenceInDays(new Date(), row.dueDate)
-                        : "--"}
+                        ? (() => {
+                          const daysRemaining = differenceInDays(new Date(), row.dueDate);
+                          if (daysRemaining < 0) {
+                            return "No Remains";  // No remaining days
+                          }
+                          return `${daysRemaining}`;  // Show remaining days if positive
+                        })()
+                        : null}  {/* Show nothing if no due date */}
+                    </TableCell>
+
+                    <TableCell align="center">
+                      {row.dueDate
+                        ? (() => {
+                          const daysRemaining = differenceInDays(new Date(), row.dueDate);
+                          if (daysRemaining >= 0) {
+                            return "No Delays";  // No delayed days
+                          }
+                          return `${Math.abs(daysRemaining)}`;  // Show delayed days if negative
+                        })()
+                        : null}  {/* Show nothing if no due date */}
                     </TableCell>
                     <TableCell align="right">{row.createdByUser}</TableCell>
                     <TableCell align="right">{row.assignee}</TableCell>

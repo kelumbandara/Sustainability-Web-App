@@ -35,7 +35,7 @@ import {
   UnsafeActOrCondition,
 } from "../../api/hazardRiskApi";
 import { sampleAssignees } from "../../api/sampleData/usersSampleData";
-import { 
+import {
   fetchSubCategory,
   fetchObservationType,
   fetchMainCategory
@@ -98,25 +98,31 @@ export default function AddOrEditHazardRiskDialog({
   });
 
   const { data: subCategoryData, isFetching: isSubCategoryDataFetching } = useQuery({
-    queryKey: ["categories"],
-    queryFn: fetchMainCategory,
+    queryKey: ["Subcategories", category],
+    queryFn: () => fetchSubCategory(category),
+    enabled: !!category, // Prevents fetching when category is empty
   });
 
+  const { data: observationData, isFetching: isObservationDataFetching } = useQuery({
+    queryKey: ["observationType", subCategory],
+    queryFn: () => fetchObservationType(subCategory),
+    enabled: !!subCategory, // Prevents fetching when category is empty
+  });
 
   const subCategoryOptions = useMemo(() => {
     return category
       ? HazardOrRiskCategories?.find(
-          (d) => d.name === category
-        )?.subCategories?.map((sc) => sc.name) || []
+        (d) => d.name === category
+      )?.subCategories?.map((sc) => sc.name) || []
       : [];
   }, [category]);
 
   const observationTypeOptions = useMemo(() => {
     return category && subCategory
       ? HazardOrRiskCategories?.find(
-          (d) => d.name === category
-        )?.subCategories?.find((sc) => sc.name === subCategory)
-          ?.observationTypes
+        (d) => d.name === category
+      )?.subCategories?.find((sc) => sc.name === subCategory)
+        ?.observationTypes
       : [];
   }, [category, subCategory]);
 
@@ -338,16 +344,20 @@ export default function AddOrEditHazardRiskDialog({
             >
 
               <Autocomplete
-                {...register("category", { required: true })} 
+                {...register("category", { required: true })}
                 size="small"
-                options={categoryData?.length ? categoryData.map((category) => category.name) : []}
+                options={categoryData?.length ? categoryData.map((category) => category.categoryName) : []}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 defaultValue={defaultValues?.category}
                 onChange={(e, value) => {
                   console.log("e", e);
-                  setValue("category", value);
+                  reset({
+                    category: value,
+                    subCategory: null, // Reset subCategory
+                    observationType: null, // Reset observationType
+                  });
                 }}
-                
+
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -362,11 +372,15 @@ export default function AddOrEditHazardRiskDialog({
                 <Autocomplete
                   {...register("subCategory", { required: true })}
                   size="small"
-                  options={subCategoryOptions}
+                  options={subCategoryData?.length ? subCategoryData.map((category) => category.subCategory) : []}
                   defaultValue={defaultValues?.subCategory}
                   onChange={(e, value) => {
                     console.log("e", e);
-                    setValue("subCategory", value);
+                    reset({
+                      category: watch("category"), // Preserve category
+                      subCategory: value,
+                      observationType: null, // Reset observationType
+                    });
                   }}
                   sx={{ flex: 1, margin: "0.5rem" }}
                   renderInput={(params) => (
@@ -399,7 +413,10 @@ export default function AddOrEditHazardRiskDialog({
                       </Typography>
                     </>
                   }
-                  options={[...observationTypeOptions, "$ADD_NEW_ITEM"]}
+                  options={[
+                    ...(observationData?.length ? observationData.map((category) => category.observationType) : []),
+                    "$ADD_NEW_ITEM"
+                  ]}
                   renderOption={(props, option) => (
                     <>
                       {option === "$ADD_NEW_ITEM" ? (
@@ -626,6 +643,7 @@ export default function AddOrEditHazardRiskDialog({
                       value={field.value ? new Date(field.value) : undefined}
                       label="Due Date"
                       error={errors?.dueDate ? "Required" : ""}
+                      disablePast={true}
                     />
                   );
                 }}
