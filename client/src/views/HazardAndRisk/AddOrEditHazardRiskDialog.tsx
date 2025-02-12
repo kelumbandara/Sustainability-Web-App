@@ -8,6 +8,7 @@ import {
   Box,
   Divider,
   IconButton,
+  LinearProgress,
   Stack,
   TextField,
   ToggleButton,
@@ -34,6 +35,12 @@ import {
   UnsafeActOrCondition,
 } from "../../api/hazardRiskApi";
 import { sampleAssignees } from "../../api/sampleData/usersSampleData";
+import { 
+  fetchSubCategory,
+  fetchObservationType,
+  fetchMainCategory
+} from "../../api/categoryApi";
+import { useQuery } from "@tanstack/react-query";
 
 type DialogProps = {
   open: boolean;
@@ -84,6 +91,17 @@ export default function AddOrEditHazardRiskDialog({
 
   const category = watch("category");
   const subCategory = watch("subCategory");
+
+  const { data: categoryData, isFetching: isCategoryDataFetching } = useQuery({
+    queryKey: ["categories"],
+    queryFn: fetchMainCategory,
+  });
+
+  const { data: subCategoryData, isFetching: isSubCategoryDataFetching } = useQuery({
+    queryKey: ["categories"],
+    queryFn: fetchMainCategory,
+  });
+
 
   const subCategoryOptions = useMemo(() => {
     return category
@@ -318,18 +336,18 @@ export default function AddOrEditHazardRiskDialog({
                 flexDirection: isMobile ? "column" : "row",
               }}
             >
+
               <Autocomplete
-                {...register("category", { required: true })}
+                {...register("category", { required: true })} 
                 size="small"
-                options={HazardOrRiskCategories?.map(
-                  (category) => category.name
-                )}
+                options={categoryData?.length ? categoryData.map((category) => category.name) : []}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 defaultValue={defaultValues?.category}
                 onChange={(e, value) => {
                   console.log("e", e);
                   setValue("category", value);
                 }}
+                
                 renderInput={(params) => (
                   <TextField
                     {...params}

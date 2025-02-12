@@ -161,7 +161,7 @@ function HazardRiskTable() {
                 setOpenAddOrEditDialog(true);
               }}
               disabled={
-               ! userPermissionObject[PermissionKeys.HAZARD_RISK_REGISTER_CREATE] //permission !
+               userPermissionObject[PermissionKeys.HAZARD_RISK_REGISTER_CREATE] //permission !
               }
             >
               Report a Hazard or Risk
@@ -308,15 +308,15 @@ function HazardRiskTable() {
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
             // setRiskData(riskData.filter((doc) => doc.id !== selectedRow.id));
-            deleteHazardRisk(selectedRow.id);
+            deleteHazardRiskMutation(selectedRow.id);
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);
             setSelectedRow(null);
             setDeleteDialogOpen(false);
-            enqueueSnackbar("Hazard Risk Record Deleted Successfully!", {
-              variant: "success",
-            });
+            // enqueueSnackbar("Hazard Risk Record Deleted Successfully!", {
+            //   variant: "success",
+            // });
           }}
           handleReject={() => {
             setOpenViewDrawer(false);
