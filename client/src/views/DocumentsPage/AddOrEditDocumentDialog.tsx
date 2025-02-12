@@ -344,7 +344,7 @@ export default function AddOrEditDocumentDialog({
                   return (
                     <DatePickerComponent
                       onChange={(e) => field.onChange(e)}
-                      value={field.value}
+                      value={field.value ? new Date(field.value) : undefined}
                       label="Issued Date"
                     />
                   );
@@ -377,7 +377,7 @@ export default function AddOrEditDocumentDialog({
                       return (
                         <DatePickerComponent
                           onChange={(e) => field.onChange(e)}
-                          value={field.value}
+                          value={field.value ? new Date(field.value) : undefined}
                           label="Expiry Date"
                         />
                       );
@@ -393,7 +393,7 @@ export default function AddOrEditDocumentDialog({
                       return (
                         <DatePickerComponent
                           onChange={(e) => field.onChange(e)}
-                          value={field.value}
+                          value={field.value ? new Date(field.value) : undefined}
                           label="Notify Date"
                         />
                       );
