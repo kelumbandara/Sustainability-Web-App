@@ -139,7 +139,7 @@ export default function AddOrEditBenefitEntitlementDialog({
             />
             <TextField
               id="amountValue"
-              label="Employee Id"
+              label="Amount / Value"
               error={!!errors.amountValue}
               size="small"
               sx={{ flex: 1, margin: "0.5rem" }}
@@ -185,9 +185,7 @@ export default function AddOrEditBenefitEntitlementDialog({
                       onChange={(e) => field.onChange(e)}
                       value={field.value}
                       label="Date of First Installment"
-                      error={
-                        errors?.dateOfFirstInstallment ? "Required" : ""
-                      }
+                      error={errors?.dateOfFirstInstallment ? "Required" : ""}
                     />
                   </Box>
                 );

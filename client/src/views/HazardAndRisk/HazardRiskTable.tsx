@@ -25,17 +25,15 @@ import AddOrEditDocumentDialog from "./AddOrEditHazardRiskDialog";
 import { differenceInDays, format } from "date-fns";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
-import { sampleHazardRiskData } from "../../api/sampleData/hazardRiskData";
 import {
   HazardAndRisk,
   HazardAndRiskStatus,
   createHazardRisk,
   getHazardRiskList,
   updateHazardRisk,
-  deleteHazardRisk
+  deleteHazardRisk,
 } from "../../api/hazardRiskApi";
 import ViewHazardOrRiskContent from "./ViewHazardRiskContent";
-import PermissionWrapper from "../../components/PermissionWrapper";
 import {
   defaultViewerPermissions,
   PermissionKeys,
@@ -67,60 +65,62 @@ function HazardRiskTable() {
     queryFn: getHazardRiskList,
   });
 
-  const { mutate: createHazardRiskMutation, } = useMutation({
-    mutationFn: createHazardRisk,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
-      enqueueSnackbar("Hazard Risk Report Created Successfully!", {
-        variant: "success",
-      });
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
-    },
-    onError: () => {
-      enqueueSnackbar(`Hazard Risk Creation Failed`, {
-        variant: "error",
-      });
-    },
-  });
+  const { mutate: createHazardRiskMutation, isPending: isCreating } =
+    useMutation({
+      mutationFn: createHazardRisk,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
+        enqueueSnackbar("Hazard Risk Report Created Successfully!", {
+          variant: "success",
+        });
+        setSelectedRow(null);
+        setOpenViewDrawer(false);
+        setOpenAddOrEditDialog(false);
+      },
+      onError: () => {
+        enqueueSnackbar(`Hazard Risk Creation Failed`, {
+          variant: "error",
+        });
+      },
+    });
 
-  const { mutate: updateHazardRiskMutation } = useMutation({
-    mutationFn: updateHazardRisk,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
-      enqueueSnackbar("Hazard Risk Report Update Successfully!", {
-        variant: "success",
-      });
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
-    },
-    onError: () => {
-      enqueueSnackbar(`Hazard Risk Update Failed`, {
-        variant: "error",
-      });
-    },
-  });
+  const { mutate: updateHazardRiskMutation, isPending: isUpdating } =
+    useMutation({
+      mutationFn: updateHazardRisk,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
+        enqueueSnackbar("Hazard Risk Report Update Successfully!", {
+          variant: "success",
+        });
+        setSelectedRow(null);
+        setOpenViewDrawer(false);
+        setOpenAddOrEditDialog(false);
+      },
+      onError: () => {
+        enqueueSnackbar(`Hazard Risk Update Failed`, {
+          variant: "error",
+        });
+      },
+    });
 
-  const { mutate: deleteHazardRiskMutation } = useMutation({
-    mutationFn: deleteHazardRisk,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
-      enqueueSnackbar("Hazard Risk Report Deleted Successfully!", {
-        variant: "success",
-      });
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
-    },
-    onError: () => {
-      enqueueSnackbar(`Hazard Risk Delete Failed`, {
-        variant: "error",
-      });
-    },
-  });
-
+  const { mutate: deleteHazardRiskMutation, isPending: isDeleting } =
+    useMutation({
+      mutationFn: deleteHazardRisk,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
+        enqueueSnackbar("Hazard Risk Report Deleted Successfully!", {
+          variant: "success",
+        });
+        setSelectedRow(null);
+        setOpenViewDrawer(false);
+        setOpenAddOrEditDialog(false);
+      },
+      onError: () => {
+        enqueueSnackbar(`Hazard Risk Delete Failed`, {
+          variant: "error",
+        });
+      },
+    });
 
   return (
     <Stack>
@@ -168,6 +168,9 @@ function HazardRiskTable() {
             </Button>
           </Box>
           {isRiskDataFetching && <LinearProgress sx={{ width: "100%" }} />}
+          {(isRiskDataFetching || isCreating || isUpdating || isDeleting) && (
+            <LinearProgress sx={{ width: "100%" }} />
+          )}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -198,7 +201,9 @@ function HazardRiskTable() {
                     }}
                   >
                     <TableCell component="th" scope="row">
-                      {row.created_at ? format(new Date(row.created_at), "yyyy-MM-dd") : "N/A"}
+                      {row.created_at
+                        ? format(new Date(row.created_at), "yyyy-MM-dd")
+                        : "N/A"}
                     </TableCell>
                     <TableCell align="right">{row.referenceNumber}</TableCell>
                     <TableCell align="right">{row.category}</TableCell>
@@ -209,25 +214,33 @@ function HazardRiskTable() {
                     <TableCell align="center">
                       {row.dueDate
                         ? (() => {
-                          const daysRemaining = differenceInDays(new Date(), row.dueDate);
-                          if (daysRemaining > 0) {
-                            return "No Remains";  // No remaining days
-                          }
-                          return `${Math.abs(daysRemaining)}`;  // Show remaining days if positive
-                        })()
-                        : null}  {/* Show nothing if no due date */}
+                            const daysRemaining = differenceInDays(
+                              new Date(),
+                              row.dueDate
+                            );
+                            if (daysRemaining > 0) {
+                              return "No Remains"; // No remaining days
+                            }
+                            return `${Math.abs(daysRemaining)}`; // Show remaining days if positive
+                          })()
+                        : null}{" "}
+                      {/* Show nothing if no due date */}
                     </TableCell>
 
                     <TableCell align="center">
                       {row.dueDate
                         ? (() => {
-                          const daysDelay = differenceInDays(new Date(), row.dueDate);
-                          if (daysDelay <= 0) {
-                            return "No Delays";  // No delayed days
-                          }
-                          return `${Math.abs(daysDelay)}`;  // Show delayed days if negative
-                        })()
-                        : null}  {/* Show nothing if no due date */}
+                            const daysDelay = differenceInDays(
+                              new Date(),
+                              row.dueDate
+                            );
+                            if (daysDelay <= 0) {
+                              return "No Delays"; // No delayed days
+                            }
+                            return `${Math.abs(daysDelay)}`; // Show delayed days if negative
+                          })()
+                        : null}{" "}
+                      {/* Show nothing if no due date */}
                     </TableCell>
                     <TableCell align="right">{row.createdByUserName}</TableCell>
                     <TableCell align="right">{row.assignee}</TableCell>
@@ -290,7 +303,7 @@ function HazardRiskTable() {
           onSubmit={(data) => {
             if (selectedRow) {
               console.log("Updating document", data);
-              updateHazardRiskMutation(data)
+              updateHazardRiskMutation(data);
               // setRiskData(
               //   riskData.map((risk) => (risk.id === data.id ? data : risk))
               // ); // Update the document in the list if it already exists
@@ -300,7 +313,7 @@ function HazardRiskTable() {
             } else {
               console.log("Adding new hazard/risk", data);
               // setRiskData([...riskData, data]); // Add new document to the list
-              createHazardRiskMutation(data)
+              createHazardRiskMutation(data);
               // enqueueSnackbar("Hazard/Risk Created Successfully!", {
               //   variant: "success",
               // });

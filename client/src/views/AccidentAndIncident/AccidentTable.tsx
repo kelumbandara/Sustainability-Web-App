@@ -57,56 +57,62 @@ function AccidentTable() {
     theme.breakpoints.down("md")
   );
 
-  const { mutate: createAccidentMutation } = useMutation({
-    mutationFn: createAccident,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["accidents"] });
-      enqueueSnackbar("Accident Report Created Successfully!", {
-        variant: "success",
-      });
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
-    },
-    onError: () => {
-      enqueueSnackbar(`Accident Creation Failed`, {
-        variant: "error",
-      });
-    },
-  });
+  const { mutate: createAccidentMutation, isPending: isCreating } = useMutation(
+    {
+      mutationFn: createAccident,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["accidents"] });
+        enqueueSnackbar("Accident Report Created Successfully!", {
+          variant: "success",
+        });
+        setSelectedRow(null);
+        setOpenViewDrawer(false);
+        setOpenAddOrEditDialog(false);
+      },
+      onError: () => {
+        enqueueSnackbar(`Accident Creation Failed`, {
+          variant: "error",
+        });
+      },
+    }
+  );
 
-  const { mutate: updateAccidentMutation } = useMutation({
-    mutationFn: updateAccident,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["accidents"] });
-      enqueueSnackbar("Accident Report Updated Successfully!", {
-        variant: "success",
-      });
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
-    },
-    onError: () => {
-      enqueueSnackbar(`Accident Update Failed`, {
-        variant: "error",
-      });
-    },
-  });
+  const { mutate: updateAccidentMutation, isPending: isUpdating } = useMutation(
+    {
+      mutationFn: updateAccident,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["accidents"] });
+        enqueueSnackbar("Accident Report Updated Successfully!", {
+          variant: "success",
+        });
+        setSelectedRow(null);
+        setOpenViewDrawer(false);
+        setOpenAddOrEditDialog(false);
+      },
+      onError: () => {
+        enqueueSnackbar(`Accident Update Failed`, {
+          variant: "error",
+        });
+      },
+    }
+  );
 
-  const { mutate: deleteAccidentMutation } = useMutation({
-    mutationFn: deleteAccident,
-    onSuccess:async () => {
-      await queryClient.invalidateQueries({ queryKey: ["accidents"] });
-      enqueueSnackbar("Accident Report Deleted Successfully!", {
-        variant: "success",
-      });
-    },
-    onError: () => {
-      enqueueSnackbar(`Accident Delete Failed`, {
-        variant: "error",
-      });
-    },
-  });
+  const { mutate: deleteAccidentMutation, isPending: isDeleting } = useMutation(
+    {
+      mutationFn: deleteAccident,
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({ queryKey: ["accidents"] });
+        enqueueSnackbar("Accident Report Deleted Successfully!", {
+          variant: "success",
+        });
+      },
+      onError: () => {
+        enqueueSnackbar(`Accident Delete Failed`, {
+          variant: "error",
+        });
+      },
+    }
+  );
 
   return (
     <Stack>
@@ -151,6 +157,10 @@ function AccidentTable() {
             </Button>
           </Box>
           {isAccidentDataFetching && <LinearProgress sx={{ width: "100%" }} />}
+          {(isAccidentDataFetching ||
+            isCreating ||
+            isUpdating ||
+            isDeleting) && <LinearProgress sx={{ width: "100%" }} />}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>

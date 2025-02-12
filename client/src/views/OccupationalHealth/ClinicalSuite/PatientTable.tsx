@@ -30,7 +30,12 @@ import { Patient } from "../../../api/OccupationalHealth/patientApi";
 import { samplePatientData } from "../../../api/sampleData/patientData";
 import ViewPatientContent from "./ViewPatientContent";
 import AddOrEditPatientDialog from "./AddOrEditPatientDialog";
-import { getPatientList,createPatient,updatePatient,deletePatient } from "../../../api/OccupationalHealth/patientApi";
+import {
+  getPatientList,
+  createPatient,
+  updatePatient,
+  deletePatient,
+} from "../../../api/OccupationalHealth/patientApi";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../../state/queryClient";
 
@@ -56,7 +61,7 @@ function PatientTable() {
     queryFn: getPatientList,
   });
 
-  const { mutate: createPatientMutation, } = useMutation({
+  const { mutate: createPatientMutation, isPending: isCreating } = useMutation({
     mutationFn: createPatient,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["patients"] });
@@ -74,7 +79,7 @@ function PatientTable() {
     },
   });
 
-  const { mutate: updatePatientMutation, } = useMutation({
+  const { mutate: updatePatientMutation, isPending: isUpdating } = useMutation({
     mutationFn: updatePatient,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["patients"] });
@@ -92,7 +97,7 @@ function PatientTable() {
     },
   });
 
-  const { mutate: deletePatientMutation, } = useMutation({
+  const { mutate: deletePatientMutation, isPending: isDeleting } = useMutation({
     mutationFn: deletePatient,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["patients"] });
@@ -152,7 +157,10 @@ function PatientTable() {
               Add New Patient
             </Button>
           </Box>
-          {isPatientDataFetching && <LinearProgress sx={{ width: "100%" }} />}
+          {(isPatientDataFetching ||
+            isCreating ||
+            isUpdating ||
+            isDeleting) && <LinearProgress sx={{ width: "100%" }} />}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -192,9 +200,7 @@ function PatientTable() {
                         ? format(new Date(row.checkInDate), "yyyy-MM-dd")
                         : "--"}
                     </TableCell>
-                    <TableCell align="right">
-                      {row?.consultingDoctor}
-                    </TableCell>
+                    <TableCell align="right">{row?.consultingDoctor}</TableCell>
                     <TableCell align="right">{row.disease ?? "--"}</TableCell>
                     <TableCell align="right">
                       {row?.checkOutDate
@@ -249,7 +255,7 @@ function PatientTable() {
           }}
           onSubmit={(data) => {
             if (selectedRow) {
-              updatePatientMutation(data)
+              updatePatientMutation(data);
               // setPatients(
               //   patients.map((doc) => (doc.id === data.id ? data : doc))
               // ); // Update the patient in the list if it already exists
@@ -258,7 +264,7 @@ function PatientTable() {
               // });
             } else {
               console.log("Adding new patient", data);
-              createPatientMutation(data)
+              createPatientMutation(data);
               // setPatients([...patients, data]); // Add new patient to the list
               // enqueueSnackbar("Patient Created Successfully!", {
               //   variant: "success",
@@ -286,7 +292,7 @@ function PatientTable() {
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
             // setPatients(patients.filter((doc) => doc.id !== selectedRow.id));
-            deletePatientMutation(selectedRow.id)
+            deletePatientMutation(selectedRow.id);
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);

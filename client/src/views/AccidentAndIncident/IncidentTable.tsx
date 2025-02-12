@@ -24,13 +24,13 @@ import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
-import { 
+import {
   Incident,
   getIncidentsList,
   createIncidents,
   updateIncident,
-  deleteIncident
- } from "../../api/accidentAndIncidentApi";
+  deleteIncident,
+} from "../../api/accidentAndIncidentApi";
 import AddOrEditIncidentDialog from "./AddOrEditIncidentDialog";
 import { sampleIncidentData } from "../../api/sampleData/incidentData";
 import ViewIncidentContent from "./ViewIncidentContent";
@@ -59,59 +59,65 @@ function IncidentTable() {
     queryFn: getIncidentsList,
   });
 
-  const { mutate: createIncidentMutation } = useMutation({
-    mutationFn: createIncidents,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["incidents"] });
-      enqueueSnackbar("Incident Report Created Successfully!", {
-        variant: "success",
-      });
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
-    },
-    onError: () => {
-      enqueueSnackbar(`Incident Creation Failed`, {
-        variant: "error",
-      });
-    },
-  });
+  const { mutate: createIncidentMutation, isPending: isCreating } = useMutation(
+    {
+      mutationFn: createIncidents,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["incidents"] });
+        enqueueSnackbar("Incident Report Created Successfully!", {
+          variant: "success",
+        });
+        setSelectedRow(null);
+        setOpenViewDrawer(false);
+        setOpenAddOrEditDialog(false);
+      },
+      onError: () => {
+        enqueueSnackbar(`Incident Creation Failed`, {
+          variant: "error",
+        });
+      },
+    }
+  );
 
-  const { mutate: updateIncidentMutation } = useMutation({
-    mutationFn: updateIncident,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["incidents"] });
-      enqueueSnackbar("Incident Report Update Successfully!", {
-        variant: "success",
-      });
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
-    },
-    onError: () => {
-      enqueueSnackbar(`Incident Updation Failed`, {
-        variant: "error",
-      });
-    },
-  });
+  const { mutate: updateIncidentMutation, isPending: isUpdating } = useMutation(
+    {
+      mutationFn: updateIncident,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["incidents"] });
+        enqueueSnackbar("Incident Report Update Successfully!", {
+          variant: "success",
+        });
+        setSelectedRow(null);
+        setOpenViewDrawer(false);
+        setOpenAddOrEditDialog(false);
+      },
+      onError: () => {
+        enqueueSnackbar(`Incident Updation Failed`, {
+          variant: "error",
+        });
+      },
+    }
+  );
 
-  const { mutate: deleteIncidentMutation } = useMutation({
-    mutationFn: deleteIncident,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["incidents"] });
-      enqueueSnackbar("Incident Report Delete Successfully!", {
-        variant: "success",
-      });
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
-    },
-    onError: () => {
-      enqueueSnackbar(`Incident Deletion Failed`, {
-        variant: "error",
-      });
-    },
-  });
+  const { mutate: deleteIncidentMutation, isPending: isDeleting } = useMutation(
+    {
+      mutationFn: deleteIncident,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["incidents"] });
+        enqueueSnackbar("Incident Report Delete Successfully!", {
+          variant: "success",
+        });
+        setSelectedRow(null);
+        setOpenViewDrawer(false);
+        setOpenAddOrEditDialog(false);
+      },
+      onError: () => {
+        enqueueSnackbar(`Incident Deletion Failed`, {
+          variant: "error",
+        });
+      },
+    }
+  );
 
   return (
     <Stack>
@@ -156,6 +162,10 @@ function IncidentTable() {
             </Button>
           </Box>
           {isIncidentDataFetching && <LinearProgress sx={{ width: "100%" }} />}
+          {(isIncidentDataFetching ||
+            isCreating ||
+            isUpdating ||
+            isDeleting) && <LinearProgress sx={{ width: "100%" }} />}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -251,7 +261,7 @@ function IncidentTable() {
           onSubmit={(data) => {
             if (selectedRow) {
               console.log("Updating document", data);
-              updateIncidentMutation(data)
+              updateIncidentMutation(data);
               // setIncidentData(
               //   incidentData.map((risk) => (risk.id === data.id ? data : risk))
               // ); // Update the document in the list if it already exists
@@ -260,7 +270,7 @@ function IncidentTable() {
               // });
             } else {
               console.log("Adding new incident", data);
-              createIncidentMutation(data)
+              createIncidentMutation(data);
               // setIncidentData([...incidentData, data]); // Add new document to the list
               // enqueueSnackbar("Incident Created Successfully!", {
               //   variant: "success",
@@ -287,7 +297,7 @@ function IncidentTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            deleteIncidentMutation(selectedRow.id)
+            deleteIncidentMutation(selectedRow.id);
             // setIncidentData(
             //   incidentData.filter((doc) => doc.id !== selectedRow.id)
             // );

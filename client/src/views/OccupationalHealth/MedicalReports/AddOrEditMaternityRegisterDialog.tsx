@@ -354,12 +354,12 @@ export default function AddOrEditMaternityRegisterDialog({
                     />
                     <TextField
                       required
-                      id="name"
+                      id="employeeName"
                       label="Name"
-                      error={!!errors.name}
+                      error={!!errors.employeeName}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("name", { required: true })}
+                      {...register("employeeName", { required: true })}
                     />
                     <TextField
                       required
@@ -414,16 +414,16 @@ export default function AddOrEditMaternityRegisterDialog({
                   >
                     <TextField
                       required
-                      id="supervisorManager"
+                      id="supervisorOrManager"
                       label="Supervisor/Manager"
-                      error={!!errors.supervisorManager}
+                      error={!!errors.supervisorOrManager}
                       size="small"
                       sx={{
                         flex: 1,
                         margin: "0.5rem",
                         marginTop: isTablet ? "0.5rem" : "1.8rem",
                       }}
-                      {...register("supervisorManager")}
+                      {...register("supervisorOrManager")}
                     />
                     <Controller
                       control={control}
@@ -435,7 +435,7 @@ export default function AddOrEditMaternityRegisterDialog({
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
                               value={field.value}
-                              label="Manufacturing Date"
+                              label="Date of Join"
                               error={errors?.dateOfJoin ? "Required" : ""}
                             />
                           </Box>
@@ -598,7 +598,7 @@ export default function AddOrEditMaternityRegisterDialog({
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
                               value={field.value}
-                              label="Application Date"
+                              label="Actual Delivery Date"
                               error={
                                 errors?.actualDeliveryDate ? "Required" : ""
                               }
@@ -855,23 +855,6 @@ export default function AddOrEditMaternityRegisterDialog({
                   >
                     <Controller
                       control={control}
-                      {...register("dateOfJoin", { required: true })}
-                      name={"dateOfJoin"}
-                      render={({ field }) => {
-                        return (
-                          <Box sx={{ flex: 1, margin: "0.5rem" }}>
-                            <DatePickerComponent
-                              onChange={(e) => field.onChange(e)}
-                              value={field.value}
-                              label="Manufacturing Date"
-                              error={errors?.dateOfJoin ? "Required" : ""}
-                            />
-                          </Box>
-                        );
-                      }}
-                    />
-                    <Controller
-                      control={control}
                       {...register("noticeDateAfterDelivery", {
                         required: true,
                       })}
@@ -895,10 +878,10 @@ export default function AddOrEditMaternityRegisterDialog({
                     />
                     <Controller
                       control={control}
-                      {...register("rejoiningDate", {
+                      {...register("reJoinDate", {
                         required: true,
                       })}
-                      name={"rejoiningDate"}
+                      name={"reJoinDate"}
                       render={({ field }) => {
                         return (
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
@@ -906,7 +889,7 @@ export default function AddOrEditMaternityRegisterDialog({
                               onChange={(e) => field.onChange(e)}
                               value={field.value}
                               label="Rejoining Date"
-                              error={errors?.rejoiningDate ? "Required" : ""}
+                              error={errors?.reJoinDate ? "Required" : ""}
                             />
                           </Box>
                         );
@@ -914,16 +897,16 @@ export default function AddOrEditMaternityRegisterDialog({
                     />
                     <TextField
                       required
-                      id="supportProvided"
+                      id="supportProvider"
                       label="Support Provided"
-                      error={!!errors.supportProvided}
+                      error={!!errors.supportProvider}
                       size="small"
                       sx={{
                         flex: 1,
                         margin: "0.5rem",
                         marginTop: isTablet ? "0.5rem" : "1.8rem",
                       }}
-                      {...register("supportProvided")}
+                      {...register("supportProvider")}
                     />
                   </Box>
                   <Box

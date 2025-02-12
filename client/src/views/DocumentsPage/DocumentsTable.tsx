@@ -23,12 +23,12 @@ import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import AddIcon from "@mui/icons-material/Add";
 import AddOrEditDocumentDialog from "./AddOrEditDocumentDialog";
 import { sampleDocuments } from "../../api/sampleData/documentData";
-import { 
+import {
   Document,
   createDocumentRecord,
   getDocumentList,
   updateDocumentRecord,
-  deleteDocumentRecord
+  deleteDocumentRecord,
 } from "../../api/documentApi";
 import { differenceInDays, format } from "date-fns";
 import ViewDocumentContent from "./ViewDocumentContent";
@@ -59,59 +59,65 @@ function DocumentTable() {
     queryFn: getDocumentList,
   });
 
-  const { mutate: createDocumentMutation, } = useMutation({
-    mutationFn: createDocumentRecord,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["documentRecords"] });
-      enqueueSnackbar("Document Record Created Successfully!", {
-        variant: "success",
-      });
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
-    },
-    onError: () => {
-      enqueueSnackbar(`Document Record Creation Failed`, {
-        variant: "error",
-      });
-    },
-  });
+  const { mutate: createDocumentMutation, isPending: isCreating } = useMutation(
+    {
+      mutationFn: createDocumentRecord,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["documentRecords"] });
+        enqueueSnackbar("Document Record Created Successfully!", {
+          variant: "success",
+        });
+        setSelectedRow(null);
+        setOpenViewDrawer(false);
+        setOpenAddOrEditDialog(false);
+      },
+      onError: () => {
+        enqueueSnackbar(`Document Record Creation Failed`, {
+          variant: "error",
+        });
+      },
+    }
+  );
 
-  const { mutate: updateDocumentMutation, } = useMutation({
-    mutationFn: updateDocumentRecord,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["documentRecords"] });
-      enqueueSnackbar("Document Record Updated Successfully!", {
-        variant: "success",
-      });
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
-    },
-    onError: () => {
-      enqueueSnackbar(`Document Record Updation Failed`, {
-        variant: "error",
-      });
-    },
-  });
+  const { mutate: updateDocumentMutation, isPending: isUpdating } = useMutation(
+    {
+      mutationFn: updateDocumentRecord,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["documentRecords"] });
+        enqueueSnackbar("Document Record Updated Successfully!", {
+          variant: "success",
+        });
+        setSelectedRow(null);
+        setOpenViewDrawer(false);
+        setOpenAddOrEditDialog(false);
+      },
+      onError: () => {
+        enqueueSnackbar(`Document Record Updation Failed`, {
+          variant: "error",
+        });
+      },
+    }
+  );
 
-  const { mutate: deleteDocumentMutation } = useMutation({
-    mutationFn: deleteDocumentRecord,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["documentRecords"] });
-      enqueueSnackbar("Document Records Deleted Successfully!", {
-        variant: "success",
-      });
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
-    },
-    onError: () => {
-      enqueueSnackbar(`Documwnt Delete Delete Failed`, {
-        variant: "error",
-      });
-    },
-  });
+  const { mutate: deleteDocumentMutation, isPending: isDeleting } = useMutation(
+    {
+      mutationFn: deleteDocumentRecord,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["documentRecords"] });
+        enqueueSnackbar("Document Records Deleted Successfully!", {
+          variant: "success",
+        });
+        setSelectedRow(null);
+        setOpenViewDrawer(false);
+        setOpenAddOrEditDialog(false);
+      },
+      onError: () => {
+        enqueueSnackbar(`Document Delete Delete Failed`, {
+          variant: "error",
+        });
+      },
+    }
+  );
 
   return (
     <Stack>
@@ -156,6 +162,10 @@ function DocumentTable() {
             </Button>
           </Box>
           {isDocumentDataFetching && <LinearProgress sx={{ width: "100%" }} />}
+          {(isDocumentDataFetching ||
+            isCreating ||
+            isUpdating ||
+            isDeleting) && <LinearProgress sx={{ width: "100%" }} />}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -271,7 +281,7 @@ function DocumentTable() {
           onSubmit={(data) => {
             if (selectedRow) {
               console.log("Updating document", data);
-              updateDocumentMutation(data)
+              updateDocumentMutation(data);
               // setDocuments(
               //   documents.map((doc) => (doc.id === data.id ? data : doc))
               // ); // Update the document in the list if it already exists
@@ -280,7 +290,7 @@ function DocumentTable() {
               // });
             } else {
               console.log("Adding new document", data);
-              createDocumentMutation(data)
+              createDocumentMutation(data);
               // setDocuments([...documents, data]); // Add new document to the list
               // enqueueSnackbar("Document Created Successfully!", {
               //   variant: "success",
@@ -308,7 +318,7 @@ function DocumentTable() {
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
             // setDocuments(documents.filter((doc) => doc.id !== selectedRow.id));
-            deleteDocumentMutation(selectedRow.id)
+            deleteDocumentMutation(selectedRow.id);
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);

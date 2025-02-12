@@ -9,6 +9,7 @@ import {
   Alert,
   Box,
   Button,
+  LinearProgress,
   Stack,
   Theme,
   Typography,
@@ -18,7 +19,13 @@ import { useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import { useSnackbar } from "notistack";
-import { MaternityRegister } from "../../../api/OccupationalHealth/maternityRegisterApi";
+import {
+  createBenefit,
+  deleteBenefit,
+  getMaternityRegisterList,
+  MaternityRegister,
+  updateBenefit,
+} from "../../../api/OccupationalHealth/maternityRegisterApi";
 import { sampleMaternityRegisterData } from "../../../api/sampleData/maternityRegisterData";
 import theme from "../../../theme";
 import PageTitle from "../../../components/PageTitle";
@@ -29,6 +36,8 @@ import ViewDataDrawer, {
 import ViewMaternityRegisterContent from "./ViewMaternityRegisterContent";
 import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
 import AddOrEditMaternityRegisterDialog from "./AddOrEditMaternityRegisterDialog";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import queryClient from "../../../state/queryClient";
 
 function MaternityRegisterTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -39,6 +48,67 @@ function MaternityRegisterTable() {
     MaternityRegister[]
   >(sampleMaternityRegisterData);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const {
+    data: maternityRegisterData,
+    isFetching: isFetchingMaternityDataList,
+  } = useQuery({
+    queryKey: ["maternity-register"],
+    queryFn: getMaternityRegisterList,
+  });
+
+  const { mutate: createPatientMutation, isPending: isCreating } = useMutation({
+    mutationFn: createBenefit,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["maternity-register"] });
+      enqueueSnackbar("Benefit Created Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Benefit Creation Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: updateBenefitMutation, isPending: isUpdating } = useMutation({
+    mutationFn: updateBenefit,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["maternity-register"] });
+      enqueueSnackbar("Benefit Update Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Benefit Update Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: deleteBenefitMutation, isPending: isDeleting } = useMutation({
+    mutationFn: deleteBenefit,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["maternity-register"] });
+      enqueueSnackbar("Benefit Delete Successfully!", {
+        variant: "success",
+      });
+    },
+    onError: () => {
+      enqueueSnackbar(`Benefit Delete Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  console.log("maternityRegisterData", maternityRegisterData);
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
@@ -90,7 +160,11 @@ function MaternityRegisterTable() {
             >
               Add New Benefit
             </Button>
-          </Box>
+          </Box>{" "}
+          {(isFetchingMaternityDataList ||
+            isCreating ||
+            isUpdating ||
+            isDeleting) && <LinearProgress sx={{ width: "100%" }} />}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -104,8 +178,8 @@ function MaternityRegisterTable() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {maternityRegisterList?.length > 0 ? (
-                maternityRegisterList.map((row) => (
+              {maternityRegisterData?.length > 0 ? (
+                maternityRegisterData.map((row) => (
                   <TableRow
                     key={`${row.id}`}
                     sx={{
@@ -120,7 +194,7 @@ function MaternityRegisterTable() {
                     <TableCell component="th" scope="row">
                       {row.employeeId}
                     </TableCell>
-                    <TableCell align="right">{row.name}</TableCell>
+                    <TableCell align="right">{row.employeeName}</TableCell>
                     <TableCell align="right">{row.applicationId}</TableCell>
                     <TableCell align="right">
                       {row?.applicationDate
@@ -129,8 +203,8 @@ function MaternityRegisterTable() {
                     </TableCell>
                     <TableCell align="right">{row?.leaveStatus}</TableCell>
                     <TableCell align="right">
-                      {row?.rejoiningDate
-                        ? format(new Date(row.rejoiningDate), "yyyy-MM-dd")
+                      {row?.reJoinDate
+                        ? format(new Date(row.reJoinDate), "yyyy-MM-dd")
                         : "--"}
                     </TableCell>
                     <TableCell align="right">{row?.status}</TableCell>
@@ -181,24 +255,10 @@ function MaternityRegisterTable() {
           }}
           onSubmit={(data) => {
             if (selectedRow) {
-              setMaternityRegisterList(
-                maternityRegisterList.map((request) =>
-                  request.id === data.id ? data : request
-                )
-              ); // Update the patient in the list if it already exists
-              enqueueSnackbar("Medicine Request Updated Successfully!", {
-                variant: "success",
-              });
+              updateBenefitMutation(data);
             } else {
-              console.log("Adding new document", data);
-              setMaternityRegisterList([...maternityRegisterList, data]); // Add new medicine request to the list
-              enqueueSnackbar("Medicine Request Created Successfully!", {
-                variant: "success",
-              });
+              createPatientMutation(data);
             }
-            setSelectedRow(null);
-            setOpenViewDrawer(false);
-            setOpenAddOrEditDialog(false);
           }}
           defaultValues={selectedRow}
         />
@@ -217,21 +277,19 @@ function MaternityRegisterTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            setMaternityRegisterList(
-              maternityRegisterList.filter((doc) => doc.id !== selectedRow.id)
-            );
+            if (selectedRow) {
+              deleteBenefitMutation(selectedRow.id);
+            }
           }}
           onSuccess={() => {
+            queryClient.invalidateQueries({
+              queryKey: ["maternity-register"],
+            });
             setOpenViewDrawer(false);
             setSelectedRow(null);
             setDeleteDialogOpen(false);
-            enqueueSnackbar("Benefit Request Deleted Successfully!", {
-              variant: "success",
-            });
           }}
           handleReject={() => {
-            setOpenViewDrawer(false);
-            setSelectedRow(null);
             setDeleteDialogOpen(false);
           }}
         />

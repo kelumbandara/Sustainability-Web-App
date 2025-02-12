@@ -65,7 +65,10 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../api/divisionApi";
 import { fetchDepartmentData } from "../../api/departmentApi";
-import { fetchAccidentSubCategory, fetchMainAccidentCategory } from "../../api/accidentCategory";
+import {
+  fetchAccidentSubCategory,
+  fetchMainAccidentCategory,
+} from "../../api/accidentCategory";
 import useCurrentUser from "../../hooks/useCurrentUser";
 
 type DialogProps = {
@@ -134,7 +137,7 @@ export default function AddOrEditAccidentDialog({
     formState: { errors },
     reset,
     setValue,
-  } = useForm<Accident>({defaultValues});
+  } = useForm<Accident>({ defaultValues });
 
   const witnessesWatch = watch("witnesses");
   const categoryWatch = watch("category");
@@ -165,36 +168,38 @@ export default function AddOrEditAccidentDialog({
     queryFn: fetchDivision,
   });
 
-  const { data: departmentData, isFetching: isDepartmentDataFetching } = useQuery({
-    queryKey: ["departments"],
-    queryFn: fetchDepartmentData,
-  });
-
+  const { data: departmentData, isFetching: isDepartmentDataFetching } =
+    useQuery({
+      queryKey: ["departments"],
+      queryFn: fetchDepartmentData,
+    });
 
   const category = watch("category");
   const subCategory = watch("subCategory");
 
-  const { data: accidentCategoryData, isFetching: isAccidentCategoryDataFetching } = useQuery({
+  const {
+    data: accidentCategoryData,
+    isFetching: isAccidentCategoryDataFetching,
+  } = useQuery({
     queryKey: ["accidentCategory"],
     queryFn: fetchMainAccidentCategory,
   });
 
-  const { data: accidentSubCategoryData, isFetching: isAccidentSubCategoryDataFetching } = useQuery({
+  const {
+    data: accidentSubCategoryData,
+    isFetching: isAccidentSubCategoryDataFetching,
+  } = useQuery({
     queryKey: ["accidentSubCategory", category],
     queryFn: () => fetchAccidentSubCategory(category),
     enabled: !!category, // Prevents fetching when category is empty
   });
 
-  const handleCreateDocument = (data: Accident) => {
+  const handleCreateAccident = (data: Accident) => {
     const submitData: Partial<Accident> = data;
-    // submitData.id = defaultValues?.id ?? uuidv4();
-    // submitData.createdDate = new Date();
-    // submitData.createdByUser = sampleAssignees[0].name;
-    submitData.createdByUser = user.id
+    submitData.id = defaultValues?.id ?? uuidv4();
+    submitData.createdByUser = user.id;
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
     onSubmit(submitData as Accident);
-    // console.log(submitData)
-    resetForm();
   };
 
   return (
@@ -351,7 +356,13 @@ export default function AddOrEditAccidentDialog({
                             field.onChange(newValue)
                           }
                           size="small"
-                          options={divisionData?.length ? divisionData.map((division) => division.divisionName) : []}
+                          options={
+                            divisionData?.length
+                              ? divisionData.map(
+                                  (division) => division.divisionName
+                                )
+                              : []
+                          }
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -395,7 +406,13 @@ export default function AddOrEditAccidentDialog({
                             field.onChange(newValue)
                           }
                           size="small"
-                          options={departmentData?.length ? departmentData.map((department) => department.department) : []}
+                          options={
+                            departmentData?.length
+                              ? departmentData.map(
+                                  (department) => department.department
+                                )
+                              : []
+                          }
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -720,7 +737,13 @@ export default function AddOrEditAccidentDialog({
                             });
                           }}
                           size="small"
-                          options={accidentCategoryData?.length ? accidentCategoryData.map((cat) => cat.categoryName) : []}
+                          options={
+                            accidentCategoryData?.length
+                              ? accidentCategoryData.map(
+                                  (cat) => cat.categoryName
+                                )
+                              : []
+                          }
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -752,7 +775,13 @@ export default function AddOrEditAccidentDialog({
                               });
                             }}
                             size="small"
-                            options={accidentSubCategoryData?.length ? accidentSubCategoryData.map((cat) => cat.subCategoryName) : []}
+                            options={
+                              accidentSubCategoryData?.length
+                                ? accidentSubCategoryData.map(
+                                    (cat) => cat.subCategoryName
+                                  )
+                                : []
+                            }
                             sx={{ flex: 1, margin: "0.5rem" }}
                             renderInput={(params) => (
                               <TextField
@@ -1082,7 +1111,7 @@ export default function AddOrEditAccidentDialog({
                     return (
                       <DatePickerComponent
                         onChange={(e) => field.onChange(e)}
-                        value={field.value ? new Date(field.value) : undefined}
+                        value={field.value}
                         label="Accident Date"
                         error={errors?.accidentDate ? "Required" : ""}
                       />
@@ -1099,7 +1128,7 @@ export default function AddOrEditAccidentDialog({
                     return (
                       <TimePickerComponent
                         onChange={(e) => field.onChange(e)}
-                        value={field.value ? new Date(field.value) : undefined}
+                        value={field.value}
                         label="Accident Time"
                         error={errors?.accidentTime ? "Required" : ""}
                       />
@@ -1265,7 +1294,7 @@ export default function AddOrEditAccidentDialog({
             }}
             size="medium"
             onClick={handleSubmit((data) => {
-              handleCreateDocument(data);
+              handleCreateAccident(data);
             })}
           >
             {defaultValues ? "Update Changes" : "Submit Report"}

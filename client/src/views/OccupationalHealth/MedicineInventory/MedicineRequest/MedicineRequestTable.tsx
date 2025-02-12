@@ -30,7 +30,12 @@ import { MedicineRequest } from "../../../../api/medicineRequestApi";
 import { medicineRequestSampleData } from "../../../../api/sampleData/medicineRequestSampleData";
 import AddOrEditMedicineRequestDialog from "./AddOrEditMedicineRequestDialog";
 import ViewMedicineRequestContent from "./ViewMedicineRequestContent";
-import { getMedicineList,createMedicine,updateMedicine,deleteMedicine } from "../../../../api/medicineRequestApi";
+import {
+  getMedicineList,
+  createMedicine,
+  updateMedicine,
+  deleteMedicine,
+} from "../../../../api/medicineRequestApi";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../../../state/queryClient";
 
@@ -58,59 +63,65 @@ function MedicineRequestTable() {
     queryFn: getMedicineList,
   });
 
-  const { mutate: createMedicineMutation, } = useMutation({
-    mutationFn: createMedicine,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["medicines"] });
-      enqueueSnackbar("Medicine Report Created Successfully!", {
-        variant: "success",
-      });
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
-    },
-    onError: () => {
-      enqueueSnackbar(`Medicine Report Creation Failed`, {
-        variant: "error",
-      });
-    },
-  });
+  const { mutate: createMedicineMutation, isPending: isCreating } = useMutation(
+    {
+      mutationFn: createMedicine,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["medicines"] });
+        enqueueSnackbar("Medicine Report Created Successfully!", {
+          variant: "success",
+        });
+        setSelectedRow(null);
+        setOpenViewDrawer(false);
+        setOpenAddOrEditDialog(false);
+      },
+      onError: () => {
+        enqueueSnackbar(`Medicine Report Creation Failed`, {
+          variant: "error",
+        });
+      },
+    }
+  );
 
-  const { mutate: updateMedicineMutation, } = useMutation({
-    mutationFn: updateMedicine,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["medicines"] });
-      enqueueSnackbar("Medicine Report Update Successfully!", {
-        variant: "success",
-      });
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
-    },
-    onError: () => {
-      enqueueSnackbar(`Medicine Report Update Failed`, {
-        variant: "error",
-      });
-    },
-  });
+  const { mutate: updateMedicineMutation, isPending: isUpdating } = useMutation(
+    {
+      mutationFn: updateMedicine,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["medicines"] });
+        enqueueSnackbar("Medicine Report Update Successfully!", {
+          variant: "success",
+        });
+        setSelectedRow(null);
+        setOpenViewDrawer(false);
+        setOpenAddOrEditDialog(false);
+      },
+      onError: () => {
+        enqueueSnackbar(`Medicine Report Update Failed`, {
+          variant: "error",
+        });
+      },
+    }
+  );
 
-  const { mutate: deleteMedicineMutation, } = useMutation({
-    mutationFn: deleteMedicine,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["medicines"] });
-      enqueueSnackbar("Medicine Report Delete Successfully!", {
-        variant: "success",
-      });
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
-    },
-    onError: () => {
-      enqueueSnackbar(`Medicine Report Delete Failed`, {
-        variant: "error",
-      });
-    },
-  });
+  const { mutate: deleteMedicineMutation, isPending: isDeleting } = useMutation(
+    {
+      mutationFn: deleteMedicine,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["medicines"] });
+        enqueueSnackbar("Medicine Report Delete Successfully!", {
+          variant: "success",
+        });
+        setSelectedRow(null);
+        setOpenViewDrawer(false);
+        setOpenAddOrEditDialog(false);
+      },
+      onError: () => {
+        enqueueSnackbar(`Medicine Report Delete Failed`, {
+          variant: "error",
+        });
+      },
+    }
+  );
 
   return (
     <Stack>
@@ -155,6 +166,10 @@ function MedicineRequestTable() {
             </Button>
           </Box>
           {isMedicineDataFetching && <LinearProgress sx={{ width: "100%" }} />}
+          {(isMedicineDataFetching ||
+            isCreating ||
+            isUpdating ||
+            isDeleting) && <LinearProgress sx={{ width: "100%" }} />}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -242,7 +257,7 @@ function MedicineRequestTable() {
           }}
           onSubmit={(data) => {
             if (selectedRow) {
-              updateMedicineMutation(data)
+              updateMedicineMutation(data);
               // setMedicineRequests(
               //   medicineRequests.map((request) =>
               //     request.id === data.id ? data : request
@@ -253,7 +268,7 @@ function MedicineRequestTable() {
               // });
             } else {
               console.log("Adding new document", data);
-              createMedicineMutation(data)
+              createMedicineMutation(data);
               // setMedicineRequests([...medicineRequests, data]); // Add new medicine request to the list
               // enqueueSnackbar("Medicine Request Created Successfully!", {
               //   variant: "success",
@@ -280,7 +295,7 @@ function MedicineRequestTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            deleteMedicineMutation(selectedRow.id)
+            deleteMedicineMutation(selectedRow.id);
             // setMedicineRequests(
             //   // medicineRequests.filter((doc) => doc.id !== selectedRow.id)
             // );
