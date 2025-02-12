@@ -135,6 +135,9 @@ export default function AddOrEditHazardRiskDialog({
     // submitData.createdDate = new Date();
     // submitData.createdByUser = sampleAssignees[0].name;
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
+    if (files.length > 0) {
+      submitData.documents = files;
+    }
     onSubmit(submitData as HazardAndRisk);
     console.log(submitData)
     resetForm();
