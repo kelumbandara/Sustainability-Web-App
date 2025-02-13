@@ -92,12 +92,12 @@ function ViewPurchaseAndInventoryContent({
         >
           <DrawerContentItem
             label="Reference"
-            value={purchaseAndInventory.reference_number}
+            value={purchaseAndInventory.referenceNumber}
             sx={{ flex: 1 }}
           />
           <DrawerContentItem
             label="Reported Date"
-            value={new Date(purchaseAndInventory?.request_date).toDateString()}
+            value={new Date(purchaseAndInventory?.requestedDate).toDateString()}
             sx={{ flex: 1 }}
           />
         </Box>
@@ -215,18 +215,18 @@ function ViewPurchaseAndInventoryContent({
           >
             <DrawerContentItem
               label="Medicine Name"
-              value={purchaseAndInventory.medicine_name}
+              value={purchaseAndInventory.medicineName}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
               label="Generic Name"
-              value={purchaseAndInventory.generic_name}
+              value={purchaseAndInventory.genericName}
               sx={{ flex: 1 }}
             />
 
             <DrawerContentItem
               label="Dosage Strength"
-              value={purchaseAndInventory.dosage_strength}
+              value={purchaseAndInventory.dosageStrength}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
@@ -236,7 +236,7 @@ function ViewPurchaseAndInventoryContent({
             />
             <DrawerContentItem
               label="Medicine Type"
-              value={purchaseAndInventory.medicine_type}
+              value={purchaseAndInventory.medicineType}
               sx={{ flex: 1 }}
             />
           </Box>
@@ -251,22 +251,22 @@ function ViewPurchaseAndInventoryContent({
           >
             <DrawerContentItem
               label="Supplier Name"
-              value={purchaseAndInventory.supplier_name}
+              value={purchaseAndInventory.supplierName}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
               label="Contact Number"
-              value={purchaseAndInventory.supplier_contact_number}
+              value={purchaseAndInventory.supplierContactNumber}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
               label="Email ID"
-              value={purchaseAndInventory.supplier_email_id}
+              value={purchaseAndInventory.supplierEmail}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
               label="Type"
-              value={purchaseAndInventory.supplier_type}
+              value={purchaseAndInventory.supplierType}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
@@ -287,52 +287,52 @@ function ViewPurchaseAndInventoryContent({
             <DrawerContentItem
               label="Manufacturing Date"
               value={new Date(
-                purchaseAndInventory.manufacturing_date
+                purchaseAndInventory.manufacturingDate
               ).toDateString()}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
               label="Expiry Date"
-              value={new Date(purchaseAndInventory.expiry_date).toDateString()}
+              value={new Date(purchaseAndInventory.expiryDate).toDateString()}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
               label="Delivery Date"
               value={new Date(
-                purchaseAndInventory.delivery_date
+                purchaseAndInventory.deliveryDate
               ).toDateString()}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
               label="Delivered Quantity"
               value={new Date(
-                purchaseAndInventory.delivered_quantity
+                purchaseAndInventory.deliveryQuantity
               ).toDateString()}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
               label="Delivered Unit"
-              value={purchaseAndInventory.delivered_unit}
+              value={purchaseAndInventory.deliveryUnit}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
               label="Purchased Amount"
-              value={purchaseAndInventory.purchased_amount}
+              value={purchaseAndInventory.purchaseAmount}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
               label="Threshold Limit"
-              value={purchaseAndInventory.threshold_limit}
+              value={purchaseAndInventory.thresholdLimit}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
               label="Invoice Date"
-              value={new Date(purchaseAndInventory.invoice_date).toDateString()}
+              value={new Date(purchaseAndInventory.invoiceDate).toDateString()}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
               label="Manufacturer Name"
-              value={purchaseAndInventory.manufacturer_name}
+              value={purchaseAndInventory.manufacturerName}
               sx={{ flex: 1 }}
             />
           </Box>
@@ -347,17 +347,17 @@ function ViewPurchaseAndInventoryContent({
           >
             <DrawerContentItem
               label="Batch Number"
-              value={purchaseAndInventory.batch_number}
+              value={purchaseAndInventory.batchNumber}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
               label="Reader Threshold"
-              value={new Date(purchaseAndInventory.expiry_date).toDateString()}
+              value={new Date(purchaseAndInventory.expiryDate).toDateString()}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
               label="Usage Instructions"
-              value={purchaseAndInventory.usage_instructions}
+              value={purchaseAndInventory.usageInstruction}
               sx={{ flex: 1 }}
             />
           </Box>
@@ -379,27 +379,27 @@ function ViewPurchaseAndInventoryContent({
               </TableRow>
             </TableHead>
             <TableBody>
-              {purchaseAndInventory?.medicine_disposals?.length > 0 ? (
-                purchaseAndInventory?.medicine_disposals.map((row) => (
+              {purchaseAndInventory?.medicineDisposals?.length > 0 ? (
+                purchaseAndInventory?.medicineDisposals.map((row) => (
                   <TableRow
-                    key={`${row.id}${row.disposal_date}`}
+                    key={`${row.id}${row.disposalDate}`}
                     sx={{
                       "&:last-child td, &:last-child th": { border: 0 },
                       cursor: "pointer",
                     }}
                   >
                     <TableCell align="center" component="th" scope="row">
-                      {row.disposal_date}
+                      {row.disposalDate}
                     </TableCell>
                     <TableCell align="center">
-                      {row.availability_quantity}
+                      {row.disposalQuantity}
                     </TableCell>
                     <TableCell align="center">
-                      {row.disposed_quantity}
+                      {row.disposalQuantity}
                     </TableCell>
                     <TableCell align="center">{row.contractor}</TableCell>
                     <TableCell align="center">{row.cost}</TableCell>
-                    <TableCell align="center">{row.balance_quantity}</TableCell>
+                    <TableCell align="center">{row.balanceQuantity}</TableCell>
                   </TableRow>
                 ))
               ) : (
@@ -429,11 +429,11 @@ function ViewPurchaseAndInventoryContent({
       >
         <DrawerContentItem
           label="Requested By"
-          value={purchaseAndInventory.requested_by}
+          value={purchaseAndInventory.requestedBy}
         />
         <DrawerContentItem
           label="Approved By"
-          value={purchaseAndInventory.approved_by}
+          value={purchaseAndInventory.approvedBy}
         />
         <DrawerContentItem
           label="Division"
