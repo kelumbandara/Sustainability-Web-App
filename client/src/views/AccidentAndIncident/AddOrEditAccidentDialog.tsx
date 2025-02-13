@@ -67,6 +67,7 @@ import { fetchDivision } from "../../api/divisionApi";
 import { fetchDepartmentData } from "../../api/departmentApi";
 import { fetchAccidentSubCategory, fetchMainAccidentCategory } from "../../api/accidentCategory";
 import useCurrentUser from "../../hooks/useCurrentUser";
+import { fetchAllUsers } from "../../api/userApi";
 
 type DialogProps = {
   open: boolean;
@@ -168,6 +169,11 @@ export default function AddOrEditAccidentDialog({
   const { data: departmentData, isFetching: isDepartmentDataFetching } = useQuery({
     queryKey: ["departments"],
     queryFn: fetchDepartmentData,
+  });
+
+  const { data: userData, isFetching: isUserDataFetching } = useQuery({
+    queryKey: ["users"],
+    queryFn: fetchAllUsers,
   });
 
 
@@ -1227,9 +1233,9 @@ export default function AddOrEditAccidentDialog({
                       {...field}
                       onChange={(event, newValue) => field.onChange(newValue)}
                       size="small"
-                      options={sampleAssignees?.map(
-                        (category) => category.name
-                      )}
+                      options={userData && Array.isArray(userData) 
+                        ? userData.filter(user => user.assigneeLevel >= 1).map(user => user.name)
+                        : []}
                       sx={{ flex: 1, margin: "0.5rem" }}
                       renderInput={(params) => (
                         <TextField

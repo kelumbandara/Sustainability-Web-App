@@ -42,6 +42,7 @@ import {
 } from "../../api/categoryApi";
 import { useQuery } from "@tanstack/react-query";
 import useCurrentUser from "../../hooks/useCurrentUser";
+import { fetchAllUsers } from "../../api/userApi";
 
 type DialogProps = {
   open: boolean;
@@ -97,6 +98,11 @@ export default function AddOrEditHazardRiskDialog({
   const { data: categoryData, isFetching: isCategoryDataFetching } = useQuery({
     queryKey: ["categories"],
     queryFn: fetchMainCategory,
+  });
+
+  const { data: userData, isFetching: isUserDataFetching } = useQuery({
+    queryKey: ["users"],
+    queryFn: fetchAllUsers,
   });
 
   const { data: subCategoryData, isFetching: isSubCategoryDataFetching } = useQuery({
@@ -661,7 +667,9 @@ export default function AddOrEditHazardRiskDialog({
               <Autocomplete
                 {...register("assignee", { required: true })}
                 size="small"
-                options={sampleAssignees?.map((category) => category.name)}
+                options={userData && Array.isArray(userData) 
+                  ? userData.filter(user => user.assigneeLevel >= 1).map(user => user.name)
+                  : []}
                 sx={{ flex: 1 }}
                 defaultValue={defaultValues?.assignee}
                 renderInput={(params) => (

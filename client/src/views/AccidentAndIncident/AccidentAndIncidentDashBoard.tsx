@@ -44,6 +44,21 @@ import {
   hazardRiskChartData1,
   hazardRiskChartData2,
 } from "../../api/sampleData/hazardRiskData";
+import { useQuery } from "@tanstack/react-query";
+import { getAccidentsList, getIncidentsList } from "../../api/accidentAndIncidentApi";
+import {
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+  subWeeks,
+  subMonths,
+  subYears,
+  isWithinInterval,
+} from "date-fns";
+import { fetchDivision } from "../../api/divisionApi";
 
 const breadcrumbItems = [
   { title: "Home", href: "/home" },
@@ -63,6 +78,132 @@ function HazardAndRiskDashboard() {
   } = useForm();
 
   const watchPeriod = watch("period");
+  const watchDivision = watch("division");
+  const watchCategory = watch("category");
+
+  const { data: accidentData, isFetching: isAccidentDataFetching } = useQuery({
+    queryKey: ["accidents"],
+    queryFn: getAccidentsList,
+  });
+
+  const { data: incidentData, isFetching: isIncidentDataFetching } = useQuery({
+    queryKey: ["incidents"],
+    queryFn: getIncidentsList,
+  });
+
+  const { data: divisionData, isFetching: isCategoryDataFetching } = useQuery({
+    queryKey: ["divisions"],
+    queryFn: fetchDivision,
+  });
+
+  const filterByPeriod = (data: any[], period: string) => {
+    const now = new Date();
+    switch (period) {
+      case HazardDashboardPeriods.THIS_WEEK:
+        return data.filter((item) => {
+          const itemDate = new Date(item.accidentDate || item.incidentDate);
+          return isWithinInterval(itemDate, { start: startOfWeek(now), end: endOfWeek(now) });
+        });
+      case HazardDashboardPeriods.LAST_WEEK:
+        return data.filter((item) => {
+          const itemDate = new Date(item.accidentDate || item.incidentDate);
+          return isWithinInterval(itemDate, { start: startOfWeek(subWeeks(now, 1)), end: endOfWeek(subWeeks(now, 1)) });
+        });
+      case HazardDashboardPeriods.THIS_MONTH:
+        return data.filter((item) => {
+          const itemDate = new Date(item.accidentDate || item.incidentDate);
+          return isWithinInterval(itemDate, { start: startOfMonth(now), end: endOfMonth(now) });
+        });
+      case HazardDashboardPeriods.LAST_MONTH:
+        return data.filter((item) => {
+          const itemDate = new Date(item.accidentDate || item.incidentDate);
+          return isWithinInterval(itemDate, { start: startOfMonth(subMonths(now, 1)), end: endOfMonth(subMonths(now, 1)) });
+        });
+      case HazardDashboardPeriods.THIS_YEAR:
+        return data.filter((item) => {
+          const itemDate = new Date(item.accidentDate || item.incidentDate);
+          return isWithinInterval(itemDate, { start: startOfYear(now), end: endOfYear(now) });
+        });
+      case HazardDashboardPeriods.LAST_YEAR:
+        return data.filter((item) => {
+          const itemDate = new Date(item.accidentDate || item.incidentDate);
+          return isWithinInterval(itemDate, { start: startOfYear(subYears(now, 1)), end: endOfYear(subYears(now, 1)) });
+        });
+      case HazardDashboardPeriods.CUSTOM:
+        return data.filter((item) => {
+          return true;
+        });
+      default:
+        return data;
+    }
+  };
+
+  const applyFilters = () => {
+    if (!accidentData || !incidentData) {
+      return { accidents: [], incidents: [] };
+    }
+
+    let filteredAccidents = accidentData;
+    let filteredIncidents = incidentData;
+
+    // Filter by period
+    if (watchPeriod) {
+      filteredAccidents = filterByPeriod(filteredAccidents, watchPeriod);
+      filteredIncidents = filterByPeriod(filteredIncidents, watchPeriod);
+    }
+
+    // Filter by division
+    if (watchDivision) {
+      filteredAccidents = filteredAccidents.filter((accident) => accident.division === watchDivision);
+      filteredIncidents = filteredIncidents.filter((incident) => incident.division === watchDivision);
+    }
+
+    // Filter by category
+    if (watchCategory) {
+      filteredAccidents = filteredAccidents.filter((accident) => accident.category === watchCategory);
+      filteredIncidents = filteredIncidents.filter((incident) => incident.category === watchCategory);
+    }
+
+    return {
+      accidents: filteredAccidents,
+      incidents: filteredIncidents,
+    };
+  };
+
+  const filterByStatus = () => {
+    const openAccidentsCount = accidents.filter(
+      (accident) => accident.status?.toLowerCase() === "open"
+    ).length;
+    const closedAccidentsCount = accidents.filter(
+      (accident) => accident.status?.toLowerCase() === "close"
+    ).length;
+  
+    const openIncidentsCount = incidents.filter(
+      (incident) => incident.status?.toLowerCase() === "draft"
+    ).length;
+    const closeIncidentsCount = incidents.filter(
+      (incident) => incident.status?.toLowerCase() === "close"
+    ).length;
+  
+    return {
+      openAccidentsCount,
+      openIncidentsCount,
+      closeIncidentsCount,
+      closedAccidentsCount
+    };
+  };
+
+
+
+  const { accidents, incidents } = applyFilters();
+  const totalAccidents = accidents.length;
+  const totalIncidents = incidents.length;
+  const { openAccidentsCount, openIncidentsCount, closeIncidentsCount, closedAccidentsCount } = filterByStatus();
+  const totalAccidentsOpen = openAccidentsCount;
+  const totalIncidentsOpen = openIncidentsCount;
+  const totalAccidentClosed = closedAccidentsCount;
+  const totalIncidentClosed = closeIncidentsCount
+
 
   return (
     <Stack>
@@ -106,7 +247,7 @@ function HazardAndRiskDashboard() {
               }}
             >
               <Autocomplete
-                {...register("period", { required: true })}
+                {...register("period", { required: false })}
                 size="small"
                 options={Object.values(HazardDashboardPeriods)}
                 sx={{ flex: 1, margin: "0.5rem" }}
@@ -149,9 +290,9 @@ function HazardAndRiskDashboard() {
               }}
             >
               <Autocomplete
-                {...register("division", { required: true })}
+                {...register("division", { required: false })}
                 size="small"
-                options={sampleDivisions?.map((division) => division.name)}
+                options={divisionData?.length ? divisionData.map((division) => division.divisionName) : []}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (
                   <TextField
@@ -172,7 +313,7 @@ function HazardAndRiskDashboard() {
               }}
             >
               <Autocomplete
-                {...register("category", { required: true })}
+                {...register("category", { required: false })}
                 size="small"
                 options={HazardOrRiskCategories?.map(
                   (category) => category.name
@@ -244,9 +385,9 @@ function HazardAndRiskDashboard() {
           }}
         >
           <DashboardCard
-            title="Total"
+            title="Total Accidents"
             titleIcon={<FunctionsIcon fontSize="small" />}
-            value={10}
+            value={totalAccidents}
             subDescription="10% From previous period"
           />
         </Box>
@@ -259,25 +400,65 @@ function HazardAndRiskDashboard() {
           }}
         >
           <DashboardCard
-            title="Completed"
+            title="Pending Reports"
             titleIcon={<CheckCircleOutlineIcon fontSize="small" />}
+            value={openAccidentsCount}
+            subDescription={openAccidentsCount > 0 ? `${((openAccidentsCount / totalAccidents) * 100).toFixed(2)}%` : "No Pendings Records yet"}
+          />
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            flex: 1,
+            margin: "0.5rem",
+            minWidth: "250px",
+          }}
+        >
+          <DashboardCard
+            title="Completed Reports"
+            titleIcon={<PendingIcon fontSize="small" />}
+            value={totalAccidentClosed}
+            subDescription={`${((closedAccidentsCount / totalAccidents) * 100).toFixed(2)}%`}
+          />
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            flex: 1,
+            margin: "0.5rem",
+            minWidth: "250px",
+          }}
+        >
+          <DashboardCard
+            title="Amount For Accidents"
+            titleIcon={<CreditCardIcon fontSize="small" />}
             value={5}
             subDescription="5% From previous period"
           />
         </Box>
+      </Box>
+
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "space-between",
+          marginTop: "1rem",
+        }}
+      >
         <Box
           sx={{
             display: "flex",
             flex: 1,
-            margin: "0.5rem",
             minWidth: "250px",
+            margin: "0.5rem",
           }}
         >
           <DashboardCard
-            title="Pending"
-            titleIcon={<PendingIcon fontSize="small" />}
-            value={8}
-            subDescription="8% From previous period"
+            title="Total Incidents"
+            titleIcon={<FunctionsIcon fontSize="small" />}
+            value={totalIncidents}
+            subDescription="10% From previous period"
           />
         </Box>
         <Box
@@ -289,7 +470,37 @@ function HazardAndRiskDashboard() {
           }}
         >
           <DashboardCard
-            title="Amount"
+            title="Pending Reports"
+            titleIcon={<CheckCircleOutlineIcon fontSize="small" />}
+            value={openIncidentsCount}
+            subDescription={`${((openIncidentsCount / totalIncidents) * 100).toFixed(2)}%`}
+          />
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            flex: 1,
+            margin: "0.5rem",
+            minWidth: "250px",
+          }}
+        >
+          <DashboardCard
+            title="Completed Reports"
+            titleIcon={<PendingIcon fontSize="small" />}
+            value={closeIncidentsCount}
+            subDescription={`${((closeIncidentsCount / totalIncidents) * 100).toFixed(2)}%`}
+          />
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            flex: 1,
+            margin: "0.5rem",
+            minWidth: "250px",
+          }}
+        >
+          <DashboardCard
+            title="Amount For Incidents"
             titleIcon={<CreditCardIcon fontSize="small" />}
             value={5}
             subDescription="5% From previous period"

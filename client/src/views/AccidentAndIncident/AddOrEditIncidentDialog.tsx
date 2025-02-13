@@ -58,6 +58,8 @@ import AddOrEditPersonDialog from "./AddOrEditPersonDialog";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { circumstancesOptions } from "../../api/sampleData/incidentData";
 import useCurrentUser from "../../hooks/useCurrentUser";
+import { fetchAllUsers } from "../../api/userApi";
+import { useQuery } from "@tanstack/react-query";
 
 type DialogProps = {
   open: boolean;
@@ -117,6 +119,11 @@ export default function AddOrEditIncidentDialog({
     console.log("event", event);
     setActiveTab(newValue);
   };
+
+  const { data: userData, isFetching: isUserDataFetching } = useQuery({
+    queryKey: ["users"],
+    queryFn: fetchAllUsers,
+  });
 
   const {
     register,
@@ -858,7 +865,9 @@ export default function AddOrEditIncidentDialog({
                 <Autocomplete
                   {...register("assignee", { required: true })}
                   size="small"
-                  options={sampleAssignees?.map((category) => category.name)}
+                  options={userData && Array.isArray(userData) 
+                    ? userData.filter(user => user.assigneeLevel >= 1).map(user => user.name)
+                    : []}
                   sx={{ flex: 1 }}
                   defaultValue={defaultValues?.assignee}
                   renderInput={(params) => (
