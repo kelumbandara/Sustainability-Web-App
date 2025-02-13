@@ -193,9 +193,39 @@ function HazardAndRiskDashboard() {
     };
   };
 
+  const processHazardChartData = () => {
+    if (!accidentData) return [];
+      let filteredAccidents = watchPeriod ? filterByPeriod(accidentData, watchPeriod) : accidentData;
+  
+    const divisionCounts = filteredAccidents.reduce((acc, accident) => {
+      const division = accident.division || "Unknown";
+      acc[division] = (acc[division] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+      return Object.entries(divisionCounts).map(([division, count]) => ({
+      name: division,
+      pv: count,
+    }));
+  };
 
+  const processHazardChartDataIncident = () => {
+    if (!incidentData) return [];
+      let filteredIncidents = watchPeriod ? filterByPeriod(incidentData, watchPeriod) : incidentData;
+  
+    const divisionCounts = filteredIncidents.reduce((acc, incident) => {
+      const division = incident.division || "Unknown";
+      acc[division] = (acc[division] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+      return Object.entries(divisionCounts).map(([division, count]) => ({
+      name: division,
+      pv: count,
+    }));
+  };
 
   const { accidents, incidents } = applyFilters();
+  const accidentLineChart = processHazardChartData();
+  const incidentLineChart = processHazardChartDataIncident();
   const totalAccidents = accidents.length;
   const totalIncidents = incidents.length;
   const { openAccidentsCount, openIncidentsCount, closeIncidentsCount, closedAccidentsCount } = filterByStatus();
@@ -521,7 +551,7 @@ function HazardAndRiskDashboard() {
         >
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
-              data={hazardRiskChartData1}
+              data={accidentLineChart}
               margin={{
                 top: 50,
                 right: 30,
@@ -615,6 +645,116 @@ function HazardAndRiskDashboard() {
           </Box>
         </Box>
       </Box>
+
+      <Box sx={{ display: "flex", flexDirection: isTablet ? "column" : "row" }}>
+        <Box
+          sx={{
+            width: "100%",
+            height: 500,
+            marginTop: "1rem",
+            flex: 2,
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+            padding: "1rem",
+          }}
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={incidentLineChart}
+              margin={{
+                top: 50,
+                right: 30,
+                left: 20,
+                bottom: 60,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                dataKey="name"
+                angle={-15}
+                textAnchor="end"
+                fontSize={"small"}
+              />
+              <YAxis
+                label={{
+                  value: "Division",
+                  position: "top",
+                  offset: 25,
+                }}
+                fontSize={"small"}
+              />
+              <Tooltip />
+              <Line
+                type="linear"
+                dataKey="pv"
+                stroke="#8884d8"
+                activeDot={{ r: 8 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            flex: 1,
+            flexDirection: "column",
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+            margin: "1rem",
+            padding: "1rem",
+          }}
+        >
+          <Typography variant="subtitle1">Status</Typography>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={hazardRiskChartData2}
+                dataKey="value"
+                cx="50%"
+                cy="50%"
+                outerRadius={isMobile ? 60 : isTablet ? 80 : 100}
+                innerRadius={isMobile ? 40 : isTablet ? 60 : 80}
+                fill="#8884d8"
+              >
+                {hazardRiskChartData2.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={
+                      ["var(--pallet-blue)", "var(--pallet-light-grey)"][
+                        index % 2
+                      ]
+                    }
+                  />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <Typography
+              variant="subtitle2"
+              sx={{ color: "var(--pallet-blue)" }}
+            >
+              This Month
+            </Typography>
+            <Typography variant="subtitle1">10 Cases</Typography>
+            <Typography
+              variant="subtitle2"
+              sx={{ color: "var(--pallet-grey)" }}
+            >
+              0 From Previous Period
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+
+      
     </Stack>
   );
 }
