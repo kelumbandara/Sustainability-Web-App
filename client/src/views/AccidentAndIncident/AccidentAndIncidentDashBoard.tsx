@@ -402,7 +402,7 @@ function HazardAndRiskDashboard() {
           <DashboardCard
             title="Pending Reports"
             titleIcon={<CheckCircleOutlineIcon fontSize="small" />}
-            value={openAccidentsCount}
+            value={totalAccidentsOpen}
             subDescription={openAccidentsCount > 0 ? `${((openAccidentsCount / totalAccidents) * 100).toFixed(2)}%` : "No Pendings Records yet"}
           />
         </Box>
@@ -472,7 +472,7 @@ function HazardAndRiskDashboard() {
           <DashboardCard
             title="Pending Reports"
             titleIcon={<CheckCircleOutlineIcon fontSize="small" />}
-            value={openIncidentsCount}
+            value={totalIncidentsOpen}
             subDescription={`${((openIncidentsCount / totalIncidents) * 100).toFixed(2)}%`}
           />
         </Box>
@@ -487,8 +487,8 @@ function HazardAndRiskDashboard() {
           <DashboardCard
             title="Completed Reports"
             titleIcon={<PendingIcon fontSize="small" />}
-            value={closeIncidentsCount}
-            subDescription={`${((closeIncidentsCount / totalIncidents) * 100).toFixed(2)}%`}
+            value={totalIncidentClosed}
+            subDescription={`${((openIncidentsCount / totalIncidents) * 100).toFixed(2)}%`}
           />
         </Box>
         <Box
