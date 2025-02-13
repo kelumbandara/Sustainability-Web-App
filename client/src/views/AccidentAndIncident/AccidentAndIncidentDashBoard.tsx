@@ -5,6 +5,7 @@ import {
   Autocomplete,
   Box,
   Button,
+  Divider,
   Stack,
   TextField,
   Typography,
@@ -223,6 +224,55 @@ function HazardAndRiskDashboard() {
     }));
   };
 
+  const countAccidentIndividualsByGender = () => {
+    if (!accidentData) return { male: 0, female: 0 };
+  
+    // Apply filters
+    let filteredAccidents = applyFilters().accidents;
+  
+    // Extract affected individuals
+    let maleCount = 0;
+    let femaleCount = 0;
+  
+    filteredAccidents.forEach((accident) => {
+      accident.effectedIndividuals?.forEach((individual) => {
+        if (individual.gender?.toLowerCase() === "male") {
+          maleCount++;
+        } else if (individual.gender?.toLowerCase() === "female") {
+          femaleCount++;
+        }
+      });
+    });
+  
+    return { male: maleCount, female: femaleCount };
+  };
+
+  const countIncidentIndividualsByGender = () => {
+    if (!incidentData) return { maleI: 0, femaleI: 0 };
+  
+    // Apply filters
+    let filteredIncidents = applyFilters().incidents;
+  
+    // Extract affected individuals
+    let maleCount = 0;
+    let femaleCount = 0;
+  
+    filteredIncidents.forEach((incident) => {
+      incident.effectedIndividuals?.forEach((individual) => {
+        if (individual.gender?.toLowerCase() === "male") {
+          maleCount++;
+        } else if (individual.gender?.toLowerCase() === "female") {
+          femaleCount++;
+        }
+      });
+    });
+  
+    return { maleI: maleCount, femaleI: femaleCount };
+  };
+  
+
+  const { male, female } = countAccidentIndividualsByGender();  
+  const { maleI, femaleI } = countIncidentIndividualsByGender(); 
   const { accidents, incidents } = applyFilters();
   const accidentLineChart = processHazardChartData();
   const incidentLineChart = processHazardChartDataIncident();
@@ -232,7 +282,15 @@ function HazardAndRiskDashboard() {
   const totalAccidentsOpen = openAccidentsCount;
   const totalIncidentsOpen = openIncidentsCount;
   const totalAccidentClosed = closedAccidentsCount;
-  const totalIncidentClosed = closeIncidentsCount
+  const totalIncidentClosed = closeIncidentsCount;
+  const accidentsByGender = [
+    { name: "Male", value: male },
+    { name: "Female", value: female },
+  ];
+  const IncidentsByGender = [
+    { name: "Male", value: maleI },
+    { name: "Female", value: femaleI },
+  ];
 
 
   return (
@@ -468,6 +526,12 @@ function HazardAndRiskDashboard() {
         </Box>
       </Box>
 
+      <Divider
+        sx={{
+          marginTop:"1rem"
+        }}
+      />
+
       <Box
         sx={{
           display: "flex",
@@ -599,7 +663,7 @@ function HazardAndRiskDashboard() {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={hazardRiskChartData2}
+                data={accidentsByGender}
                 dataKey="value"
                 cx="50%"
                 cy="50%"
@@ -607,7 +671,7 @@ function HazardAndRiskDashboard() {
                 innerRadius={isMobile ? 40 : isTablet ? 60 : 80}
                 fill="#8884d8"
               >
-                {hazardRiskChartData2.map((entry, index) => (
+                {accidentsByGender.map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={
@@ -707,7 +771,7 @@ function HazardAndRiskDashboard() {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={hazardRiskChartData2}
+                data={IncidentsByGender}
                 dataKey="value"
                 cx="50%"
                 cy="50%"
@@ -715,11 +779,11 @@ function HazardAndRiskDashboard() {
                 innerRadius={isMobile ? 40 : isTablet ? 60 : 80}
                 fill="#8884d8"
               >
-                {hazardRiskChartData2.map((entry, index) => (
+                {IncidentsByGender.map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={
-                      ["var(--pallet-blue)", "var(--pallet-light-grey)"][
+                      ["var(--pallet-blue)", "var(--pallet-pink)"][
                         index % 2
                       ]
                     }
