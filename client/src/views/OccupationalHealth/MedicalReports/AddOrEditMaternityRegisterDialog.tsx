@@ -356,10 +356,10 @@ export default function AddOrEditMaternityRegisterDialog({
                       required
                       id="name"
                       label="Name"
-                      error={!!errors.name}
+                      error={!!errors.employeeName}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("name", { required: true })}
+                      {...register("employeeName", { required: true })}
                     />
                     <TextField
                       required
@@ -416,14 +416,14 @@ export default function AddOrEditMaternityRegisterDialog({
                       required
                       id="supervisorManager"
                       label="Supervisor/Manager"
-                      error={!!errors.supervisorManager}
+                      error={!!errors.supervisorOrManager}
                       size="small"
                       sx={{
                         flex: 1,
                         margin: "0.5rem",
                         marginTop: isTablet ? "0.5rem" : "1.8rem",
                       }}
-                      {...register("supervisorManager")}
+                      {...register("supervisorOrManager")}
                     />
                     <Controller
                       control={control}
@@ -895,10 +895,10 @@ export default function AddOrEditMaternityRegisterDialog({
                     />
                     <Controller
                       control={control}
-                      {...register("rejoiningDate", {
+                      {...register("reJoinDate", {
                         required: true,
                       })}
-                      name={"rejoiningDate"}
+                      name={"reJoinDate"}
                       render={({ field }) => {
                         return (
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
@@ -906,7 +906,7 @@ export default function AddOrEditMaternityRegisterDialog({
                               onChange={(e) => field.onChange(e)}
                               value={field.value}
                               label="Rejoining Date"
-                              error={errors?.rejoiningDate ? "Required" : ""}
+                              error={errors?.reJoinDate ? "Required" : ""}
                             />
                           </Box>
                         );
