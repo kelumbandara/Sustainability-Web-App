@@ -44,12 +44,12 @@ export type MedicalDocument = z.infer<typeof medicalDocumentSchema>;
 export const MaternityRegisterSchema = z.object({
   id: z.string(),
   employeeId: z.string(),
-  name: z.string(),
+  employeeName: z.string(),
   age: z.string(),
   contactNumber: z.string(),
   designation: z.string(),
   department: z.string(),
-  supervisorManager: z.string(),
+  supervisorOrManager: z.string(),
   dateOfJoin: z.date(),
   averageWages: z.string(),
   applicationId: z.string(),
@@ -60,10 +60,10 @@ export const MaternityRegisterSchema = z.object({
   actualDeliveryDate: z.date(),
   leaveStatus: z.nativeEnum(LeaveStatus),
   noticeDateAfterDelivery: z.date(),
-  rejoiningDate: z.date(),
+  reJoinDate: z.date(),
   supportProvided: z.string().optional(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  created_at: z.string(),
+  updated_at: z.string(),
   publishedAt: z.string(),
   signature: z.string(),
   remarks: z.string().optional(),
@@ -77,7 +77,7 @@ export const MaternityRegisterSchema = z.object({
 export type MaternityRegister = z.infer<typeof MaternityRegisterSchema>;
 
 export async function getMaternityRegistersList() {
-  const res = await axios.get("/api/maternity-registers");
+  const res = await axios.get("/api/benefit-request");
   return res.data;
 }
 
@@ -86,7 +86,6 @@ export const createMaternityRegister = async (
 ) => {
   const formData = new FormData();
 
-  // Append each property of the maternity Register object to the form data
   Object.keys(maternityRegister).forEach((key) => {
     const value = maternityRegister[key as keyof typeof maternityRegister];
     if (Array.isArray(value)) {
@@ -100,7 +99,7 @@ export const createMaternityRegister = async (
     }
   });
 
-  const res = await axios.post("/api/maternity-registers", formData, {
+  const res = await axios.post("/api/benefit-request", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -129,7 +128,7 @@ export const updateMaternityRegister = async (
   });
 
   const res = await axios.put(
-    `/api/maternity-registers/${maternityRegister.id}/update`,
+    `/api/benefit-request/${maternityRegister.id}/update`,
     formData,
     {
       headers: {
@@ -142,6 +141,6 @@ export const updateMaternityRegister = async (
 };
 
 export const deleteMaternityRegister = async (id: string) => {
-  const res = await axios.delete(`/api/maternity-registers/${id}/delete`);
+  const res = await axios.delete(`/api/benefit-request/${id}/delete`);
   return res.data;
 };
