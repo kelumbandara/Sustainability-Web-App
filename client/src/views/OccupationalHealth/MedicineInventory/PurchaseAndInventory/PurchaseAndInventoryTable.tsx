@@ -202,7 +202,7 @@ function PurchaseAndInventoryTable() {
                       {row?.deliveryQuantity ?? "--"}
                     </TableCell>
                     <TableCell align="right">
-                      {row?.issued_quantity ?? "--"}
+                      {row?.issuedQuantity ?? "--"}
                     </TableCell>
                     <TableCell align="right">
                       {row?.disposalQuantity ?? "--"}
