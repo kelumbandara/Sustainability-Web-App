@@ -69,7 +69,7 @@ function HazardAndRiskDashboard() {
 
   const watchPeriod = watch("period");
 
-  const { data: riskData, isFetching: isRiskDataFetching } = useQuery({
+  const { data: riskData = [], isFetching: isRiskDataFetching } = useQuery({
     queryKey: ["hazardRisks"],
     queryFn: getHazardRiskList,
   });
