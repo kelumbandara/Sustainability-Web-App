@@ -165,7 +165,7 @@ export default function AddOrEditBenefitEntitlementDialog({
             <TextField
               id="amountOfFirstInstallment"
               label="Amount of First Installment"
-              error={!!errors.amountOfFirstInstallment}
+              error={!!errors.amount1stInstallment}
               type="number"
               size="small"
               sx={{
@@ -173,12 +173,12 @@ export default function AddOrEditBenefitEntitlementDialog({
                 margin: "0.5rem",
                 marginTop: isTablet ? "0.5rem" : "1.4rem",
               }}
-              {...register("amountOfFirstInstallment", { required: true })}
+              {...register("amount1stInstallment", { required: true })}
             />
             <Controller
               control={control}
-              {...register("dateOfFirstInstallment", { required: true })}
-              name={"dateOfFirstInstallment"}
+              {...register("dateOf1stInstallment", { required: true })}
+              name={"dateOf1stInstallment"}
               render={({ field }) => {
                 return (
                   <Box sx={{ flex: 1, marginX: "0.5rem" }}>
@@ -187,7 +187,7 @@ export default function AddOrEditBenefitEntitlementDialog({
                       value={field.value}
                       label="Date of First Installment"
                       error={
-                        errors?.dateOfFirstInstallment ? "Required" : ""
+                        errors?.dateOf1stInstallment ? "Required" : ""
                       }
                     />
                   </Box>
@@ -195,9 +195,9 @@ export default function AddOrEditBenefitEntitlementDialog({
               }}
             />
             <TextField
-              id="amountOfSecondInstallment"
+              id="amount2ndInstallment"
               label="Amount of Second Installment"
-              error={!!errors.amountOfSecondInstallment}
+              error={!!errors.amount2ndInstallment}
               type="number"
               size="small"
               sx={{
@@ -205,7 +205,7 @@ export default function AddOrEditBenefitEntitlementDialog({
                 margin: "0.5rem",
                 marginTop: isTablet ? "0.5rem" : "1.4rem",
               }}
-              {...register("amountOfSecondInstallment")}
+              {...register("amount2ndInstallment")}
             />
           </Box>
 
@@ -217,8 +217,8 @@ export default function AddOrEditBenefitEntitlementDialog({
           >
             <Controller
               control={control}
-              {...register("dateOfSecondInstallment")}
-              name={"dateOfSecondInstallment"}
+              {...register("dateOf2ndInstallment")}
+              name={"dateOf2ndInstallment"}
               render={({ field }) => {
                 return (
                   <Box sx={{ flex: 1, marginX: "0.5rem" }}>
@@ -232,7 +232,7 @@ export default function AddOrEditBenefitEntitlementDialog({
               }}
             />
             <Autocomplete
-              {...register("ifBenefitReceivedSomeoneElse", {
+              {...register("ifBenefitReceived", {
                 required: true,
               })}
               size="small"
@@ -242,18 +242,18 @@ export default function AddOrEditBenefitEntitlementDialog({
                 margin: "0.5rem",
                 marginTop: isTablet ? "0.5rem" : "1.4rem",
               }}
-              defaultValue={defaultValues?.ifBenefitReceivedSomeoneElse}
+              defaultValue={defaultValues?.ifBenefitReceived}
               onChange={(e, value) => {
                 console.log("e", e);
-                setValue("ifBenefitReceivedSomeoneElse", value);
+                setValue("ifBenefitReceived", value);
               }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   required
-                  error={!!errors.ifBenefitReceivedSomeoneElse}
+                  error={!!errors.ifBenefitReceived}
                   label="If Benefit Received Someone Else"
-                  name="ifBenefitReceivedSomeoneElse"
+                  name="ifBenefitReceived"
                 />
               )}
             />

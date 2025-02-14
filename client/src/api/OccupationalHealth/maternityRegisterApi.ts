@@ -6,11 +6,11 @@ export const benefitAndEntitlementsSchema = z.object({
   benefitType: z.string(),
   amountValue: z.string(),
   totalDaysPaid: z.string(),
-  amountOfFirstInstallment: z.number().optional(),
-  dateOfFirstInstallment: z.date().optional(),
-  amountOfSecondInstallment: z.number().optional(),
-  dateOfSecondInstallment: z.date().optional(),
-  ifBenefitReceivedSomeoneElse: z.string(),
+  amount1stInstallment: z.number().optional(),
+  dateOf1stInstallment: z.date().optional(),
+  amount2ndInstallment: z.number().optional(),
+  dateOf2ndInstallment: z.date().optional(),
+  ifBenefitReceived: z.string(),
   beneficiaryName: z.string(),
   beneficiaryAddress: z.string(),
   beneficiaryTotalAmount: z.number(),
@@ -81,10 +81,10 @@ export async function getMaternityRegistersList() {
   return res.data;
 }
 
-export const createMaternityRegister = async (MaternityRegister: MaternityRegister) => {
+export const createMaternityRegister = async (maternityRegister: MaternityRegister) => {
   const formData = new FormData();
-  Object.keys(MaternityRegister).forEach((key) => {
-    const value = MaternityRegister[key as keyof typeof MaternityRegister];
+  Object.keys(maternityRegister).forEach((key) => {
+    const value = maternityRegister[key as keyof typeof maternityRegister];
 
     if (Array.isArray(value)) {
       value.forEach((item, index) => {
@@ -110,27 +110,31 @@ export const createMaternityRegister = async (MaternityRegister: MaternityRegist
   });
 }
 
-export const updateMaternityRegister = async (
-  maternityRegister: MaternityRegister
-) => {
+
+export const updateMaternityRegister = async (maternityRegister: MaternityRegister) => {
   const formData = new FormData();
 
-  // Append each property of the maternity Register object to the form data
   Object.keys(maternityRegister).forEach((key) => {
     const value = maternityRegister[key as keyof typeof maternityRegister];
+
     if (Array.isArray(value)) {
       value.forEach((item, index) => {
-        formData.append(`${key}[${index}]`, JSON.stringify(item));
+        if (key === 'benefitsAndEntitlements' || key === 'medicalDocuments') {
+          Object.keys(item).forEach((nestedKey) => {
+            formData.append(`${key}[${index}][${nestedKey}]`, item[nestedKey].toString());
+          });
+        } else {
+          formData.append(`${key}[${index}]`, JSON.stringify(item));
+        }
       });
     } else if (value instanceof Date) {
       formData.append(key, value.toISOString());
     } else if (value !== null && value !== undefined) {
       formData.append(key, value.toString());
     }
-  });
-
-  const res = await axios.put(
-    `/api/benefit-request/${maternityRegister.id}/update`,
+  });  
+  const res = await axios.post(
+       `/api/benefit-request/${maternityRegister.id}/update`,
     formData,
     {
       headers: {
@@ -141,7 +145,6 @@ export const updateMaternityRegister = async (
 
   return res.data;
 };
-
 export const deleteMaternityRegister = async (id: string) => {
   const res = await axios.delete(`/api/benefit-request/${id}/delete`);
   return res.data;
