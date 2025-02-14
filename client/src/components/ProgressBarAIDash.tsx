@@ -6,12 +6,13 @@ import Box from '@mui/material/Box';
 interface CircularProgressWithLabelAIProps extends CircularProgressProps {
   daysSince: number; // Accept daysSince as a prop
   size?: number;
+  nameValue?: string;
 }
 
 function CircularProgressWithLabelAI(
   props: CircularProgressWithLabelAIProps
 ) {
-  const { daysSince, size = 40 } = props;
+  const { daysSince, size = 40, nameValue } = props;
 
   // 3 months = 90 days. Progress bar should reset every 3 months
   const cycleLength = 90; // 90 days for 3 months
@@ -64,14 +65,19 @@ function CircularProgressWithLabelAI(
           component="div"
           sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}
         >
-          {`Day Since: ${daysSince}`}  {/* Display daysSince here */}
+          {`Days Since Last ${nameValue}`}
         </Typography>
         <Typography
-          variant="overline"
+          variant='h6'
+        >
+          {daysSince}
+        </Typography>
+        <Typography
+          variant="caption"
           component="div"
           sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}
         >
-          {`Months: ${monthCount + 1}`}  {/* Display month count here */}
+          {`for ${monthCount + 1}`} months  {/* Display month count here */}
         </Typography>
       </Box>
     </Box>
