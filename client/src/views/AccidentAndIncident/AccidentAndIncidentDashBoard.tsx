@@ -60,8 +60,11 @@ import {
   subMonths,
   subYears,
   isWithinInterval,
+  parseISO,
+  differenceInDays,
 } from "date-fns";
 import { fetchDivision } from "../../api/divisionApi";
+import CircularProgressWithLabelAI from "../../components/ProgressBarAIDash";
 
 const breadcrumbItems = [
   { title: "Home", href: "/home" },
@@ -318,7 +321,68 @@ function HazardAndRiskDashboard() {
     return ageGroups;
   };
 
-  
+  const countIncidentIndividualsByAge = () => {
+    if (!incidentData) {
+      return {
+        smallestAge: 0,
+        smallAge: 0,
+        middledAge: 0,
+        middleAge: 0,
+        bigAge: 0,
+        largeAge: 0,
+        sixPlus: 0,
+      };
+    }
+
+    let filteredIncidents = applyFilters().incidents;
+
+    let ageGroups = {
+      smallestAge: 0, // 16-19
+      smallAge: 0, // 20-24
+      middledAge: 0, // 25-34
+      middleAge: 0, // 35-44
+      bigAge: 0, // 45-54
+      largeAge: 0, // 55-60
+      sixPlus: 0, // 60+
+    };
+
+    filteredIncidents.forEach((incident) => {
+      incident.effectedIndividuals?.forEach((individual) => {
+        const age = individual.age;
+
+        if (age >= 16 && age <= 19) {
+          ageGroups.smallestAge++;
+        } else if (age >= 20 && age <= 24) {
+          ageGroups.smallAge++;
+        } else if (age >= 25 && age <= 34) {
+          ageGroups.middledAge++;
+        } else if (age >= 35 && age <= 44) {
+          ageGroups.middleAge++;
+        } else if (age >= 45 && age <= 54) {
+          ageGroups.bigAge++;
+        } else if (age >= 55 && age <= 60) {
+          ageGroups.largeAge++;
+        } else if (age > 60) {
+          ageGroups.sixPlus++;
+        }
+      });
+    });
+
+    return ageGroups;
+  };
+
+  const ageDataIncident = countIncidentIndividualsByAge();
+  const hazardRiskChartData4 = [
+    { name: "16-19", value: ageDataIncident.smallestAge },
+    { name: "20-24", value: ageDataIncident.smallAge },
+    { name: "25-34", value: ageDataIncident.middledAge },
+    { name: "35-44", value: ageDataIncident.middleAge },
+    { name: "45-54", value: ageDataIncident.bigAge },
+    { name: "55-60", value: ageDataIncident.largeAge },
+    { name: "60+", value: ageDataIncident.sixPlus },
+  ];
+
+
   const ageData = countAccidentIndividualsByAge();
   const hazardRiskChartData3 = [
     { name: "16-19", value: ageData.smallestAge },
@@ -330,8 +394,27 @@ function HazardAndRiskDashboard() {
     { name: "60+", value: ageData.sixPlus },
   ];
 
+  const today = new Date();
+  const latestAccidentDate = (Array.isArray(accidentData) ? accidentData : []).reduce((latest, accident) => {
+    const accidentDate = parseISO(accident.accidentDate);
+    return accidentDate > latest ? accidentDate : latest;
+  }, new Date(0));
+
+  const daysSinceLastAccident = Math.abs(differenceInDays(latestAccidentDate, today));
+
+  const latestIncidentDate = (Array.isArray(incidentData) ? incidentData : []).reduce((latest, incident) => {
+    const incidentDate = parseISO(incident.incidentDate);
+    return incidentDate > latest ? incidentDate : latest;
+  }, new Date(0));
+
+  const daysSinceLastIncident = Math.abs(differenceInDays(latestIncidentDate, today));
 
 
+
+
+
+
+  const startDate = new Date('2025-01-01'); // Example start date
   const { male, female } = countAccidentIndividualsByGender();
   const { maleI, femaleI } = countIncidentIndividualsByGender();
   const { accidents, incidents } = applyFilters();
@@ -890,6 +973,7 @@ function HazardAndRiskDashboard() {
             padding: "1rem",
           }}
         >
+          <Typography>hi</Typography>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={hazardRiskChartData3}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -912,30 +996,16 @@ function HazardAndRiskDashboard() {
           }}
         >
           <Typography variant="subtitle1">Status</Typography>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={IncidentsByGender}
-                dataKey="value"
-                cx="50%"
-                cy="50%"
-                outerRadius={isMobile ? 60 : isTablet ? 80 : 100}
-                innerRadius={isMobile ? 40 : isTablet ? 60 : 80}
-                fill="#8884d8"
-              >
-                {IncidentsByGender.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={
-                      ["var(--pallet-blue)", "var(--pallet-pink)"][
-                      index % 2
-                      ]
-                    }
-                  />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
+          <ResponsiveContainer width="100%" height="auto">
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <CircularProgressWithLabelAI daysSince={daysSinceLastAccident} size={250} />
+            </Box>
           </ResponsiveContainer>
           <Box
             sx={{
@@ -943,6 +1013,77 @@ function HazardAndRiskDashboard() {
               justifyContent: "center",
               flexDirection: "column",
               alignItems: "center",
+              marginTop: "2rem"
+            }}
+          >
+            <Typography
+              variant="subtitle2"
+              sx={{ color: "var(--pallet-blue)" }}
+            >
+              This Month
+            </Typography>
+            <Typography variant="subtitle1">10 Cases</Typography>
+            <Typography
+              variant="subtitle2"
+              sx={{ color: "var(--pallet-grey)" }}
+            >
+              0 From Previous Period
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+
+      <Box sx={{ display: "flex", flexDirection: isTablet ? "column" : "row" }}>
+        <Box
+          sx={{
+            width: "100%",
+            height: 500,
+            marginTop: "1rem",
+            flex: 2,
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+            padding: "1rem",
+          }}
+        >
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={hazardRiskChartData4}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis label={{ value: "Number of Individuals", angle: -90, position: "insideLeft" }} />
+              <Tooltip />
+              <Bar dataKey="value" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            flex: 1,
+            flexDirection: "column",
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+            margin: "1rem",
+            padding: "1rem",
+          }}
+        >
+          <Typography variant="subtitle1">Status</Typography>
+          <ResponsiveContainer width="100%" height="auto">
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <CircularProgressWithLabelAI daysSince={daysSinceLastIncident} size={250} />
+            </Box>
+          </ResponsiveContainer>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              flexDirection: "column",
+              alignItems: "center",
+              marginTop: "2rem"
             }}
           >
             <Typography
