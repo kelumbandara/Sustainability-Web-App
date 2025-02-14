@@ -181,7 +181,7 @@ function HazardAndRiskDashboard() {
   }, [selectedPeriod, selectedDivision, riskData]);
 
   const filteredRiskDataForCase = useMemo(() => {
-    if (!selectedDivision || !riskData) return [];
+    if (!selectedDivision || !Array.isArray(riskData)) return [];
 
     return riskData.filter((risk) => {
       const riskDate = new Date(risk.created_at);
