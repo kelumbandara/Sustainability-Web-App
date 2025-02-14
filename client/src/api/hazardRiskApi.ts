@@ -206,6 +206,9 @@ export const HazardAndRiskSchema = z.object({
   cost: z.string().optional(),
   remarks: z.string().optional(),
   actionTaken: z.string().optional(),
+  created_at: z.string(),
+  referenceNumber: z.string(),
+  createdByUserName: z.string(),
 });
 
 export type HazardAndRisk = z.infer<typeof HazardAndRiskSchema>;
@@ -216,12 +219,20 @@ export async function getHazardRiskList() {
 }
 
 export const createHazardRisk = async (hazardRisk: HazardAndRisk) => {
+  const token = `Bearer ${localStorage.getItem("token") || ""}`;
   const formData = new FormData();
+
+  formData.append("token", token);
+  console.log('submit',token)
 
   Object.keys(hazardRisk).forEach((key) => {
     const value = hazardRisk[key as keyof HazardAndRisk];
 
-    if (Array.isArray(value)) {
+    if (key === "documents" && Array.isArray(value)) {
+      value.forEach((file, index) => {
+        formData.append(`documents[${index}]`, file);
+      });
+    } else if (Array.isArray(value)) {
       value.forEach((item, index) => {
         formData.append(`${key}[${index}]`, JSON.stringify(item));
       });
@@ -237,10 +248,10 @@ export const createHazardRisk = async (hazardRisk: HazardAndRisk) => {
       "Content-Type": "multipart/form-data",
     },
   });
-
+  
   return res.data;
-
 };
+
 
 export const updateHazardRisk = async (hazardRisk: HazardAndRisk) => {
   if (!hazardRisk.id) {
@@ -260,8 +271,8 @@ export const updateHazardRisk = async (hazardRisk: HazardAndRisk) => {
 
   try {
     const response = await axios.post(
-      `/api/hazard-risk/${hazardRisk.id}/update`, 
-      formData, 
+      `/api/hazard-risk/${hazardRisk.id}/update`,
+      formData,
       { headers: { "Content-Type": "multipart/form-data" } }
     );
 
@@ -276,4 +287,3 @@ export const deleteHazardRisk = async (id: string) => {
   const res = await axios.delete(`/api/hazard-risk/${id}/delete`);
   return res.data;
 };
-

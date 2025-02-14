@@ -9,6 +9,7 @@ import {
   Alert,
   Box,
   Button,
+  LinearProgress,
   Stack,
   Theme,
   Typography,
@@ -25,17 +26,24 @@ import ViewDataDrawer, {
   DrawerHeader,
 } from "../../../components/ViewDataDrawer";
 import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
-import { Patient } from "../../../api/OccupationalHealth/patientApi";
-import { samplePatientData } from "../../../api/sampleData/patientData";
+import {
+  createPatient,
+  deletePatient,
+  getPatientList,
+  Patient,
+  updatePatient,
+} from "../../../api/OccupationalHealth/patientApi";
 import ViewPatientContent from "./ViewPatientContent";
 import AddOrEditPatientDialog from "./AddOrEditPatientDialog";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import queryClient from "../../../state/queryClient";
 
 function PatientTable() {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<Patient>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
-  const [patients, setPatients] = useState<Patient[]>(samplePatientData);
+  // const [patients, setPatients] = useState<Patient[]>(samplePatientData);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const breadcrumbItems = [
@@ -46,6 +54,65 @@ function PatientTable() {
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("md")
   );
+
+  const { data: patientData, isFetching: isPatientDataFetching } = useQuery({
+    queryKey: ["patients"],
+    queryFn: getPatientList,
+  });
+
+  const { mutate: createPatientMutation } = useMutation({
+    mutationFn: createPatient,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["patients"] });
+      enqueueSnackbar("Patient Report Created Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Patient Report Creation Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: updatePatientMutation } = useMutation({
+    mutationFn: updatePatient,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["patients"] });
+      enqueueSnackbar("Patient Report Update Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Patient Report Update Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: deletePatientMutation } = useMutation({
+    mutationFn: deletePatient,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["patients"] });
+      enqueueSnackbar("Patient Report Delete Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Patient Report Delete Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   return (
     <Stack>
@@ -89,6 +156,7 @@ function PatientTable() {
               Add New Patient
             </Button>
           </Box>
+          {isPatientDataFetching && <LinearProgress sx={{ width: "100%" }} />}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -104,10 +172,10 @@ function PatientTable() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {patients?.length > 0 ? (
-                patients.map((row) => (
+              {patientData?.length > 0 ? (
+                patientData.map((row) => (
                   <TableRow
-                    key={`${row.id}${row.employee_id}`}
+                    key={`${row.id}${row.employeeId}`}
                     sx={{
                       "&:last-child td, &:last-child th": { border: 0 },
                       cursor: "pointer",
@@ -120,21 +188,19 @@ function PatientTable() {
                     <TableCell component="th" scope="row">
                       {row.id}
                     </TableCell>
-                    <TableCell align="right">{row.employee_id}</TableCell>
-                    <TableCell align="right">{row.employee_name}</TableCell>
+                    <TableCell align="right">{row.employeeId}</TableCell>
+                    <TableCell align="right">{row.employeeName}</TableCell>
                     <TableCell align="right">{row.gender}</TableCell>
                     <TableCell align="right">
-                      {row?.check_in_date
-                        ? format(new Date(row.check_in_date), "yyyy-MM-dd")
+                      {row?.checkInDate
+                        ? format(new Date(row.checkInDate), "yyyy-MM-dd")
                         : "--"}
                     </TableCell>
-                    <TableCell align="right">
-                      {row?.consulting_doctor}
-                    </TableCell>
+                    <TableCell align="right">{row?.consultingDoctor}</TableCell>
                     <TableCell align="right">{row.disease ?? "--"}</TableCell>
                     <TableCell align="right">
-                      {row?.check_out_date
-                        ? format(new Date(row.check_out_date), "yyyy-MM-dd")
+                      {row?.checkOutDate
+                        ? format(new Date(row.checkOutDate), "yyyy-MM-dd")
                         : "--"}
                     </TableCell>
                     <TableCell align="right">{row.status}</TableCell>
@@ -185,22 +251,10 @@ function PatientTable() {
           }}
           onSubmit={(data) => {
             if (selectedRow) {
-              setPatients(
-                patients.map((doc) => (doc.id === data.id ? data : doc))
-              ); // Update the patient in the list if it already exists
-              enqueueSnackbar("Patient Details Updated Successfully!", {
-                variant: "success",
-              });
+              updatePatientMutation(data);
             } else {
-              console.log("Adding new patient", data);
-              setPatients([...patients, data]); // Add new patient to the list
-              enqueueSnackbar("Patient Created Successfully!", {
-                variant: "success",
-              });
+              createPatientMutation(data);
             }
-            setSelectedRow(null);
-            setOpenViewDrawer(false);
-            setOpenAddOrEditDialog(false);
           }}
           defaultValues={selectedRow}
         />
@@ -219,7 +273,7 @@ function PatientTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            setPatients(patients.filter((doc) => doc.id !== selectedRow.id));
+            deletePatientMutation(selectedRow.id);
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);

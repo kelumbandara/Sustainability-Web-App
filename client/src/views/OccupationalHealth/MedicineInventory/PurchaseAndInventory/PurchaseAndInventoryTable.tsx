@@ -25,8 +25,15 @@ import ViewDataDrawer, {
   DrawerHeader,
 } from "../../../../components/ViewDataDrawer";
 import DeleteConfirmationModal from "../../../../components/DeleteConfirmationModal";
-import { MedicineInventory } from "../../../../api/OccupationalHealth/medicineInventoryApi";
-import { medicineInventorySampleData } from "../../../../api/sampleData/medicineInventorySampleData";
+import {
+  createMedicineInventory,
+  deleteMedicineInventory,
+  getMedicineInventoriesList,
+  MedicineInventory,
+  updateMedicineInventory,
+} from "../../../../api/OccupationalHealth/medicineInventoryApi";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import queryClient from "../../../../state/queryClient";
 import ViewPurchaseAndInventoryContent from "./ViewPurchaseAndInventoryContent";
 import AddOrEditPurchaseAndInventoryDialog from "./AddOrEditPurchaseAndInventoryDialog";
 
@@ -35,9 +42,6 @@ function PurchaseAndInventoryTable() {
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<MedicineInventory>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
-  const [medicineInventory, setMedicineInventory] = useState<
-    MedicineInventory[]
-  >(medicineInventorySampleData);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const breadcrumbItems = [
@@ -48,6 +52,65 @@ function PurchaseAndInventoryTable() {
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("md")
   );
+
+  const { data: medicineInventory } = useQuery({
+    queryKey: ["medicine-inventory"],
+    queryFn: getMedicineInventoriesList,
+  });
+
+  const { mutate: createMedicineInventoryMutation } = useMutation({
+    mutationFn: createMedicineInventory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["medicine-inventory"] });
+      enqueueSnackbar("Medicine Inventory Report Created Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Medicine Inventory Creation Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: updateMedicineInventoryMutation } = useMutation({
+    mutationFn: updateMedicineInventory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["medicine-inventory"] });
+      enqueueSnackbar("Medicine Inventory Report Updated Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Medicine Inventory Update Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: deleteMedicineInventoryMutation } = useMutation({
+    mutationFn: deleteMedicineInventory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["medicine-inventory"] });
+      enqueueSnackbar("Medicine Inventory Report Deleted Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Medicine Inventory Delete Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   return (
     <Stack>
@@ -111,7 +174,7 @@ function PurchaseAndInventoryTable() {
               {medicineInventory?.length > 0 ? (
                 medicineInventory.map((row) => (
                   <TableRow
-                    key={`${row.id}${row.reference_number}`}
+                    key={`${row.id}${row.referenceNumber}`}
                     sx={{
                       "&:last-child td, &:last-child th": { border: 0 },
                       cursor: "pointer",
@@ -122,30 +185,30 @@ function PurchaseAndInventoryTable() {
                     }}
                   >
                     <TableCell component="th" scope="row">
-                      {row.reference_number}
+                      {row.referenceNumber}
                     </TableCell>
                     <TableCell align="right">
-                      {row?.request_date
+                      {row?.requestedDate
                         ? format(new Date(row.request_date), "yyyy-MM-dd")
                         : "--"}
                     </TableCell>
-                    <TableCell align="right">{row?.medicine_name}</TableCell>
+                    <TableCell align="right">{row?.medicineName}</TableCell>
                     <TableCell align="right">
-                      {row?.medicine_type ?? "--"}
+                      {row?.medicineType ?? "--"}
                     </TableCell>
-                    <TableCell align="right">{row?.reporter ?? "--"}</TableCell>
-                    <TableCell align="right">{row?.approver ?? "--"}</TableCell>
+                    <TableCell align="right">{row?.requestedBy ?? "--"}</TableCell>
+                    <TableCell align="right">{row?.approvedBy ?? "--"}</TableCell>
                     <TableCell align="right">
-                      {row?.delivered_quantity ?? "--"}
-                    </TableCell>
-                    <TableCell align="right">
-                      {row?.issued_quantity ?? "--"}
+                      {row?.deliveryQuantity ?? "--"}
                     </TableCell>
                     <TableCell align="right">
-                      {row?.disposed_of_quantity ?? "--"}
+                      {row?.issuedQuantity ?? "--"}
                     </TableCell>
                     <TableCell align="right">
-                      {row?.balance_quantity ?? "--"}
+                      {row?.disposalQuantity ?? "--"}
+                    </TableCell>
+                    <TableCell align="right">
+                      {row?.balanceQuantity ?? "--"}
                     </TableCell>
                     <TableCell align="right">{row?.status}</TableCell>
                   </TableRow>
@@ -199,24 +262,10 @@ function PurchaseAndInventoryTable() {
           }}
           onSubmit={(data) => {
             if (selectedRow) {
-              setMedicineInventory(
-                medicineInventory.map((request) =>
-                  request.id === data.id ? data : request
-                )
-              ); // Update the patient in the list if it already exists
-              enqueueSnackbar("Medicine Request Updated Successfully!", {
-                variant: "success",
-              });
+              updateMedicineInventoryMutation(data);
             } else {
-              console.log("Adding new document", data);
-              setMedicineInventory([...medicineInventory, data]); // Add new medicine request to the list
-              enqueueSnackbar("Medicine Request Created Successfully!", {
-                variant: "success",
-              });
+              createMedicineInventoryMutation(data);
             }
-            setSelectedRow(null);
-            setOpenViewDrawer(false);
-            setOpenAddOrEditDialog(false);
           }}
           defaultValues={selectedRow}
         />
@@ -235,9 +284,9 @@ function PurchaseAndInventoryTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            setMedicineInventory(
-              medicineInventory.filter((doc) => doc.id !== selectedRow.id)
-            );
+            if (selectedRow) {
+              deleteMedicineInventoryMutation(selectedRow.id);
+            }
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);

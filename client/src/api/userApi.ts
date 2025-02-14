@@ -28,6 +28,7 @@ export const userSchema = z.object({
   assignedFactory: z.array(z.string()),
   employeeNumber: z.string(),
   jobPosition: z.string(),
+  assigneeLevel: z.string(),
 });
 
 export type User = z.infer<typeof userSchema>;
@@ -86,5 +87,10 @@ export async function registerUser({
 
 export async function validateUser() {
   const res = await axios.get("/api/user");
+  return res.data;
+}
+
+export async function fetchAllUsers() {
+  const res = await axios.get("/api/all-users");
   return res.data;
 }

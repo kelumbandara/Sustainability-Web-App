@@ -303,21 +303,21 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                   >
                     <TextField
                       required
-                      id="medicine_name "
+                      id="medicineName "
                       label="Medicine Name"
-                      error={!!errors.medicine_name}
+                      error={!!errors.medicineName}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("medicine_name", { required: true })}
+                      {...register("medicineName", { required: true })}
                     />
                     <TextField
                       required
-                      id="generic_name"
+                      id="genericName"
                       label="Generic Name"
-                      error={!!errors.generic_name}
+                      error={!!errors.genericName}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("generic_name", { required: true })}
+                      {...register("genericName", { required: true })}
                     />
                   </Box>
                   <Box
@@ -328,12 +328,12 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                   >
                     <TextField
                       required
-                      id="dosage_strength"
+                      id="dosageStrength"
                       label="Dosage Strength"
-                      error={!!errors.dosage_strength}
+                      error={!!errors.dosageStrength}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("dosage_strength", { required: true })}
+                      {...register("dosageStrength", { required: true })}
                     />
                     <Controller
                       name="form"
@@ -368,9 +368,9 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                     }}
                   >
                     <Controller
-                      name="medicine_type"
+                      name="medicineType"
                       control={control}
-                      defaultValue={defaultValues?.medicine_type}
+                      defaultValue={defaultValues?.medicineType}
                       rules={{ required: true }}
                       render={({ field }) => (
                         <Autocomplete
@@ -385,9 +385,9 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                             <TextField
                               {...params}
                               required
-                              error={!!errors.medicine_type}
+                              error={!!errors.medicineType}
                               label="Medicine Type"
-                              name="medicine_type"
+                              name="medicineType"
                             />
                           )}
                         />
@@ -435,9 +435,9 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                     }}
                   >
                     <Controller
-                      name="supplier_name"
+                      name="supplierName"
                       control={control}
-                      defaultValue={defaultValues?.supplier_name}
+                      defaultValue={defaultValues?.supplierName}
                       rules={{ required: true }}
                       render={({ field }) => (
                         <Autocomplete
@@ -448,7 +448,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                           size="small"
                           options={
                             sampleMedicineSuppliers.map(
-                              (supplier) => supplier.supplier_name
+                              (supplier) => supplier.supplierName
                             ) ?? []
                           }
                           sx={{ flex: 1, margin: "0.5rem" }}
@@ -456,9 +456,9 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                             <TextField
                               {...params}
                               required
-                              error={!!errors.supplier_name}
+                              error={!!errors.supplierName}
                               label="Supplier Type"
-                              name="supplier_name"
+                              name="supplierName"
                             />
                           )}
                         />
@@ -466,13 +466,13 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                     />
                     <TextField
                       required
-                      id="supplier_contact_number"
+                      id="supplierContactNumber"
                       label="Supplier Contact Number"
-                      error={!!errors.supplier_contact_number}
+                      error={!!errors.supplierContactNumber}
                       size="small"
                       type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("supplier_contact_number", {
+                      {...register("supplierContactNumber", {
                         required: true,
                       })}
                     />
@@ -485,18 +485,18 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                   >
                     <TextField
                       required
-                      id="supplier_email_id"
+                      id="supplierEmail"
                       label="Email ID"
-                      error={!!errors.supplier_email_id}
+                      error={!!errors.supplierEmail}
                       size="small"
                       type="email"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("supplier_email_id", { required: true })}
+                      {...register("supplierEmail", { required: true })}
                     />
                     <Controller
-                      name="supplier_type"
+                      name="supplierType"
                       control={control}
-                      defaultValue={defaultValues?.supplier_type}
+                      defaultValue={defaultValues?.supplierType}
                       rules={{ required: true }}
                       render={({ field }) => (
                         <Autocomplete
@@ -511,9 +511,9 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                             <TextField
                               {...params}
                               required
-                              error={!!errors.supplier_type}
+                              error={!!errors.supplierType}
                               label="Supplier Type"
-                              name="supplier_type"
+                              name="supplierType"
                             />
                           )}
                         />
@@ -591,17 +591,17 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                   >
                     <Controller
                       control={control}
-                      {...register("manufacturing_date", { required: true })}
-                      name={"manufacturing_date"}
+                      {...register("manufacturingDate", { required: true })}
+                      name={"manufacturingDate"}
                       render={({ field }) => {
                         return (
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value}
+                              value={field.value ? new Date(field.value) : undefined}
                               label="Manufacturing Date"
                               error={
-                                errors?.manufacturing_date ? "Required" : ""
+                                errors?.manufacturingDate ? "Required" : ""
                               }
                             />
                           </Box>
@@ -610,16 +610,16 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                     />
                     <Controller
                       control={control}
-                      {...register("expiry_date", { required: true })}
-                      name={"expiry_date"}
+                      {...register("expiryDate", { required: true })}
+                      name={"expiryDate"}
                       render={({ field }) => {
                         return (
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value}
+                              value={field.value ? new Date(field.value) : undefined}
                               label="Expiry Date"
-                              error={errors?.expiry_date ? "Required" : ""}
+                              error={errors?.expiryDate ? "Required" : ""}
                             />
                           </Box>
                         );
@@ -627,16 +627,16 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                     />
                     <Controller
                       control={control}
-                      {...register("delivery_date", { required: true })}
-                      name={"delivery_date"}
+                      {...register("deliveryDate", { required: true })}
+                      name={"deliveryDate"}
                       render={({ field }) => {
                         return (
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value}
+                              value={field.value ? new Date(field.value) : undefined}
                               label="Delivery Date"
-                              error={errors?.delivery_date ? "Required" : ""}
+                              error={errors?.deliveryDate ? "Required" : ""}
                             />
                           </Box>
                         );
@@ -651,33 +651,33 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                   >
                     <TextField
                       required
-                      id="delivered_quantity"
+                      id="deliveryQuantity"
                       label="Delivery Quantity"
-                      error={!!errors.delivered_quantity}
+                      error={!!errors.deliveryQuantity}
                       size="small"
                       type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("delivered_quantity", { required: true })}
+                      {...register("deliveryQuantity", { required: true })}
                     />
                     <TextField
                       required
-                      id="purchased_amount"
+                      id="purchaseAmount"
                       label="Purchased Amount"
-                      error={!!errors.purchased_amount}
+                      error={!!errors.purchaseAmount}
                       size="small"
                       type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("purchased_amount", { required: true })}
+                      {...register("purchaseAmount", { required: true })}
                     />
                     <TextField
                       required
-                      id="threshold_limit"
+                      id="thresholdLimit"
                       label="Threshold Limit"
-                      error={!!errors.threshold_limit}
+                      error={!!errors.thresholdLimit}
                       size="small"
                       type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("threshold_limit", { required: true })}
+                      {...register("thresholdLimit", { required: true })}
                     />
                   </Box>
                   <Box
@@ -687,16 +687,16 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                   >
                     <Controller
                       control={control}
-                      {...register("invoice_date", { required: true })}
-                      name={"invoice_date"}
+                      {...register("invoiceDate", { required: true })}
+                      name={"invoiceDate"}
                       render={({ field }) => {
                         return (
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value}
+                              value={field.value ? new Date(field.value) : undefined}
                               label="Delivery Date"
-                              error={errors?.invoice_date ? "Required" : ""}
+                              error={errors?.invoiceDate ? "Required" : ""}
                             />
                           </Box>
                         );
@@ -704,29 +704,29 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                     />
                     <TextField
                       required
-                      id="invoice_reference"
+                      id="invoiceReference"
                       label="Invoice Reference"
-                      error={!!errors.invoice_reference}
+                      error={!!errors.invoiceReference}
                       size="small"
                       sx={{
                         flex: 1,
                         margin: "0.5rem",
                         marginTop: isMobile ? "0.5rem" : "1.85rem",
                       }}
-                      {...register("invoice_reference", { required: true })}
+                      {...register("invoiceReference", { required: true })}
                     />
                     <TextField
                       required
                       id="manufacturer_name"
                       label="Manufacturer Name"
-                      error={!!errors.manufacturer_name}
+                      error={!!errors.manufacturerName}
                       size="small"
                       sx={{
                         flex: 1,
                         margin: "0.5rem",
                         marginTop: isMobile ? "0.5rem" : "1.85rem",
                       }}
-                      {...register("manufacturer_name", { required: true })}
+                      {...register("manufacturerName", { required: true })}
                     />
                   </Box>
                   <Box
@@ -784,13 +784,13 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                   >
                     <TextField
                       required
-                      id="batch_number"
+                      id="batchNumber"
                       label="Batch Number"
-                      error={!!errors.batch_number}
+                      error={!!errors.batchNumber}
                       size="small"
                       type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("batch_number", { required: true })}
+                      {...register("batchNumber", { required: true })}
                     />
                   </Box>
                   <Box
@@ -800,7 +800,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                   >
                     <Controller
                       control={control}
-                      name={"usage_instructions"}
+                      name={"usageInstruction"}
                       render={({ field }) => {
                         return (
                           <RichTextComponent
@@ -863,7 +863,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                       variant="caption"
                       sx={{ marginBottom: "0.1rem", color: grey[700] }}
                     >
-                      {defaultValues?.requested_by ?? "--"}
+                      {defaultValues?.requestedBy ?? "--"}
                     </Typography>
                   </Box>
 
@@ -878,7 +878,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                       variant="caption"
                       sx={{ marginBottom: "0.1rem", color: grey[700] }}
                     >
-                      {defaultValues?.approved_by ?? "--"}
+                      {defaultValues?.requestedBy ?? "--"}
                     </Typography>
                   </Box>
                 </>

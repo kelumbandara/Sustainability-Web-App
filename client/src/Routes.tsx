@@ -40,6 +40,10 @@ const IncidentTable = React.lazy(
   () => import("./views/AccidentAndIncident/IncidentTable")
 );
 
+const AccidentAndIncidentDashboard = React.lazy(
+  () => import("./views/AccidentAndIncident/AccidentAndIncidentDashBoard")
+);
+
 //Occupational Health
 const PatientTable = React.lazy(
   () => import("./views/OccupationalHealth/ClinicalSuite/PatientTable")
@@ -180,9 +184,7 @@ const AppRoutes = () => {
         {/* Accident & Incident */}
         <Route
           path="/accident-incident/dashboard"
-          element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="Accident & Incident > Dashboard" />
-          ))}
+          element={withLayout(MainLayout, AccidentAndIncidentDashboard)}
         />
         <Route
           path="/accident-incident/register/accident-register"

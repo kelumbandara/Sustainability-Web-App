@@ -1,20 +1,88 @@
+import axios from "axios";
 import { z } from "zod";
 
 export const MedicineRequestSchema = z.object({
   id: z.string(),
   approver: z.string(),
-  approver_remarks: z.string(),
-  created_at: z.string(),
+  approverRemarks: z.string(),
+  createdAt: z.string(),
   division: z.string(),
-  generic_name: z.string(),
-  medicine_name: z.string(),
-  medicine_id: z.string(),
-  published_at: z.string(),
-  reference_number: z.string(),
-  request_date: z.string(),
-  requested_quantity: z.string(),
+  genericName: z.string(),
+  medicineName: z.string(),
+  medicineId: z.string(),
+  publishedAt: z.string(),
+  referenceNumber: z.string(),
+  requestDate: z.string(),
+  requestQuantity: z.string(),
   status: z.string(),
   updatedAt: z.string().optional(),
+  created_at: z.string(),
 });
 
 export type MedicineRequest = z.infer<typeof MedicineRequestSchema>;
+
+export async function getMedicineList() {
+  const res = await axios.get("/api/medicine-request");
+  return res.data;
+}
+
+export const createMedicine = async (medicineRequest: MedicineRequest) => {
+  const formData = new FormData();
+
+  Object.keys(medicineRequest).forEach((key) => {
+    const value = medicineRequest[key as keyof MedicineRequest];
+
+    if (key === "documents" && Array.isArray(value)) {
+      value.forEach((file, index) => {
+        formData.append(`documents[${index}]`, file);
+      });
+    } else if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        formData.append(`${key}[${index}]`, JSON.stringify(item));
+      });
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  const res = await axios.post("/api/medicine-request", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return res.data;
+};
+
+export const updateMedicine = async (medicineRequest: MedicineRequest) => {
+  if (!medicineRequest.id) {
+    throw new Error("Patient must have an ID for an update.");
+  }
+
+  const formData = new FormData();
+  Object.keys(medicineRequest).forEach((key) => {
+    const value = medicineRequest[key as keyof MedicineRequest];
+
+    if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  try {
+    const response = await axios.post(
+      `/api/medicine-request/${medicineRequest.id}/update`,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error updating patient record:", error);
+    throw error;
+  }
+};
+
+export const deleteMedicine = async (id: string) => {
+  const res = await axios.delete(`/api/medicine-request/${id}/delete`);
+  return res.data;
+};

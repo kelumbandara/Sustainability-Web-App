@@ -22,6 +22,7 @@ function DashboardCard({
         padding: "1rem",
         boxShadow: "0 0 10px rgba(0,0,0,0.1)",
         borderRadius: "0.3rem",
+        border: "1px solid var(--pallet-border-blue)", // Added border
       }}
     >
       <Box>
@@ -43,7 +44,7 @@ function DashboardCard({
           {title && (
             <Box>
               <Typography
-                variant="subtitle1"
+                variant="h6"
                 sx={{
                   color: "var(--pallet-text-primary)",
                 }}

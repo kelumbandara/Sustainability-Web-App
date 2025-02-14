@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { DrawerContentItem } from "../../components/ViewDataDrawer";
 import { HazardAndRisk } from "../../api/hazardRiskApi";
-import { differenceInDays } from "date-fns";
+import { differenceInDays,format } from "date-fns";
 import { useState } from "react";
 import theme from "../../theme";
 import useIsMobile from "../../customHooks/useIsMobile";
@@ -93,7 +93,7 @@ function ViewDocumentContent({ document }: { document: Document }) {
           />
           <DrawerContentItem
             label="Reported Date"
-            value={document.createdDate?.toDateString()}
+            value={document.createdDate ? format(new Date(document.createdDate), "yyyy-MM-dd") : "N/A"}
             sx={{ flex: 1 }}
           />
         </Box>
@@ -362,15 +362,15 @@ function ViewDocumentContent({ document }: { document: Document }) {
         <DrawerContentItem label="Reported By" value={document.createdBy} />
         <DrawerContentItem
           label="Issued Date"
-          value={document.issuedDate?.toDateString()}
+          value={document.issuedDate ? format(new Date(document.issuedDate), "yyyy-MM-dd") : "N/A"}
         />
         <DrawerContentItem
           label="Expiry Date"
-          value={document.expiryDate?.toDateString()}
+          value={document.expiryDate ? format(new Date(document.expiryDate), "yyyy-MM-dd") : "N/A"}
         />
         <DrawerContentItem
           label="Notify Date"
-          value={document.notifyDate?.toDateString()}
+          value={document.notifyDate ? format(new Date(document.notifyDate), "yyyy-MM-dd") : "N/A"}
         />
       </Box>
     </Stack>

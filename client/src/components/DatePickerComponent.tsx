@@ -9,15 +9,24 @@ function DatePickerComponent({
   defaultValue,
   label,
   error,
+  disablePast, // Accept disablePast as a prop
+  disableFuture,
+  minDate,
+  disabled,
 }: {
   value: Date | null;
   onChange: (value: Date) => void;
   defaultValue?: Date;
   label?: string;
   error?: string;
+  disablePast?: boolean; // Type it as a boolean
+  disableFuture?: boolean;
+  minDate?: Date;
+  disabled?: boolean;
 }) {
   const { isMobile } = useIsMobile();
   console.log("err", error);
+
   return (
     <Stack>
       {label && (
@@ -33,6 +42,10 @@ function DatePickerComponent({
           value={value}
           onChange={onChange}
           defaultValue={defaultValue}
+          disablePast={disablePast} // Use the passed prop
+          disableFuture={disableFuture}
+          minDate={minDate}
+          disabled={disabled}
           sx={{
             border: error ? "1px solid var(--pallet-red)" : "",
           }}
@@ -43,6 +56,10 @@ function DatePickerComponent({
           onChange={onChange}
           defaultValue={defaultValue}
           className="date-picker"
+          disablePast={disablePast} // Use the passed prop
+          disableFuture={disableFuture}
+          minDate={minDate}
+          disabled={disabled}
           sx={{
             border: error ? "1px solid var(--pallet-red)" : "",
             padding: 0,

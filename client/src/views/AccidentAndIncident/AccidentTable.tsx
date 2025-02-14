@@ -95,14 +95,11 @@ function AccidentTable() {
 
   const { mutate: deleteAccidentMutation } = useMutation({
     mutationFn: deleteAccident,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["accidents"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["accidents"] });
       enqueueSnackbar("Accident Report Deleted Successfully!", {
         variant: "success",
       });
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
     },
     onError: () => {
       enqueueSnackbar(`Accident Delete Failed`, {
@@ -161,9 +158,9 @@ function AccidentTable() {
                 <TableCell align="right">Accident Date</TableCell>
                 <TableCell align="right">Accident Time</TableCell>
                 <TableCell align="right">Severity</TableCell>
-                <TableCell align="right">Injury</TableCell>
-                <TableCell align="right">Time of Work</TableCell>
-                <TableCell align="right">Return for Work</TableCell>
+                <TableCell align="right">Injury Type</TableCell>
+                {/* <TableCell align="right">Time of Work</TableCell>
+                <TableCell align="right">Return for Work</TableCell> */}
                 <TableCell align="right">Division</TableCell>
                 <TableCell align="right">Department</TableCell>
                 <TableCell align="right">Category</TableCell>
@@ -195,11 +192,12 @@ function AccidentTable() {
                       {format(row.accidentTime, "HH:mm")}
                     </TableCell>
                     <TableCell align="right">{row.severity}</TableCell>
-                    <TableCell align="right">{row.injury}</TableCell>
-                    <TableCell align="right">{row.timeOfWork}</TableCell>
+                    <TableCell align="right">{row.injuryType}</TableCell>
+                    {/* hide until figure out from where this come */}
+                    {/* <TableCell align="right">{row.timeOfWork}</TableCell>
                     <TableCell align="right">
                       {row.returnForWork ? row.returnForWork : "--"}
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell align="right">{row.division}</TableCell>
                     <TableCell align="right">{row.department}</TableCell>
                     <TableCell align="right">{row.category}</TableCell>
@@ -280,9 +278,9 @@ function AccidentTable() {
             setOpenViewDrawer(false);
             setSelectedRow(null);
             setDeleteDialogOpen(false);
-            enqueueSnackbar("Accident Deleted Successfully!", {
-              variant: "success",
-            });
+            // enqueueSnackbar("Accident Deleted Successfully!", {
+            //   variant: "success",
+            // });
           }}
           handleReject={() => {
             setOpenViewDrawer(false);

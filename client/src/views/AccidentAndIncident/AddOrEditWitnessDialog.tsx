@@ -22,6 +22,9 @@ import {
 import CustomButton from "../../components/CustomButton";
 import useIsMobile from "../../customHooks/useIsMobile";
 import CloseIcon from "@mui/icons-material/Close";
+import { useQuery } from "@tanstack/react-query";
+import { fetchDivision } from "../../api/divisionApi";
+import { fetchDepartmentData } from "../../api/departmentApi";
 
 const AddOrEditWitnessDialog = ({
   open,
@@ -45,6 +48,15 @@ const AddOrEditWitnessDialog = ({
     defaultValues: defaultWitness,
   });
   console.log("defaultValues", defaultWitness);
+  const { data: divisionData, isFetching: isCategoryDataFetching } = useQuery({
+    queryKey: ["divisions"],
+    queryFn: fetchDivision,
+  });
+
+  const { data: departmentData, isFetching: isDepartmentDataFetching } = useQuery({
+    queryKey: ["departments"],
+    queryFn: fetchDepartmentData,
+  });
 
   // useEffect(() => {
   //   if (defaultValues) {
@@ -130,7 +142,7 @@ const AddOrEditWitnessDialog = ({
             <Autocomplete
               {...register("division", { required: true })}
               size="small"
-              options={sampleDivisions?.map((division) => division.name)}
+              options={divisionData?.length ? divisionData.map((division) => division.divisionName) : []}
               defaultValue={defaultWitness?.division || ""}
               sx={{ flex: 1, margin: "0.5rem" }}
               renderInput={(params) => (
@@ -146,7 +158,7 @@ const AddOrEditWitnessDialog = ({
             <Autocomplete
               {...register("department", { required: true })}
               size="small"
-              options={sampleDepartments?.map((department) => department.name)}
+              options={departmentData?.length ? departmentData.map((department) => department.department) : []}
               defaultValue={defaultWitness?.department || ""}
               sx={{ flex: 1, margin: "0.5rem" }}
               renderInput={(params) => (

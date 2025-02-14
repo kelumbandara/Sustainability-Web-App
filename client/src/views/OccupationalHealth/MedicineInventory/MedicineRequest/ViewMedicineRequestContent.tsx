@@ -26,26 +26,26 @@ function ViewMedicineRequestContent({
       >
         <DrawerContentItem
           label="Reference Number"
-          value={medicalRequest?.reference_number}
+          value={medicalRequest?.referenceNumber}
           sx={{ flex: 1 }}
         />
         <DrawerContentItem
           label="Requested Date"
           value={
-            medicalRequest.request_date
-              ? format(medicalRequest.request_date, "dd/MM/yyyy hh:mm a")
+            medicalRequest.created_at
+              ? format(medicalRequest.created_at, "dd/MM/yyyy hh:mm a")
               : "--"
           }
           sx={{ flex: 1 }}
         />
         <DrawerContentItem
           label="Medicine Name"
-          value={medicalRequest?.medicine_name}
+          value={medicalRequest?.medicineName}
           sx={{ flex: 1 }}
         />
         <DrawerContentItem
           label="Generic Name"
-          value={medicalRequest?.generic_name}
+          value={medicalRequest?.genericName}
           sx={{ flex: 1 }}
         />
         <DrawerContentItem
