@@ -60,24 +60,17 @@ function CircularProgressWithLabelAI(
           flexDirection: 'column',
         }}
       >
-        <Typography
+        {/* <Typography
           variant="overline"
           component="div"
           sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}
         >
           {`Days Since Last ${nameValue}`}
-        </Typography>
+        </Typography> */}
         <Typography
-          variant='h6'
+          variant='h5'
         >
-          {daysSince}
-        </Typography>
-        <Typography
-          variant="caption"
-          component="div"
-          sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}
-        >
-          {`for ${monthCount + 1}`} months  {/* Display month count here */}
+          {daysSince} Days
         </Typography>
       </Box>
     </Box>

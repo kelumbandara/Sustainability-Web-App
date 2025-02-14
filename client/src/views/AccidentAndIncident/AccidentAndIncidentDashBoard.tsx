@@ -199,6 +199,7 @@ function HazardAndRiskDashboard() {
     };
   };
 
+
   const processHazardChartData = () => {
     if (!accidentData) return [];
     let filteredAccidents = watchPeriod ? filterByPeriod(accidentData, watchPeriod) : accidentData;
@@ -408,8 +409,6 @@ function HazardAndRiskDashboard() {
   }, new Date(0));
 
   const daysSinceLastIncident = Math.abs(differenceInDays(latestIncidentDate, today));
-
-  const startDate = new Date('2025-01-01'); // Example start date
   const { male, female } = countAccidentIndividualsByGender();
   const { maleI, femaleI } = countIncidentIndividualsByGender();
   const { accidents, incidents } = applyFilters();
@@ -430,7 +429,6 @@ function HazardAndRiskDashboard() {
     { name: "Male", value: maleI },
     { name: "Female", value: femaleI },
   ];
-
 
   return (
     <Stack>
@@ -781,7 +779,7 @@ function HazardAndRiskDashboard() {
             </Typography>
           </Box>
 
-          <ResponsiveContainer width="100%" height={500}>
+          <ResponsiveContainer width="100%" height={400}>
             <LineChart
               data={accidentLineChart}
               margin={{
@@ -794,7 +792,7 @@ function HazardAndRiskDashboard() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 dataKey="name"
-                angle={-15}
+                angle={-65}
                 textAnchor="end"
                 fontSize={"small"}
               />
@@ -834,16 +832,16 @@ function HazardAndRiskDashboard() {
             sx={{
               textAlign: "center"
             }}
-          >Status</Typography>
-          <ResponsiveContainer width="100%" height={500}>
+          >Accident Male And Female</Typography>
+          <ResponsiveContainer width="100%" height={400}>
             <PieChart>
               <Pie
                 data={accidentsByGender}
                 dataKey="value"
                 cx="50%"
                 cy="50%"
-                outerRadius={isMobile ? 60 : isTablet ? 80 : 100}
-                innerRadius={isMobile ? 40 : isTablet ? 60 : 80}
+                outerRadius={isMobile ? 120 : isTablet ? 120 : 120}
+                innerRadius={isMobile ? 100 : isTablet ? 100 : 100}
                 fill="#8884d8"
               >
                 {accidentsByGender.map((entry, index) => (
@@ -868,19 +866,32 @@ function HazardAndRiskDashboard() {
               alignItems: "center",
             }}
           >
-            <Typography
-              variant="subtitle2"
-              sx={{ color: "var(--pallet-blue)" }}
-            >
-              This Month
+            <Typography variant="subtitle2" sx={{ color: "var(--pallet-blue)" }}>
+              {accidentsByGender.every((entry) => entry.value === 0)
+                ? "No Available Data for This Filter"
+                : watchPeriod
+                  ? watchPeriod
+                  : "All Time Accidents By Gender"}
             </Typography>
-            <Typography variant="subtitle1">10 Cases</Typography>
-            <Typography
-              variant="subtitle2"
-              sx={{ color: "var(--pallet-grey)" }}
+
+            <Typography variant="subtitle1">Total Accidents {totalAccidents}</Typography>
+            <Stack
+              direction="row"
+              gap={10}
             >
-              0 From Previous Period
-            </Typography>
+              <Typography
+                variant="subtitle2"
+                sx={{ color: "var(--pallet-grey)" }}
+              >
+                Male {accidentsByGender.find(entry => entry.name === "Male")?.value ?? "0"}
+              </Typography>
+              <Typography
+                variant="subtitle2"
+                sx={{ color: "var(--pallet-grey)" }}
+              >
+                Female {accidentsByGender.find(entry => entry.name === "Female")?.value ?? "0"}
+              </Typography>
+            </Stack>
           </Box>
         </Box>
       </Box>
@@ -921,7 +932,7 @@ function HazardAndRiskDashboard() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 dataKey="name"
-                angle={-15}
+                angle={-65}
                 textAnchor="end"
                 fontSize={"small"}
               />
@@ -957,16 +968,20 @@ function HazardAndRiskDashboard() {
             marginTop: "1rem",
           }}
         >
-          <Typography variant="subtitle1">Status</Typography>
-          <ResponsiveContainer width="100%" height={500}>
+          <Typography variant="h6"
+            sx={{
+              textAlign: "center"
+            }}
+          >Incident Male And Female</Typography>
+          <ResponsiveContainer width="100%" height={400}>
             <PieChart>
               <Pie
                 data={IncidentsByGender}
                 dataKey="value"
                 cx="50%"
                 cy="50%"
-                outerRadius={isMobile ? 60 : isTablet ? 80 : 100}
-                innerRadius={isMobile ? 40 : isTablet ? 60 : 80}
+                outerRadius={isMobile ? 120 : isTablet ? 120 : 120}
+                innerRadius={isMobile ? 100 : isTablet ? 100 : 100}
                 fill="#8884d8"
               >
                 {IncidentsByGender.map((entry, index) => (
@@ -991,19 +1006,32 @@ function HazardAndRiskDashboard() {
               alignItems: "center",
             }}
           >
-            <Typography
-              variant="subtitle2"
-              sx={{ color: "var(--pallet-blue)" }}
-            >
-              This Month
+            <Typography variant="subtitle2" sx={{ color: "var(--pallet-blue)" }}>
+              {IncidentsByGender.every((entry) => entry.value === 0)
+                ? "No Available Data for This Filter"
+                : watchPeriod
+                  ? watchPeriod
+                  : "All Time Accidents By Gender"}
             </Typography>
-            <Typography variant="subtitle1">10 Cases</Typography>
-            <Typography
-              variant="subtitle2"
-              sx={{ color: "var(--pallet-grey)" }}
+
+            <Typography variant="subtitle1">Total Incidents {totalIncidents}</Typography>
+            <Stack
+              direction="row"
+              gap={10}
             >
-              0 From Previous Period
-            </Typography>
+              <Typography
+                variant="subtitle2"
+                sx={{ color: "var(--pallet-grey)" }}
+              >
+                Male {IncidentsByGender.find(entry => entry.name === "Male")?.value ?? "0"}
+              </Typography>
+              <Typography
+                variant="subtitle2"
+                sx={{ color: "var(--pallet-grey)" }}
+              >
+                Female {IncidentsByGender.find(entry => entry.name === "Female")?.value ?? "0"}
+              </Typography>
+            </Stack>
           </Box>
         </Box>
       </Box>
@@ -1035,13 +1063,13 @@ function HazardAndRiskDashboard() {
             <BarChart data={hazardRiskChartData3}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" textAnchor="center" fontSize={"small"} />
-              <YAxis 
-                label={{ 
-                  value: "Number of Individuals", 
-                  angle: -90, 
+              <YAxis
+                label={{
+                  value: "Number of Individuals",
+                  angle: -90,
                   position: "insideLeft",
                   fontSize: "small",
-                }}             
+                }}
               />
               <Tooltip />
               <Bar dataKey="value" fill="var(--pallet-blue)" barSize={40} />
@@ -1066,7 +1094,7 @@ function HazardAndRiskDashboard() {
 
             <Box>
               <Typography variant="h6" sx={{ textAlign: "center" }}>
-                Status
+                Days Since Last Accident
               </Typography>
             </Box>
 
@@ -1078,7 +1106,7 @@ function HazardAndRiskDashboard() {
                 alignItems: "center",
               }}
             >
-              <CircularProgressWithLabelAI daysSince={daysSinceLastAccident} size={250} nameValue="Accident"/>
+              <CircularProgressWithLabelAI daysSince={daysSinceLastAccident} size={250} nameValue="Accident" />
             </Box>
 
             <Box
@@ -1088,8 +1116,8 @@ function HazardAndRiskDashboard() {
                 alignItems: "center",
               }}
             >
-              <Typography variant="subtitle2" sx={{ color: "var(--pallet-grey)" }}>
-                0 From Previous Period
+              <Typography sx={{ color: "var(--pallet-grey)" }}>
+                Last Accident Date {latestAccidentDate ? latestAccidentDate.toISOString().split("T")[0] : "N/A"}
               </Typography>
             </Box>
           </Stack>
@@ -1113,13 +1141,13 @@ function HazardAndRiskDashboard() {
             <BarChart data={hazardRiskChartData4}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
-              <YAxis 
-                label={{ 
-                  value: "Number of Individuals", 
-                  angle: -90, 
+              <YAxis
+                label={{
+                  value: "Number of Individuals",
+                  angle: -90,
                   position: "insideLeft",
                   fontSize: "small",
-                }}             
+                }}
               />
               <Tooltip />
               <Bar dataKey="value" fill="var(--pallet-blue)" barSize={40} />
@@ -1142,9 +1170,11 @@ function HazardAndRiskDashboard() {
           <Stack spacing={10} sx={{ justifyContent: "space-between" }}>
 
             <Box>
-              <Typography variant="h6" sx={{ textAlign: "center" }}>
-                Status
-              </Typography>
+              <Box>
+                <Typography variant="h6" sx={{ textAlign: "center" }}>
+                  Days Since Last Incident
+                </Typography>
+              </Box>
             </Box>
 
             <Box
@@ -1155,9 +1185,8 @@ function HazardAndRiskDashboard() {
                 alignItems: "center",
               }}
             >
-              <CircularProgressWithLabelAI daysSince={daysSinceLastIncident} size={250} nameValue="Incident"/>
+              <CircularProgressWithLabelAI daysSince={daysSinceLastIncident} size={250} nameValue="Incident" />
             </Box>
-
             <Box
               sx={{
                 display: "flex",
@@ -1165,34 +1194,11 @@ function HazardAndRiskDashboard() {
                 alignItems: "center",
               }}
             >
-              <Typography variant="subtitle2" sx={{ color: "var(--pallet-grey)" }}>
-                0 From Previous Period
+              <Typography sx={{ color: "var(--pallet-grey)" }}>
+                Last Incident Date {latestIncidentDate ? latestIncidentDate.toISOString().split("T")[0] : "N/A"}
               </Typography>
             </Box>
           </Stack>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              flexDirection: "column",
-              alignItems: "center",
-              marginTop: "2rem"
-            }}
-          >
-            <Typography
-              variant="subtitle2"
-              sx={{ color: "var(--pallet-blue)" }}
-            >
-              This Month
-            </Typography>
-            <Typography variant="subtitle1">10 Cases</Typography>
-            <Typography
-              variant="subtitle2"
-              sx={{ color: "var(--pallet-grey)" }}
-            >
-              0 From Previous Period
-            </Typography>
-          </Box>
         </Box>
       </Box>
     </Stack>
