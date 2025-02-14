@@ -409,11 +409,6 @@ function HazardAndRiskDashboard() {
 
   const daysSinceLastIncident = Math.abs(differenceInDays(latestIncidentDate, today));
 
-
-
-
-
-
   const startDate = new Date('2025-01-01'); // Example start date
   const { male, female } = countAccidentIndividualsByGender();
   const { maleI, femaleI } = countIncidentIndividualsByGender();
