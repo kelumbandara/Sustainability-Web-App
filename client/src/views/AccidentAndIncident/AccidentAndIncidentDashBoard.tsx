@@ -597,6 +597,14 @@ function HazardAndRiskDashboard() {
 
       <Box
         sx={{
+          marginTop: "2rem",
+        }}
+      >
+        <Typography>Accident Details</Typography>
+      </Box>
+
+      <Box
+        sx={{
           display: "flex",
           flexWrap: "wrap",
           justifyContent: "space-between",
@@ -673,6 +681,14 @@ function HazardAndRiskDashboard() {
 
       <Box
         sx={{
+          marginTop: "2rem",
+        }}
+      >
+        <Typography>Incidents Details</Typography>
+      </Box>
+
+      <Box
+        sx={{
           display: "flex",
           flexWrap: "wrap",
           justifyContent: "space-between",
@@ -741,24 +757,37 @@ function HazardAndRiskDashboard() {
         </Box>
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: isTablet ? "column" : "row" }}>
+      <Box sx={{ display: "flex", flexDirection: isTablet ? "column" : "row", gap: "1rem" }}>
         <Box
           sx={{
             width: "100%",
-            height: 500,
+            height: "auto",
             marginTop: "1rem",
             flex: 2,
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
             padding: "1rem",
+            borderRadius: "0.3rem",
+            border: "1px solid var(--pallet-border-blue)"
           }}
         >
-          <ResponsiveContainer width="100%" height="100%">
+          <Box>
+            <Typography
+              variant="h6"
+              sx={{
+                textAlign: "center"
+              }}
+            >
+              Total Accidents Count For Divisions
+            </Typography>
+          </Box>
+
+          <ResponsiveContainer width="100%" height={500}>
             <LineChart
               data={accidentLineChart}
               margin={{
                 top: 50,
                 right: 30,
-                left: 20,
+                left: 40,
                 bottom: 60,
               }}
             >
@@ -771,7 +800,7 @@ function HazardAndRiskDashboard() {
               />
               <YAxis
                 label={{
-                  value: "Division",
+                  value: "Accident Count",
                   position: "top",
                   offset: 25,
                 }}
@@ -781,7 +810,7 @@ function HazardAndRiskDashboard() {
               <Line
                 type="linear"
                 dataKey="pv"
-                stroke="#8884d8"
+                stroke="var(--pallet-blue)"
                 activeDot={{ r: 8 }}
               />
             </LineChart>
@@ -794,12 +823,19 @@ function HazardAndRiskDashboard() {
             flex: 1,
             flexDirection: "column",
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-            margin: "1rem",
             padding: "1rem",
+            height: "auto",
+            marginTop: "1rem",
+            borderRadius: "0.3rem",
+            border: "1px solid var(--pallet-border-blue)",
           }}
         >
-          <Typography variant="subtitle1">Status</Typography>
-          <ResponsiveContainer width="100%" height="100%">
+          <Typography variant="h6"
+            sx={{
+              textAlign: "center"
+            }}
+          >Status</Typography>
+          <ResponsiveContainer width="100%" height={500}>
             <PieChart>
               <Pie
                 data={accidentsByGender}
@@ -849,24 +885,36 @@ function HazardAndRiskDashboard() {
         </Box>
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: isTablet ? "column" : "row" }}>
+      <Box sx={{ display: "flex", flexDirection: isTablet ? "column" : "row", gap: "1rem" }}>
         <Box
           sx={{
             width: "100%",
-            height: 500,
+            height: "auto",
             marginTop: "1rem",
             flex: 2,
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
             padding: "1rem",
+            borderRadius: "0.3rem",
+            border: "1px solid var(--pallet-border-blue)"
           }}
         >
-          <ResponsiveContainer width="100%" height="100%">
+          <Box>
+            <Typography
+              variant="h6"
+              sx={{
+                textAlign: "center"
+              }}
+            >
+              incident Count For Divisions
+            </Typography>
+          </Box>
+          <ResponsiveContainer width="100%" height={500}>
             <LineChart
               data={incidentLineChart}
               margin={{
                 top: 50,
                 right: 30,
-                left: 20,
+                left: 40,
                 bottom: 60,
               }}
             >
@@ -879,7 +927,7 @@ function HazardAndRiskDashboard() {
               />
               <YAxis
                 label={{
-                  value: "Division",
+                  value: "Incident Counts",
                   position: "top",
                   offset: 25,
                 }}
@@ -902,12 +950,15 @@ function HazardAndRiskDashboard() {
             flex: 1,
             flexDirection: "column",
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-            margin: "1rem",
+            border: "1px solid var(--pallet-border-blue)",
             padding: "1rem",
+            height: "auto",
+            borderRadius: "0.3rem",
+            marginTop: "1rem",
           }}
         >
           <Typography variant="subtitle1">Status</Typography>
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={500}>
             <PieChart>
               <Pie
                 data={IncidentsByGender}
@@ -957,25 +1008,43 @@ function HazardAndRiskDashboard() {
         </Box>
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: isTablet ? "column" : "row" }}>
+      <Box sx={{ display: "flex", flexDirection: isTablet ? "column" : "row", gap: "1rem" }}>
         <Box
           sx={{
             width: "100%",
-            height: 500,
+            height: "auto",
             marginTop: "1rem",
             flex: 2,
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
             padding: "1rem",
+            borderRadius: "0.3rem",
+            border: "1px solid var(--pallet-border-blue)"
           }}
         >
-          <Typography>hi</Typography>
-          <ResponsiveContainer width="100%" height={300}>
+          <Box>
+            <Typography
+              variant="h6"
+              sx={{
+                textAlign: "center"
+              }}
+            >
+              Total Hazard Risks For Divisions
+            </Typography>
+          </Box>
+          <ResponsiveContainer width="100%" height={500}>
             <BarChart data={hazardRiskChartData3}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis label={{ value: "Number of Individuals", angle: -90, position: "insideLeft" }} />
+              <XAxis dataKey="name" textAnchor="center" fontSize={"small"} />
+              <YAxis 
+                label={{ 
+                  value: "Number of Individuals", 
+                  angle: -90, 
+                  position: "insideLeft",
+                  fontSize: "small",
+                }}             
+              />
               <Tooltip />
-              <Bar dataKey="value" fill="#8884d8" />
+              <Bar dataKey="value" fill="var(--pallet-blue)" barSize={40} />
             </BarChart>
           </ResponsiveContainer>
         </Box>
@@ -986,66 +1055,74 @@ function HazardAndRiskDashboard() {
             flex: 1,
             flexDirection: "column",
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-            margin: "1rem",
+            borderRadius: "0.3rem",
+            border: "1px solid var(--pallet-border-blue)",
             padding: "1rem",
+            height: "auto",
+            marginTop: "1rem"
           }}
         >
-          <Typography variant="subtitle1">Status</Typography>
-          <ResponsiveContainer width="100%" height="auto">
+          <Stack spacing={10} sx={{ justifyContent: "space-between" }}>
+
+            <Box>
+              <Typography variant="h6" sx={{ textAlign: "center" }}>
+                Status
+              </Typography>
+            </Box>
+
             <Box
               sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
+                flexGrow: 1,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
               }}
             >
-              <CircularProgressWithLabelAI daysSince={daysSinceLastAccident} size={250} />
+              <CircularProgressWithLabelAI daysSince={daysSinceLastAccident} size={250} nameValue="Accident"/>
             </Box>
-          </ResponsiveContainer>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              flexDirection: "column",
-              alignItems: "center",
-              marginTop: "2rem"
-            }}
-          >
-            <Typography
-              variant="subtitle2"
-              sx={{ color: "var(--pallet-blue)" }}
+
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
             >
-              This Month
-            </Typography>
-            <Typography variant="subtitle1">10 Cases</Typography>
-            <Typography
-              variant="subtitle2"
-              sx={{ color: "var(--pallet-grey)" }}
-            >
-              0 From Previous Period
-            </Typography>
-          </Box>
+              <Typography variant="subtitle2" sx={{ color: "var(--pallet-grey)" }}>
+                0 From Previous Period
+              </Typography>
+            </Box>
+          </Stack>
         </Box>
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: isTablet ? "column" : "row" }}>
+      <Box sx={{ display: "flex", flexDirection: isTablet ? "column" : "row", gap: "1rem" }}>
         <Box
           sx={{
             width: "100%",
-            height: 500,
+            height: "auto",
             marginTop: "1rem",
             flex: 2,
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+            borderRadius: "0.3rem",
+            border: "1px solid var(--pallet-border-blue)",
             padding: "1rem",
           }}
         >
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={500}>
             <BarChart data={hazardRiskChartData4}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
-              <YAxis label={{ value: "Number of Individuals", angle: -90, position: "insideLeft" }} />
+              <YAxis 
+                label={{ 
+                  value: "Number of Individuals", 
+                  angle: -90, 
+                  position: "insideLeft",
+                  fontSize: "small",
+                }}             
+              />
               <Tooltip />
-              <Bar dataKey="value" fill="#8884d8" />
+              <Bar dataKey="value" fill="var(--pallet-blue)" barSize={40} />
             </BarChart>
           </ResponsiveContainer>
         </Box>
@@ -1056,22 +1133,43 @@ function HazardAndRiskDashboard() {
             flex: 1,
             flexDirection: "column",
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-            margin: "1rem",
+            borderRadius: "0.3rem",
+            border: "1px solid var(--pallet-border-blue)",
             padding: "1rem",
+            marginTop: "1rem",
           }}
         >
-          <Typography variant="subtitle1">Status</Typography>
-          <ResponsiveContainer width="100%" height="auto">
+          <Stack spacing={10} sx={{ justifyContent: "space-between" }}>
+
+            <Box>
+              <Typography variant="h6" sx={{ textAlign: "center" }}>
+                Status
+              </Typography>
+            </Box>
+
             <Box
               sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
+                flexGrow: 1,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
               }}
             >
-              <CircularProgressWithLabelAI daysSince={daysSinceLastIncident} size={250} />
+              <CircularProgressWithLabelAI daysSince={daysSinceLastIncident} size={250} nameValue="Incident"/>
             </Box>
-          </ResponsiveContainer>
+
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <Typography variant="subtitle2" sx={{ color: "var(--pallet-grey)" }}>
+                0 From Previous Period
+              </Typography>
+            </Box>
+          </Stack>
           <Box
             sx={{
               display: "flex",
