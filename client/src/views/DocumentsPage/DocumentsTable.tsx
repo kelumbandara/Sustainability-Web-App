@@ -22,13 +22,12 @@ import { useState } from "react";
 import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import AddIcon from "@mui/icons-material/Add";
 import AddOrEditDocumentDialog from "./AddOrEditDocumentDialog";
-import { sampleDocuments } from "../../api/sampleData/documentData";
-import { 
+import {
   Document,
   createDocumentRecord,
   getDocumentList,
   updateDocumentRecord,
-  deleteDocumentRecord
+  deleteDocumentRecord,
 } from "../../api/documentApi";
 import { differenceInDays, format } from "date-fns";
 import ViewDocumentContent from "./ViewDocumentContent";
@@ -59,7 +58,7 @@ function DocumentTable() {
     queryFn: getDocumentList,
   });
 
-  const { mutate: createDocumentMutation, } = useMutation({
+  const { mutate: createDocumentMutation } = useMutation({
     mutationFn: createDocumentRecord,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documentRecords"] });
@@ -77,7 +76,7 @@ function DocumentTable() {
     },
   });
 
-  const { mutate: updateDocumentMutation, } = useMutation({
+  const { mutate: updateDocumentMutation } = useMutation({
     mutationFn: updateDocumentRecord,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documentRecords"] });
@@ -209,7 +208,10 @@ function DocumentTable() {
                     </TableCell>
                     <TableCell align="right">
                       {row.expiryDate
-                        ? differenceInDays(row.expiryDate, row.issuedDate)
+                        ? Math.max(
+                            differenceInDays(row.expiryDate, row.issuedDate),
+                            0
+                          )
                         : "--"}
                     </TableCell>
                     <TableCell align="right">
@@ -271,7 +273,7 @@ function DocumentTable() {
           onSubmit={(data) => {
             if (selectedRow) {
               console.log("Updating document", data);
-              updateDocumentMutation(data)
+              updateDocumentMutation(data);
               // setDocuments(
               //   documents.map((doc) => (doc.id === data.id ? data : doc))
               // ); // Update the document in the list if it already exists
@@ -280,7 +282,7 @@ function DocumentTable() {
               // });
             } else {
               console.log("Adding new document", data);
-              createDocumentMutation(data)
+              createDocumentMutation(data);
               // setDocuments([...documents, data]); // Add new document to the list
               // enqueueSnackbar("Document Created Successfully!", {
               //   variant: "success",
@@ -308,7 +310,7 @@ function DocumentTable() {
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
             // setDocuments(documents.filter((doc) => doc.id !== selectedRow.id));
-            deleteDocumentMutation(selectedRow.id)
+            deleteDocumentMutation(selectedRow.id);
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);

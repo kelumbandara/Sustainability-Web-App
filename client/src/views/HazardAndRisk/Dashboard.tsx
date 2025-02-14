@@ -5,7 +5,6 @@ import {
   Autocomplete,
   Box,
   Button,
-  CircularProgress,
   Divider,
   Stack,
   TextField,
@@ -21,7 +20,18 @@ import {
   getHazardRiskList,
 } from "../../api/hazardRiskApi";
 import useIsMobile from "../../customHooks/useIsMobile";
-import { subWeeks, subMonths, subYears, startOfWeek, startOfMonth, startOfYear, endOfWeek, endOfMonth, endOfYear, isWithinInterval } from "date-fns";
+import {
+  subWeeks,
+  subMonths,
+  subYears,
+  startOfWeek,
+  startOfMonth,
+  startOfYear,
+  endOfWeek,
+  endOfMonth,
+  endOfYear,
+  isWithinInterval,
+} from "date-fns";
 import { sampleDivisions } from "../../api/sampleData/documentData";
 import DateRangePicker from "../../components/DateRangePicker";
 import CustomButton from "../../components/CustomButton";
@@ -111,20 +121,29 @@ function HazardAndRiskDashboard() {
         endDate = endOfYear(subYears(today, 1));
         break;
       case HazardDashboardPeriods.CUSTOM:
-        const dateRange = watch("dateRange");
-        if (Array.isArray(dateRange) && dateRange.length === 2) {
-          startDate = new Date(dateRange[0]);
-          endDate = new Date(dateRange[1]);
-        } else {
-          startDate = null;
-          endDate = null;
+        {
+          const dateRange = watch("dateRange");
+          if (Array.isArray(dateRange) && dateRange.length === 2) {
+            startDate = new Date(dateRange[0]);
+            endDate = new Date(dateRange[1]);
+          } else {
+            startDate = null;
+            endDate = null;
+          }
         }
         break;
     }
 
-    const matchesPeriod = startDate && endDate ? isWithinInterval(riskDate, { start: startDate, end: endDate }) : true;
-    const matchesDivision = selectedDivision ? risk.division === selectedDivision : true;
-    const matchesCategory = selectedCategory ? risk.category === selectedCategory : true;
+    const matchesPeriod =
+      startDate && endDate
+        ? isWithinInterval(riskDate, { start: startDate, end: endDate })
+        : true;
+    const matchesDivision = selectedDivision
+      ? risk.division === selectedDivision
+      : true;
+    const matchesCategory = selectedCategory
+      ? risk.category === selectedCategory
+      : true;
 
     return matchesPeriod && matchesDivision && matchesCategory;
   });
@@ -132,52 +151,59 @@ function HazardAndRiskDashboard() {
   const filteredRiskDataForBarChart = useMemo(() => {
     if (!selectedDivision) return [];
 
-    return riskData?.filter((risk) => {
-      const riskDate = new Date(risk.created_at);
-      const today = new Date();
+    return (
+      riskData?.filter((risk) => {
+        const riskDate = new Date(risk.created_at);
+        const today = new Date();
 
-      let startDate: Date | null = null;
-      let endDate: Date | null = null;
+        let startDate: Date | null = null;
+        let endDate: Date | null = null;
 
-      switch (selectedPeriod) {
-        case HazardDashboardPeriods.THIS_WEEK:
-          startDate = startOfWeek(today);
-          endDate = endOfWeek(today);
-          break;
-        case HazardDashboardPeriods.LAST_WEEK:
-          startDate = startOfWeek(subWeeks(today, 1));
-          endDate = endOfWeek(subWeeks(today, 1));
-          break;
-        case HazardDashboardPeriods.THIS_MONTH:
-          startDate = startOfMonth(today);
-          endDate = endOfMonth(today);
-          break;
-        case HazardDashboardPeriods.LAST_MONTH:
-          startDate = startOfMonth(subMonths(today, 1));
-          endDate = endOfMonth(subMonths(today, 1));
-          break;
-        case HazardDashboardPeriods.THIS_YEAR:
-          startDate = startOfYear(today);
-          endDate = endOfYear(today);
-          break;
-        case HazardDashboardPeriods.LAST_YEAR:
-          startDate = startOfYear(subYears(today, 1));
-          endDate = endOfYear(subYears(today, 1));
-          break;
-        case HazardDashboardPeriods.CUSTOM:
-          const dateRange = watch("dateRange");
-          if (Array.isArray(dateRange) && dateRange.length === 2) {
-            startDate = new Date(dateRange[0]);
-            endDate = new Date(dateRange[1]);
+        switch (selectedPeriod) {
+          case HazardDashboardPeriods.THIS_WEEK:
+            startDate = startOfWeek(today);
+            endDate = endOfWeek(today);
+            break;
+          case HazardDashboardPeriods.LAST_WEEK:
+            startDate = startOfWeek(subWeeks(today, 1));
+            endDate = endOfWeek(subWeeks(today, 1));
+            break;
+          case HazardDashboardPeriods.THIS_MONTH:
+            startDate = startOfMonth(today);
+            endDate = endOfMonth(today);
+            break;
+          case HazardDashboardPeriods.LAST_MONTH:
+            startDate = startOfMonth(subMonths(today, 1));
+            endDate = endOfMonth(subMonths(today, 1));
+            break;
+          case HazardDashboardPeriods.THIS_YEAR:
+            startDate = startOfYear(today);
+            endDate = endOfYear(today);
+            break;
+          case HazardDashboardPeriods.LAST_YEAR:
+            startDate = startOfYear(subYears(today, 1));
+            endDate = endOfYear(subYears(today, 1));
+            break;
+          case HazardDashboardPeriods.CUSTOM: {
+            const dateRange = watch("dateRange");
+            if (Array.isArray(dateRange) && dateRange.length === 2) {
+              startDate = new Date(dateRange[0]);
+              endDate = new Date(dateRange[1]);
+            }
+            break;
           }
-          break;
-      }
+        }
 
-      const matchesPeriod = startDate && endDate ? isWithinInterval(riskDate, { start: startDate, end: endDate }) : true;
-      const matchesDivision = risk.division.toLowerCase() === selectedDivision.toLowerCase();
+        const matchesPeriod =
+          startDate && endDate
+            ? isWithinInterval(riskDate, { start: startDate, end: endDate })
+            : true;
+        const matchesDivision =
+          risk.division.toLowerCase() === selectedDivision.toLowerCase();
 
-      return matchesPeriod && matchesDivision;
-    }) || [];
+        return matchesPeriod && matchesDivision;
+      }) || []
+    );
   }, [selectedPeriod, selectedDivision, riskData]);
 
   const filteredRiskDataForCase = useMemo(() => {
@@ -215,17 +241,28 @@ function HazardAndRiskDashboard() {
           startDate = startOfYear(subYears(today, 1));
           endDate = endOfYear(subYears(today, 1));
           break;
-        case HazardDashboardPeriods.CUSTOM:
+        case HazardDashboardPeriods.CUSTOM: {
           const dateRange = watch("dateRange");
-          if (Array.isArray(dateRange) && dateRange.length === 2 && dateRange[0] && dateRange[1]) {
+          if (
+            Array.isArray(dateRange) &&
+            dateRange.length === 2 &&
+            dateRange[0] &&
+            dateRange[1]
+          ) {
             startDate = new Date(dateRange[0]);
             endDate = new Date(dateRange[1]);
           }
           break;
+        }
       }
 
-      const matchesPeriod = startDate && endDate ? isWithinInterval(riskDate, { start: startDate, end: endDate }) : true;
-      const matchesDivision = risk.division.trim().toLowerCase() === selectedDivision.trim().toLowerCase();
+      const matchesPeriod =
+        startDate && endDate
+          ? isWithinInterval(riskDate, { start: startDate, end: endDate })
+          : true;
+      const matchesDivision =
+        risk.division.trim().toLowerCase() ===
+        selectedDivision.trim().toLowerCase();
 
       return matchesPeriod && matchesDivision;
     });
@@ -281,14 +318,15 @@ function HazardAndRiskDashboard() {
     ];
   }, [filteredRiskDataForBarChart]);
 
-
   const barChartData = riskLevelData.length
     ? riskLevelData
     : [{ name: "No data available", riskLevelCount: 0 }];
 
   const totalRisks = filteredRiskData?.length || 0;
-  const completedRisks = filteredRiskData?.filter((item) => item.status === "Completed").length || 0;
-  const pendingRisks = filteredRiskData?.filter((item) => item.status === "Pending").length || 0;
+  const completedRisks =
+    filteredRiskData?.filter((item) => item.status === "Completed").length || 0;
+  const pendingRisks =
+    filteredRiskData?.filter((item) => item.status === "Pending").length || 0;
 
   const hazardRiskChartData1 = useMemo(() => {
     if (!riskData) return [];
@@ -337,7 +375,7 @@ function HazardAndRiskDashboard() {
           id="panel1-header"
           sx={{
             borderBottom: "1px solid var(--pallet-border-blue)",
-            borderRadius: "0.3rem"
+            borderRadius: "0.3rem",
           }}
         >
           <Typography variant="subtitle2">Dashboard Filters</Typography>
@@ -510,7 +548,9 @@ function HazardAndRiskDashboard() {
             title="Completed"
             titleIcon={<CheckCircleOutlineIcon fontSize="small" />}
             value={completedRisks}
-            subDescription={`${(completedRisks / totalRisks) * 100}% From previous period`}
+            subDescription={`${
+              (completedRisks / totalRisks) * 100
+            }% From previous period`}
           />
         </Box>
         <Box
@@ -525,7 +565,9 @@ function HazardAndRiskDashboard() {
             title="Pending"
             titleIcon={<PendingIcon fontSize="small" />}
             value={pendingRisks}
-            subDescription={`${(pendingRisks / totalRisks) * 100}% From previous period`}
+            subDescription={`${
+              (pendingRisks / totalRisks) * 100
+            }% From previous period`}
           />
         </Box>
         <Box
@@ -545,7 +587,13 @@ function HazardAndRiskDashboard() {
         </Box>
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: isTablet ? "column" : "row", gap: "1rem" }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: isTablet ? "column" : "row",
+          gap: "1rem",
+        }}
+      >
         <Box
           sx={{
             width: "100%",
@@ -555,14 +603,14 @@ function HazardAndRiskDashboard() {
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
             padding: "1rem",
             borderRadius: "0.3rem",
-            border: "1px solid var(--pallet-border-blue)"
+            border: "1px solid var(--pallet-border-blue)",
           }}
         >
           <Box>
             <Typography
               variant="h6"
               sx={{
-                textAlign: "center"
+                textAlign: "center",
               }}
             >
               Total Hazard Risks For Divisions
@@ -615,14 +663,17 @@ function HazardAndRiskDashboard() {
             border: "1px solid var(--pallet-border-blue)",
             padding: "1rem",
             height: "auto",
-            marginTop: "1rem"
+            marginTop: "1rem",
           }}
         >
-          <Typography variant="h6"
+          <Typography
+            variant="h6"
             sx={{
-              textAlign: "center"
+              textAlign: "center",
             }}
-          >Status</Typography>
+          >
+            Status
+          </Typography>
           <ResponsiveContainer width="100%" height={500}>
             <PieChart>
               <Pie
@@ -638,7 +689,9 @@ function HazardAndRiskDashboard() {
                   <Cell
                     key={`cell-${index}`}
                     fill={
-                      ["var(--pallet-blue)", "var(--pallet-light-grey)"][index % 2]
+                      ["var(--pallet-blue)", "var(--pallet-light-grey)"][
+                        index % 2
+                      ]
                     }
                   />
                 ))}
@@ -671,7 +724,13 @@ function HazardAndRiskDashboard() {
         </Box>
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: isTablet ? "column" : "row", gap: "1rem" }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: isTablet ? "column" : "row",
+          gap: "1rem",
+        }}
+      >
         <Box
           sx={{
             width: "100%",
@@ -684,7 +743,6 @@ function HazardAndRiskDashboard() {
             padding: "1rem",
           }}
         >
-
           <ResponsiveContainer width="100%" height={500}>
             <BarChart
               data={barChartData}
@@ -707,7 +765,11 @@ function HazardAndRiskDashboard() {
                 fontSize={"small"}
               />
               <Tooltip />
-              <Bar dataKey="riskLevelCount" fill="var(--pallet-blue)" barSize={40} />
+              <Bar
+                dataKey="riskLevelCount"
+                fill="var(--pallet-blue)"
+                barSize={40}
+              />
             </BarChart>
           </ResponsiveContainer>
           <Box
@@ -722,14 +784,20 @@ function HazardAndRiskDashboard() {
               variant="subtitle2"
               sx={{ color: "var(--pallet-blue)" }}
             >
-              {selectedDivision ? selectedDivision : "Select a Division to watch Risk Levels"}
+              {selectedDivision
+                ? selectedDivision
+                : "Select a Division to watch Risk Levels"}
             </Typography>
-            <Typography variant="subtitle1">Total Hazard Risks - {totalRisks}</Typography>
+            <Typography variant="subtitle1">
+              Total Hazard Risks - {totalRisks}
+            </Typography>
             <Typography
               variant="subtitle2"
               sx={{ color: "var(--pallet-blue)" }}
             >
-              {selectedPeriod ? `${totalRisks} From ${selectedPeriod}` : "Choose a Time period"}
+              {selectedPeriod
+                ? `${totalRisks} From ${selectedPeriod}`
+                : "Choose a Time period"}
             </Typography>
           </Box>
         </Box>
@@ -747,208 +815,227 @@ function HazardAndRiskDashboard() {
             padding: "1rem",
           }}
         >
-          <Stack spacing="auto" direction="column" sx={{ height: '100%' }}>
-            <Divider sx={{ backgroundColor: 'var(--pallet-light-grey)' }} />
+          <Stack spacing="auto" direction="column" sx={{ height: "100%" }}>
+            <Divider sx={{ backgroundColor: "var(--pallet-light-grey)" }} />
             <Stack direction="column">
               <Box
                 sx={{
                   gap: 2,
-                  marginX: '1rem'
+                  marginX: "1rem",
                 }}
               >
                 <Typography variant="button">High Level Cases</Typography>
-                <Typography variant="h6">{riskLevelData.find((data) => data.name === "High")?.riskLevelCount || 0}</Typography>
+                <Typography variant="h6">
+                  {riskLevelData.find((data) => data.name === "High")
+                    ?.riskLevelCount || 0}
+                </Typography>
                 <Typography>0%</Typography>
               </Box>
               <Box
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
                   flexGrow: 1,
-                  gap: 10
+                  gap: 10,
                 }}
               >
                 <Box
                   sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    gap: 2
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 2,
                   }}
                 >
                   <CircularProgressWithLabel
                     size={60}
-                    value={
-                      (() => {
-                        const highRiskData = riskLevelDataWithCases.find((data) => data.name === "High");
-                        return highRiskData && highRiskData.riskLevelCount > 0
-                          ? (highRiskData.pendingCount / highRiskData.riskLevelCount) * 100
-                          : 0;
-                      })()
-                    }
+                    value={(() => {
+                      const highRiskData = riskLevelDataWithCases.find(
+                        (data) => data.name === "High"
+                      );
+                      return highRiskData && highRiskData.riskLevelCount > 0
+                        ? (highRiskData.pendingCount /
+                            highRiskData.riskLevelCount) *
+                            100
+                        : 0;
+                    })()}
                   />
                   <Typography variant="subtitle2">Reported Cases</Typography>
                 </Box>
                 <Box
                   sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    gap: 2
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 2,
                   }}
                 >
                   <CircularProgressWithLabel
                     size={60}
-                    value={
-                      (() => {
-                        const highRiskData = riskLevelDataWithCases.find((data) => data.name === "High");
-                        return highRiskData && highRiskData.riskLevelCount > 0
-                          ? (highRiskData.completedCount / highRiskData.riskLevelCount) * 100
-                          : 0;
-                      })()
-                    }
+                    value={(() => {
+                      const highRiskData = riskLevelDataWithCases.find(
+                        (data) => data.name === "High"
+                      );
+                      return highRiskData && highRiskData.riskLevelCount > 0
+                        ? (highRiskData.completedCount /
+                            highRiskData.riskLevelCount) *
+                            100
+                        : 0;
+                    })()}
                   />
                   <Typography variant="subtitle2">Closed Cases</Typography>
                 </Box>
               </Box>
             </Stack>
 
-            <Divider sx={{ backgroundColor: 'var(--pallet-light-grey)' }} />
+            <Divider sx={{ backgroundColor: "var(--pallet-light-grey)" }} />
             <Stack direction="column">
               <Box
                 sx={{
                   gap: 2,
-                  marginX: '1rem'
+                  marginX: "1rem",
                 }}
               >
                 <Typography variant="button">Medium Level Cases</Typography>
-                <Typography variant="h6">{riskLevelData.find((data) => data.name === "Medium")?.riskLevelCount || 0}</Typography>
+                <Typography variant="h6">
+                  {riskLevelData.find((data) => data.name === "Medium")
+                    ?.riskLevelCount || 0}
+                </Typography>
                 <Typography>0%</Typography>
               </Box>
               <Box
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
                   flexGrow: 1,
-                  gap: 10
+                  gap: 10,
                 }}
               >
                 <Box
                   sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    gap: 2
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 2,
                   }}
                 >
                   <CircularProgressWithLabel
                     size={60}
-                    value={
-                      (() => {
-                        const highRiskData = riskLevelDataWithCases.find((data) => data.name === "Medium");
-                        return highRiskData && highRiskData.riskLevelCount > 0
-                          ? (highRiskData.pendingCount / highRiskData.riskLevelCount) * 100
-                          : 0;
-                      })()
-                    }
+                    value={(() => {
+                      const highRiskData = riskLevelDataWithCases.find(
+                        (data) => data.name === "Medium"
+                      );
+                      return highRiskData && highRiskData.riskLevelCount > 0
+                        ? (highRiskData.pendingCount /
+                            highRiskData.riskLevelCount) *
+                            100
+                        : 0;
+                    })()}
                   />
                   <Typography variant="subtitle2">Reported Cases</Typography>
                 </Box>
                 <Box
                   sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    gap: 2
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 2,
                   }}
                 >
                   <CircularProgressWithLabel
                     size={60}
-                    value={
-                      (() => {
-                        const highRiskData = riskLevelDataWithCases.find((data) => data.name === "Medium");
-                        return highRiskData && highRiskData.riskLevelCount > 0
-                          ? (highRiskData.completedCount / highRiskData.riskLevelCount) * 100
-                          : 0;
-                      })()
-                    }
+                    value={(() => {
+                      const highRiskData = riskLevelDataWithCases.find(
+                        (data) => data.name === "Medium"
+                      );
+                      return highRiskData && highRiskData.riskLevelCount > 0
+                        ? (highRiskData.completedCount /
+                            highRiskData.riskLevelCount) *
+                            100
+                        : 0;
+                    })()}
                   />
                   <Typography variant="subtitle2">Closed Cases</Typography>
                 </Box>
               </Box>
             </Stack>
 
-            <Divider sx={{ backgroundColor: 'var(--pallet-light-grey)' }} />
+            <Divider sx={{ backgroundColor: "var(--pallet-light-grey)" }} />
             <Stack direction="column">
               <Box
                 sx={{
                   gap: 2,
-                  marginX: '1rem'
+                  marginX: "1rem",
                 }}
               >
                 <Typography variant="button">Low Level Cases</Typography>
-                <Typography variant="h6">{riskLevelData.find((data) => data.name === "Low")?.riskLevelCount || 0}</Typography>
+                <Typography variant="h6">
+                  {riskLevelData.find((data) => data.name === "Low")
+                    ?.riskLevelCount || 0}
+                </Typography>
                 <Typography>0%</Typography>
               </Box>
               <Box
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
                   flexGrow: 1,
-                  gap: 10
+                  gap: 10,
                 }}
               >
                 <Box
                   sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    gap: 2
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 2,
                   }}
                 >
                   <CircularProgressWithLabel
                     size={60}
-                    value={
-                      (() => {
-                        const highRiskData = riskLevelDataWithCases.find((data) => data.name === "Low");
-                        return highRiskData && highRiskData.riskLevelCount > 0
-                          ? (highRiskData.pendingCount / highRiskData.riskLevelCount) * 100
-                          : 0;
-                      })()
-                    }
+                    value={(() => {
+                      const highRiskData = riskLevelDataWithCases.find(
+                        (data) => data.name === "Low"
+                      );
+                      return highRiskData && highRiskData.riskLevelCount > 0
+                        ? (highRiskData.pendingCount /
+                            highRiskData.riskLevelCount) *
+                            100
+                        : 0;
+                    })()}
                   />
                   <Typography variant="subtitle2">Reported Cases</Typography>
                 </Box>
                 <Box
                   sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    gap: 2
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 2,
                   }}
                 >
                   <CircularProgressWithLabel
                     size={60}
-                    value={
-                      (() => {
-                        const highRiskData = riskLevelDataWithCases.find((data) => data.name === "Low");
-                        return highRiskData && highRiskData.riskLevelCount > 0
-                          ? (highRiskData.completedCount / highRiskData.riskLevelCount) * 100
-                          : 0;
-                      })()
-                    }
+                    value={(() => {
+                      const highRiskData = riskLevelDataWithCases.find(
+                        (data) => data.name === "Low"
+                      );
+                      return highRiskData && highRiskData.riskLevelCount > 0
+                        ? (highRiskData.completedCount /
+                            highRiskData.riskLevelCount) *
+                            100
+                        : 0;
+                    })()}
                   />
                   <Typography variant="subtitle2">Closed Cases </Typography>
                 </Box>
               </Box>
             </Stack>
-            <Divider sx={{ backgroundColor: 'var(--pallet-light-grey)' }} />
+            <Divider sx={{ backgroundColor: "var(--pallet-light-grey)" }} />
           </Stack>
-
-
         </Box>
       </Box>
     </Stack>

@@ -35,7 +35,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
   PieChart,
   Pie,
@@ -43,12 +42,11 @@ import {
   BarChart,
   Bar,
 } from "recharts";
-import {
-  hazardRiskChartData1,
-  hazardRiskChartData2,
-} from "../../api/sampleData/hazardRiskData";
 import { useQuery } from "@tanstack/react-query";
-import { getAccidentsList, getIncidentsList } from "../../api/accidentAndIncidentApi";
+import {
+  getAccidentsList,
+  getIncidentsList,
+} from "../../api/accidentAndIncidentApi";
 import {
   startOfWeek,
   endOfWeek,
@@ -108,32 +106,50 @@ function HazardAndRiskDashboard() {
       case HazardDashboardPeriods.THIS_WEEK:
         return data.filter((item) => {
           const itemDate = new Date(item.accidentDate || item.incidentDate);
-          return isWithinInterval(itemDate, { start: startOfWeek(now), end: endOfWeek(now) });
+          return isWithinInterval(itemDate, {
+            start: startOfWeek(now),
+            end: endOfWeek(now),
+          });
         });
       case HazardDashboardPeriods.LAST_WEEK:
         return data.filter((item) => {
           const itemDate = new Date(item.accidentDate || item.incidentDate);
-          return isWithinInterval(itemDate, { start: startOfWeek(subWeeks(now, 1)), end: endOfWeek(subWeeks(now, 1)) });
+          return isWithinInterval(itemDate, {
+            start: startOfWeek(subWeeks(now, 1)),
+            end: endOfWeek(subWeeks(now, 1)),
+          });
         });
       case HazardDashboardPeriods.THIS_MONTH:
         return data.filter((item) => {
           const itemDate = new Date(item.accidentDate || item.incidentDate);
-          return isWithinInterval(itemDate, { start: startOfMonth(now), end: endOfMonth(now) });
+          return isWithinInterval(itemDate, {
+            start: startOfMonth(now),
+            end: endOfMonth(now),
+          });
         });
       case HazardDashboardPeriods.LAST_MONTH:
         return data.filter((item) => {
           const itemDate = new Date(item.accidentDate || item.incidentDate);
-          return isWithinInterval(itemDate, { start: startOfMonth(subMonths(now, 1)), end: endOfMonth(subMonths(now, 1)) });
+          return isWithinInterval(itemDate, {
+            start: startOfMonth(subMonths(now, 1)),
+            end: endOfMonth(subMonths(now, 1)),
+          });
         });
       case HazardDashboardPeriods.THIS_YEAR:
         return data.filter((item) => {
           const itemDate = new Date(item.accidentDate || item.incidentDate);
-          return isWithinInterval(itemDate, { start: startOfYear(now), end: endOfYear(now) });
+          return isWithinInterval(itemDate, {
+            start: startOfYear(now),
+            end: endOfYear(now),
+          });
         });
       case HazardDashboardPeriods.LAST_YEAR:
         return data.filter((item) => {
           const itemDate = new Date(item.accidentDate || item.incidentDate);
-          return isWithinInterval(itemDate, { start: startOfYear(subYears(now, 1)), end: endOfYear(subYears(now, 1)) });
+          return isWithinInterval(itemDate, {
+            start: startOfYear(subYears(now, 1)),
+            end: endOfYear(subYears(now, 1)),
+          });
         });
       case HazardDashboardPeriods.CUSTOM:
         return data.filter((item) => {
@@ -160,14 +176,22 @@ function HazardAndRiskDashboard() {
 
     // Filter by division
     if (watchDivision) {
-      filteredAccidents = filteredAccidents.filter((accident) => accident.division === watchDivision);
-      filteredIncidents = filteredIncidents.filter((incident) => incident.division === watchDivision);
+      filteredAccidents = filteredAccidents.filter(
+        (accident) => accident.division === watchDivision
+      );
+      filteredIncidents = filteredIncidents.filter(
+        (incident) => incident.division === watchDivision
+      );
     }
 
     // Filter by category
     if (watchCategory) {
-      filteredAccidents = filteredAccidents.filter((accident) => accident.category === watchCategory);
-      filteredIncidents = filteredIncidents.filter((incident) => incident.category === watchCategory);
+      filteredAccidents = filteredAccidents.filter(
+        (accident) => accident.category === watchCategory
+      );
+      filteredIncidents = filteredIncidents.filter(
+        (incident) => incident.category === watchCategory
+      );
     }
 
     return {
@@ -195,14 +219,15 @@ function HazardAndRiskDashboard() {
       openAccidentsCount,
       openIncidentsCount,
       closeIncidentsCount,
-      closedAccidentsCount
+      closedAccidentsCount,
     };
   };
 
-
   const processHazardChartData = () => {
     if (!accidentData) return [];
-    let filteredAccidents = watchPeriod ? filterByPeriod(accidentData, watchPeriod) : accidentData;
+    const filteredAccidents = watchPeriod
+      ? filterByPeriod(accidentData, watchPeriod)
+      : accidentData;
 
     const divisionCounts = filteredAccidents.reduce((acc, accident) => {
       const division = accident.division || "Unknown";
@@ -217,7 +242,9 @@ function HazardAndRiskDashboard() {
 
   const processHazardChartDataIncident = () => {
     if (!incidentData) return [];
-    let filteredIncidents = watchPeriod ? filterByPeriod(incidentData, watchPeriod) : incidentData;
+    const filteredIncidents = watchPeriod
+      ? filterByPeriod(incidentData, watchPeriod)
+      : incidentData;
 
     const divisionCounts = filteredIncidents.reduce((acc, incident) => {
       const division = incident.division || "Unknown";
@@ -233,7 +260,7 @@ function HazardAndRiskDashboard() {
   const countAccidentIndividualsByGender = () => {
     if (!accidentData) return { male: 0, female: 0 };
 
-    let filteredAccidents = applyFilters().accidents;
+    const filteredAccidents = applyFilters().accidents;
 
     let maleCount = 0;
     let femaleCount = 0;
@@ -254,7 +281,7 @@ function HazardAndRiskDashboard() {
   const countIncidentIndividualsByGender = () => {
     if (!incidentData) return { maleI: 0, femaleI: 0 };
 
-    let filteredIncidents = applyFilters().incidents;
+    const filteredIncidents = applyFilters().incidents;
 
     let maleCount = 0;
     let femaleCount = 0;
@@ -285,9 +312,9 @@ function HazardAndRiskDashboard() {
       };
     }
 
-    let filteredAccidents = applyFilters().accidents;
+    const filteredAccidents = applyFilters().accidents;
 
-    let ageGroups = {
+    const ageGroups = {
       smallestAge: 0, // 16-19
       smallAge: 0, // 20-24
       middledAge: 0, // 25-34
@@ -335,9 +362,9 @@ function HazardAndRiskDashboard() {
       };
     }
 
-    let filteredIncidents = applyFilters().incidents;
+    const filteredIncidents = applyFilters().incidents;
 
-    let ageGroups = {
+    const ageGroups = {
       smallestAge: 0, // 16-19
       smallAge: 0, // 20-24
       middledAge: 0, // 25-34
@@ -383,7 +410,6 @@ function HazardAndRiskDashboard() {
     { name: "60+", value: ageDataIncident.sixPlus },
   ];
 
-
   const ageData = countAccidentIndividualsByAge();
   const hazardRiskChartData3 = [
     { name: "16-19", value: ageData.smallestAge },
@@ -396,19 +422,27 @@ function HazardAndRiskDashboard() {
   ];
 
   const today = new Date();
-  const latestAccidentDate = (Array.isArray(accidentData) ? accidentData : []).reduce((latest, accident) => {
+  const latestAccidentDate = (
+    Array.isArray(accidentData) ? accidentData : []
+  ).reduce((latest, accident) => {
     const accidentDate = parseISO(accident.accidentDate);
     return accidentDate > latest ? accidentDate : latest;
   }, new Date(0));
 
-  const daysSinceLastAccident = Math.abs(differenceInDays(latestAccidentDate, today));
+  const daysSinceLastAccident = Math.abs(
+    differenceInDays(latestAccidentDate, today)
+  );
 
-  const latestIncidentDate = (Array.isArray(incidentData) ? incidentData : []).reduce((latest, incident) => {
+  const latestIncidentDate = (
+    Array.isArray(incidentData) ? incidentData : []
+  ).reduce((latest, incident) => {
     const incidentDate = parseISO(incident.incidentDate);
     return incidentDate > latest ? incidentDate : latest;
   }, new Date(0));
 
-  const daysSinceLastIncident = Math.abs(differenceInDays(latestIncidentDate, today));
+  const daysSinceLastIncident = Math.abs(
+    differenceInDays(latestIncidentDate, today)
+  );
   const { male, female } = countAccidentIndividualsByGender();
   const { maleI, femaleI } = countIncidentIndividualsByGender();
   const { accidents, incidents } = applyFilters();
@@ -416,7 +450,12 @@ function HazardAndRiskDashboard() {
   const incidentLineChart = processHazardChartDataIncident();
   const totalAccidents = accidents.length;
   const totalIncidents = incidents.length;
-  const { openAccidentsCount, openIncidentsCount, closeIncidentsCount, closedAccidentsCount } = filterByStatus();
+  const {
+    openAccidentsCount,
+    openIncidentsCount,
+    closeIncidentsCount,
+    closedAccidentsCount,
+  } = filterByStatus();
   const totalAccidentsOpen = openAccidentsCount;
   const totalIncidentsOpen = openIncidentsCount;
   const totalAccidentClosed = closedAccidentsCount;
@@ -517,7 +556,11 @@ function HazardAndRiskDashboard() {
               <Autocomplete
                 {...register("division", { required: false })}
                 size="small"
-                options={divisionData?.length ? divisionData.map((division) => division.divisionName) : []}
+                options={
+                  divisionData?.length
+                    ? divisionData.map((division) => division.divisionName)
+                    : []
+                }
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (
                   <TextField
@@ -636,7 +679,11 @@ function HazardAndRiskDashboard() {
             title="Pending Reports"
             titleIcon={<CheckCircleOutlineIcon fontSize="small" />}
             value={totalAccidentsOpen}
-            subDescription={openAccidentsCount > 0 ? `${((openAccidentsCount / totalAccidents) * 100).toFixed(2)}%` : "No Pendings Records yet"}
+            subDescription={
+              openAccidentsCount > 0
+                ? `${((openAccidentsCount / totalAccidents) * 100).toFixed(2)}%`
+                : "No Pendings Records yet"
+            }
           />
         </Box>
         <Box
@@ -651,7 +698,10 @@ function HazardAndRiskDashboard() {
             title="Completed Reports"
             titleIcon={<PendingIcon fontSize="small" />}
             value={totalAccidentClosed}
-            subDescription={`${((closedAccidentsCount / totalAccidents) * 100).toFixed(2)}%`}
+            subDescription={`${(
+              (closedAccidentsCount / totalAccidents) *
+              100
+            ).toFixed(2)}%`}
           />
         </Box>
         <Box
@@ -673,7 +723,7 @@ function HazardAndRiskDashboard() {
 
       <Divider
         sx={{
-          marginTop: "1rem"
+          marginTop: "1rem",
         }}
       />
 
@@ -720,7 +770,10 @@ function HazardAndRiskDashboard() {
             title="Pending Reports"
             titleIcon={<CheckCircleOutlineIcon fontSize="small" />}
             value={totalIncidentsOpen}
-            subDescription={`${((openIncidentsCount / totalIncidents) * 100).toFixed(2)}%`}
+            subDescription={`${(
+              (openIncidentsCount / totalIncidents) *
+              100
+            ).toFixed(2)}%`}
           />
         </Box>
         <Box
@@ -735,7 +788,10 @@ function HazardAndRiskDashboard() {
             title="Completed Reports"
             titleIcon={<PendingIcon fontSize="small" />}
             value={totalIncidentClosed}
-            subDescription={`${((openIncidentsCount / totalIncidents) * 100).toFixed(2)}%`}
+            subDescription={`${(
+              (openIncidentsCount / totalIncidents) *
+              100
+            ).toFixed(2)}%`}
           />
         </Box>
         <Box
@@ -755,7 +811,13 @@ function HazardAndRiskDashboard() {
         </Box>
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: isTablet ? "column" : "row", gap: "1rem" }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: isTablet ? "column" : "row",
+          gap: "1rem",
+        }}
+      >
         <Box
           sx={{
             width: "100%",
@@ -765,14 +827,14 @@ function HazardAndRiskDashboard() {
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
             padding: "1rem",
             borderRadius: "0.3rem",
-            border: "1px solid var(--pallet-border-blue)"
+            border: "1px solid var(--pallet-border-blue)",
           }}
         >
           <Box>
             <Typography
               variant="h6"
               sx={{
-                textAlign: "center"
+                textAlign: "center",
               }}
             >
               Total Accidents Count For Divisions
@@ -828,11 +890,14 @@ function HazardAndRiskDashboard() {
             border: "1px solid var(--pallet-border-blue)",
           }}
         >
-          <Typography variant="h6"
+          <Typography
+            variant="h6"
             sx={{
-              textAlign: "center"
+              textAlign: "center",
             }}
-          >Accident Male And Female</Typography>
+          >
+            Accident Male And Female
+          </Typography>
           <ResponsiveContainer width="100%" height={400}>
             <PieChart>
               <Pie
@@ -849,7 +914,7 @@ function HazardAndRiskDashboard() {
                     key={`cell-${index}`}
                     fill={
                       ["var(--pallet-blue)", "var(--pallet-light-grey)"][
-                      index % 2
+                        index % 2
                       ]
                     }
                   />
@@ -866,37 +931,49 @@ function HazardAndRiskDashboard() {
               alignItems: "center",
             }}
           >
-            <Typography variant="subtitle2" sx={{ color: "var(--pallet-blue)" }}>
+            <Typography
+              variant="subtitle2"
+              sx={{ color: "var(--pallet-blue)" }}
+            >
               {accidentsByGender.every((entry) => entry.value === 0)
                 ? "No Available Data for This Filter"
                 : watchPeriod
-                  ? watchPeriod
-                  : "All Time Accidents By Gender"}
+                ? watchPeriod
+                : "All Time Accidents By Gender"}
             </Typography>
 
-            <Typography variant="subtitle1">Total Accidents {totalAccidents}</Typography>
-            <Stack
-              direction="row"
-              gap={10}
-            >
+            <Typography variant="subtitle1">
+              Total Accidents {totalAccidents}
+            </Typography>
+            <Stack direction="row" gap={10}>
               <Typography
                 variant="subtitle2"
                 sx={{ color: "var(--pallet-grey)" }}
               >
-                Male {accidentsByGender.find(entry => entry.name === "Male")?.value ?? "0"}
+                Male{" "}
+                {accidentsByGender.find((entry) => entry.name === "Male")
+                  ?.value ?? "0"}
               </Typography>
               <Typography
                 variant="subtitle2"
                 sx={{ color: "var(--pallet-grey)" }}
               >
-                Female {accidentsByGender.find(entry => entry.name === "Female")?.value ?? "0"}
+                Female{" "}
+                {accidentsByGender.find((entry) => entry.name === "Female")
+                  ?.value ?? "0"}
               </Typography>
             </Stack>
           </Box>
         </Box>
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: isTablet ? "column" : "row", gap: "1rem" }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: isTablet ? "column" : "row",
+          gap: "1rem",
+        }}
+      >
         <Box
           sx={{
             width: "100%",
@@ -906,14 +983,14 @@ function HazardAndRiskDashboard() {
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
             padding: "1rem",
             borderRadius: "0.3rem",
-            border: "1px solid var(--pallet-border-blue)"
+            border: "1px solid var(--pallet-border-blue)",
           }}
         >
           <Box>
             <Typography
               variant="h6"
               sx={{
-                textAlign: "center"
+                textAlign: "center",
               }}
             >
               incident Count For Divisions
@@ -968,11 +1045,14 @@ function HazardAndRiskDashboard() {
             marginTop: "1rem",
           }}
         >
-          <Typography variant="h6"
+          <Typography
+            variant="h6"
             sx={{
-              textAlign: "center"
+              textAlign: "center",
             }}
-          >Incident Male And Female</Typography>
+          >
+            Incident Male And Female
+          </Typography>
           <ResponsiveContainer width="100%" height={400}>
             <PieChart>
               <Pie
@@ -988,9 +1068,7 @@ function HazardAndRiskDashboard() {
                   <Cell
                     key={`cell-${index}`}
                     fill={
-                      ["var(--pallet-blue)", "var(--pallet-pink)"][
-                      index % 2
-                      ]
+                      ["var(--pallet-blue)", "var(--pallet-pink)"][index % 2]
                     }
                   />
                 ))}
@@ -1006,37 +1084,49 @@ function HazardAndRiskDashboard() {
               alignItems: "center",
             }}
           >
-            <Typography variant="subtitle2" sx={{ color: "var(--pallet-blue)" }}>
+            <Typography
+              variant="subtitle2"
+              sx={{ color: "var(--pallet-blue)" }}
+            >
               {IncidentsByGender.every((entry) => entry.value === 0)
                 ? "No Available Data for This Filter"
                 : watchPeriod
-                  ? watchPeriod
-                  : "All Time Accidents By Gender"}
+                ? watchPeriod
+                : "All Time Accidents By Gender"}
             </Typography>
 
-            <Typography variant="subtitle1">Total Incidents {totalIncidents}</Typography>
-            <Stack
-              direction="row"
-              gap={10}
-            >
+            <Typography variant="subtitle1">
+              Total Incidents {totalIncidents}
+            </Typography>
+            <Stack direction="row" gap={10}>
               <Typography
                 variant="subtitle2"
                 sx={{ color: "var(--pallet-grey)" }}
               >
-                Male {IncidentsByGender.find(entry => entry.name === "Male")?.value ?? "0"}
+                Male{" "}
+                {IncidentsByGender.find((entry) => entry.name === "Male")
+                  ?.value ?? "0"}
               </Typography>
               <Typography
                 variant="subtitle2"
                 sx={{ color: "var(--pallet-grey)" }}
               >
-                Female {IncidentsByGender.find(entry => entry.name === "Female")?.value ?? "0"}
+                Female{" "}
+                {IncidentsByGender.find((entry) => entry.name === "Female")
+                  ?.value ?? "0"}
               </Typography>
             </Stack>
           </Box>
         </Box>
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: isTablet ? "column" : "row", gap: "1rem" }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: isTablet ? "column" : "row",
+          gap: "1rem",
+        }}
+      >
         <Box
           sx={{
             width: "100%",
@@ -1046,14 +1136,14 @@ function HazardAndRiskDashboard() {
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
             padding: "1rem",
             borderRadius: "0.3rem",
-            border: "1px solid var(--pallet-border-blue)"
+            border: "1px solid var(--pallet-border-blue)",
           }}
         >
           <Box>
             <Typography
               variant="h6"
               sx={{
-                textAlign: "center"
+                textAlign: "center",
               }}
             >
               Total Hazard Risks For Divisions
@@ -1087,11 +1177,10 @@ function HazardAndRiskDashboard() {
             border: "1px solid var(--pallet-border-blue)",
             padding: "1rem",
             height: "auto",
-            marginTop: "1rem"
+            marginTop: "1rem",
           }}
         >
           <Stack spacing={10} sx={{ justifyContent: "space-between" }}>
-
             <Box>
               <Typography variant="h6" sx={{ textAlign: "center" }}>
                 Days Since Last Accident
@@ -1106,7 +1195,11 @@ function HazardAndRiskDashboard() {
                 alignItems: "center",
               }}
             >
-              <CircularProgressWithLabelAI daysSince={daysSinceLastAccident} size={250} nameValue="Accident" />
+              <CircularProgressWithLabelAI
+                daysSince={daysSinceLastAccident}
+                size={250}
+                nameValue="Accident"
+              />
             </Box>
 
             <Box
@@ -1117,14 +1210,23 @@ function HazardAndRiskDashboard() {
               }}
             >
               <Typography sx={{ color: "var(--pallet-grey)" }}>
-                Last Accident Date {latestAccidentDate ? latestAccidentDate.toISOString().split("T")[0] : "N/A"}
+                Last Accident Date{" "}
+                {latestAccidentDate
+                  ? latestAccidentDate.toISOString().split("T")[0]
+                  : "N/A"}
               </Typography>
             </Box>
           </Stack>
         </Box>
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: isTablet ? "column" : "row", gap: "1rem" }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: isTablet ? "column" : "row",
+          gap: "1rem",
+        }}
+      >
         <Box
           sx={{
             width: "100%",
@@ -1168,7 +1270,6 @@ function HazardAndRiskDashboard() {
           }}
         >
           <Stack spacing={10} sx={{ justifyContent: "space-between" }}>
-
             <Box>
               <Box>
                 <Typography variant="h6" sx={{ textAlign: "center" }}>
@@ -1185,7 +1286,11 @@ function HazardAndRiskDashboard() {
                 alignItems: "center",
               }}
             >
-              <CircularProgressWithLabelAI daysSince={daysSinceLastIncident} size={250} nameValue="Incident" />
+              <CircularProgressWithLabelAI
+                daysSince={daysSinceLastIncident}
+                size={250}
+                nameValue="Incident"
+              />
             </Box>
             <Box
               sx={{
@@ -1195,7 +1300,10 @@ function HazardAndRiskDashboard() {
               }}
             >
               <Typography sx={{ color: "var(--pallet-grey)" }}>
-                Last Incident Date {latestIncidentDate ? latestIncidentDate.toISOString().split("T")[0] : "N/A"}
+                Last Incident Date{" "}
+                {latestIncidentDate
+                  ? latestIncidentDate.toISOString().split("T")[0]
+                  : "N/A"}
               </Typography>
             </Box>
           </Stack>

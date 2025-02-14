@@ -81,16 +81,21 @@ export async function getMaternityRegistersList() {
   return res.data;
 }
 
-export const createMaternityRegister = async (maternityRegister: MaternityRegister) => {
+export const createMaternityRegister = async (
+  maternityRegister: MaternityRegister
+) => {
   const formData = new FormData();
   Object.keys(maternityRegister).forEach((key) => {
     const value = maternityRegister[key as keyof typeof maternityRegister];
 
     if (Array.isArray(value)) {
       value.forEach((item, index) => {
-        if (key === 'benefitsAndEntitlements' || key === 'medicalDocuments') {
+        if (key === "benefitsAndEntitlements" || key === "medicalDocuments") {
           Object.keys(item).forEach((nestedKey) => {
-            formData.append(`${key}[${index}][${nestedKey}]`, item[nestedKey].toString());
+            formData.append(
+              `${key}[${index}][${nestedKey}]`,
+              item[nestedKey]?.toString()
+            );
           });
         } else {
           formData.append(`${key}[${index}]`, JSON.stringify(item));
@@ -108,10 +113,11 @@ export const createMaternityRegister = async (maternityRegister: MaternityRegist
       "Content-Type": "multipart/form-data",
     },
   });
-}
+};
 
-
-export const updateMaternityRegister = async (maternityRegister: MaternityRegister) => {
+export const updateMaternityRegister = async (
+  maternityRegister: MaternityRegister
+) => {
   const formData = new FormData();
 
   Object.keys(maternityRegister).forEach((key) => {
@@ -119,9 +125,12 @@ export const updateMaternityRegister = async (maternityRegister: MaternityRegist
 
     if (Array.isArray(value)) {
       value.forEach((item, index) => {
-        if (key === 'benefitsAndEntitlements' || key === 'medicalDocuments') {
+        if (key === "benefitsAndEntitlements" || key === "medicalDocuments") {
           Object.keys(item).forEach((nestedKey) => {
-            formData.append(`${key}[${index}][${nestedKey}]`, item[nestedKey].toString());
+            formData.append(
+              `${key}[${index}][${nestedKey}]`,
+              item[nestedKey]?.toString()
+            );
           });
         } else {
           formData.append(`${key}[${index}]`, JSON.stringify(item));
@@ -132,9 +141,9 @@ export const updateMaternityRegister = async (maternityRegister: MaternityRegist
     } else if (value !== null && value !== undefined) {
       formData.append(key, value.toString());
     }
-  });  
+  });
   const res = await axios.post(
-       `/api/benefit-request/${maternityRegister.id}/update`,
+    `/api/benefit-request/${maternityRegister.id}/update`,
     formData,
     {
       headers: {

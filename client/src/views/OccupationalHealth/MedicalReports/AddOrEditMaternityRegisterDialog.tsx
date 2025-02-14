@@ -434,7 +434,9 @@ export default function AddOrEditMaternityRegisterDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value ? new Date(field.value) : undefined}
+                              value={
+                                field.value ? new Date(field.value) : undefined
+                              }
                               label="Manufacturing Date"
                               error={errors?.dateOfJoin ? "Required" : ""}
                             />
@@ -521,7 +523,7 @@ export default function AddOrEditMaternityRegisterDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value ? new Date(field.value) : undefined}
+                              value={field.value ? new Date(field.value) : null}
                               label="Application Date"
                               error={errors?.applicationDate ? "Required" : ""}
                             />
@@ -538,7 +540,7 @@ export default function AddOrEditMaternityRegisterDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value ? new Date(field.value) : undefined}
+                              value={field.value ? new Date(field.value) : null}
                               label="Expected Delivery Date"
                             />
                           </Box>
@@ -561,7 +563,7 @@ export default function AddOrEditMaternityRegisterDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value ? new Date(field.value) : undefined}
+                              value={field.value ? new Date(field.value) : null}
                               label="Leave Start Date"
                               error={errors?.leaveStartDate ? "Required" : ""}
                             />
@@ -578,7 +580,7 @@ export default function AddOrEditMaternityRegisterDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value ? new Date(field.value) : undefined}
+                              value={field.value ? new Date(field.value) : null}
                               label="Leave End Date"
                               error={errors?.leaveEndDate ? "Required" : ""}
                             />
@@ -597,7 +599,7 @@ export default function AddOrEditMaternityRegisterDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value ? new Date(field.value) : undefined}
+                              value={field.value ? new Date(field.value) : null}
                               label="Application Date"
                               error={
                                 errors?.actualDeliveryDate ? "Required" : ""
@@ -862,7 +864,7 @@ export default function AddOrEditMaternityRegisterDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value ? new Date(field.value) : undefined}
+                              value={field.value ? new Date(field.value) : null}
                               label="Manufacturing Date"
                               error={errors?.dateOfJoin ? "Required" : ""}
                             />
@@ -881,7 +883,7 @@ export default function AddOrEditMaternityRegisterDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value ? new Date(field.value) : undefined}
+                              value={field.value ? new Date(field.value) : null}
                               label="Notice Date After Delivery"
                               error={
                                 errors?.noticeDateAfterDelivery
@@ -904,7 +906,7 @@ export default function AddOrEditMaternityRegisterDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value ? new Date(field.value) : undefined}
+                              value={field.value ? new Date(field.value) : null}
                               label="Rejoining Date"
                               error={errors?.reJoinDate ? "Required" : ""}
                             />
@@ -1119,19 +1121,30 @@ export default function AddOrEditMaternityRegisterDialog({
               }}
             >
               <Box sx={{ margin: "0.5rem" }}>
-                <Autocomplete
-                  {...register("division", { required: true })}
-                  size="small"
-                  options={sampleDivisions?.map((division) => division.name)}
-                  defaultValue={defaultValues?.division}
-                  sx={{ flex: 1, margin: "0.5rem" }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      required
-                      error={!!errors.division}
-                      label="Division"
-                      name="division"
+                <Controller
+                  name="division"
+                  control={control}
+                  defaultValue={defaultValues?.division ?? null}
+                  rules={{ required: true }}
+                  render={({ field }) => (
+                    <Autocomplete
+                      {...field}
+                      onChange={(event, newValue) => field.onChange(newValue)}
+                      size="small"
+                      options={sampleDivisions?.map(
+                        (division) => division.name
+                      )}
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          error={!!errors.division}
+                          helperText={errors.division && "Required"}
+                          label="Division"
+                          name="division"
+                        />
+                      )}
                     />
                   )}
                 />
