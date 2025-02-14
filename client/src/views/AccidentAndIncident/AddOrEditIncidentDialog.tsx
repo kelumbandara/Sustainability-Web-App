@@ -60,6 +60,7 @@ import { circumstancesOptions } from "../../api/sampleData/incidentData";
 import useCurrentUser from "../../hooks/useCurrentUser";
 import { fetchAllUsers } from "../../api/userApi";
 import { useQuery } from "@tanstack/react-query";
+import { fetchDivision } from "../../api/divisionApi";
 
 type DialogProps = {
   open: boolean;
@@ -123,6 +124,11 @@ export default function AddOrEditIncidentDialog({
   const { data: userData, isFetching: isUserDataFetching } = useQuery({
     queryKey: ["users"],
     queryFn: fetchAllUsers,
+  });
+
+  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
+    queryKey: ["divisions"],
+    queryFn: fetchDivision,
   });
 
   const {
@@ -307,9 +313,7 @@ export default function AddOrEditIncidentDialog({
                     <Autocomplete
                       {...register("division", { required: true })}
                       size="small"
-                      options={sampleDivisions?.map(
-                        (division) => division.name
-                      )}
+                      options={divisionData?.length ? divisionData.map((division) => division.divisionName) : []}
                       defaultValue={defaultValues?.division}
                       sx={{ flex: 1, margin: "0.5rem" }}
                       renderInput={(params) => (

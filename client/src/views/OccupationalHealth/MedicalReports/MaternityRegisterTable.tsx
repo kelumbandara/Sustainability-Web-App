@@ -192,7 +192,7 @@ function MaternityRegisterTable() {
                     </TableCell>
                     <TableCell align="right">{row?.leaveStatus}</TableCell>
                     <TableCell align="right">
-                      {row?.rejoiningDate
+                      {row?.reJoinDate
                         ? format(new Date(row.reJoinDate), "yyyy-MM-dd")
                         : "--"}
                     </TableCell>

@@ -598,7 +598,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value}
+                              value={field.value ? new Date(field.value) : undefined}
                               label="Manufacturing Date"
                               error={
                                 errors?.manufacturingDate ? "Required" : ""
@@ -617,7 +617,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value}
+                              value={field.value ? new Date(field.value) : undefined}
                               label="Expiry Date"
                               error={errors?.expiryDate ? "Required" : ""}
                             />
@@ -634,7 +634,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value}
+                              value={field.value ? new Date(field.value) : undefined}
                               label="Delivery Date"
                               error={errors?.deliveryDate ? "Required" : ""}
                             />
@@ -694,7 +694,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value}
+                              value={field.value ? new Date(field.value) : undefined}
                               label="Delivery Date"
                               error={errors?.invoiceDate ? "Required" : ""}
                             />

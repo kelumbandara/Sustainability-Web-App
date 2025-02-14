@@ -43,6 +43,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import useCurrentUser from "../../hooks/useCurrentUser";
 import { fetchAllUsers } from "../../api/userApi";
+import { fetchDivision } from "../../api/divisionApi";
 
 type DialogProps = {
   open: boolean;
@@ -115,6 +116,11 @@ export default function AddOrEditHazardRiskDialog({
     queryKey: ["observationType", subCategory],
     queryFn: () => fetchObservationType(subCategory),
     enabled: !!subCategory, // Prevents fetching when category is empty
+  });
+
+  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
+    queryKey: ["divisions"],
+    queryFn: fetchDivision,
   });
 
   const subCategoryOptions = useMemo(() => {
@@ -464,7 +470,7 @@ export default function AddOrEditHazardRiskDialog({
               <Autocomplete
                 {...register("division", { required: true })}
                 size="small"
-                options={sampleDivisions?.map((division) => division.name)}
+                options={divisionData?.length ? divisionData.map((division) => division.divisionName) : []}
                 defaultValue={defaultValues?.division}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (

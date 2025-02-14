@@ -26,6 +26,8 @@ import SwitchButton from "../../components/SwitchButton";
 import CustomButton from "../../components/CustomButton";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { useQuery } from "@tanstack/react-query";
+import { fetchDivision } from "../../api/divisionApi";
 
 type DialogProps = {
   open: boolean;
@@ -58,6 +60,11 @@ export default function AddOrEditDocumentDialog({
   const versionNumber = watch("versionNumber");
 
   console.log("versionNumber", versionNumber, defaultValues);
+
+  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
+    queryKey: ["divisions"],
+    queryFn: fetchDivision,
+  });
 
   useEffect(() => {
     if (defaultValues) {
@@ -185,7 +192,7 @@ export default function AddOrEditDocumentDialog({
               <Autocomplete
                 {...register("division", { required: true })}
                 size="small"
-                options={sampleDivisions?.map((division) => division.name)}
+                options={divisionData?.length ? divisionData.map((division) => division.divisionName) : []}
                 defaultValue={defaultValues?.division}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (

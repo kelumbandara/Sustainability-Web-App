@@ -97,7 +97,7 @@ function HazardAndRiskDashboard() {
     queryFn: getIncidentsList,
   });
 
-  const { data: divisionData, isFetching: isCategoryDataFetching } = useQuery({
+  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
     queryKey: ["divisions"],
     queryFn: fetchDivision,
   });

@@ -184,7 +184,7 @@ export default function AddOrEditBenefitEntitlementDialog({
                   <Box sx={{ flex: 1, marginX: "0.5rem" }}>
                     <DatePickerComponent
                       onChange={(e) => field.onChange(e)}
-                      value={field.value}
+                      value={field.value ? new Date(field.value) : undefined}
                       label="Date of First Installment"
                       error={
                         errors?.dateOf1stInstallment ? "Required" : ""
@@ -224,7 +224,7 @@ export default function AddOrEditBenefitEntitlementDialog({
                   <Box sx={{ flex: 1, marginX: "0.5rem" }}>
                     <DatePickerComponent
                       onChange={(e) => field.onChange(e)}
-                      value={field.value}
+                      value={field.value ? new Date(field.value) : undefined}
                       label="Date of Second Installment"
                     />
                   </Box>
@@ -307,7 +307,7 @@ export default function AddOrEditBenefitEntitlementDialog({
                   <Box sx={{ flex: 1, marginX: "0.5rem" }}>
                     <DatePickerComponent
                       onChange={(e) => field.onChange(e)}
-                      value={field.value}
+                      value={field.value ? new Date(field.value) : undefined}
                       label="Beneficiary Date"
                       error={errors?.beneficiaryDate ? "Required" : ""}
                     />

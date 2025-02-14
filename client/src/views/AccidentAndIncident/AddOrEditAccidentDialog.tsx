@@ -188,7 +188,7 @@ export default function AddOrEditAccidentDialog({
   const { data: accidentSubCategoryData, isFetching: isAccidentSubCategoryDataFetching } = useQuery({
     queryKey: ["accidentSubCategory", category],
     queryFn: () => fetchAccidentSubCategory(category),
-    enabled: !!category, // Prevents fetching when category is empty
+    enabled: !!category,
   });
 
   const handleCreateDocument = (data: Accident) => {

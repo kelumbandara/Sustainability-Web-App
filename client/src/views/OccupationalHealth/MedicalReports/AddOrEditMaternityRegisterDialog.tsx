@@ -434,7 +434,7 @@ export default function AddOrEditMaternityRegisterDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value}
+                              value={field.value ? new Date(field.value) : undefined}
                               label="Manufacturing Date"
                               error={errors?.dateOfJoin ? "Required" : ""}
                             />
@@ -521,7 +521,7 @@ export default function AddOrEditMaternityRegisterDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value}
+                              value={field.value ? new Date(field.value) : undefined}
                               label="Application Date"
                               error={errors?.applicationDate ? "Required" : ""}
                             />
@@ -538,7 +538,7 @@ export default function AddOrEditMaternityRegisterDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value}
+                              value={field.value ? new Date(field.value) : undefined}
                               label="Expected Delivery Date"
                             />
                           </Box>
@@ -561,7 +561,7 @@ export default function AddOrEditMaternityRegisterDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value}
+                              value={field.value ? new Date(field.value) : undefined}
                               label="Leave Start Date"
                               error={errors?.leaveStartDate ? "Required" : ""}
                             />
@@ -578,7 +578,7 @@ export default function AddOrEditMaternityRegisterDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value}
+                              value={field.value ? new Date(field.value) : undefined}
                               label="Leave End Date"
                               error={errors?.leaveEndDate ? "Required" : ""}
                             />
@@ -597,7 +597,7 @@ export default function AddOrEditMaternityRegisterDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value}
+                              value={field.value ? new Date(field.value) : undefined}
                               label="Application Date"
                               error={
                                 errors?.actualDeliveryDate ? "Required" : ""
@@ -862,7 +862,7 @@ export default function AddOrEditMaternityRegisterDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value}
+                              value={field.value ? new Date(field.value) : undefined}
                               label="Manufacturing Date"
                               error={errors?.dateOfJoin ? "Required" : ""}
                             />
@@ -881,7 +881,7 @@ export default function AddOrEditMaternityRegisterDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value}
+                              value={field.value ? new Date(field.value) : undefined}
                               label="Notice Date After Delivery"
                               error={
                                 errors?.noticeDateAfterDelivery
@@ -904,7 +904,7 @@ export default function AddOrEditMaternityRegisterDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value}
+                              value={field.value ? new Date(field.value) : undefined}
                               label="Rejoining Date"
                               error={errors?.reJoinDate ? "Required" : ""}
                             />
