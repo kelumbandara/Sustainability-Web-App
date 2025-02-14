@@ -217,7 +217,7 @@ function HazardAndRiskDashboard() {
           break;
         case HazardDashboardPeriods.CUSTOM:
           const dateRange = watch("dateRange");
-          if (Array.isArray(dateRange) && dateRange.length === 2) {
+          if (Array.isArray(dateRange) && dateRange.length === 2 && dateRange[0] && dateRange[1]) {
             startDate = new Date(dateRange[0]);
             endDate = new Date(dateRange[1]);
           }
@@ -229,7 +229,7 @@ function HazardAndRiskDashboard() {
 
       return matchesPeriod && matchesDivision;
     });
-  }, [selectedPeriod, selectedDivision, riskData]);
+  }, [selectedPeriod, selectedDivision, riskData, watch]);
 
   const riskLevelDataWithCases = useMemo(() => {
     if (!filteredRiskDataForCase.length) return [];
@@ -560,7 +560,7 @@ function HazardAndRiskDashboard() {
         >
           <Box>
             <Typography
-            variant="h6"
+              variant="h6"
               sx={{
                 textAlign: "center"
               }}
