@@ -139,7 +139,8 @@ export default function AddOrEditBenefitEntitlementDialog({
             />
             <TextField
               id="amountValue"
-              label="Employee Id"
+              type="number"
+              label="Amount Value"
               error={!!errors.amountValue}
               size="small"
               sx={{ flex: 1, margin: "0.5rem" }}

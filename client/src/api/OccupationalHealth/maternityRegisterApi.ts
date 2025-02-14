@@ -61,7 +61,7 @@ export const MaternityRegisterSchema = z.object({
   leaveStatus: z.nativeEnum(LeaveStatus),
   noticeDateAfterDelivery: z.date(),
   reJoinDate: z.date(),
-  supportProvided: z.string().optional(),
+  supportProvider: z.string().optional(),
   created_at: z.string(),
   updated_at: z.string(),
   publishedAt: z.string(),
@@ -81,16 +81,20 @@ export async function getMaternityRegistersList() {
   return res.data;
 }
 
-export const createMaternityRegister = async (
-  maternityRegister: MaternityRegister
-) => {
+export const createMaternityRegister = async (MaternityRegister: MaternityRegister) => {
   const formData = new FormData();
+  Object.keys(MaternityRegister).forEach((key) => {
+    const value = MaternityRegister[key as keyof typeof MaternityRegister];
 
-  Object.keys(maternityRegister).forEach((key) => {
-    const value = maternityRegister[key as keyof typeof maternityRegister];
     if (Array.isArray(value)) {
       value.forEach((item, index) => {
-        formData.append(`${key}[${index}]`, JSON.stringify(item));
+        if (key === 'benefitsAndEntitlements' || key === 'medicalDocuments') {
+          Object.keys(item).forEach((nestedKey) => {
+            formData.append(`${key}[${index}][${nestedKey}]`, item[nestedKey].toString());
+          });
+        } else {
+          formData.append(`${key}[${index}]`, JSON.stringify(item));
+        }
       });
     } else if (value instanceof Date) {
       formData.append(key, value.toISOString());
@@ -104,9 +108,7 @@ export const createMaternityRegister = async (
       "Content-Type": "multipart/form-data",
     },
   });
-
-  return res.data;
-};
+}
 
 export const updateMaternityRegister = async (
   maternityRegister: MaternityRegister

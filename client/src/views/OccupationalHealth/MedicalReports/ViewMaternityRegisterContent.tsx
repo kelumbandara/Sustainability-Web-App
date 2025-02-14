@@ -21,6 +21,7 @@ import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import DescriptionIcon from "@mui/icons-material/Description";
 import AssignmentReturnIcon from "@mui/icons-material/AssignmentReturn";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
+import { format } from "date-fns";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -221,7 +222,7 @@ function ViewMaternityRegisterContent({
               />
               <DrawerContentItem
                 label="Name"
-                value={maternityRegister.name}
+                value={maternityRegister.employeeName}
                 sx={{ flex: 1 }}
               />
 
@@ -251,12 +252,12 @@ function ViewMaternityRegisterContent({
             <Box sx={{ flex: 1, flexDirection: isTablet ? "column" : "row" }}>
               <DrawerContentItem
                 label="Supervisor/Manager"
-                value={maternityRegister.supervisorManager}
+                value={maternityRegister.supervisorOrManager}
                 sx={{ flex: 1 }}
               />
               <DrawerContentItem
                 label="Date of Join"
-                value={maternityRegister.dateOfJoin?.toDateString()}
+                value={format(maternityRegister.dateOfJoin, "dd/MM/yyyy")}
                 sx={{ flex: 1 }}
               />
               <DrawerContentItem
@@ -283,29 +284,29 @@ function ViewMaternityRegisterContent({
               />
               <DrawerContentItem
                 label="Application Date"
-                value={maternityRegister.applicationDate?.toDateString()}
+                value={format(maternityRegister.applicationDate, "dd/MM/yyyy")}
                 sx={{ flex: 1 }}
               />
               <DrawerContentItem
                 label="Expected Delivery Date"
-                value={maternityRegister.expectedDeliveryDate?.toDateString()}
+                value={format(maternityRegister.expectedDeliveryDate, "dd/MM/yyyy")} 
                 sx={{ flex: 1 }}
               />
             </Box>
             <Box sx={{ flex: 1, flexDirection: isTablet ? "column" : "row" }}>
               <DrawerContentItem
                 label="Leave Start Date"
-                value={maternityRegister.leaveStartDate?.toDateString()}
+                value={format(maternityRegister.leaveStartDate, "dd/MM/yyyy")}
                 sx={{ flex: 1 }}
               />
               <DrawerContentItem
                 label="Leave End Date"
-                value={maternityRegister.leaveEndDate?.toDateString()}
+                value={format(maternityRegister.leaveEndDate, "dd/MM/yyyy")}
                 sx={{ flex: 1 }}
               />
               <DrawerContentItem
                 label="Actual Delivery Date"
-                value={maternityRegister.actualDeliveryDate?.toDateString()}
+                value={format(maternityRegister.actualDeliveryDate, "dd/MM/yyyy")}
                 sx={{ flex: 1 }}
               />
             </Box>
@@ -368,17 +369,17 @@ function ViewMaternityRegisterContent({
           >
             <DrawerContentItem
               label="Notice Date After Delivery"
-              value={maternityRegister.noticeDateAfterDelivery?.toDateString()}
+              value={format(maternityRegister.noticeDateAfterDelivery, "dd/MM/yyyy")} //maternityRegister.noticeDateAfterDelivery?.toDateString()}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
               label="Rejoining Date"
-              value={new Date(maternityRegister.rejoiningDate).toDateString()}
+              value={new Date(maternityRegister.reJoinDate).toDateString()}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
               label="Support Provided"
-              value={maternityRegister.supportProvided}
+              value={maternityRegister.supportProvider}
               sx={{ flex: 1 }}
             />
           </Box>

@@ -914,16 +914,16 @@ export default function AddOrEditMaternityRegisterDialog({
                     />
                     <TextField
                       required
-                      id="supportProvided"
+                      id="supportProvider"
                       label="Support Provided"
-                      error={!!errors.supportProvided}
+                      error={!!errors.supportProvider}
                       size="small"
                       sx={{
                         flex: 1,
                         margin: "0.5rem",
                         marginTop: isTablet ? "0.5rem" : "1.8rem",
                       }}
-                      {...register("supportProvided")}
+                      {...register("supportProvider")}
                     />
                   </Box>
                   <Box
