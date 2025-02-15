@@ -98,7 +98,11 @@ export default function AddOrEditPurchaseAndInventoryDialog({
     control,
     formState: { errors },
     reset,
+    watch,
   } = useForm<MedicineInventory>({});
+
+  const manufacturingDate = watch("manufacturingDate");
+  const expiryDate = watch("expiryDate");
 
   useEffect(() => {
     if (defaultValues) {
@@ -457,7 +461,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                               {...params}
                               required
                               error={!!errors.supplierName}
-                              label="Supplier Type"
+                              label="Supplier Name"
                               name="supplierName"
                             />
                           )}
@@ -598,7 +602,9 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value ? new Date(field.value) : undefined}
+                              value={
+                                field.value ? new Date(field.value) : undefined
+                              }
                               label="Manufacturing Date"
                               error={
                                 errors?.manufacturingDate ? "Required" : ""
@@ -617,9 +623,12 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value ? new Date(field.value) : undefined}
+                              value={
+                                field.value ? new Date(field.value) : undefined
+                              }
                               label="Expiry Date"
                               error={errors?.expiryDate ? "Required" : ""}
+                              minDate={manufacturingDate}
                             />
                           </Box>
                         );
@@ -634,8 +643,12 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value ? new Date(field.value) : undefined}
+                              value={
+                                field.value ? new Date(field.value) : undefined
+                              }
                               label="Delivery Date"
+                              minDate={manufacturingDate}
+                              maxDate={expiryDate}
                               error={errors?.deliveryDate ? "Required" : ""}
                             />
                           </Box>
@@ -694,8 +707,10 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                           <Box sx={{ flex: 1, margin: "0.5rem" }}>
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
-                              value={field.value ? new Date(field.value) : undefined}
-                              label="Delivery Date"
+                              value={
+                                field.value ? new Date(field.value) : undefined
+                              }
+                              label="Invoice Date"
                               error={errors?.invoiceDate ? "Required" : ""}
                             />
                           </Box>

@@ -12,6 +12,7 @@ function DatePickerComponent({
   disablePast, // Accept disablePast as a prop
   disableFuture,
   minDate,
+  maxDate,
   disabled,
 }: {
   value: Date | null;
@@ -22,6 +23,7 @@ function DatePickerComponent({
   disablePast?: boolean; // Type it as a boolean
   disableFuture?: boolean;
   minDate?: Date;
+  maxDate?: Date;
   disabled?: boolean;
 }) {
   const { isMobile } = useIsMobile();
@@ -45,6 +47,7 @@ function DatePickerComponent({
           disablePast={disablePast} // Use the passed prop
           disableFuture={disableFuture}
           minDate={minDate}
+          maxDate={maxDate}
           disabled={disabled}
           sx={{
             border: error ? "1px solid var(--pallet-red)" : "",
@@ -59,6 +62,7 @@ function DatePickerComponent({
           disablePast={disablePast} // Use the passed prop
           disableFuture={disableFuture}
           minDate={minDate}
+          maxDate={maxDate}
           disabled={disabled}
           sx={{
             border: error ? "1px solid var(--pallet-red)" : "",
