@@ -29,7 +29,7 @@ function DashboardCard({
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
+            alignItems: "flex-start",
           }}
         >
           <Box
@@ -37,6 +37,7 @@ function DashboardCard({
               marginRight: "0.4rem",
               display: "flex",
               alignItems: "center",
+              marginTop: "0.1rem",
             }}
           >
             {titleIcon}
@@ -44,7 +45,7 @@ function DashboardCard({
           {title && (
             <Box>
               <Typography
-                variant="h6"
+                variant="subtitle2"
                 sx={{
                   color: "var(--pallet-text-primary)",
                 }}
@@ -71,7 +72,7 @@ function DashboardCard({
             sx={{
               color: "var(--pallet-blue)",
               marginX: "0.2rem",
-              marginY: "0.3rem",
+              marginY: "0.4rem",
               fontWeight: 600,
             }}
           >
@@ -79,11 +80,11 @@ function DashboardCard({
           </Typography>
         )}
       </Box>
-      <Box>
+      <Box sx={{ marginX: "0.2rem" }}>
         {subDescription && (
           <Typography
-            variant="body2"
-            sx={{ color: "var(--pallet-text-secondary)", marginX: "0.2rem" }}
+            variant="caption"
+            sx={{ color: "var(--pallet-text-secondary)" }}
           >
             {subDescription}
           </Typography>
