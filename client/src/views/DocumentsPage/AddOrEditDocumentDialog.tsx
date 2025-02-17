@@ -28,6 +28,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../api/divisionApi";
 import theme from "../../theme";
+import { fetchAllDocumentType } from "../../api/documentType";
 
 type DialogProps = {
   open: boolean;
@@ -65,6 +66,11 @@ export default function AddOrEditDocumentDialog({
   const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
     queryKey: ["divisions"],
     queryFn: fetchDivision,
+  });
+
+  const { data: documentType, isFetching: isDocumentTypeDataFetching } = useQuery({
+    queryKey: ["documentTypes"],
+    queryFn: fetchAllDocumentType,
   });
 
   useEffect(() => {
@@ -176,7 +182,8 @@ export default function AddOrEditDocumentDialog({
               <Autocomplete
                 {...register("documentType", { required: true })}
                 size="small"
-                options={Object.values(DocumentType)}
+                options={
+                  documentType?.length ? documentType.map((documents) => documents.documentType) : []}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 defaultValue={defaultValues?.documentType}
                 renderInput={(params) => (

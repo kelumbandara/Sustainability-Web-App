@@ -49,6 +49,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { sampleDivisions } from "../../../api/sampleData/documentData";
 import AddOrEditBenefitEntitlementDialog from "./AddOrEditBenefitEntitlementDialog";
 import AddOrEditDocumentDialog from "./AddOrEditDocumentDialog";
+import { fetchDivision } from "../../../api/divisionApi";
+import { useQuery } from "@tanstack/react-query";
 
 type DialogProps = {
   open: boolean;
@@ -145,6 +147,11 @@ export default function AddOrEditMaternityRegisterDialog({
     onSubmit(submitData as MaternityRegister);
     resetForm();
   };
+
+  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
+    queryKey: ["divisions"],
+    queryFn: fetchDivision,
+  });
 
   return (
     <>
@@ -1131,9 +1138,9 @@ export default function AddOrEditMaternityRegisterDialog({
                       {...field}
                       onChange={(event, newValue) => field.onChange(newValue)}
                       size="small"
-                      options={sampleDivisions?.map(
-                        (division) => division.name
-                      )}
+                      options={
+                        divisionData?.length ? divisionData.map((division) => division.divisionName) : []}
+
                       sx={{ flex: 1, margin: "0.5rem" }}
                       renderInput={(params) => (
                         <TextField

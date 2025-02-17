@@ -61,6 +61,11 @@ import useCurrentUser from "../../hooks/useCurrentUser";
 import { fetchAllUsers } from "../../api/userApi";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../api/divisionApi";
+import { fetchNearMiss } from "../../api/nearMissApi";
+import { fetchTypeOfConcerns } from "../../api/typeOfConcern";
+import { fetchAllFactors } from "../../api/incidentFactorsApi";
+import { fetchAllCircumstances } from "../../api/circumstancesApi";
+
 
 type DialogProps = {
   open: boolean;
@@ -129,6 +134,26 @@ export default function AddOrEditIncidentDialog({
   const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
     queryKey: ["divisions"],
     queryFn: fetchDivision,
+  });
+
+  const { data: nearMissData, isFetching: isNearMissDataFetching } = useQuery({
+    queryKey: ["nearMissData"],
+    queryFn: fetchNearMiss,
+  });
+
+  const { data: concernData, isFetching: isConcernDataFetching } = useQuery({
+    queryKey: ["concernData"],
+    queryFn: fetchTypeOfConcerns,
+  });
+
+  const { data: factorData, isFetching: isFactorDataFetching } = useQuery({
+    queryKey: ["factorData"],
+    queryFn: fetchAllFactors,
+  });
+
+  const { data: circumstancesData, isFetching: isCircumstancesDataFetching } = useQuery({
+    queryKey: ["circumstancesData"],
+    queryFn: fetchAllCircumstances,
   });
 
   const {
@@ -324,8 +349,8 @@ export default function AddOrEditIncidentDialog({
                           options={
                             divisionData?.length
                               ? divisionData.map(
-                                  (division) => division.divisionName
-                                )
+                                (division) => division.divisionName
+                              )
                               : []
                           }
                           sx={{ flex: 1, margin: "0.5rem" }}
@@ -363,7 +388,8 @@ export default function AddOrEditIncidentDialog({
                             field.onChange(newValue)
                           }
                           size="small"
-                          options={circumstancesOptions}
+                          options={
+                            circumstancesData?.length ? circumstancesData.map((circumstance) => circumstance.name) : []}
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -556,7 +582,8 @@ export default function AddOrEditIncidentDialog({
                             field.onChange(newValue)
                           }
                           size="small"
-                          options={Object.values(IncidentTypeOfNearMiss)}
+                          options={
+                            nearMissData?.length ? nearMissData.map((nearMiss) => nearMiss.type) : []}
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -583,7 +610,8 @@ export default function AddOrEditIncidentDialog({
                             field.onChange(newValue)
                           }
                           size="small"
-                          options={Object.values(IncidentTypeOfConcern)}
+                          options={
+                            concernData?.length ? concernData.map((concern) => concern.typeConcern) : []}
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -610,7 +638,8 @@ export default function AddOrEditIncidentDialog({
                             field.onChange(newValue)
                           }
                           size="small"
-                          options={Object.values(IncidentFactors)}
+                          options={
+                            factorData?.length ? factorData.map((factors) => factors.factorName) : []}
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -930,8 +959,8 @@ export default function AddOrEditIncidentDialog({
                       options={
                         userData && Array.isArray(userData)
                           ? userData
-                              .filter((user) => user.assigneeLevel >= 1)
-                              .map((user) => user.name)
+                            .filter((user) => user.assigneeLevel >= 1)
+                            .map((user) => user.name)
                           : []
                       }
                       sx={{ flex: 1, margin: "0.5rem" }}

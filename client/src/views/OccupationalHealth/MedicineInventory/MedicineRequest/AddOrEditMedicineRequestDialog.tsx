@@ -22,6 +22,10 @@ import { sampleMedicines } from "../../../../api/sampleData/medicineRequestSampl
 import { sampleDivisions } from "../../../../api/sampleData/documentData";
 import { sampleAssignees } from "../../../../api/sampleData/usersSampleData";
 import CustomButton from "../../../../components/CustomButton";
+import { useQuery } from "@tanstack/react-query";
+import { fetchMedicineList } from "../../../../api/OccupationalHealth/medicineNameApi";
+import { fetchDivision } from "../../../../api/divisionApi";
+import { fetchAllUsers } from "../../../../api/userApi";
 
 type DialogProps = {
   open: boolean;
@@ -72,6 +76,21 @@ export default function AddOrEditMedicineRequestDialog({
     onSubmit(submitData as MedicineRequest);
     resetForm();
   };
+
+  const { data: medicineData, isFetching: isDoctorDataFetching } = useQuery({
+    queryKey: ["medicine"],
+    queryFn: fetchMedicineList,
+  });
+
+  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
+    queryKey: ["divisions"],
+    queryFn: fetchDivision,
+  });
+
+  const { data: userData, isFetching: isUserDataFetching } = useQuery({
+    queryKey: ["users"],
+    queryFn: fetchAllUsers,
+  });
 
   return (
     <Dialog
@@ -135,7 +154,8 @@ export default function AddOrEditMedicineRequestDialog({
             <Autocomplete
               {...register("medicineName", { required: false })}
               size="small"
-              options={sampleMedicines.map((medicine) => medicine.medicineName)}
+              options={
+                medicineData?.length ? medicineData.map((medicine) => medicine.medicineName) : []}
               defaultValue={defaultValues?.medicineName}
               sx={{ flex: 1, margin: "0.5rem" }}
               renderInput={(params) => (
@@ -160,7 +180,8 @@ export default function AddOrEditMedicineRequestDialog({
             <Autocomplete
               {...register("division", { required: true })}
               size="small"
-              options={sampleDivisions?.map((division) => division.name)}
+              options={
+                divisionData?.length ? divisionData.map((division) => division.divisionName) : []}
               defaultValue={defaultValues?.division}
               sx={{ flex: 1, margin: "0.5rem" }}
               renderInput={(params) => (
@@ -186,7 +207,13 @@ export default function AddOrEditMedicineRequestDialog({
             <Autocomplete
               {...register("approver", { required: true })}
               size="small"
-              options={sampleAssignees?.map((category) => category.name)}
+              options={
+                userData && Array.isArray(userData)
+                  ? userData
+                    .filter((user) => user.assigneeLevel >= 1)
+                    .map((user) => user.name)
+                  : []
+              }
               sx={{ flex: 1, margin: "0.5rem" }}
               defaultValue={defaultValues?.approver}
               renderInput={(params) => (
