@@ -109,7 +109,7 @@ const AddOrEditDocumentDialog = ({
             {...register("documentType", { required: true })}
             size="small"
             options={
-              medicalReportTypeData?.length ? medicalReportTypeData.map((report) => report.divisionName) : []}
+              medicalReportTypeData?.length ? medicalReportTypeData.map((report) => report.documentName) : []}
             defaultValue={defaultDocument?.documentType || ""}
             sx={{ flex: 1 }}
             renderInput={(params) => (
