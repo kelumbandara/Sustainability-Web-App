@@ -24,7 +24,8 @@ import { User } from "../../api/userApi";
 import { sampleUsers } from "../../api/sampleData/usersSampleData";
 import ViewUserContent from "./ViewUserContent";
 import EditUserRoleDialog from "./EditUserRoleDialog";
-import { defaultViewerPermissions, PermissionKeys } from "./SectionList";
+import { PermissionKeys } from "./SectionList";
+import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
 
 function UserTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -33,8 +34,6 @@ function UserTable() {
   const [openEditUserRoleDialog, setOpenEditUserRoleDialog] = useState(false);
   const [userData, setUserData] = useState<User[]>(sampleUsers);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
-  const userPermissionObject = defaultViewerPermissions;
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
@@ -119,18 +118,16 @@ function UserTable() {
             <DrawerHeader
               title="User Details"
               handleClose={() => setOpenViewDrawer(false)}
-              onEdit={
-                userPermissionObject[PermissionKeys.ADMIN_USERS_EDIT]
-                  ? () => {
-                      setSelectedRow(selectedRow);
-                      setOpenEditUserRoleDialog(true);
-                    }
-                  : undefined
+              onEdit={() => {
+                setSelectedRow(selectedRow);
+                setOpenEditUserRoleDialog(true);
+              }}
+              disableEdit={
+                !useCurrentUserHaveAccess(PermissionKeys.ADMIN_USERS_EDIT)
               }
-              onDelete={
-                userPermissionObject[PermissionKeys.ADMIN_USERS_DELETE]
-                  ? () => setDeleteDialogOpen(true)
-                  : undefined
+              onDelete={() => setDeleteDialogOpen(true)}
+              disableDelete={
+                !useCurrentUserHaveAccess(PermissionKeys.ADMIN_USERS_DELETE)
               }
             />
 

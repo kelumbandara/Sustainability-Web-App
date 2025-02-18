@@ -36,6 +36,8 @@ import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal
 import AddOrEditMaternityRegisterDialog from "./AddOrEditMaternityRegisterDialog";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../../state/queryClient";
+import useCurrentUserHaveAccess from "../../../hooks/useCurrentUserHaveAccess";
+import { PermissionKeys } from "../../Administration/SectionList";
 
 function MaternityRegisterTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -150,6 +152,11 @@ function MaternityRegisterTable() {
                 setSelectedRow(null);
                 setOpenAddOrEditDialog(true);
               }}
+              disabled={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.OCCUPATIONAL_HEALTH_MEDICAL_RECORDS_MATERNITY_REGISTER_CREATE
+                )
+              }
             >
               Add New Benefit
             </Button>
@@ -224,6 +231,16 @@ function MaternityRegisterTable() {
                 setOpenAddOrEditDialog(true);
               }}
               onDelete={() => setDeleteDialogOpen(true)}
+              disableEdit={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.OCCUPATIONAL_HEALTH_MEDICAL_RECORDS_MATERNITY_REGISTER_EDIT
+                )
+              }
+              disableDelete={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.OCCUPATIONAL_HEALTH_MEDICAL_RECORDS_MATERNITY_REGISTER_DELETE
+                )
+              }
             />
 
             {selectedRow && (

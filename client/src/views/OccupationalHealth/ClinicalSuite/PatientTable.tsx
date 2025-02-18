@@ -37,6 +37,8 @@ import ViewPatientContent from "./ViewPatientContent";
 import AddOrEditPatientDialog from "./AddOrEditPatientDialog";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../../state/queryClient";
+import useCurrentUserHaveAccess from "../../../hooks/useCurrentUserHaveAccess";
+import { PermissionKeys } from "../../Administration/SectionList";
 
 function PatientTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -152,6 +154,11 @@ function PatientTable() {
                 setSelectedRow(null);
                 setOpenAddOrEditDialog(true);
               }}
+              disabled={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.OCCUPATIONAL_HEALTH_CLINICAL_SUITE_PATIENT_REGISTER_CREATE
+                )
+              }
             >
               Add New Patient
             </Button>
@@ -230,7 +237,17 @@ function PatientTable() {
                 setSelectedRow(selectedRow);
                 setOpenAddOrEditDialog(true);
               }}
+              disableEdit={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.OCCUPATIONAL_HEALTH_CLINICAL_SUITE_PATIENT_REGISTER_EDIT
+                )
+              }
               onDelete={() => setDeleteDialogOpen(true)}
+              disableDelete={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.OCCUPATIONAL_HEALTH_CLINICAL_SUITE_PATIENT_REGISTER_DELETE
+                )
+              }
             />
 
             {selectedRow && (

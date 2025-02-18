@@ -36,6 +36,8 @@ import {
   updateAccessRole,
 } from "../../api/accessManagementApi";
 import queryClient from "../../state/queryClient";
+import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
+import { PermissionKeys } from "./SectionList";
 
 function AccessManagementTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -152,6 +154,11 @@ function AccessManagementTable() {
                 setSelectedRole(null);
                 setAddOrEditAccessRoleDialogOpen(true);
               }}
+              disabled={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.ADMIN_ACCESS_MNG_CREATE
+                )
+              }
             >
               Create New Role
             </Button>
@@ -221,7 +228,15 @@ function AccessManagementTable() {
                 setSelectedRole(selectedRole);
                 setAddOrEditAccessRoleDialogOpen(true);
               }}
+              disableEdit={
+                !useCurrentUserHaveAccess(PermissionKeys.ADMIN_ACCESS_MNG_EDIT)
+              }
               onDelete={() => setDeleteDialogOpen(true)}
+              disableDelete={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.ADMIN_ACCESS_MNG_DELETE
+                )
+              }
             />
             {selectedRole && (
               <AccessManagementDrawerContent selectedRole={selectedRole} />

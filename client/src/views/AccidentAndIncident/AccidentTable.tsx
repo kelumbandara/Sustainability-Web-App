@@ -35,6 +35,8 @@ import ViewAccidentContent from "./ViewAccidentContent";
 import AddOrEditAccidentDialog from "./AddOrEditAccidentDialog";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../state/queryClient";
+import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
+import { PermissionKeys } from "../Administration/SectionList";
 
 function AccidentTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -146,6 +148,11 @@ function AccidentTable() {
                 setSelectedRow(null);
                 setOpenAddOrEditDialog(true);
               }}
+              disabled={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.INCIDENT_ACCIDENT_REGISTER_ACCIDENT_CREATE
+                )
+              }
             >
               Report an accident
             </Button>
@@ -229,7 +236,17 @@ function AccidentTable() {
                 setSelectedRow(selectedRow);
                 setOpenAddOrEditDialog(true);
               }}
+              disableEdit={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.INCIDENT_ACCIDENT_REGISTER_ACCIDENT_EDIT
+                )
+              }
               onDelete={() => setDeleteDialogOpen(true)}
+              disableDelete={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.INCIDENT_ACCIDENT_REGISTER_ACCIDENT_DELETE
+                )
+              }
             />
 
             {selectedRow && (

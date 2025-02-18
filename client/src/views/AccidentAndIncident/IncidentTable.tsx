@@ -24,18 +24,19 @@ import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
-import { 
+import {
   Incident,
   getIncidentsList,
   createIncidents,
   updateIncident,
-  deleteIncident
- } from "../../api/accidentAndIncidentApi";
+  deleteIncident,
+} from "../../api/accidentAndIncidentApi";
 import AddOrEditIncidentDialog from "./AddOrEditIncidentDialog";
-import { sampleIncidentData } from "../../api/sampleData/incidentData";
 import ViewIncidentContent from "./ViewIncidentContent";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../state/queryClient";
+import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
+import { PermissionKeys } from "../Administration/SectionList";
 
 function IncidentTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -151,6 +152,11 @@ function IncidentTable() {
                 setSelectedRow(null);
                 setOpenAddOrEditDialog(true);
               }}
+              disabled={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.INCIDENT_ACCIDENT_REGISTER_INCIDENT_CREATE
+                )
+              }
             >
               Report an incident
             </Button>
@@ -229,7 +235,17 @@ function IncidentTable() {
                 setSelectedRow(selectedRow);
                 setOpenAddOrEditDialog(true);
               }}
+              disableEdit={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.INCIDENT_ACCIDENT_REGISTER_INCIDENT_EDIT
+                )
+              }
               onDelete={() => setDeleteDialogOpen(true)}
+              disableDelete={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.INCIDENT_ACCIDENT_REGISTER_INCIDENT_DELETE
+                )
+              }
             />
 
             {selectedRow && (
@@ -251,7 +267,7 @@ function IncidentTable() {
           onSubmit={(data) => {
             if (selectedRow) {
               console.log("Updating document", data);
-              updateIncidentMutation(data)
+              updateIncidentMutation(data);
               // setIncidentData(
               //   incidentData.map((risk) => (risk.id === data.id ? data : risk))
               // ); // Update the document in the list if it already exists
@@ -260,7 +276,7 @@ function IncidentTable() {
               // });
             } else {
               console.log("Adding new incident", data);
-              createIncidentMutation(data)
+              createIncidentMutation(data);
               // setIncidentData([...incidentData, data]); // Add new document to the list
               // enqueueSnackbar("Incident Created Successfully!", {
               //   variant: "success",
@@ -287,7 +303,7 @@ function IncidentTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            deleteIncidentMutation(selectedRow.id)
+            deleteIncidentMutation(selectedRow.id);
             // setIncidentData(
             //   incidentData.filter((doc) => doc.id !== selectedRow.id)
             // );
