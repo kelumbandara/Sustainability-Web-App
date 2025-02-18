@@ -611,7 +611,7 @@ export default function AddOrEditIncidentDialog({
                           }
                           size="small"
                           options={
-                            concernData?.length ? concernData.map((concern) => concern.typeConcern) : []}
+                            concernData?.length ? concernData.map((concern) => concern.typeConcerns) : []}
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
