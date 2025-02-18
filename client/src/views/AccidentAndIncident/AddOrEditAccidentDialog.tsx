@@ -369,8 +369,8 @@ export default function AddOrEditAccidentDialog({
                           options={
                             divisionData?.length
                               ? divisionData.map(
-                                  (division) => division.divisionName
-                                )
+                                (division) => division.divisionName
+                              )
                               : []
                           }
                           sx={{ flex: 1, margin: "0.5rem" }}
@@ -419,8 +419,8 @@ export default function AddOrEditAccidentDialog({
                           options={
                             departmentData?.length
                               ? departmentData.map(
-                                  (department) => department.department
-                                )
+                                (department) => department.department
+                              )
                               : []
                           }
                           sx={{ flex: 1, margin: "0.5rem" }}
@@ -747,8 +747,8 @@ export default function AddOrEditAccidentDialog({
                           options={
                             accidentCategoryData?.length
                               ? accidentCategoryData.map(
-                                  (cat) => cat.categoryName
-                                )
+                                (cat) => cat.categoryName
+                              )
                               : []
                           }
                           sx={{ flex: 1, margin: "0.5rem" }}
@@ -782,8 +782,8 @@ export default function AddOrEditAccidentDialog({
                             options={
                               accidentSubCategoryData?.length
                                 ? accidentSubCategoryData.map(
-                                    (cat) => cat.subCategoryName
-                                  )
+                                  (cat) => cat.subCategoryName
+                                )
                                 : []
                             }
                             sx={{ flex: 1, margin: "0.5rem" }}
@@ -1265,8 +1265,8 @@ export default function AddOrEditAccidentDialog({
                       options={
                         userData && Array.isArray(userData)
                           ? userData
-                              .filter((user) => user.assigneeLevel >= 1)
-                              .map((user) => user.name)
+                            .filter((user) => user.assigneeLevel >= 1)
+                            .map((user) => user.name)
                           : []
                       }
                       sx={{ flex: 1, margin: "0.5rem" }}

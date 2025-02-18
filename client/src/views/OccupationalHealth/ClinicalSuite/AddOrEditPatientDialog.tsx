@@ -33,6 +33,11 @@ import DatePickerComponent from "../../../components/DatePickerComponent";
 import RichTextComponent from "../../../components/RichTextComponent";
 import TimePickerComponent from "../../../components/TimePickerComponent";
 import { sampleDoctorData } from "../../../api/sampleData/patientData";
+import { useQuery } from "@tanstack/react-query";
+import { fetchAllDoctors } from "../../../api/OccupationalHealth/consultingDoctorsAPi";
+import { fetchDivision } from "../../../api/divisionApi";
+import { fetchDepartmentData } from "../../../api/departmentApi";
+import { fetchDesignation } from "../../../api/OccupationalHealth/patientDesignationApi";
 
 type DialogProps = {
   open: boolean;
@@ -70,6 +75,26 @@ export default function AddOrEditPatientDialog({
   const resetForm = () => {
     reset();
   };
+
+  const { data: doctorData, isFetching: isDoctorDataFetching } = useQuery({
+    queryKey: ["doctors"],
+    queryFn: fetchAllDoctors,
+  });
+
+  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
+    queryKey: ["divisions"],
+    queryFn: fetchDivision,
+  });
+
+  const { data: departmentData, isFetching: isDepartmentDataFetching } = useQuery({
+    queryKey: ["departments"],
+    queryFn: fetchDepartmentData,
+  });
+
+  const { data: designationData, isFetching: isDesignationDataFetching } = useQuery({
+    queryKey: ["designations"],
+    queryFn: fetchDesignation,
+  });
 
   const handleCreateDocument = (data: Patient) => {
     const submitData: Partial<Patient> = data;
@@ -212,7 +237,8 @@ export default function AddOrEditPatientDialog({
             <Autocomplete
               {...register("designation", { required: true })}
               size="small"
-              options={Object.values(Designation)}
+              options={
+                designationData?.length ? designationData.map((designation) => designation.designationName) : []}
               defaultValue={defaultValues?.designation}
               sx={{ flex: 1, margin: "0.5rem" }}
               renderInput={(params) => (
@@ -235,7 +261,8 @@ export default function AddOrEditPatientDialog({
               <Autocomplete
                 {...register("division", { required: true })}
                 size="small"
-                options={sampleDivisions?.map((division) => division.name)}
+                options={
+                  divisionData?.length ? divisionData.map((division) => division.divisionName) : []}
                 defaultValue={defaultValues?.division}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (
@@ -251,9 +278,8 @@ export default function AddOrEditPatientDialog({
               <Autocomplete
                 {...register("department", { required: true })}
                 size="small"
-                options={sampleDepartments?.map(
-                  (department) => department.name
-                )}
+                options={
+                  departmentData?.length ? departmentData.map((department) => department.department) : []}
                 defaultValue={defaultValues?.department}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (
@@ -444,9 +470,8 @@ export default function AddOrEditPatientDialog({
               <Autocomplete
                 {...register("consultingDoctor", { required: true })}
                 size="small"
-                options={sampleDoctorData.map(
-                  (doctor) => doctor.first_name + " " + doctor.last_name
-                )}
+                options={
+                  doctorData?.length ? doctorData.map((doctor) => doctor.doctorName) : []}
                 defaultValue={defaultValues?.consultingDoctor}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (
@@ -491,7 +516,8 @@ export default function AddOrEditPatientDialog({
               <Autocomplete
                 {...register("clinicDivision", { required: true })}
                 size="small"
-                options={sampleDivisions?.map((division) => division.name)}
+                options={
+                  divisionData?.length ? divisionData.map((division) => division.divisionName) : []}
                 defaultValue={defaultValues?.clinicDivision}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (

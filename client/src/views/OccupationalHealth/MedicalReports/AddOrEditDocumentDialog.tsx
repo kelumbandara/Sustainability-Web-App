@@ -19,6 +19,8 @@ import useIsMobile from "../../../customHooks/useIsMobile";
 import CustomButton from "../../../components/CustomButton";
 import DropzoneComponent from "../../../components/DropzoneComponent";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { fetchAllMedicalReportType } from "../../../api/OccupationalHealth/medicalReportTypeApi";
 
 const AddOrEditDocumentDialog = ({
   open,
@@ -51,6 +53,11 @@ const AddOrEditDocumentDialog = ({
   //   }
   // }, [reset, defaultValues]);
   // console.log("def", defaultValues);
+
+  const { data: medicalReportTypeData, isFetching: isMedicalReportTypeDataFetching } = useQuery({
+    queryKey: ["medicalReport"],
+    queryFn: fetchAllMedicalReportType,
+  });
 
   return (
     <Dialog
@@ -101,7 +108,8 @@ const AddOrEditDocumentDialog = ({
           <Autocomplete
             {...register("documentType", { required: true })}
             size="small"
-            options={["Pregnancy Certificate", "Fitness Certificate"]}
+            options={
+              medicalReportTypeData?.length ? medicalReportTypeData.map((report) => report.documentName) : []}
             defaultValue={defaultDocument?.documentType || ""}
             sx={{ flex: 1 }}
             renderInput={(params) => (

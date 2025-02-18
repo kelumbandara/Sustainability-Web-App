@@ -22,6 +22,8 @@ import DatePickerComponent from "../../../components/DatePickerComponent";
 import CustomButton from "../../../components/CustomButton";
 import RichTextComponent from "../../../components/RichTextComponent";
 import useIsMobile from "../../../customHooks/useIsMobile";
+import { useQuery } from "@tanstack/react-query";
+import { fetchAllBenefitList } from "../../../api/OccupationalHealth/clinicDivisionApi";
 
 type DialogProps = {
   open: boolean;
@@ -60,6 +62,11 @@ export default function AddOrEditBenefitEntitlementDialog({
   const resetForm = () => {
     reset();
   };
+
+  const { data: benefitData, isFetching: isBenifitDataFetching } = useQuery({
+    queryKey: ["benefitTypeData"],
+    queryFn: fetchAllBenefitList,
+  });
 
   return (
     <Dialog
@@ -120,7 +127,8 @@ export default function AddOrEditBenefitEntitlementDialog({
             <Autocomplete
               {...register("benefitType", { required: true })}
               size="small"
-              options={sampleMaternityBenefitTypes}
+              options={
+                benefitData?.length ? benefitData.map((benefit) => benefit.benefitType) : []}
               sx={{ flex: 1, margin: "0.5rem" }}
               defaultValue={defaultValues?.benefitType}
               onChange={(e, value) => {

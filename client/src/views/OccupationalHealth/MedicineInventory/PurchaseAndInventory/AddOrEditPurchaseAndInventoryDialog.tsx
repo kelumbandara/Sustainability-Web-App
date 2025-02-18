@@ -39,6 +39,11 @@ import {
   sampleMedicineSuppliers,
   supplierTypes,
 } from "../../../../api/sampleData/medicineInventorySampleData";
+import { fetchMedicineList } from "../../../../api/OccupationalHealth/medicineNameApi";
+import { useQuery } from "@tanstack/react-query";
+import { fetchDivision } from "../../../../api/divisionApi";
+import { fetchAllSupplierName } from "../../../../api/OccupationalHealth/medicineSupplierNameApi";
+import { fetchAllSupplierTypes } from "../../../../api/OccupationalHealth/supplierType";
 
 type DialogProps = {
   open: boolean;
@@ -124,6 +129,28 @@ export default function AddOrEditPurchaseAndInventoryDialog({
     onSubmit(submitData as MedicineInventory);
     resetForm();
   };
+
+  const { data: medicineInventoryData, isFetching: isMedicineInventoryFetching } = useQuery({
+    queryKey: ["medicineInventory"],
+    queryFn: fetchMedicineList,
+  });
+
+  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
+    queryKey: ["divisions"],
+    queryFn: fetchDivision,
+  });
+
+  const { data: supplierTypeData, isFetching: isSupplierDataFetching } = useQuery({
+    queryKey: ["supplierType"],
+    queryFn: fetchAllSupplierTypes,
+  });
+
+  const { data: supplierNameData, isFetching: isSupplierNameDataFetching } = useQuery({
+    queryKey: ["supplierName"],
+    queryFn: fetchAllSupplierName,
+  });
+
+
 
   return (
     <>
@@ -351,7 +378,11 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                             field.onChange(newValue)
                           }
                           size="small"
-                          options={medicineInventoryForms}
+                          options={
+                            medicineInventoryData?.length
+                              ? [...new Set(medicineInventoryData.map((inventory) => inventory.form))]
+                              : []
+                          }
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -383,7 +414,11 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                             field.onChange(newValue)
                           }
                           size="small"
-                          options={medicineTypes}
+                          options={
+                            medicineInventoryData?.length
+                              ? [...new Set(medicineInventoryData.map((inventory) => inventory.medicineType))]
+                              : []
+                          }
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -451,10 +486,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                           }
                           size="small"
                           options={
-                            sampleMedicineSuppliers.map(
-                              (supplier) => supplier.supplierName
-                            ) ?? []
-                          }
+                            supplierNameData?.length ? supplierNameData.map((supplier) => supplier.supplierName) : []}
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -509,7 +541,8 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                             field.onChange(newValue)
                           }
                           size="small"
-                          options={supplierTypes}
+                          options={
+                            supplierTypeData?.length ? supplierTypeData.map((division) => division.benefitType) : []}
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -902,7 +935,9 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                 <Autocomplete
                   {...register("division", { required: true })}
                   size="small"
-                  options={sampleDivisions?.map((division) => division.name)}
+                  options={
+                    divisionData?.length ? divisionData.map((division) => division.divisionName) : []}
+
                   defaultValue={defaultValues?.division}
                   sx={{ flex: 1, margin: "0.5rem" }}
                   renderInput={(params) => (
