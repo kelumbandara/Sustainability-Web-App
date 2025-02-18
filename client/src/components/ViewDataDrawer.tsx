@@ -50,11 +50,15 @@ export function DrawerHeader({
   handleClose,
   onEdit,
   onDelete,
+  disableEdit,
+  disableDelete,
 }: {
   title: string;
   handleClose: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  disableEdit?: boolean;
+  disableDelete?: boolean;
 }) {
   return (
     <Box
@@ -76,7 +80,12 @@ export function DrawerHeader({
         }}
       >
         <Typography variant="h6">{title}</Typography>
-        <DrawerEditAndDeleteButtons onEdit={onEdit} onDelete={onDelete} />
+        <DrawerEditAndDeleteButtons
+          onEdit={onEdit}
+          onDelete={onDelete}
+          disableEdit={disableEdit}
+          disableDelete={disableDelete}
+        />
       </Box>
     </Box>
   );
@@ -85,9 +94,13 @@ export function DrawerHeader({
 export function DrawerEditAndDeleteButtons({
   onEdit,
   onDelete,
+  disableEdit,
+  disableDelete,
 }: {
   onEdit: () => void;
   onDelete: () => void;
+  disableEdit?: boolean;
+  disableDelete?: boolean;
 }) {
   const { isTablet } = useIsMobile();
   return (
@@ -100,7 +113,11 @@ export function DrawerEditAndDeleteButtons({
       {onEdit && (
         <>
           {isTablet ? (
-            <IconButton aria-label="edit" onClick={onEdit}>
+            <IconButton
+              aria-label="edit"
+              onClick={onEdit}
+              disabled={disableEdit}
+            >
               <EditIcon
                 sx={{
                   color: "var(--pallet-blue)",
@@ -116,6 +133,7 @@ export function DrawerEditAndDeleteButtons({
               size="medium"
               onClick={onEdit}
               startIcon={<EditIcon />}
+              disabled={disableEdit}
             >
               Edit
             </CustomButton>
@@ -129,6 +147,7 @@ export function DrawerEditAndDeleteButtons({
               aria-label="delete"
               onClick={onDelete}
               sx={{ marginX: 1 }}
+              disabled={disableDelete}
             >
               <DeleteIcon sx={{ color: "var(--pallet-red)" }} />
             </IconButton>
@@ -142,6 +161,7 @@ export function DrawerEditAndDeleteButtons({
               size="medium"
               onClick={onDelete}
               startIcon={<DeleteIcon />}
+              disabled={disableDelete}
             >
               Delete
             </CustomButton>

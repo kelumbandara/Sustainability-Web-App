@@ -25,23 +25,19 @@ import AddOrEditDocumentDialog from "./AddOrEditHazardRiskDialog";
 import { differenceInDays, format } from "date-fns";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
-import { sampleHazardRiskData } from "../../api/sampleData/hazardRiskData";
 import {
   HazardAndRisk,
   HazardAndRiskStatus,
   createHazardRisk,
   getHazardRiskList,
   updateHazardRisk,
-  deleteHazardRisk
+  deleteHazardRisk,
 } from "../../api/hazardRiskApi";
 import ViewHazardOrRiskContent from "./ViewHazardRiskContent";
-import PermissionWrapper from "../../components/PermissionWrapper";
-import {
-  defaultViewerPermissions,
-  PermissionKeys,
-} from "../Administration/SectionList";
+import { PermissionKeys } from "../Administration/SectionList";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../state/queryClient";
+import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
 
 function HazardRiskTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -50,8 +46,6 @@ function HazardRiskTable() {
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
   // const [riskData, setRiskData] = useState<HazardAndRisk[]>(sampleHazardRiskData);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
-  const userPermissionObject = defaultViewerPermissions;
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
@@ -67,7 +61,7 @@ function HazardRiskTable() {
     queryFn: getHazardRiskList,
   });
 
-  const { mutate: createHazardRiskMutation, } = useMutation({
+  const { mutate: createHazardRiskMutation } = useMutation({
     mutationFn: createHazardRisk,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
@@ -121,7 +115,6 @@ function HazardRiskTable() {
     },
   });
 
-
   return (
     <Stack>
       <Box
@@ -161,7 +154,9 @@ function HazardRiskTable() {
                 setOpenAddOrEditDialog(true);
               }}
               disabled={
-                userPermissionObject[PermissionKeys.HAZARD_RISK_REGISTER_CREATE] //permission !
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.HAZARD_RISK_REGISTER_CREATE
+                )
               }
             >
               Report a Hazard or Risk
@@ -198,7 +193,9 @@ function HazardRiskTable() {
                     }}
                   >
                     <TableCell component="th" scope="row">
-                      {row.created_at ? format(new Date(row.created_at), "yyyy-MM-dd") : "N/A"}
+                      {row.created_at
+                        ? format(new Date(row.created_at), "yyyy-MM-dd")
+                        : "N/A"}
                     </TableCell>
                     <TableCell align="right">{row.referenceNumber}</TableCell>
                     <TableCell align="right">{row.category}</TableCell>
@@ -209,25 +206,33 @@ function HazardRiskTable() {
                     <TableCell align="center">
                       {row.dueDate
                         ? (() => {
-                          const daysRemaining = differenceInDays(new Date(), row.dueDate);
-                          if (daysRemaining > 0) {
-                            return "No Remains";  // No remaining days
-                          }
-                          return `${Math.abs(daysRemaining)}`;  // Show remaining days if positive
-                        })()
-                        : null}  {/* Show nothing if no due date */}
+                            const daysRemaining = differenceInDays(
+                              new Date(),
+                              row.dueDate
+                            );
+                            if (daysRemaining > 0) {
+                              return "No Remains"; // No remaining days
+                            }
+                            return `${Math.abs(daysRemaining)}`; // Show remaining days if positive
+                          })()
+                        : null}{" "}
+                      {/* Show nothing if no due date */}
                     </TableCell>
 
                     <TableCell align="center">
                       {row.dueDate
                         ? (() => {
-                          const daysDelay = differenceInDays(new Date(), row.dueDate);
-                          if (daysDelay <= 0) {
-                            return "No Delays";  // No delayed days
-                          }
-                          return `${Math.abs(daysDelay)}`;  // Show delayed days if negative
-                        })()
-                        : null}  {/* Show nothing if no due date */}
+                            const daysDelay = differenceInDays(
+                              new Date(),
+                              row.dueDate
+                            );
+                            if (daysDelay <= 0) {
+                              return "No Delays"; // No delayed days
+                            }
+                            return `${Math.abs(daysDelay)}`; // Show delayed days if negative
+                          })()
+                        : null}{" "}
+                      {/* Show nothing if no due date */}
                     </TableCell>
                     <TableCell align="right">{row.createdByUserName}</TableCell>
                     <TableCell align="right">{row.assignee}</TableCell>
@@ -264,11 +269,21 @@ function HazardRiskTable() {
             <DrawerHeader
               title="Hazard or Risk Details"
               handleClose={() => setOpenViewDrawer(false)}
+              disableEdit={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.HAZARD_RISK_REGISTER_EDIT
+                )
+              }
               onEdit={() => {
                 setSelectedRow(selectedRow);
                 setOpenAddOrEditDialog(true);
               }}
               onDelete={() => setDeleteDialogOpen(true)}
+              disableDelete={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.HAZARD_RISK_REGISTER_DELETE
+                )
+              }
             />
 
             {selectedRow && (
@@ -290,7 +305,7 @@ function HazardRiskTable() {
           onSubmit={(data) => {
             if (selectedRow) {
               console.log("Updating document", data);
-              updateHazardRiskMutation(data)
+              updateHazardRiskMutation(data);
               // setRiskData(
               //   riskData.map((risk) => (risk.id === data.id ? data : risk))
               // ); // Update the document in the list if it already exists
@@ -300,7 +315,7 @@ function HazardRiskTable() {
             } else {
               console.log("Adding new hazard/risk", data);
               // setRiskData([...riskData, data]); // Add new document to the list
-              createHazardRiskMutation(data)
+              createHazardRiskMutation(data);
               // enqueueSnackbar("Hazard/Risk Created Successfully!", {
               //   variant: "success",
               // });

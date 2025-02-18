@@ -36,6 +36,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../../../state/queryClient";
 import ViewPurchaseAndInventoryContent from "./ViewPurchaseAndInventoryContent";
 import AddOrEditPurchaseAndInventoryDialog from "./AddOrEditPurchaseAndInventoryDialog";
+import useCurrentUserHaveAccess from "../../../../hooks/useCurrentUserHaveAccess";
+import { PermissionKeys } from "../../../Administration/SectionList";
 
 function PurchaseAndInventoryTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -150,6 +152,11 @@ function PurchaseAndInventoryTable() {
                 setSelectedRow(null);
                 setOpenAddOrEditDialog(true);
               }}
+              disabled={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_PURCHASE_INVENTORY_CREATE
+                )
+              }
             >
               Add New Medicine Inventory Item
             </Button>
@@ -196,8 +203,12 @@ function PurchaseAndInventoryTable() {
                     <TableCell align="right">
                       {row?.medicineType ?? "--"}
                     </TableCell>
-                    <TableCell align="right">{row?.requestedBy ?? "--"}</TableCell>
-                    <TableCell align="right">{row?.approvedBy ?? "--"}</TableCell>
+                    <TableCell align="right">
+                      {row?.requestedBy ?? "--"}
+                    </TableCell>
+                    <TableCell align="right">
+                      {row?.approvedBy ?? "--"}
+                    </TableCell>
                     <TableCell align="right">
                       {row?.deliveryQuantity ?? "--"}
                     </TableCell>
@@ -239,7 +250,17 @@ function PurchaseAndInventoryTable() {
                 setSelectedRow(selectedRow);
                 setOpenAddOrEditDialog(true);
               }}
+              disableEdit={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_PURCHASE_INVENTORY_EDIT
+                )
+              }
               onDelete={() => setDeleteDialogOpen(true)}
+              disableDelete={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_PURCHASE_INVENTORY_DELETE
+                )
+              }
             />
 
             {selectedRow && (

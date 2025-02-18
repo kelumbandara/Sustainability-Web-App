@@ -35,6 +35,8 @@ import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../state/queryClient";
+import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
+import { PermissionKeys } from "../Administration/SectionList";
 
 function DocumentTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -150,6 +152,11 @@ function DocumentTable() {
                 setSelectedRow(null);
                 setOpenAddOrEditDialog(true);
               }}
+              disabled={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.DOCUMENT_REGISTER_CREATE
+                )
+              }
             >
               Add New Document
             </Button>
@@ -251,7 +258,15 @@ function DocumentTable() {
                 setSelectedRow(selectedRow);
                 setOpenAddOrEditDialog(true);
               }}
+              disableEdit={
+                !useCurrentUserHaveAccess(PermissionKeys.DOCUMENT_REGISTER_EDIT)
+              }
               onDelete={() => setDeleteDialogOpen(true)}
+              disableDelete={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.DOCUMENT_REGISTER_DELETE
+                )
+              }
             />
 
             {selectedRow && (

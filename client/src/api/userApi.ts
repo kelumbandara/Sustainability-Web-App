@@ -29,6 +29,7 @@ export const userSchema = z.object({
   employeeNumber: z.string(),
   jobPosition: z.string(),
   assigneeLevel: z.string(),
+  permissionObject: PermissionKeysObjectSchema,
 });
 
 export type User = z.infer<typeof userSchema>;

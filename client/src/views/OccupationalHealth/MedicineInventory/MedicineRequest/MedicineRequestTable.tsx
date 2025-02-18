@@ -37,6 +37,8 @@ import {
 } from "../../../../api/medicineRequestApi";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../../../state/queryClient";
+import useCurrentUserHaveAccess from "../../../../hooks/useCurrentUserHaveAccess";
+import { PermissionKeys } from "../../../Administration/SectionList";
 
 function MedicineRequestTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -154,6 +156,11 @@ function MedicineRequestTable() {
                 setSelectedRow(null);
                 setOpenAddOrEditDialog(true);
               }}
+              disabled={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_MEDICINE_REQUEST_CREATE
+                )
+              }
             >
               Add New Medicine Request
             </Button>
@@ -225,7 +232,17 @@ function MedicineRequestTable() {
                 setSelectedRow(selectedRow);
                 setOpenAddOrEditDialog(true);
               }}
+              disableEdit={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_MEDICINE_REQUEST_EDIT
+                )
+              }
               onDelete={() => setDeleteDialogOpen(true)}
+              disableDelete={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_MEDICINE_REQUEST_DELETE
+                )
+              }
             />
 
             {selectedRow && (
