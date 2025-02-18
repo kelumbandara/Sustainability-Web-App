@@ -94,3 +94,13 @@ export async function fetchAllUsers() {
   const res = await axios.get("/api/all-users");
   return res.data;
 }
+
+export async function updateUser() {
+  const res = await axios.post("/api/all-users");
+  return res.data;
+}
+
+export async function deleteUser() {
+  const res = await axios.delete("/api/all-users");
+  return res.data;
+}

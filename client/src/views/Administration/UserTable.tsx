@@ -8,6 +8,7 @@ import Paper from "@mui/material/Paper";
 import {
   Alert,
   Box,
+  LinearProgress,
   Stack,
   Theme,
   Typography,
@@ -20,18 +21,20 @@ import { useState } from "react";
 import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
-import { User } from "../../api/userApi";
+import { User, deleteUser, fetchAllUsers, updateUser } from "../../api/userApi";
 import { sampleUsers } from "../../api/sampleData/usersSampleData";
 import ViewUserContent from "./ViewUserContent";
 import EditUserRoleDialog from "./EditUserRoleDialog";
 import { defaultViewerPermissions, PermissionKeys } from "./SectionList";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import queryClient from "../../state/queryClient";
 
 function UserTable() {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<User>(null);
   const [openEditUserRoleDialog, setOpenEditUserRoleDialog] = useState(false);
-  const [userData, setUserData] = useState<User[]>(sampleUsers);
+  //const [userData, setUserData] = useState<User[]>(sampleUsers);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const userPermissionObject = defaultViewerPermissions;
@@ -44,6 +47,47 @@ function UserTable() {
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("md")
   );
+
+  const { data: userData, isFetching: isUserDataFetching } = useQuery({
+    queryKey: ["users"],
+    queryFn: fetchAllUsers,
+  });
+
+  const { mutate: updateUserMutation } = useMutation({
+    mutationFn: updateUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
+      enqueueSnackbar("Hazard Risk Report Update Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenEditUserRoleDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Hazard Risk Update Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: deleteHazardRiskMutation } = useMutation({
+    mutationFn: deleteUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
+      enqueueSnackbar("Hazard Risk Report Deleted Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenEditUserRoleDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Hazard Risk Delete Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   return (
     <Stack>
@@ -59,6 +103,7 @@ function UserTable() {
         <PageTitle title="Users" />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
+      {isUserDataFetching && <LinearProgress sx={{ width: "100%" }} />}
       <Stack sx={{ alignItems: "center" }}>
         <TableContainer
           component={Paper}
@@ -152,17 +197,17 @@ function UserTable() {
           }}
           onSubmit={(data) => {
             if (selectedRow) {
-              setUserData(
+              updateUserMutation(
                 userData.map((user) => (user.id === data.id ? data : user))
               ); // Update the user in the list if it already exists
               enqueueSnackbar("User Details Updated Successfully!", {
                 variant: "success",
               });
             } else {
-              setUserData([...userData, data]); // Add new document to the list
-              enqueueSnackbar("User Created Successfully!", {
-                variant: "success",
-              });
+              // setUserData([...userData, data]); // Add new document to the list
+              // enqueueSnackbar("User Created Successfully!", {
+              //   variant: "success",
+              // });
             }
             setSelectedRow(null);
             setOpenViewDrawer(false);
@@ -185,7 +230,7 @@ function UserTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            setUserData(userData.filter((doc) => doc.id !== selectedRow.id));
+            deleteHazardRiskMutation(userData.filter((doc) => doc.id !== selectedRow.id));
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);
