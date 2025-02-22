@@ -65,7 +65,7 @@ import { fetchNearMiss } from "../../api/nearMissApi";
 import { fetchTypeOfConcerns } from "../../api/typeOfConcern";
 import { fetchAllFactors } from "../../api/incidentFactorsApi";
 import { fetchAllCircumstances } from "../../api/circumstancesApi";
-
+import UserAutoComplete from "../../components/UserAutoComplete";
 
 type DialogProps = {
   open: boolean;
@@ -151,10 +151,11 @@ export default function AddOrEditIncidentDialog({
     queryFn: fetchAllFactors,
   });
 
-  const { data: circumstancesData, isFetching: isCircumstancesDataFetching } = useQuery({
-    queryKey: ["circumstancesData"],
-    queryFn: fetchAllCircumstances,
-  });
+  const { data: circumstancesData, isFetching: isCircumstancesDataFetching } =
+    useQuery({
+      queryKey: ["circumstancesData"],
+      queryFn: fetchAllCircumstances,
+    });
 
   const {
     register,
@@ -168,6 +169,7 @@ export default function AddOrEditIncidentDialog({
 
   const witnessesWatch = watch("witnesses");
   const effectedIndividualsWatch = watch("effectedIndividuals");
+  const assignee = watch("assignee");
 
   useEffect(() => {
     if (defaultValues) {
@@ -187,6 +189,7 @@ export default function AddOrEditIncidentDialog({
     submitData.id = defaultValues?.id ?? uuidv4();
     // submitData.createdDate = new Date();
     // submitData.createdByUser = sampleAssignees[0].name;
+    submitData.assigneeId = assignee?.id;
     submitData.createdByUser = user.id;
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
     onSubmit(submitData as Incident);
@@ -349,8 +352,8 @@ export default function AddOrEditIncidentDialog({
                           options={
                             divisionData?.length
                               ? divisionData.map(
-                                (division) => division.divisionName
-                              )
+                                  (division) => division.divisionName
+                                )
                               : []
                           }
                           sx={{ flex: 1, margin: "0.5rem" }}
@@ -389,7 +392,12 @@ export default function AddOrEditIncidentDialog({
                           }
                           size="small"
                           options={
-                            circumstancesData?.length ? circumstancesData.map((circumstance) => circumstance.name) : []}
+                            circumstancesData?.length
+                              ? circumstancesData.map(
+                                  (circumstance) => circumstance.name
+                                )
+                              : []
+                          }
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -583,7 +591,10 @@ export default function AddOrEditIncidentDialog({
                           }
                           size="small"
                           options={
-                            nearMissData?.length ? nearMissData.map((nearMiss) => nearMiss.type) : []}
+                            nearMissData?.length
+                              ? nearMissData.map((nearMiss) => nearMiss.type)
+                              : []
+                          }
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -611,7 +622,12 @@ export default function AddOrEditIncidentDialog({
                           }
                           size="small"
                           options={
-                            concernData?.length ? concernData.map((concern) => concern.typeConcerns) : []}
+                            concernData?.length
+                              ? concernData.map(
+                                  (concern) => concern.typeConcerns
+                                )
+                              : []
+                          }
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -639,7 +655,10 @@ export default function AddOrEditIncidentDialog({
                           }
                           size="small"
                           options={
-                            factorData?.length ? factorData.map((factors) => factors.factorName) : []}
+                            factorData?.length
+                              ? factorData.map((factors) => factors.factorName)
+                              : []
+                          }
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -946,36 +965,15 @@ export default function AddOrEditIncidentDialog({
               </Box>
 
               <Box sx={{ margin: "0.5rem" }}>
-                <Controller
+                <UserAutoComplete
                   name="assignee"
+                  label="Assignee"
                   control={control}
-                  defaultValue={defaultValues?.assignee ?? null}
-                  rules={{ required: true }}
-                  render={({ field }) => (
-                    <Autocomplete
-                      {...field}
-                      onChange={(event, newValue) => field.onChange(newValue)}
-                      size="small"
-                      options={
-                        userData && Array.isArray(userData)
-                          ? userData
-                            .filter((user) => user.assigneeLevel >= 1)
-                            .map((user) => user.name)
-                          : []
-                      }
-                      sx={{ flex: 1, margin: "0.5rem" }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          required
-                          error={!!errors.assignee}
-                          helperText={errors.assignee && "Required"}
-                          label="Assignee"
-                          name="assignee"
-                        />
-                      )}
-                    />
-                  )}
+                  register={register}
+                  errors={errors}
+                  userData={userData}
+                  defaultValue={defaultValues?.assignee}
+                  required={true}
                 />
               </Box>
             </Box>

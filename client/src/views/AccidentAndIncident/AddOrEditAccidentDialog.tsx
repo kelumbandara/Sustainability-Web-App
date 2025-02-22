@@ -71,6 +71,7 @@ import {
 } from "../../api/accidentCategory";
 import useCurrentUser from "../../hooks/useCurrentUser";
 import { fetchAllUsers } from "../../api/userApi";
+import UserAutoComplete from "../../components/UserAutoComplete";
 
 type DialogProps = {
   open: boolean;
@@ -182,6 +183,7 @@ export default function AddOrEditAccidentDialog({
 
   const category = watch("category");
   const subCategory = watch("subCategory");
+  const assignee = watch("assignee");
 
   const {
     data: accidentCategoryData,
@@ -205,6 +207,7 @@ export default function AddOrEditAccidentDialog({
     // submitData.id = defaultValues?.id ?? uuidv4();
     // submitData.createdDate = new Date();
     // submitData.createdByUser = sampleAssignees[0].name;
+    submitData.assigneeId = assignee?.id;
     submitData.createdByUser = user.id;
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
     onSubmit(submitData as Accident);
@@ -369,8 +372,8 @@ export default function AddOrEditAccidentDialog({
                           options={
                             divisionData?.length
                               ? divisionData.map(
-                                (division) => division.divisionName
-                              )
+                                  (division) => division.divisionName
+                                )
                               : []
                           }
                           sx={{ flex: 1, margin: "0.5rem" }}
@@ -419,8 +422,8 @@ export default function AddOrEditAccidentDialog({
                           options={
                             departmentData?.length
                               ? departmentData.map(
-                                (department) => department.department
-                              )
+                                  (department) => department.department
+                                )
                               : []
                           }
                           sx={{ flex: 1, margin: "0.5rem" }}
@@ -747,8 +750,8 @@ export default function AddOrEditAccidentDialog({
                           options={
                             accidentCategoryData?.length
                               ? accidentCategoryData.map(
-                                (cat) => cat.categoryName
-                              )
+                                  (cat) => cat.categoryName
+                                )
                               : []
                           }
                           sx={{ flex: 1, margin: "0.5rem" }}
@@ -782,8 +785,8 @@ export default function AddOrEditAccidentDialog({
                             options={
                               accidentSubCategoryData?.length
                                 ? accidentSubCategoryData.map(
-                                  (cat) => cat.subCategoryName
-                                )
+                                    (cat) => cat.subCategoryName
+                                  )
                                 : []
                             }
                             sx={{ flex: 1, margin: "0.5rem" }}
@@ -1252,35 +1255,15 @@ export default function AddOrEditAccidentDialog({
               </Box>
 
               <Box sx={{ margin: "0.5rem" }}>
-                <Controller
+                <UserAutoComplete
                   name="assignee"
+                  label="Assignee"
                   control={control}
-                  defaultValue={defaultValues?.assignee ?? ""}
-                  rules={{ required: true }}
-                  render={({ field }) => (
-                    <Autocomplete
-                      {...field}
-                      onChange={(event, newValue) => field.onChange(newValue)}
-                      size="small"
-                      options={
-                        userData && Array.isArray(userData)
-                          ? userData
-                            .filter((user) => user.assigneeLevel >= 1)
-                            .map((user) => user.name)
-                          : []
-                      }
-                      sx={{ flex: 1, margin: "0.5rem" }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          required
-                          error={!!errors.assignee}
-                          label="Assignee"
-                          name="assignee"
-                        />
-                      )}
-                    />
-                  )}
+                  register={register}
+                  errors={errors}
+                  userData={userData}
+                  defaultValue={defaultValues?.assignee}
+                  required={true}
                 />
               </Box>
             </Box>

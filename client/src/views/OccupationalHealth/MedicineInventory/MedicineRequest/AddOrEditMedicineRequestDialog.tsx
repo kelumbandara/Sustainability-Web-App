@@ -26,6 +26,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchMedicineList } from "../../../../api/OccupationalHealth/medicineNameApi";
 import { fetchDivision } from "../../../../api/divisionApi";
 import { fetchAllUsers } from "../../../../api/userApi";
+import UserAutoComplete from "../../../../components/UserAutoComplete";
 
 type DialogProps = {
   open: boolean;
@@ -47,6 +48,7 @@ export default function AddOrEditMedicineRequestDialog({
     handleSubmit,
     formState: { errors },
     reset,
+    control,
   } = useForm<MedicineRequest>({
     defaultValues,
   });
@@ -66,6 +68,7 @@ export default function AddOrEditMedicineRequestDialog({
   const handleCreateDocument = (data: MedicineRequest) => {
     const submitData: Partial<MedicineRequest> = data;
     submitData.id = defaultValues?.id ?? uuidv4();
+    submitData.approverId = defaultValues?.approverId;
     submitData.referenceNumber = defaultValues?.referenceNumber ?? uuidv4();
     submitData.requestDate =
       defaultValues?.requestDate ?? new Date().toDateString();
@@ -155,7 +158,10 @@ export default function AddOrEditMedicineRequestDialog({
               {...register("medicineName", { required: false })}
               size="small"
               options={
-                medicineData?.length ? medicineData.map((medicine) => medicine.medicineName) : []}
+                medicineData?.length
+                  ? medicineData.map((medicine) => medicine.medicineName)
+                  : []
+              }
               defaultValue={defaultValues?.medicineName}
               sx={{ flex: 1, margin: "0.5rem" }}
               renderInput={(params) => (
@@ -181,7 +187,10 @@ export default function AddOrEditMedicineRequestDialog({
               {...register("division", { required: true })}
               size="small"
               options={
-                divisionData?.length ? divisionData.map((division) => division.divisionName) : []}
+                divisionData?.length
+                  ? divisionData.map((division) => division.divisionName)
+                  : []
+              }
               defaultValue={defaultValues?.division}
               sx={{ flex: 1, margin: "0.5rem" }}
               renderInput={(params) => (
@@ -204,27 +213,15 @@ export default function AddOrEditMedicineRequestDialog({
               sx={{ flex: 1, margin: "0.5rem" }}
               {...register("requestQuantity", { required: true })}
             />
-            <Autocomplete
-              {...register("approver", { required: true })}
-              size="small"
-              options={
-                userData && Array.isArray(userData)
-                  ? userData
-                    .filter((user) => user.assigneeLevel >= 1)
-                    .map((user) => user.name)
-                  : []
-              }
-              sx={{ flex: 1, margin: "0.5rem" }}
+            <UserAutoComplete
+              name="approver"
+              label="Approver"
+              control={control}
+              register={register}
+              errors={errors}
+              userData={userData}
               defaultValue={defaultValues?.approver}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  required
-                  error={!!errors.approver}
-                  label="Approver"
-                  name="approver"
-                />
-              )}
+              required={true}
             />
           </Stack>
         </Stack>

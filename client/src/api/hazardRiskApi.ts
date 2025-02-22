@@ -1,5 +1,6 @@
 import { z } from "zod";
 import axios from "axios";
+import { userSchema } from "./userApi";
 
 export enum CategoryType {
   HEALTH_AND_HSE_MANAGEMENT = "Health and HSE Management",
@@ -195,7 +196,8 @@ export const HazardAndRiskSchema = z.object({
   riskLevel: z.nativeEnum(RiskLevel),
   unsafeActOrCondition: z.nativeEnum(UnsafeActOrCondition),
   dueDate: z.date(),
-  assignee: z.string(),
+  assignee: userSchema,
+  assigneeId: z.string().optional(),
   documents: z
     .array(z.union([z.string().url(), z.instanceof(File)]))
     .optional(),
@@ -223,7 +225,7 @@ export const createHazardRisk = async (hazardRisk: HazardAndRisk) => {
   const formData = new FormData();
 
   formData.append("token", token);
-  console.log('submit',token)
+  console.log("submit", token);
 
   Object.keys(hazardRisk).forEach((key) => {
     const value = hazardRisk[key as keyof HazardAndRisk];
@@ -248,10 +250,9 @@ export const createHazardRisk = async (hazardRisk: HazardAndRisk) => {
       "Content-Type": "multipart/form-data",
     },
   });
-  
+
   return res.data;
 };
-
 
 export const updateHazardRisk = async (hazardRisk: HazardAndRisk) => {
   if (!hazardRisk.id) {

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { z } from "zod";
+import { userSchema } from "./userApi";
 
 export enum Severity {
   MINOR = "Minor",
@@ -142,7 +143,8 @@ export const AccidentSchema = z.object({
   affectedSecondaryRegion: z.string(),
   affectedTertiaryRegion: z.string(),
   rootCause: z.string().nullable(),
-  assignee: z.string(),
+  assignee: userSchema.optional(),
+  assigneeId: z.string().optional(),
   witnesses: z.array(AccidentWitnessSchema),
   effectedIndividuals: z.array(AccidentEffectedIndividualSchema),
   imageUrl: z.string().optional(),
@@ -170,7 +172,8 @@ export const IncidentSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   publishedAt: z.string(),
-  assignee: z.string(),
+  assignee: userSchema.optional(),
+  assigneeId: z.string().optional(),
   witnesses: z.array(AccidentWitnessSchema),
   effectedIndividuals: z.array(AccidentEffectedIndividualSchema),
   reporter: z.string(),

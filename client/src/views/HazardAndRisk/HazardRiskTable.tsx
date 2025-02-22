@@ -235,7 +235,7 @@ function HazardRiskTable() {
                       {/* Show nothing if no due date */}
                     </TableCell>
                     <TableCell align="right">{row.createdByUserName}</TableCell>
-                    <TableCell align="right">{row.assignee}</TableCell>
+                    <TableCell align="right">{row.assignee?.name}</TableCell>
                     <TableCell align="right">
                       {row.status === HazardAndRiskStatus.OPEN ? (
                         <Typography sx={{ color: "var(--pallet-blue)" }}>

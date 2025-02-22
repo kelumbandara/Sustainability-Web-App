@@ -208,7 +208,7 @@ function AccidentTable() {
                     <TableCell align="right">{row.division}</TableCell>
                     <TableCell align="right">{row.department}</TableCell>
                     <TableCell align="right">{row.category}</TableCell>
-                    <TableCell align="right">{row.assignee}</TableCell>
+                    <TableCell align="right">{row.assignee?.name}</TableCell>
                     <TableCell align="right">{row.status}</TableCell>
                   </TableRow>
                 ))

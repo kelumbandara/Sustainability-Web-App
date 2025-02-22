@@ -1,9 +1,11 @@
 import axios from "axios";
 import { z } from "zod";
+import { userSchema } from "./userApi";
 
 export const MedicineRequestSchema = z.object({
   id: z.string(),
-  approver: z.string(),
+  approver: userSchema,
+  approverId: z.string(),
   approverRemarks: z.string(),
   createdAt: z.string(),
   division: z.string(),
