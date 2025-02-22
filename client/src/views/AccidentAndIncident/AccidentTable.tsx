@@ -38,7 +38,7 @@ import queryClient from "../../state/queryClient";
 import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
 import { PermissionKeys } from "../Administration/SectionList";
 
-function AccidentTable() {
+function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<Accident>(null);
@@ -47,7 +47,7 @@ function AccidentTable() {
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
-    { title: "Accident Management" },
+    { title: `${isAssignedTasks ? "Assigned " : ""}Accident Management` },
   ];
 
   const { data: accidentData, isFetching: isAccidentDataFetching } = useQuery({
@@ -121,7 +121,9 @@ function AccidentTable() {
           overflowX: "hidden",
         }}
       >
-        <PageTitle title="Accident Management" />
+        <PageTitle
+          title={`${isAssignedTasks ? "Assigned " : ""}Accident Management`}
+        />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
       <Stack sx={{ alignItems: "center" }}>

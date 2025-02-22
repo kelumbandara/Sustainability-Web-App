@@ -39,7 +39,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../state/queryClient";
 import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
 
-function HazardRiskTable() {
+function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<HazardAndRisk>(null);
@@ -49,7 +49,7 @@ function HazardRiskTable() {
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
-    { title: "Hazard & Risk Management" },
+    { title: `${isAssignedTasks ? "Assigned " : ""}Hazard & Risk Management` },
   ];
 
   const isMobile = useMediaQuery((theme: Theme) =>
@@ -126,7 +126,11 @@ function HazardRiskTable() {
           overflowX: "hidden",
         }}
       >
-        <PageTitle title="Hazard & Risk Management" />
+        <PageTitle
+          title={`${
+            isAssignedTasks ? "Assigned " : ""
+          }Hazard & Risk Management`}
+        />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
       <Stack sx={{ alignItems: "center" }}>

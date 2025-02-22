@@ -40,7 +40,11 @@ import queryClient from "../../../../state/queryClient";
 import useCurrentUserHaveAccess from "../../../../hooks/useCurrentUserHaveAccess";
 import { PermissionKeys } from "../../../Administration/SectionList";
 
-function MedicineRequestTable() {
+function MedicineRequestTable({
+  isAssignedTasks,
+}: {
+  isAssignedTasks: boolean;
+}) {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<MedicineRequest>(null);
@@ -52,7 +56,9 @@ function MedicineRequestTable() {
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
-    { title: "Medicine Request Management" },
+    {
+      title: `${isAssignedTasks ? "Assigned " : ""}Medicine Request Management`,
+    },
   ];
 
   const isMobile = useMediaQuery((theme: Theme) =>
@@ -129,7 +135,11 @@ function MedicineRequestTable() {
           overflowX: "hidden",
         }}
       >
-        <PageTitle title="Medicine Request Management" />
+        <PageTitle
+          title={`${
+            isAssignedTasks ? "Assigned " : ""
+          }Medicine Request Management`}
+        />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
       <Stack sx={{ alignItems: "center" }}>
