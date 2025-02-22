@@ -179,13 +179,13 @@ const AppRoutes = () => {
         <Route
           path="/hazard-risk/history"
           element={withLayout(MainLayout, () => (
-            <HazardRiskTable />
+            <HazardRiskTable isAssignedTasks={false} />
           ))}
         />
         <Route
           path="/hazard-risk/assigned-tasks"
           element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="Document > Assigned Task" />
+            <HazardRiskTable isAssignedTasks={true} />
           ))}
         />
         {/* Accident & Incident */}
@@ -195,11 +195,15 @@ const AppRoutes = () => {
         />
         <Route
           path="/accident-incident/register/accident-register"
-          element={withLayout(MainLayout, AccidentTable)}
+          element={withLayout(MainLayout, () => {
+            return <AccidentTable isAssignedTasks={false} />;
+          })}
         />
         <Route
           path="/accident-incident/register/incident-register"
-          element={withLayout(MainLayout, IncidentTable)}
+          element={withLayout(MainLayout, () => {
+            return <IncidentTable isAssignedTasks={false} />;
+          })}
         />
         <Route
           path="/accident-incident/register/corrective-action"
@@ -210,15 +214,15 @@ const AppRoutes = () => {
         {/* Assigned Tasks */}
         <Route
           path="/accident-incident/assigned-tasks/accident-assigned"
-          element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="Assigned Tasks > Accident Assigned" />
-          ))}
+          element={withLayout(MainLayout, () => {
+            return <AccidentTable isAssignedTasks={true} />;
+          })}
         />
         <Route
           path="/accident-incident/assigned-tasks/incident-assigned"
-          element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="Assigned Tasks > Incident Assigned" />
-          ))}
+          element={withLayout(MainLayout, () => {
+            return <IncidentTable isAssignedTasks={true} />;
+          })}
         />
         <Route
           path="/accident-incident/assigned-tasks/corrective-action"
@@ -259,7 +263,9 @@ const AppRoutes = () => {
         {/* Medicine Inventory */}
         <Route
           path="/occupational-health/medicines-inventory/medicine-request"
-          element={withLayout(MainLayout, MedicineRequestTable)}
+          element={withLayout(MainLayout, () => (
+            <MedicineRequestTable isAssignedTasks={false} />
+          ))}
         />
         <Route
           path="/occupational-health/medicines-inventory/purchase-inventory"
@@ -274,7 +280,7 @@ const AppRoutes = () => {
         <Route
           path="/occupational-health/medicines-inventory/assigned-tasks"
           element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="Medicine Inventory > Assigned Tasks" />
+            <MedicineRequestTable isAssignedTasks={true} />
           ))}
         />
         {/* Medical Records */}

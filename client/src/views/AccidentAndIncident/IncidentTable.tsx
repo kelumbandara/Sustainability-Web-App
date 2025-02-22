@@ -38,7 +38,7 @@ import queryClient from "../../state/queryClient";
 import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
 import { PermissionKeys } from "../Administration/SectionList";
 
-function IncidentTable() {
+function IncidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<Incident>(null);
@@ -48,7 +48,7 @@ function IncidentTable() {
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
-    { title: "Incident Management" },
+    { title: `${isAssignedTasks ? "Assigned " : ""}Incident Management` },
   ];
 
   const isMobile = useMediaQuery((theme: Theme) =>
@@ -125,7 +125,9 @@ function IncidentTable() {
           overflowX: "hidden",
         }}
       >
-        <PageTitle title="Incident Management" />
+        <PageTitle
+          title={`${isAssignedTasks ? "Assigned " : ""}Incident Management`}
+        />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
       <Stack sx={{ alignItems: "center" }}>
