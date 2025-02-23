@@ -11,11 +11,13 @@ import {
   Button,
   LinearProgress,
   Stack,
+  TableFooter,
+  TablePagination,
   Theme,
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import { useSnackbar } from "notistack";
@@ -47,6 +49,23 @@ function PatientTable() {
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
   // const [patients, setPatients] = useState<Patient[]>(samplePatientData);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  // handle pagination
+  const handleChangePage = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
@@ -116,6 +135,14 @@ function PatientTable() {
     },
   });
 
+  const paginatedPatientData = useMemo(() => {
+    if (!patientData) return [];
+    return patientData.slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage
+    );
+  }, [patientData, page, rowsPerPage]);
+
   return (
     <Stack>
       <Box
@@ -179,8 +206,8 @@ function PatientTable() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {patientData?.length > 0 ? (
-                patientData.map((row) => (
+              {paginatedPatientData?.length > 0 ? (
+                paginatedPatientData.map((row) => (
                   <TableRow
                     key={`${row.id}${row.employeeId}`}
                     sx={{
@@ -221,6 +248,21 @@ function PatientTable() {
                 </TableRow>
               )}
             </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                  colSpan={100}
+                  count={patientData?.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  showFirstButton={true}
+                  showLastButton={true}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+              </TableRow>
+            </TableFooter>
           </Table>
         </TableContainer>
       </Stack>

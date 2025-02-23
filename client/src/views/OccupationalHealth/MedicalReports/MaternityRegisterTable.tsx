@@ -9,12 +9,15 @@ import {
   Alert,
   Box,
   Button,
+  LinearProgress,
   Stack,
+  TableFooter,
+  TablePagination,
   Theme,
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import { useSnackbar } from "notistack";
@@ -45,6 +48,23 @@ function MaternityRegisterTable() {
   const [selectedRow, setSelectedRow] = useState<MaternityRegister>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  // handle pagination
+  const handleChangePage = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
@@ -55,7 +75,7 @@ function MaternityRegisterTable() {
     theme.breakpoints.down("md")
   );
 
-  const { data: maternityRegisterList } = useQuery({
+  const { data: maternityRegisterList, isLoading } = useQuery({
     queryKey: ["maternity-register"],
     queryFn: getMaternityRegistersList,
   });
@@ -95,6 +115,14 @@ function MaternityRegisterTable() {
       });
     },
   });
+
+  const paginatedMaternityRegisterData = useMemo(() => {
+    if (!maternityRegisterList) return [];
+    return maternityRegisterList.slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage
+    );
+  }, [maternityRegisterList, page, rowsPerPage]);
 
   const { mutate: deleteMaternityRegisterMutation } = useMutation({
     mutationFn: deleteMaternityRegister,
@@ -161,6 +189,7 @@ function MaternityRegisterTable() {
               Add New Benefit
             </Button>
           </Box>
+          {isLoading && <LinearProgress sx={{ width: "100%" }} />}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -174,8 +203,8 @@ function MaternityRegisterTable() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {maternityRegisterList?.length > 0 ? (
-                maternityRegisterList.map((row) => (
+              {paginatedMaternityRegisterData?.length > 0 ? (
+                paginatedMaternityRegisterData.map((row) => (
                   <TableRow
                     key={`${row.id}`}
                     sx={{
@@ -214,6 +243,21 @@ function MaternityRegisterTable() {
                 </TableRow>
               )}
             </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                  colSpan={100}
+                  count={maternityRegisterList?.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  showFirstButton={true}
+                  showLastButton={true}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+              </TableRow>
+            </TableFooter>
           </Table>
         </TableContainer>
       </Stack>

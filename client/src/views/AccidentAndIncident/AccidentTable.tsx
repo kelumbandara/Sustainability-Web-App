@@ -11,6 +11,8 @@ import {
   Button,
   LinearProgress,
   Stack,
+  TableFooter,
+  TablePagination,
   Theme,
   Typography,
   useMediaQuery,
@@ -18,7 +20,7 @@ import {
 import theme from "../../theme";
 import PageTitle from "../../components/PageTitle";
 import Breadcrumb from "../../components/BreadCrumb";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
@@ -44,6 +46,24 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   const [selectedRow, setSelectedRow] = useState<Accident>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  // handle pagination
+  const handleChangePage = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
@@ -109,6 +129,14 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
       });
     },
   });
+
+  const paginatedAccidentData = useMemo(() => {
+    if (!accidentData) return [];
+    return accidentData.slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage
+    );
+  }, [accidentData, page, rowsPerPage]);
 
   return (
     <Stack>
@@ -178,8 +206,8 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {accidentData?.length > 0 ? (
-                accidentData?.map((row) => (
+              {paginatedAccidentData?.length > 0 ? (
+                paginatedAccidentData?.map((row) => (
                   <TableRow
                     key={`${row.id}`}
                     sx={{
@@ -222,6 +250,21 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
                 </TableRow>
               )}
             </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                  colSpan={100}
+                  count={paginatedAccidentData?.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  showFirstButton={true}
+                  showLastButton={true}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+              </TableRow>
+            </TableFooter>
           </Table>
         </TableContainer>
       </Stack>

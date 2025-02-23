@@ -11,11 +11,13 @@ import {
   Button,
   LinearProgress,
   Stack,
+  TableFooter,
+  TablePagination,
   Theme,
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import { useSnackbar } from "notistack";
@@ -53,6 +55,23 @@ function MedicineRequestTable({
   //   medicineRequestSampleData
   // );
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  // handle pagination
+  const handleChangePage = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
@@ -124,6 +143,14 @@ function MedicineRequestTable({
     },
   });
 
+  const paginatedMedicineData = useMemo(() => {
+    if (!medicineData) return [];
+    return medicineData.slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage
+    );
+  }, [medicineData, page, rowsPerPage]);
+
   return (
     <Stack>
       <Box
@@ -189,8 +216,8 @@ function MedicineRequestTable({
               </TableRow>
             </TableHead>
             <TableBody>
-              {medicineData?.length > 0 ? (
-                medicineData.map((row) => (
+              {paginatedMedicineData?.length > 0 ? (
+                paginatedMedicineData.map((row) => (
                   <TableRow
                     key={`${row.id}${row.id}`}
                     sx={{
@@ -227,6 +254,21 @@ function MedicineRequestTable({
                 </TableRow>
               )}
             </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                  colSpan={100}
+                  count={medicineData?.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  showFirstButton={true}
+                  showLastButton={true}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+              </TableRow>
+            </TableFooter>
           </Table>
         </TableContainer>
       </Stack>

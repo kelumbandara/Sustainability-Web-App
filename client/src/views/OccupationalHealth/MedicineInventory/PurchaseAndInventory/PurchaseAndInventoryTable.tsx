@@ -9,12 +9,15 @@ import {
   Alert,
   Box,
   Button,
+  LinearProgress,
   Stack,
+  TableFooter,
+  TablePagination,
   Theme,
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import { useSnackbar } from "notistack";
@@ -45,6 +48,23 @@ function PurchaseAndInventoryTable() {
   const [selectedRow, setSelectedRow] = useState<MedicineInventory>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  // handle pagination
+  const handleChangePage = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
@@ -55,7 +75,7 @@ function PurchaseAndInventoryTable() {
     theme.breakpoints.down("md")
   );
 
-  const { data: medicineInventory } = useQuery({
+  const { data: medicineInventory, isLoading } = useQuery({
     queryKey: ["medicine-inventory"],
     queryFn: getMedicineInventoriesList,
   });
@@ -114,6 +134,14 @@ function PurchaseAndInventoryTable() {
     },
   });
 
+  const paginatedMedicineInventoryData = useMemo(() => {
+    if (!medicineInventory) return [];
+    return medicineInventory.slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage
+    );
+  }, [medicineInventory, page, rowsPerPage]);
+
   return (
     <Stack>
       <Box
@@ -161,6 +189,7 @@ function PurchaseAndInventoryTable() {
               Add New Medicine Inventory Item
             </Button>
           </Box>
+          {isLoading && <LinearProgress sx={{ width: "100%" }} />}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -178,8 +207,8 @@ function PurchaseAndInventoryTable() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {medicineInventory?.length > 0 ? (
-                medicineInventory.map((row) => (
+              {paginatedMedicineInventoryData?.length > 0 ? (
+                paginatedMedicineInventoryData.map((row) => (
                   <TableRow
                     key={`${row.id}${row.referenceNumber}`}
                     sx={{
@@ -234,6 +263,21 @@ function PurchaseAndInventoryTable() {
                 </TableRow>
               )}
             </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                  colSpan={100}
+                  count={medicineInventory?.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  showFirstButton={true}
+                  showLastButton={true}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+              </TableRow>
+            </TableFooter>
           </Table>
         </TableContainer>
       </Stack>
