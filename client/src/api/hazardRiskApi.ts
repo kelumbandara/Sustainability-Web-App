@@ -220,6 +220,11 @@ export async function getHazardRiskList() {
   return res.data;
 }
 
+export async function getAssignedHazardRiskList() {
+  const res = await axios.get("api/hazard-risks-assign-task");
+  return res.data;
+}
+
 export const createHazardRisk = async (hazardRisk: HazardAndRisk) => {
   const token = `Bearer ${localStorage.getItem("token") || ""}`;
   const formData = new FormData();

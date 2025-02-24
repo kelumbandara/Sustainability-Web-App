@@ -34,6 +34,7 @@ import {
   getHazardRiskList,
   updateHazardRisk,
   deleteHazardRisk,
+  getAssignedHazardRiskList,
 } from "../../api/hazardRiskApi";
 import ViewHazardOrRiskContent from "./ViewHazardRiskContent";
 import { PermissionKeys } from "../Administration/SectionList";
@@ -80,15 +81,33 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
     queryFn: getHazardRiskList,
   });
 
+  const { data: assignedRiskData, isFetching: isAssignedRiskDataFetching } =
+    useQuery({
+      queryKey: ["assigned-hazardRisks"],
+      queryFn: getAssignedHazardRiskList,
+    });
+
   const paginatedRiskData = useMemo(() => {
-    if (!riskData) return [];
-    return riskData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-  }, [riskData, page, rowsPerPage]);
+    if (isAssignedTasks) {
+      if (!assignedRiskData) return [];
+      return assignedRiskData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
+    } else {
+      if (!riskData) return [];
+      return riskData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
+    }
+  }, [isAssignedTasks, assignedRiskData, page, rowsPerPage, riskData]);
 
   const { mutate: createHazardRiskMutation } = useMutation({
     mutationFn: createHazardRisk,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
+      queryClient.invalidateQueries({ queryKey: ["assigned-hazardRisks"] });
       enqueueSnackbar("Hazard Risk Report Created Successfully!", {
         variant: "success",
       });
@@ -107,6 +126,7 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
     mutationFn: updateHazardRisk,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
+      queryClient.invalidateQueries({ queryKey: ["assigned-hazardRisks"] });
       enqueueSnackbar("Hazard Risk Report Update Successfully!", {
         variant: "success",
       });
@@ -125,6 +145,7 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
     mutationFn: deleteHazardRisk,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
+      queryClient.invalidateQueries({ queryKey: ["assigned-hazardRisks"] });
       enqueueSnackbar("Hazard Risk Report Deleted Successfully!", {
         variant: "success",
       });
@@ -138,6 +159,25 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
       });
     },
   });
+
+  const isRiskCreateDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.HAZARD_RISK_REGISTER_CREATE
+  );
+  const isRiskEditDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.HAZARD_RISK_REGISTER_EDIT
+  );
+  const isRiskDeleteDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.HAZARD_RISK_REGISTER_DELETE
+  );
+  const isRiskAssignCreateDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.HAZARD_RISK_ASSIGNED_TASKS_CREATE
+  );
+  const isRiskAssignEditDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.HAZARD_RISK_ASSIGNED_TASKS_EDIT
+  );
+  const isRiskAssignDeleteDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.HAZARD_RISK_ASSIGNED_TASKS_DELETE
+  );
 
   return (
     <Stack>
@@ -166,31 +206,35 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
             maxWidth: isMobile ? "88vw" : "100%",
           }}
         >
-          <Box
-            sx={{
-              padding: theme.spacing(2),
-              display: "flex",
-              justifyContent: "flex-end",
-            }}
-          >
-            <Button
-              variant="contained"
-              sx={{ backgroundColor: "var(--pallet-blue)" }}
-              startIcon={<AddIcon />}
-              onClick={() => {
-                setSelectedRow(null);
-                setOpenAddOrEditDialog(true);
+          {!isAssignedTasks && (
+            <Box
+              sx={{
+                padding: theme.spacing(2),
+                display: "flex",
+                justifyContent: "flex-end",
               }}
-              disabled={
-                !useCurrentUserHaveAccess(
-                  PermissionKeys.HAZARD_RISK_REGISTER_CREATE
-                )
-              }
             >
-              Report a Hazard or Risk
-            </Button>
-          </Box>
-          {isRiskDataFetching && <LinearProgress sx={{ width: "100%" }} />}
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: "var(--pallet-blue)" }}
+                startIcon={<AddIcon />}
+                onClick={() => {
+                  setSelectedRow(null);
+                  setOpenAddOrEditDialog(true);
+                }}
+                disabled={
+                  isAssignedTasks
+                    ? isRiskAssignCreateDisabled
+                    : isRiskCreateDisabled
+                }
+              >
+                Report a Hazard or Risk
+              </Button>
+            </Box>
+          )}
+          {(isRiskDataFetching || isAssignedRiskDataFetching) && (
+            <LinearProgress sx={{ width: "100%" }} />
+          )}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -313,9 +357,7 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
               title="Hazard or Risk Details"
               handleClose={() => setOpenViewDrawer(false)}
               disableEdit={
-                !useCurrentUserHaveAccess(
-                  PermissionKeys.HAZARD_RISK_REGISTER_EDIT
-                )
+                isAssignedTasks ? isRiskAssignEditDisabled : isRiskEditDisabled
               }
               onEdit={() => {
                 setSelectedRow(selectedRow);
@@ -323,9 +365,9 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
               }}
               onDelete={() => setDeleteDialogOpen(true)}
               disableDelete={
-                !useCurrentUserHaveAccess(
-                  PermissionKeys.HAZARD_RISK_REGISTER_DELETE
-                )
+                isAssignedTasks
+                  ? isRiskAssignDeleteDisabled
+                  : isRiskDeleteDisabled
               }
             />
 
