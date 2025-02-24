@@ -542,7 +542,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                           }
                           size="small"
                           options={
-                            supplierTypeData?.length ? supplierTypeData.map((division) => division.benefitType) : []}
+                            supplierTypeData?.length ? supplierTypeData.map((supplier) => supplier.type) : []}
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField

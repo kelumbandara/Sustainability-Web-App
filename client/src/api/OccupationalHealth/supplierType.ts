@@ -3,7 +3,7 @@ import axios from "axios";
 
 export const categorySchema = z.object({
   id: z.string(),
-  supplierType: z.string(),
+  type: z.string(),
 });
 
 export type categorySchema = z.infer<typeof categorySchema>;
