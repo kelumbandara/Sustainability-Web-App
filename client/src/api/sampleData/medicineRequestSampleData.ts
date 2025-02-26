@@ -13,7 +13,6 @@ export const sampleMedicines = [
 export const medicineRequestSampleData: MedicineRequest[] = [
   {
     id: "1",
-    approverRemarks: "Approved",
     createdAt: "2021-10-01",
     division: "Pharmacy",
     genericName: "Paracetamol",
@@ -28,7 +27,6 @@ export const medicineRequestSampleData: MedicineRequest[] = [
   },
   {
     id: "2",
-    approverRemarks: "Approved",
     createdAt: "2021-10-01",
     division: "Pharmacy",
     genericName: "Paracetamol",
