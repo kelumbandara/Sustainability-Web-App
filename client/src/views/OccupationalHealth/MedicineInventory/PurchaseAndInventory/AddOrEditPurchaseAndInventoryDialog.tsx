@@ -4,8 +4,10 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import {
+  Alert,
   Autocomplete,
   Box,
+  Chip,
   Divider,
   IconButton,
   Stack,
@@ -44,6 +46,9 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../../../api/divisionApi";
 import { fetchAllSupplierName } from "../../../../api/OccupationalHealth/medicineSupplierNameApi";
 import { fetchAllSupplierTypes } from "../../../../api/OccupationalHealth/supplierType";
+import SaveIcon from "@mui/icons-material/Save";
+import PublishIcon from "@mui/icons-material/Publish";
+import ApproveConfirmationModal from "../MedicineRequest/ApproveConfirmationModal";
 
 type DialogProps = {
   open: boolean;
@@ -91,6 +96,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
   const { isMobile, isTablet } = useIsMobile();
   const [files, setFiles] = useState<File[]>([]);
   const [activeTab, setActiveTab] = useState(0);
+  const [publishModalOpen, setPublishModalOpen] = useState(false);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     console.log("event", event);
@@ -130,7 +136,10 @@ export default function AddOrEditPurchaseAndInventoryDialog({
     resetForm();
   };
 
-  const { data: medicineInventoryData, isFetching: isMedicineInventoryFetching } = useQuery({
+  const {
+    data: medicineInventoryData,
+    isFetching: isMedicineInventoryFetching,
+  } = useQuery({
     queryKey: ["medicineInventory"],
     queryFn: fetchMedicineList,
   });
@@ -140,17 +149,17 @@ export default function AddOrEditPurchaseAndInventoryDialog({
     queryFn: fetchDivision,
   });
 
-  const { data: supplierTypeData, isFetching: isSupplierDataFetching } = useQuery({
-    queryKey: ["supplierType"],
-    queryFn: fetchAllSupplierTypes,
-  });
+  const { data: supplierTypeData, isFetching: isSupplierDataFetching } =
+    useQuery({
+      queryKey: ["supplierType"],
+      queryFn: fetchAllSupplierTypes,
+    });
 
-  const { data: supplierNameData, isFetching: isSupplierNameDataFetching } = useQuery({
-    queryKey: ["supplierName"],
-    queryFn: fetchAllSupplierName,
-  });
-
-
+  const { data: supplierNameData, isFetching: isSupplierNameDataFetching } =
+    useQuery({
+      queryKey: ["supplierName"],
+      queryFn: fetchAllSupplierName,
+    });
 
   return (
     <>
@@ -380,7 +389,13 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                           size="small"
                           options={
                             medicineInventoryData?.length
-                              ? [...new Set(medicineInventoryData.map((inventory) => inventory.form))]
+                              ? [
+                                  ...new Set(
+                                    medicineInventoryData.map(
+                                      (inventory) => inventory.form
+                                    )
+                                  ),
+                                ]
                               : []
                           }
                           sx={{ flex: 1, margin: "0.5rem" }}
@@ -416,7 +431,13 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                           size="small"
                           options={
                             medicineInventoryData?.length
-                              ? [...new Set(medicineInventoryData.map((inventory) => inventory.medicineType))]
+                              ? [
+                                  ...new Set(
+                                    medicineInventoryData.map(
+                                      (inventory) => inventory.medicineType
+                                    )
+                                  ),
+                                ]
                               : []
                           }
                           sx={{ flex: 1, margin: "0.5rem" }}
@@ -486,7 +507,12 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                           }
                           size="small"
                           options={
-                            supplierNameData?.length ? supplierNameData.map((supplier) => supplier.supplierName) : []}
+                            supplierNameData?.length
+                              ? supplierNameData.map(
+                                  (supplier) => supplier.supplierName
+                                )
+                              : []
+                          }
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -542,7 +568,12 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                           }
                           size="small"
                           options={
-                            supplierTypeData?.length ? supplierTypeData.map((supplier) => supplier.type) : []}
+                            supplierTypeData?.length
+                              ? supplierTypeData.map(
+                                  (supplier) => supplier.type
+                                )
+                              : []
+                          }
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -900,30 +931,50 @@ export default function AddOrEditPurchaseAndInventoryDialog({
             >
               {defaultValues && (
                 <>
+                  <Typography
+                    variant="caption"
+                    sx={{ marginLeft: "0.5rem", color: grey[700] }}
+                  >
+                    Status
+                  </Typography>
+                  <Box>
+                    {defaultValues.status === "approved" ? (
+                      <Chip label="Request Approved" />
+                    ) : defaultValues.status === "published" ? (
+                      <Chip
+                        label="Published"
+                        sx={{
+                          backgroundColor: "var(--pallet-blue)",
+                          color: "white",
+                        }}
+                      />
+                    ) : (
+                      "--"
+                    )}
+                  </Box>
                   <Box sx={{ margin: "0.5rem" }}>
                     <Typography
-                      variant="body2"
+                      variant="caption"
                       sx={{ marginBottom: "0.1rem", color: grey[700] }}
                     >
                       Requested By
                     </Typography>
                     <Typography
-                      variant="caption"
+                      variant="body2"
                       sx={{ marginBottom: "0.1rem", color: grey[700] }}
                     >
                       {defaultValues?.requestedBy ?? "--"}
                     </Typography>
                   </Box>
-
                   <Box sx={{ margin: "0.5rem" }}>
                     <Typography
-                      variant="body2"
+                      variant="caption"
                       sx={{ marginBottom: "0.1rem", color: grey[700] }}
                     >
                       Approved By
                     </Typography>
                     <Typography
-                      variant="caption"
+                      variant="body2"
                       sx={{ marginBottom: "0.1rem", color: grey[700] }}
                     >
                       {defaultValues?.requestedBy ?? "--"}
@@ -936,8 +987,10 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                   {...register("division", { required: true })}
                   size="small"
                   options={
-                    divisionData?.length ? divisionData.map((division) => division.divisionName) : []}
-
+                    divisionData?.length
+                      ? divisionData.map((division) => division.divisionName)
+                      : []
+                  }
                   defaultValue={defaultValues?.division}
                   sx={{ flex: 1, margin: "0.5rem" }}
                   renderInput={(params) => (
@@ -968,16 +1021,54 @@ export default function AddOrEditPurchaseAndInventoryDialog({
           <CustomButton
             variant="contained"
             sx={{
-              backgroundColor: "var(--pallet-blue)",
+              backgroundColor: "var(--pallet-grey)",
             }}
+            startIcon={<SaveIcon />}
             size="medium"
             onClick={handleSubmit((data) => {
               handleCreateMedicineInventory(data);
             })}
           >
-            {defaultValues ? "Update Changes" : "Submit Item"}
+            {defaultValues ? "Save Draft" : "Submit Item"}
+          </CustomButton>
+          <CustomButton
+            variant="contained"
+            sx={{
+              backgroundColor: "var(--pallet-blue)",
+            }}
+            size="medium"
+            startIcon={<PublishIcon />}
+            onClick={() => setPublishModalOpen(true)}
+          >
+            Publish Inventory Item
           </CustomButton>
         </DialogActions>
+
+        {publishModalOpen && (
+          <ApproveConfirmationModal
+            open={publishModalOpen}
+            title="Publish Medicine Inventory Confirmation"
+            content={
+              <>
+                Are you sure you want to publish this Medicine Inventory Item?
+                <Alert severity="warning" style={{ marginTop: "1rem" }}>
+                  This action is not reversible.
+                </Alert>
+              </>
+            }
+            handleClose={() => setPublishModalOpen(false)}
+            approveFunc={async () => {
+              console.log("Publishing Medicine Inventory Item");
+            }}
+            onSuccess={() => {
+              setPublishModalOpen(false);
+              handleClose();
+            }}
+            handleReject={() => {
+              setPublishModalOpen(false);
+            }}
+          />
+        )}
       </Dialog>
     </>
   );

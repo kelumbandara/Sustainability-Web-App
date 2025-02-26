@@ -9,6 +9,7 @@ import {
   Alert,
   Box,
   Button,
+  Chip,
   LinearProgress,
   Stack,
   TableFooter,
@@ -44,6 +45,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../../../state/queryClient";
 import useCurrentUserHaveAccess from "../../../../hooks/useCurrentUserHaveAccess";
 import { PermissionKeys } from "../../../Administration/SectionList";
+import CustomButton from "../../../../components/CustomButton";
+import ApproveConfirmationModal from "./ApproveConfirmationModal";
 
 function MedicineRequestTable({
   isAssignedTasks,
@@ -58,6 +61,7 @@ function MedicineRequestTable({
   //   medicineRequestSampleData
   // );
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -153,6 +157,10 @@ function MedicineRequestTable({
       });
     },
   });
+
+  const approveMedicineRequest = async (requestItem) => {
+    updateMedicineMutation({ ...requestItem, status: "Approved" });
+  };
 
   const paginatedMedicineData = useMemo(() => {
     if (isAssignedTasks) {
@@ -287,7 +295,19 @@ function MedicineRequestTable({
                     <TableCell align="right">
                       {row?.assignee?.name ?? "--"}
                     </TableCell>
-                    <TableCell align="right">{row.status}</TableCell>
+                    <TableCell align="right">
+                      {row.status === "pending" ? (
+                        <Chip label="Pending" />
+                      ) : (
+                        <Chip
+                          label="Approved"
+                          sx={{
+                            backgroundColor: "var(--pallet-blue)",
+                            color: "white",
+                          }}
+                        />
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
@@ -332,8 +352,10 @@ function MedicineRequestTable({
               }}
               disableEdit={
                 isAssignedTasks
-                  ? isMedicineDataAssignedTaskEditDisabled
-                  : isMedicineDataEditDisabled
+                  ? isMedicineDataAssignedTaskEditDisabled ||
+                    selectedRow?.status === "Approved"
+                  : isMedicineDataEditDisabled ||
+                    selectedRow?.status === "Approved"
               }
               onDelete={() => setDeleteDialogOpen(true)}
               disableDelete={
@@ -346,6 +368,20 @@ function MedicineRequestTable({
             {selectedRow && (
               <Stack>
                 <ViewMedicineRequestContent medicalRequest={selectedRow} />
+                {selectedRow.status !== "Approved" && (
+                  <CustomButton
+                    variant="contained"
+                    sx={{
+                      backgroundColor: "var(--pallet-blue)",
+                      marginTop: "1rem",
+                      marginX: "0.5rem",
+                    }}
+                    size="medium"
+                    onClick={() => setApproveDialogOpen(true)}
+                  >
+                    Approve Medicine Request
+                  </CustomButton>
+                )}
               </Stack>
             )}
           </Stack>
@@ -385,6 +421,39 @@ function MedicineRequestTable({
           deleteFunc={async () => {
             if (selectedRow) {
               deleteMedicineMutation(selectedRow.id);
+            }
+          }}
+          onSuccess={() => {
+            setOpenViewDrawer(false);
+            setSelectedRow(null);
+            setDeleteDialogOpen(false);
+            // enqueueSnackbar("Medicine Request Deleted Successfully!", {
+            //   variant: "success",
+            // });
+          }}
+          handleReject={() => {
+            setOpenViewDrawer(false);
+            setSelectedRow(null);
+            setDeleteDialogOpen(false);
+          }}
+        />
+      )}
+      {approveDialogOpen && (
+        <ApproveConfirmationModal
+          open={approveDialogOpen}
+          title="Approve Medicine Request Confirmation"
+          content={
+            <>
+              Are you sure you want to approve this medicine request?
+              <Alert severity="warning" style={{ marginTop: "1rem" }}>
+                This action is not reversible.
+              </Alert>
+            </>
+          }
+          handleClose={() => setApproveDialogOpen(false)}
+          approveFunc={async () => {
+            if (selectedRow) {
+              approveMedicineRequest(selectedRow);
             }
           }}
           onSuccess={() => {
