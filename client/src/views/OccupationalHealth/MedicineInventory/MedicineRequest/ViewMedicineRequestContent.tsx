@@ -55,7 +55,7 @@ function ViewMedicineRequestContent({
         />
         <DrawerContentItem
           label="Approver"
-          value={medicalRequest?.approver?.name}
+          value={medicalRequest?.assignee?.name}
           sx={{ flex: 1 }}
         />
         <DrawerContentItem
