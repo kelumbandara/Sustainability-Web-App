@@ -28,7 +28,10 @@ import ViewDataDrawer, {
   DrawerHeader,
 } from "../../../../components/ViewDataDrawer";
 import DeleteConfirmationModal from "../../../../components/DeleteConfirmationModal";
-import { MedicineRequest } from "../../../../api/medicineRequestApi";
+import {
+  getMedicineAssignedTaskList,
+  MedicineRequest,
+} from "../../../../api/medicineRequestApi";
 import AddOrEditMedicineRequestDialog from "./AddOrEditMedicineRequestDialog";
 import ViewMedicineRequestContent from "./ViewMedicineRequestContent";
 import {
@@ -89,6 +92,14 @@ function MedicineRequestTable({
     queryFn: getMedicineList,
   });
 
+  const {
+    data: medicineAssignedTaskData,
+    isFetching: isMedicineAssignedTaskDataFetching,
+  } = useQuery({
+    queryKey: ["medicines-assigned-task"],
+    queryFn: getMedicineAssignedTaskList,
+  });
+
   const { mutate: createMedicineMutation } = useMutation({
     mutationFn: createMedicine,
     onSuccess: () => {
@@ -144,12 +155,43 @@ function MedicineRequestTable({
   });
 
   const paginatedMedicineData = useMemo(() => {
-    if (!medicineData) return [];
+    if (isAssignedTasks) {
+      if (!medicineAssignedTaskData) return [];
+      return medicineAssignedTaskData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
+    } else if (!medicineData) return [];
     return medicineData.slice(
       page * rowsPerPage,
       page * rowsPerPage + rowsPerPage
     );
-  }, [medicineData, page, rowsPerPage]);
+  }, [
+    medicineData,
+    page,
+    rowsPerPage,
+    medicineAssignedTaskData,
+    isAssignedTasks,
+  ]);
+
+  const isMedicineDataCreateDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_MEDICINE_REQUEST_CREATE
+  );
+  const isMedicineDataEditDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_MEDICINE_REQUEST_EDIT
+  );
+  const isMedicineDataDeleteDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_MEDICINE_REQUEST_DELETE
+  );
+  const isMedicineDataAssignedTaskCreateDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_ASSIGNED_TASKS_CREATE
+  );
+  const isMedicineDataAssignedTaskEditDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_ASSIGNED_TASKS_EDIT
+  );
+  const isMedicineDataAssignedTaskDeleteDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_ASSIGNED_TASKS_DELETE
+  );
 
   return (
     <Stack>
@@ -194,15 +236,17 @@ function MedicineRequestTable({
                 setOpenAddOrEditDialog(true);
               }}
               disabled={
-                !useCurrentUserHaveAccess(
-                  PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_MEDICINE_REQUEST_CREATE
-                )
+                isAssignedTasks
+                  ? isMedicineDataAssignedTaskCreateDisabled
+                  : isMedicineDataCreateDisabled
               }
             >
               Add New Medicine Request
             </Button>
           </Box>
-          {isMedicineDataFetching && <LinearProgress sx={{ width: "100%" }} />}
+          {(isMedicineDataFetching || isMedicineAssignedTaskDataFetching) && (
+            <LinearProgress sx={{ width: "100%" }} />
+          )}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -240,7 +284,9 @@ function MedicineRequestTable({
                     <TableCell align="right">{row.medicineName}</TableCell>
                     <TableCell align="right">{row.genericName}</TableCell>
                     <TableCell align="right">{row?.division ?? "--"}</TableCell>
-                    <TableCell align="right">{row?.approver ?? "--"}</TableCell>
+                    <TableCell align="right">
+                      {row?.assignee?.name ?? "--"}
+                    </TableCell>
                     <TableCell align="right">{row.status}</TableCell>
                   </TableRow>
                 ))
@@ -285,15 +331,15 @@ function MedicineRequestTable({
                 setOpenAddOrEditDialog(true);
               }}
               disableEdit={
-                !useCurrentUserHaveAccess(
-                  PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_MEDICINE_REQUEST_EDIT
-                )
+                isAssignedTasks
+                  ? isMedicineDataAssignedTaskEditDisabled
+                  : isMedicineDataEditDisabled
               }
               onDelete={() => setDeleteDialogOpen(true)}
               disableDelete={
-                !useCurrentUserHaveAccess(
-                  PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_MEDICINE_REQUEST_DELETE
-                )
+                isAssignedTasks
+                  ? isMedicineDataAssignedTaskDeleteDisabled
+                  : isMedicineDataDeleteDisabled
               }
             />
 

@@ -18,9 +18,6 @@ import { useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { MedicineRequest } from "../../../../api/medicineRequestApi";
 import useIsMobile from "../../../../customHooks/useIsMobile";
-import { sampleMedicines } from "../../../../api/sampleData/medicineRequestSampleData";
-import { sampleDivisions } from "../../../../api/sampleData/documentData";
-import { sampleAssignees } from "../../../../api/sampleData/usersSampleData";
 import CustomButton from "../../../../components/CustomButton";
 import { useQuery } from "@tanstack/react-query";
 import { fetchMedicineList } from "../../../../api/OccupationalHealth/medicineNameApi";
@@ -49,9 +46,12 @@ export default function AddOrEditMedicineRequestDialog({
     formState: { errors },
     reset,
     control,
+    watch,
   } = useForm<MedicineRequest>({
     defaultValues,
   });
+
+  const assignee = watch("assignee");
 
   useEffect(() => {
     if (defaultValues) {
@@ -68,7 +68,7 @@ export default function AddOrEditMedicineRequestDialog({
   const handleCreateDocument = (data: MedicineRequest) => {
     const submitData: Partial<MedicineRequest> = data;
     submitData.id = defaultValues?.id ?? uuidv4();
-    submitData.approverId = defaultValues?.approverId;
+    submitData.assigneeId = assignee?.id ?? defaultValues?.assigneeId;
     submitData.referenceNumber = defaultValues?.referenceNumber ?? uuidv4();
     submitData.requestDate =
       defaultValues?.requestDate ?? new Date().toDateString();
@@ -214,13 +214,13 @@ export default function AddOrEditMedicineRequestDialog({
               {...register("requestQuantity", { required: true })}
             />
             <UserAutoComplete
-              name="approver"
-              label="Approver"
+              name="assignee"
+              label="assignee"
               control={control}
               register={register}
               errors={errors}
               userData={userData}
-              defaultValue={defaultValues?.approver}
+              defaultValue={defaultValues?.assignee}
               required={true}
             />
           </Stack>

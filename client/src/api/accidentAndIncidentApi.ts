@@ -194,6 +194,11 @@ export async function getAccidentsList() {
   return res.data;
 }
 
+export async function getAccidentsAssignedTaskList() {
+  const res = await axios.get("/api/accidents-assign-task");
+  return res.data;
+}
+
 export const createAccident = async (accident: Accident) => {
   const formData = new FormData();
   Object.keys(accident).forEach((key) => {
@@ -274,6 +279,11 @@ export const deleteAccident = async (id: string) => {
 //Incident Apis
 export async function getIncidentsList() {
   const res = await axios.get("/api/incidents");
+  return res.data;
+}
+
+export async function getIncidentsAssignedTaskList() {
+  const res = await axios.get("/api/incidents-assign-task");
   return res.data;
 }
 

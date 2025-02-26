@@ -30,6 +30,7 @@ import {
   Accident,
   createAccident,
   deleteAccident,
+  getAccidentsAssignedTaskList,
   getAccidentsList,
   updateAccident,
 } from "../../api/accidentAndIncidentApi";
@@ -75,6 +76,14 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
     queryFn: getAccidentsList,
   });
 
+  const {
+    data: accidentAssignedTaskData,
+    isFetching: isAccidentAssignedTaskData,
+  } = useQuery({
+    queryKey: ["accidents-assigned-task"],
+    queryFn: getAccidentsAssignedTaskList,
+  });
+
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("md")
   );
@@ -83,6 +92,7 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
     mutationFn: createAccident,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["accidents"] });
+      queryClient.invalidateQueries({ queryKey: ["accidents-assigned-task"] });
       enqueueSnackbar("Accident Report Created Successfully!", {
         variant: "success",
       });
@@ -101,6 +111,7 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
     mutationFn: updateAccident,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["accidents"] });
+      queryClient.invalidateQueries({ queryKey: ["accidents-assigned-task"] });
       enqueueSnackbar("Accident Report Updated Successfully!", {
         variant: "success",
       });
@@ -119,6 +130,11 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
     mutationFn: deleteAccident,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["accidents"] });
+      await queryClient.invalidateQueries({
+        queryKey: ["accidents-assigned-task"],
+      });
+      setOpenViewDrawer(false);
+      setSelectedRow(null);
       enqueueSnackbar("Accident Report Deleted Successfully!", {
         variant: "success",
       });
@@ -131,12 +147,45 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   });
 
   const paginatedAccidentData = useMemo(() => {
-    if (!accidentData) return [];
-    return accidentData.slice(
-      page * rowsPerPage,
-      page * rowsPerPage + rowsPerPage
-    );
-  }, [accidentData, page, rowsPerPage]);
+    if (isAssignedTasks) {
+      if (!accidentAssignedTaskData) return [];
+      return accidentAssignedTaskData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
+    } else {
+      if (!accidentData) return [];
+      return accidentData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
+    }
+  }, [
+    accidentData,
+    page,
+    rowsPerPage,
+    accidentAssignedTaskData,
+    isAssignedTasks,
+  ]);
+
+  const isAccidentCreateDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_REGISTER_ACCIDENT_CREATE
+  );
+  const isAccidentEditDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_REGISTER_ACCIDENT_EDIT
+  );
+  const isAccidentDeleteDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_REGISTER_ACCIDENT_DELETE
+  );
+  const isAccidentAssignedTaskListDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_ACCIDENT_CREATE
+  );
+  const isAccidentAssignedTaskEditDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_ACCIDENT_EDIT
+  );
+  const isAccidentAssignedTaskDeleteDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_ACCIDENT_DELETE
+  );
 
   return (
     <Stack>
@@ -179,15 +228,17 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
                 setOpenAddOrEditDialog(true);
               }}
               disabled={
-                !useCurrentUserHaveAccess(
-                  PermissionKeys.INCIDENT_ACCIDENT_REGISTER_ACCIDENT_CREATE
-                )
+                isAssignedTasks
+                  ? isAccidentAssignedTaskListDisabled
+                  : isAccidentCreateDisabled
               }
             >
               Report an accident
             </Button>
           </Box>
-          {isAccidentDataFetching && <LinearProgress sx={{ width: "100%" }} />}
+          {(isAccidentDataFetching || isAccidentAssignedTaskData) && (
+            <LinearProgress sx={{ width: "100%" }} />
+          )}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -282,15 +333,15 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
                 setOpenAddOrEditDialog(true);
               }}
               disableEdit={
-                !useCurrentUserHaveAccess(
-                  PermissionKeys.INCIDENT_ACCIDENT_REGISTER_ACCIDENT_EDIT
-                )
+                isAssignedTasks
+                  ? isAccidentAssignedTaskEditDisabled
+                  : isAccidentEditDisabled
               }
               onDelete={() => setDeleteDialogOpen(true)}
               disableDelete={
-                !useCurrentUserHaveAccess(
-                  PermissionKeys.INCIDENT_ACCIDENT_REGISTER_ACCIDENT_DELETE
-                )
+                isAssignedTasks
+                  ? isAccidentAssignedTaskDeleteDisabled
+                  : isAccidentDeleteDisabled
               }
             />
 

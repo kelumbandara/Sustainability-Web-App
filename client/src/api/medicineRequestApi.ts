@@ -4,9 +4,8 @@ import { userSchema } from "./userApi";
 
 export const MedicineRequestSchema = z.object({
   id: z.string(),
-  approver: userSchema,
-  approverId: z.string(),
-  approverRemarks: z.string(),
+  assignee: userSchema,
+  assigneeId: z.string(),
   createdAt: z.string(),
   division: z.string(),
   genericName: z.string(),
@@ -25,6 +24,11 @@ export type MedicineRequest = z.infer<typeof MedicineRequestSchema>;
 
 export async function getMedicineList() {
   const res = await axios.get("/api/medicine-request");
+  return res.data;
+}
+
+export async function getMedicineAssignedTaskList() {
+  const res = await axios.get("/api/medicine-request-assign-task");
   return res.data;
 }
 
