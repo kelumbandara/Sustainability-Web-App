@@ -690,7 +690,7 @@ export default function AddOrEditHazardRiskDialog({
                 }}
               />
             </Box>
-            <Box sx={{ margin: "0.5rem" }}>
+            <Box>
               <UserAutoComplete
                 name="assignee"
                 label="Assignee"
