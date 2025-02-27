@@ -56,6 +56,11 @@ const PatientTable = React.lazy(
   () => import("./views/OccupationalHealth/ClinicalSuite/PatientTable")
 );
 
+//Medicine Stock
+const MedicineStockTable = React.lazy(
+  () => import("./views/OccupationalHealth/ClinicalSuite/MedicineStockTable")
+);
+
 //Medicine Request
 const MedicineRequestTable = React.lazy(
   () =>
@@ -70,6 +75,10 @@ const PurchaseAndInventoryTable = React.lazy(
     import(
       "./views/OccupationalHealth/MedicineInventory/PurchaseAndInventory/PurchaseAndInventoryTable"
     )
+);
+
+const PurchaseAndInventoryTransactionTable = React.lazy(
+  () => import("./views/OccupationalHealth/MedicineInventory/TransactionTable")
 );
 
 //Maternity Register
@@ -250,9 +259,7 @@ const AppRoutes = () => {
         />
         <Route
           path="/occupational-health/clinical-suite/medicine-stock"
-          element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="Clinical Suite > Medicine Stock" />
-          ))}
+          element={withLayout(MainLayout, MedicineStockTable)}
         />
         <Route
           path="/occupational-health/clinical-suite/pharmacy-queue"
@@ -273,9 +280,7 @@ const AppRoutes = () => {
         />
         <Route
           path="/occupational-health/medicines-inventory/transaction"
-          element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="Medicine Inventory > Transaction" />
-          ))}
+          element={withLayout(MainLayout, PurchaseAndInventoryTransactionTable)}
         />
         <Route
           path="/occupational-health/medicines-inventory/assigned-tasks"
