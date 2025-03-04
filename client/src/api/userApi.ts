@@ -95,3 +95,42 @@ export async function fetchAllUsers() {
   const res = await axios.get("/api/all-users");
   return res.data;
 }
+
+export async function forgotPassword({
+  email,
+}: {
+  email: string;
+}) {
+  const res = await axios.post("/api/forgot-password", {
+    email,
+  });
+  return res.data;
+}
+
+export async function otpVerification({
+  email,
+  otp,
+}: {
+  email: string;
+  otp: string;
+}) {
+  const res = await axios.post("/api/reset-password", {
+    email,
+    otp,
+  });
+  return res.data;
+}
+
+export async function resetPassword({
+  email,
+  password,
+}: {
+  email: string;
+  password: string;
+}) {
+  const res = await axios.post("/api/change-password", {
+    email,
+    password,
+  });
+  return res.data;
+}
