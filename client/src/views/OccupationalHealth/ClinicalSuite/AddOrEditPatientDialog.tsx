@@ -33,6 +33,11 @@ import DatePickerComponent from "../../../components/DatePickerComponent";
 import RichTextComponent from "../../../components/RichTextComponent";
 import TimePickerComponent from "../../../components/TimePickerComponent";
 import { sampleDoctorData } from "../../../api/sampleData/patientData";
+import { useQuery } from "@tanstack/react-query";
+import { fetchAllDoctors } from "../../../api/OccupationalHealth/consultingDoctorsAPi";
+import { fetchDivision } from "../../../api/divisionApi";
+import { fetchDepartmentData } from "../../../api/departmentApi";
+import { fetchDesignation } from "../../../api/OccupationalHealth/patientDesignationApi";
 
 type DialogProps = {
   open: boolean;
@@ -70,6 +75,26 @@ export default function AddOrEditPatientDialog({
   const resetForm = () => {
     reset();
   };
+
+  const { data: doctorData, isFetching: isDoctorDataFetching } = useQuery({
+    queryKey: ["doctors"],
+    queryFn: fetchAllDoctors,
+  });
+
+  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
+    queryKey: ["divisions"],
+    queryFn: fetchDivision,
+  });
+
+  const { data: departmentData, isFetching: isDepartmentDataFetching } = useQuery({
+    queryKey: ["departments"],
+    queryFn: fetchDepartmentData,
+  });
+
+  const { data: designationData, isFetching: isDesignationDataFetching } = useQuery({
+    queryKey: ["designations"],
+    queryFn: fetchDesignation,
+  });
 
   const handleCreateDocument = (data: Patient) => {
     const submitData: Partial<Patient> = data;
@@ -158,21 +183,21 @@ export default function AddOrEditPatientDialog({
             >
               <TextField
                 required
-                id="employee_id"
+                id="employeeId"
                 label="Employee ID"
-                error={!!errors.employee_id}
+                error={!!errors.employeeId}
                 size="small"
                 sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("employee_id", { required: true })}
+                {...register("employeeId", { required: true })}
               />
               <TextField
                 required
-                id="employee_name"
+                id="employeeName"
                 label="Employee Name"
-                error={!!errors.employee_name}
+                error={!!errors.employeeName}
                 size="small"
                 sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("employee_name", { required: true })}
+                {...register("employeeName", { required: true })}
               />
             </Box>
 
@@ -212,7 +237,8 @@ export default function AddOrEditPatientDialog({
             <Autocomplete
               {...register("designation", { required: true })}
               size="small"
-              options={Object.values(Designation)}
+              options={
+                designationData?.length ? designationData.map((designation) => designation.designationName) : []}
               defaultValue={defaultValues?.designation}
               sx={{ flex: 1, margin: "0.5rem" }}
               renderInput={(params) => (
@@ -235,7 +261,8 @@ export default function AddOrEditPatientDialog({
               <Autocomplete
                 {...register("division", { required: true })}
                 size="small"
-                options={sampleDivisions?.map((division) => division.name)}
+                options={
+                  divisionData?.length ? divisionData.map((division) => division.divisionName) : []}
                 defaultValue={defaultValues?.division}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (
@@ -251,9 +278,8 @@ export default function AddOrEditPatientDialog({
               <Autocomplete
                 {...register("department", { required: true })}
                 size="small"
-                options={sampleDepartments?.map(
-                  (department) => department.name
-                )}
+                options={
+                  departmentData?.length ? departmentData.map((department) => department.department) : []}
                 defaultValue={defaultValues?.department}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (
@@ -276,24 +302,24 @@ export default function AddOrEditPatientDialog({
               <TextField
                 id="subDepartment"
                 label="Sub Department"
-                error={!!errors.sub_department}
+                error={!!errors.subDepartment}
                 size="small"
                 sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("sub_department")}
+                {...register("subDepartment")}
               />
               <Autocomplete
-                {...register("work_status", { required: true })}
+                {...register("workStatus", { required: true })}
                 size="small"
                 options={Object.values(WorkStatus)}
-                defaultValue={defaultValues?.work_status}
+                defaultValue={defaultValues?.workStatus}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
                     required
-                    error={!!errors.work_status}
+                    error={!!errors.workStatus}
                     label="Work Status"
-                    name="work_status"
+                    name="workStatus"
                   />
                 )}
               />
@@ -336,30 +362,30 @@ export default function AddOrEditPatientDialog({
             <Box sx={{ margin: "0.5rem" }}>
               <Controller
                 control={control}
-                {...register("check_in_date", { required: true })}
-                name={"check_in_date"}
+                {...register("checkInDate", { required: true })}
+                name={"checkInDate"}
                 render={({ field }) => {
                   return (
                     <DatePickerComponent
                       onChange={(e) => field.onChange(e)}
-                      value={field.value}
+                      value={field.value ? new Date(field.value) : undefined}
                       label="Check In Date"
-                      error={errors?.check_in_date ? "Required" : ""}
+                      error={errors?.checkInDate ? "Required" : ""}
                     />
                   );
                 }}
               />
               <Controller
                 control={control}
-                {...register("check_in", { required: true })}
-                name={"check_in"}
+                {...register("checkInTime", { required: true })}
+                name={"checkInTime"}
                 render={({ field }) => {
                   return (
                     <TimePickerComponent
                       onChange={(e) => field.onChange(e)}
-                      value={field.value}
+                      value={field.value ? new Date(field.value) : undefined}
                       label="Check In Time"
-                      error={errors?.check_in ? "Required" : ""}
+                      error={errors?.checkInTime ? "Required" : ""}
                     />
                   );
                 }}
@@ -383,13 +409,13 @@ export default function AddOrEditPatientDialog({
             >
               <TextField
                 required
-                id="body_temperature"
+                id="bodyTemperature"
                 label="Body Temperature (°C)"
-                error={!!errors.body_temperature}
+                error={!!errors.bodyTemperature}
                 type="number"
                 size="small"
                 sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("body_temperature", { required: true })}
+                {...register("bodyTemperature", { required: true })}
               />
               <TextField
                 required
@@ -421,41 +447,40 @@ export default function AddOrEditPatientDialog({
               />
               <TextField
                 required
-                id="blood_pressure"
+                id="bloodPressure"
                 label="Blood Pressure (mmHg)"
-                error={!!errors.blood_pressure}
+                error={!!errors.bloodPressure}
                 size="small"
                 sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("blood_pressure", { required: true })}
+                {...register("bloodPressure", { required: true })}
               />
             </Box>
             <Box sx={{ margin: "0.5rem" }}>
               <TextField
                 required
-                id="random_blood_sugar"
+                id="randomBloodSugar"
                 label="Random Blood Sugar (mg/dL)"
-                error={!!errors.random_blood_sugar}
+                error={!!errors.randomBloodSugar}
                 size="small"
                 sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("random_blood_sugar", { required: true })}
+                {...register("randomBloodSugar", { required: true })}
               />
             </Box>
             <Box sx={{ margin: "0.5rem" }}>
               <Autocomplete
-                {...register("consulting_doctor", { required: true })}
+                {...register("consultingDoctor", { required: true })}
                 size="small"
-                options={sampleDoctorData.map(
-                  (doctor) => doctor.first_name + " " + doctor.last_name
-                )}
-                defaultValue={defaultValues?.consulting_doctor}
+                options={
+                  doctorData?.length ? doctorData.map((doctor) => doctor.doctorName) : []}
+                defaultValue={defaultValues?.consultingDoctor}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
                     required
-                    error={!!errors.consulting_doctor}
+                    error={!!errors.consultingDoctor}
                     label="Consulting Doctor"
-                    name="consulting_doctor"
+                    name="consultingDoctor"
                   />
                 )}
               />
@@ -489,18 +514,19 @@ export default function AddOrEditPatientDialog({
             </Box>
             <Box sx={{ margin: "0.5rem" }}>
               <Autocomplete
-                {...register("clinic_division", { required: true })}
+                {...register("clinicDivision", { required: true })}
                 size="small"
-                options={sampleDivisions?.map((division) => division.name)}
-                defaultValue={defaultValues?.clinic_division}
+                options={
+                  divisionData?.length ? divisionData.map((division) => division.divisionName) : []}
+                defaultValue={defaultValues?.clinicDivision}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
                     required
-                    error={!!errors.clinic_division}
+                    error={!!errors.clinicDivision}
                     label="Clinic Division"
-                    name="clinic_division"
+                    name="clinicDivision"
                   />
                 )}
               />

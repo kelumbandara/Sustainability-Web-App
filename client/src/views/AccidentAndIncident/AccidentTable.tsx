@@ -9,7 +9,10 @@ import {
   Alert,
   Box,
   Button,
+  LinearProgress,
   Stack,
+  TableFooter,
+  TablePagination,
   Theme,
   Typography,
   useMediaQuery,
@@ -17,33 +20,171 @@ import {
 import theme from "../../theme";
 import PageTitle from "../../components/PageTitle";
 import Breadcrumb from "../../components/BreadCrumb";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
-import { Accident } from "../../api/accidentAndIncidentApi";
+import {
+  Accident,
+  createAccident,
+  deleteAccident,
+  getAccidentsAssignedTaskList,
+  getAccidentsList,
+  updateAccident,
+} from "../../api/accidentAndIncidentApi";
 import ViewAccidentContent from "./ViewAccidentContent";
 import AddOrEditAccidentDialog from "./AddOrEditAccidentDialog";
-import { sampleAccidentData } from "../../api/sampleData/accidentData";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import queryClient from "../../state/queryClient";
+import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
+import { PermissionKeys } from "../Administration/SectionList";
 
-function AccidentTable() {
+function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<Accident>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
-  const [accidentData, setAccidentData] =
-    useState<Accident[]>(sampleAccidentData);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  // handle pagination
+  const handleChangePage = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
-    { title: "Accident Management" },
+    { title: `${isAssignedTasks ? "Assigned " : ""}Accident Management` },
   ];
+
+  const { data: accidentData, isFetching: isAccidentDataFetching } = useQuery({
+    queryKey: ["accidents"],
+    queryFn: getAccidentsList,
+  });
+
+  const {
+    data: accidentAssignedTaskData,
+    isFetching: isAccidentAssignedTaskData,
+  } = useQuery({
+    queryKey: ["accidents-assigned-task"],
+    queryFn: getAccidentsAssignedTaskList,
+  });
 
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("md")
+  );
+
+  const { mutate: createAccidentMutation } = useMutation({
+    mutationFn: createAccident,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["accidents"] });
+      queryClient.invalidateQueries({ queryKey: ["accidents-assigned-task"] });
+      enqueueSnackbar("Accident Report Created Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Accident Creation Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: updateAccidentMutation } = useMutation({
+    mutationFn: updateAccident,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["accidents"] });
+      queryClient.invalidateQueries({ queryKey: ["accidents-assigned-task"] });
+      enqueueSnackbar("Accident Report Updated Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Accident Update Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: deleteAccidentMutation } = useMutation({
+    mutationFn: deleteAccident,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["accidents"] });
+      await queryClient.invalidateQueries({
+        queryKey: ["accidents-assigned-task"],
+      });
+      setOpenViewDrawer(false);
+      setSelectedRow(null);
+      enqueueSnackbar("Accident Report Deleted Successfully!", {
+        variant: "success",
+      });
+    },
+    onError: () => {
+      enqueueSnackbar(`Accident Delete Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const paginatedAccidentData = useMemo(() => {
+    if (isAssignedTasks) {
+      if (!accidentAssignedTaskData) return [];
+      return accidentAssignedTaskData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
+    } else {
+      if (!accidentData) return [];
+      return accidentData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
+    }
+  }, [
+    accidentData,
+    page,
+    rowsPerPage,
+    accidentAssignedTaskData,
+    isAssignedTasks,
+  ]);
+
+  const isAccidentCreateDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_REGISTER_ACCIDENT_CREATE
+  );
+  const isAccidentEditDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_REGISTER_ACCIDENT_EDIT
+  );
+  const isAccidentDeleteDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_REGISTER_ACCIDENT_DELETE
+  );
+  const isAccidentAssignedTaskListDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_ACCIDENT_CREATE
+  );
+  const isAccidentAssignedTaskEditDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_ACCIDENT_EDIT
+  );
+  const isAccidentAssignedTaskDeleteDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_ACCIDENT_DELETE
   );
 
   return (
@@ -57,7 +198,9 @@ function AccidentTable() {
           overflowX: "hidden",
         }}
       >
-        <PageTitle title="Accident Management" />
+        <PageTitle
+          title={`${isAssignedTasks ? "Assigned " : ""}Accident Management`}
+        />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
       <Stack sx={{ alignItems: "center" }}>
@@ -84,10 +227,18 @@ function AccidentTable() {
                 setSelectedRow(null);
                 setOpenAddOrEditDialog(true);
               }}
+              disabled={
+                isAssignedTasks
+                  ? isAccidentAssignedTaskListDisabled
+                  : isAccidentCreateDisabled
+              }
             >
               Report an accident
             </Button>
           </Box>
+          {(isAccidentDataFetching || isAccidentAssignedTaskData) && (
+            <LinearProgress sx={{ width: "100%" }} />
+          )}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -95,9 +246,9 @@ function AccidentTable() {
                 <TableCell align="right">Accident Date</TableCell>
                 <TableCell align="right">Accident Time</TableCell>
                 <TableCell align="right">Severity</TableCell>
-                <TableCell align="right">Injury</TableCell>
-                <TableCell align="right">Time of Work</TableCell>
-                <TableCell align="right">Return for Work</TableCell>
+                <TableCell align="right">Injury Type</TableCell>
+                {/* <TableCell align="right">Time of Work</TableCell>
+                <TableCell align="right">Return for Work</TableCell> */}
                 <TableCell align="right">Division</TableCell>
                 <TableCell align="right">Department</TableCell>
                 <TableCell align="right">Category</TableCell>
@@ -106,8 +257,8 @@ function AccidentTable() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {accidentData?.length > 0 ? (
-                accidentData?.map((row) => (
+              {paginatedAccidentData?.length > 0 ? (
+                paginatedAccidentData?.map((row) => (
                   <TableRow
                     key={`${row.id}`}
                     sx={{
@@ -129,15 +280,16 @@ function AccidentTable() {
                       {format(row.accidentTime, "HH:mm")}
                     </TableCell>
                     <TableCell align="right">{row.severity}</TableCell>
-                    <TableCell align="right">{row.injury}</TableCell>
-                    <TableCell align="right">{row.timeOfWork}</TableCell>
+                    <TableCell align="right">{row.injuryType}</TableCell>
+                    {/* hide until figure out from where this come */}
+                    {/* <TableCell align="right">{row.timeOfWork}</TableCell>
                     <TableCell align="right">
                       {row.returnForWork ? row.returnForWork : "--"}
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell align="right">{row.division}</TableCell>
                     <TableCell align="right">{row.department}</TableCell>
                     <TableCell align="right">{row.category}</TableCell>
-                    <TableCell align="right">{row.assignee}</TableCell>
+                    <TableCell align="right">{row.assignee?.name}</TableCell>
                     <TableCell align="right">{row.status}</TableCell>
                   </TableRow>
                 ))
@@ -149,6 +301,21 @@ function AccidentTable() {
                 </TableRow>
               )}
             </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                  colSpan={100}
+                  count={paginatedAccidentData?.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  showFirstButton={true}
+                  showLastButton={true}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+              </TableRow>
+            </TableFooter>
           </Table>
         </TableContainer>
       </Stack>
@@ -165,7 +332,17 @@ function AccidentTable() {
                 setSelectedRow(selectedRow);
                 setOpenAddOrEditDialog(true);
               }}
+              disableEdit={
+                isAssignedTasks
+                  ? isAccidentAssignedTaskEditDisabled
+                  : isAccidentEditDisabled
+              }
               onDelete={() => setDeleteDialogOpen(true)}
+              disableDelete={
+                isAssignedTasks
+                  ? isAccidentAssignedTaskDeleteDisabled
+                  : isAccidentDeleteDisabled
+              }
             />
 
             {selectedRow && (
@@ -186,23 +363,10 @@ function AccidentTable() {
           }}
           onSubmit={(data) => {
             if (selectedRow) {
-              console.log("Updating document", data);
-              setAccidentData(
-                accidentData.map((risk) => (risk.id === data.id ? data : risk))
-              ); // Update the document in the list if it already exists
-              enqueueSnackbar("Accident Details Updated Successfully!", {
-                variant: "success",
-              });
+              updateAccidentMutation(data);
             } else {
-              console.log("Adding new accident", data);
-              setAccidentData([...accidentData, data]); // Add new document to the list
-              enqueueSnackbar("Accident Report Created Successfully!", {
-                variant: "success",
-              });
+              createAccidentMutation(data);
             }
-            setSelectedRow(null);
-            setOpenViewDrawer(false);
-            setOpenAddOrEditDialog(false);
           }}
           defaultValues={selectedRow}
         />
@@ -221,17 +385,15 @@ function AccidentTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            setAccidentData(
-              accidentData.filter((doc) => doc.id !== selectedRow.id)
-            );
+            deleteAccidentMutation(selectedRow.id);
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);
             setSelectedRow(null);
             setDeleteDialogOpen(false);
-            enqueueSnackbar("Accident Deleted Successfully!", {
-              variant: "success",
-            });
+            // enqueueSnackbar("Accident Deleted Successfully!", {
+            //   variant: "success",
+            // });
           }}
           handleReject={() => {
             setOpenViewDrawer(false);

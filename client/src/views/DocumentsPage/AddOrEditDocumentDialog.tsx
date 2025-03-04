@@ -17,7 +17,6 @@ import { Document } from "../../api/documentApi";
 import useIsMobile from "../../customHooks/useIsMobile";
 import { Controller, useForm } from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
-import { sampleDivisions } from "../../api/sampleData/documentData";
 import RichTextComponent from "../../components/RichTextComponent";
 import DropzoneComponent from "../../components/DropzoneComponent";
 import { grey } from "@mui/material/colors";
@@ -26,6 +25,10 @@ import SwitchButton from "../../components/SwitchButton";
 import CustomButton from "../../components/CustomButton";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { useQuery } from "@tanstack/react-query";
+import { fetchDivision } from "../../api/divisionApi";
+import theme from "../../theme";
+import { fetchAllDocumentType } from "../../api/documentType";
 
 type DialogProps = {
   open: boolean;
@@ -56,8 +59,19 @@ export default function AddOrEditDocumentDialog({
 
   const isNoExpiry = watch("isNoExpiry");
   const versionNumber = watch("versionNumber");
+  const issuedDate = watch("issuedDate");
 
   console.log("versionNumber", versionNumber, defaultValues);
+
+  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
+    queryKey: ["divisions"],
+    queryFn: fetchDivision,
+  });
+
+  const { data: documentType, isFetching: isDocumentTypeDataFetching } = useQuery({
+    queryKey: ["documentTypes"],
+    queryFn: fetchAllDocumentType,
+  });
 
   useEffect(() => {
     if (defaultValues) {
@@ -168,7 +182,8 @@ export default function AddOrEditDocumentDialog({
               <Autocomplete
                 {...register("documentType", { required: true })}
                 size="small"
-                options={Object.values(DocumentType)}
+                options={
+                  documentType?.length ? documentType.map((documents) => documents.documentType) : []}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 defaultValue={defaultValues?.documentType}
                 renderInput={(params) => (
@@ -185,7 +200,11 @@ export default function AddOrEditDocumentDialog({
               <Autocomplete
                 {...register("division", { required: true })}
                 size="small"
-                options={sampleDivisions?.map((division) => division.name)}
+                options={
+                  divisionData?.length
+                    ? divisionData.map((division) => division.divisionName)
+                    : []
+                }
                 defaultValue={defaultValues?.division}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (
@@ -344,7 +363,7 @@ export default function AddOrEditDocumentDialog({
                   return (
                     <DatePickerComponent
                       onChange={(e) => field.onChange(e)}
-                      value={field.value}
+                      value={field.value ? new Date(field.value) : undefined}
                       label="Issued Date"
                     />
                   );
@@ -370,6 +389,14 @@ export default function AddOrEditDocumentDialog({
             {!isNoExpiry && (
               <>
                 <Box sx={{ margin: "0.5rem" }}>
+                  {!issuedDate && (
+                    <Typography
+                      variant="caption"
+                      sx={{ marginY: "0.5rem", color: theme.palette.info.main }}
+                    >
+                      * Specify issue date to enable expiry date and notify date
+                    </Typography>
+                  )}
                   <Controller
                     control={control}
                     name={"expiryDate"}
@@ -377,8 +404,12 @@ export default function AddOrEditDocumentDialog({
                       return (
                         <DatePickerComponent
                           onChange={(e) => field.onChange(e)}
-                          value={field.value}
+                          value={
+                            field.value ? new Date(field.value) : undefined
+                          }
                           label="Expiry Date"
+                          minDate={issuedDate}
+                          disabled={!issuedDate}
                         />
                       );
                     }}
@@ -393,8 +424,11 @@ export default function AddOrEditDocumentDialog({
                       return (
                         <DatePickerComponent
                           onChange={(e) => field.onChange(e)}
-                          value={field.value}
+                          value={
+                            field.value ? new Date(field.value) : undefined
+                          }
                           label="Notify Date"
+                          disabled={!issuedDate}
                         />
                       );
                     }}

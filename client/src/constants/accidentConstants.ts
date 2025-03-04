@@ -83,4 +83,8 @@ export const accidentTypesOptions = [
 
 export const personTypes = ["Employee", "Contractor", "Visitor"];
 
+export const industryExperience = ["Skill", "Unskilled", "SemiSkilled"];
+
 export const genderOptions = ["Male", "Female", "Other"];
+
+export const ExperienceTypes = ["Skill", "Unskilled", "Semiskilled"];

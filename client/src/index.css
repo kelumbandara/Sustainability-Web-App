@@ -27,8 +27,11 @@
   --pallet-lighter-grey: #dce1ec;
   --pallet-light-blue: #7db0ff;
   --pallet-lighter-blue: #98c0fc;
+  --pallet-lightest-blue: #afcaf1;
   --pallet-main-blue: #010f24;
+  --pallet-border-blue: #95979c;
   --pallet-blue: #00327e;
+  --pallet-pink: #ad6fc1;
 }
 
 /* Global Styles */

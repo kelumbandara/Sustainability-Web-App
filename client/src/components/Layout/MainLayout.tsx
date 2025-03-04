@@ -36,6 +36,10 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import DeleteConfirmationModal from "../DeleteConfirmationModal";
 import { useState } from "react";
 import { useSnackbar } from "notistack";
+import {
+  defaultViewerPermissions,
+  PermissionKeysObject,
+} from "../../views/Administration/SectionList";
 
 const drawerWidth = 265;
 
@@ -285,6 +289,8 @@ const DrawerContent = ({
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+
+  const userPermissionObject = defaultViewerPermissions;
   return (
     <>
       <DrawerHeader sx={{ justifyContent: "flex-start" }}>
@@ -322,10 +328,13 @@ const DrawerContent = ({
         }}
       >
         {sidebarItems.map((item, i) => {
+          if (item?.accessKey && !userPermissionObject[`${item?.accessKey}`])
+            return null;
+
           if (item?.headline) {
             return (
               <Typography
-                key={i}
+                key={item.headline}
                 variant="body2"
                 sx={{
                   color: "#7db0ff",
@@ -342,18 +351,19 @@ const DrawerContent = ({
 
           if (item.nestedItems) {
             return (
-              <Box sx={{ marginLeft: "1rem" }}>
+              <Box sx={{ marginLeft: "1rem" }} key={item.accessKey}>
                 <NestedItem
-                  key={i}
+                  key={item.accessKey}
                   item={item}
                   handleDrawerClose={handleDrawerClose}
+                  userPermissionObject={userPermissionObject}
                 />
               </Box>
             );
           }
           return (
             <ListItem
-              key={i}
+              key={item.accessKey}
               disableGutters
               sx={{ paddingY: "3px", marginLeft: "1rem" }}
             >
@@ -428,13 +438,15 @@ const NestedItem = React.memo(
   ({
     item,
     handleDrawerClose,
+    userPermissionObject,
   }: {
     item: SidebarItem;
     handleDrawerClose: () => void;
+    userPermissionObject: PermissionKeysObject;
   }) => {
     const [open, setOpen] = React.useState(item.open);
     return (
-      <>
+      <React.Fragment key={item.accessKey}>
         <Button
           onClick={() => setOpen((o) => !o)}
           endIcon={open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
@@ -468,12 +480,19 @@ const NestedItem = React.memo(
         <Collapse in={open} unmountOnExit>
           <List>
             {item.nestedItems.map((item) => {
+              if (
+                item?.accessKey &&
+                !userPermissionObject[`${item?.accessKey}`]
+              )
+                return null;
+
               if (item.nestedItems) {
                 return (
-                  <Box key={item.href} sx={{ marginLeft: "0.5rem" }}>
+                  <Box key={item.accessKey} sx={{ marginLeft: "0.5rem" }}>
                     <NestedItem
                       item={item}
                       handleDrawerClose={handleDrawerClose}
+                      userPermissionObject={userPermissionObject}
                     />
                   </Box>
                 );
@@ -482,7 +501,7 @@ const NestedItem = React.memo(
               return (
                 <ListItem
                   disableGutters
-                  key={item.title}
+                  key={item.accessKey}
                   sx={{ paddingY: "3px", marginLeft: "0.5rem" }}
                 >
                   <LinkButton
@@ -497,7 +516,7 @@ const NestedItem = React.memo(
             })}
           </List>
         </Collapse>
-      </>
+      </React.Fragment>
     );
   }
 );

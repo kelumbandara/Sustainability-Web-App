@@ -1,19 +1,20 @@
+import axios from "axios";
 import { z } from "zod";
 
-export const BenefitAndEntitlementsSchema = z.object({
+export const benefitAndEntitlementsSchema = z.object({
   id: z.string(),
-  benefit_type: z.string(),
-  amount_value: z.string(),
-  total_days_paid: z.string(),
-  amount_of_first_installment: z.number().optional(),
-  date_of_first_installment: z.date().optional(),
-  amount_of_second_installment: z.number().optional(),
-  date_of_second_installment: z.date().optional(),
-  if_benefit_received_someone_else: z.string(),
-  beneficiary_name: z.string(),
-  beneficiary_address: z.string(),
-  beneficiary_total_amount: z.number(),
-  beneficiary_date: z.date(),
+  benefitType: z.string(),
+  amountValue: z.string(),
+  totalDaysPaid: z.string(),
+  amount1stInstallment: z.number().optional(),
+  dateOf1stInstallment: z.date().optional(),
+  amount2ndInstallment: z.number().optional(),
+  dateOf2ndInstallment: z.date().optional(),
+  ifBenefitReceived: z.string(),
+  beneficiaryName: z.string(),
+  beneficiaryAddress: z.string(),
+  beneficiaryTotalAmount: z.number(),
+  beneficiaryDate: z.date(),
   description: z.string(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -21,14 +22,14 @@ export const BenefitAndEntitlementsSchema = z.object({
 });
 
 export type BenefitAndEntitlements = z.infer<
-  typeof BenefitAndEntitlementsSchema
+  typeof benefitAndEntitlementsSchema
 >;
 
-export const MedicalDocumentSchema = z.object({
+export const medicalDocumentSchema = z.object({
   id: z.string(),
-  document_type: z.string(),
+  documentType: z.string(),
   document: z.string(),
-  upload_date: z.date(),
+  uploadDate: z.date(),
   updatedAt: z.string().optional(),
 });
 
@@ -38,39 +39,122 @@ export enum LeaveStatus {
   REJECTED = "Rejected",
 }
 
-export type MedicalDocument = z.infer<typeof MedicalDocumentSchema>;
+export type MedicalDocument = z.infer<typeof medicalDocumentSchema>;
 
 export const MaternityRegisterSchema = z.object({
   id: z.string(),
-  employee_id: z.string(),
-  name: z.string(),
+  employeeId: z.string(),
+  employeeName: z.string(),
   age: z.string(),
-  contact_number: z.string(),
+  contactNumber: z.string(),
   designation: z.string(),
   department: z.string(),
-  supervisor_manager: z.string(),
-  date_of_join: z.date(),
-  average_wages: z.string(),
-  application_id: z.string(),
-  application_date: z.date(),
-  expected_delivery_date: z.date(),
-  leave_start_date: z.date(),
-  leave_end_date: z.date(),
-  actual_delivery_date: z.date(),
-  leave_status: z.nativeEnum(LeaveStatus),
-  notice_date_after_delivery: z.date(),
-  rejoining_date: z.date(),
-  support_provided: z.string().optional(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  supervisorOrManager: z.string(),
+  dateOfJoin: z.date(),
+  averageWages: z.string(),
+  applicationId: z.string(),
+  applicationDate: z.date(),
+  expectedDeliveryDate: z.date(),
+  leaveStartDate: z.date(),
+  leaveEndDate: z.date(),
+  actualDeliveryDate: z.date(),
+  leaveStatus: z.nativeEnum(LeaveStatus),
+  noticeDateAfterDelivery: z.date(),
+  reJoinDate: z.date(),
+  supportProvider: z.string().optional(),
+  created_at: z.string(),
+  updated_at: z.string(),
   publishedAt: z.string(),
   signature: z.string(),
   remarks: z.string().optional(),
-  created_date: z.date(),
+  createdDate: z.date(),
   status: z.string(),
-  benefits_and_entitlements: z.array(BenefitAndEntitlementsSchema),
-  medical_documents: z.array(MedicalDocumentSchema),
+  benefitsAndEntitlements: z.array(benefitAndEntitlementsSchema),
+  medicalDocuments: z.array(medicalDocumentSchema),
   division: z.string().optional(),
 });
 
 export type MaternityRegister = z.infer<typeof MaternityRegisterSchema>;
+
+export async function getMaternityRegistersList() {
+  const res = await axios.get("/api/benefit-request");
+  return res.data;
+}
+
+export const createMaternityRegister = async (
+  maternityRegister: MaternityRegister
+) => {
+  const formData = new FormData();
+  Object.keys(maternityRegister).forEach((key) => {
+    const value = maternityRegister[key as keyof typeof maternityRegister];
+
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        if (key === "benefitsAndEntitlements" || key === "medicalDocuments") {
+          Object.keys(item).forEach((nestedKey) => {
+            formData.append(
+              `${key}[${index}][${nestedKey}]`,
+              item[nestedKey]?.toString()
+            );
+          });
+        } else {
+          formData.append(`${key}[${index}]`, JSON.stringify(item));
+        }
+      });
+    } else if (value instanceof Date) {
+      formData.append(key, value.toISOString());
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  const res = await axios.post("/api/benefit-request", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+export const updateMaternityRegister = async (
+  maternityRegister: MaternityRegister
+) => {
+  const formData = new FormData();
+
+  Object.keys(maternityRegister).forEach((key) => {
+    const value = maternityRegister[key as keyof typeof maternityRegister];
+
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        if (key === "benefitsAndEntitlements" || key === "medicalDocuments") {
+          Object.keys(item).forEach((nestedKey) => {
+            formData.append(
+              `${key}[${index}][${nestedKey}]`,
+              item[nestedKey]?.toString()
+            );
+          });
+        } else {
+          formData.append(`${key}[${index}]`, JSON.stringify(item));
+        }
+      });
+    } else if (value instanceof Date) {
+      formData.append(key, value.toISOString());
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+  const res = await axios.post(
+    `/api/benefit-request/${maternityRegister.id}/update`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return res.data;
+};
+export const deleteMaternityRegister = async (id: string) => {
+  const res = await axios.delete(`/api/benefit-request/${id}/delete`);
+  return res.data;
+};

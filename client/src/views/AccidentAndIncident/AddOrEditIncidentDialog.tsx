@@ -35,7 +35,7 @@ import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import AddIcon from "@mui/icons-material/Add";
 import { HazardAndRiskStatus } from "../../api/hazardRiskApi";
-import { sampleAssignees } from "../../api/sampleData/usersSampleDate";
+import { sampleAssignees } from "../../api/sampleData/usersSampleData";
 import {
   AccidentEffectedIndividual,
   AccidentWitness,
@@ -57,6 +57,15 @@ import AddOrEditWitnessDialog from "./AddOrEditWitnessDialog";
 import AddOrEditPersonDialog from "./AddOrEditPersonDialog";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { circumstancesOptions } from "../../api/sampleData/incidentData";
+import useCurrentUser from "../../hooks/useCurrentUser";
+import { fetchAllUsers } from "../../api/userApi";
+import { useQuery } from "@tanstack/react-query";
+import { fetchDivision } from "../../api/divisionApi";
+import { fetchNearMiss } from "../../api/nearMissApi";
+import { fetchTypeOfConcerns } from "../../api/typeOfConcern";
+import { fetchAllFactors } from "../../api/incidentFactorsApi";
+import { fetchAllCircumstances } from "../../api/circumstancesApi";
+import UserAutoComplete from "../../components/UserAutoComplete";
 
 type DialogProps = {
   open: boolean;
@@ -110,11 +119,43 @@ export default function AddOrEditIncidentDialog({
   const [selectedWitness, setSelectedWitness] = useState<AccidentWitness>(null);
   const [selectedPerson, setSelectedPerson] =
     useState<AccidentEffectedIndividual>(null);
+  const { user } = useCurrentUser();
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     console.log("event", event);
     setActiveTab(newValue);
   };
+
+  const { data: userData, isFetching: isUserDataFetching } = useQuery({
+    queryKey: ["users"],
+    queryFn: fetchAllUsers,
+  });
+
+  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
+    queryKey: ["divisions"],
+    queryFn: fetchDivision,
+  });
+
+  const { data: nearMissData, isFetching: isNearMissDataFetching } = useQuery({
+    queryKey: ["nearMissData"],
+    queryFn: fetchNearMiss,
+  });
+
+  const { data: concernData, isFetching: isConcernDataFetching } = useQuery({
+    queryKey: ["concernData"],
+    queryFn: fetchTypeOfConcerns,
+  });
+
+  const { data: factorData, isFetching: isFactorDataFetching } = useQuery({
+    queryKey: ["factorData"],
+    queryFn: fetchAllFactors,
+  });
+
+  const { data: circumstancesData, isFetching: isCircumstancesDataFetching } =
+    useQuery({
+      queryKey: ["circumstancesData"],
+      queryFn: fetchAllCircumstances,
+    });
 
   const {
     register,
@@ -128,6 +169,7 @@ export default function AddOrEditIncidentDialog({
 
   const witnessesWatch = watch("witnesses");
   const effectedIndividualsWatch = watch("effectedIndividuals");
+  const assignee = watch("assignee");
 
   useEffect(() => {
     if (defaultValues) {
@@ -147,9 +189,10 @@ export default function AddOrEditIncidentDialog({
     submitData.id = defaultValues?.id ?? uuidv4();
     // submitData.createdDate = new Date();
     // submitData.createdByUser = sampleAssignees[0].name;
+    submitData.assigneeId = assignee?.id;
+    submitData.createdByUser = user.id;
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
     onSubmit(submitData as Incident);
-    resetForm();
   };
 
   return (
@@ -294,21 +337,36 @@ export default function AddOrEditIncidentDialog({
                       flexDirection: isMobile ? "column" : "row",
                     }}
                   >
-                    <Autocomplete
-                      {...register("division", { required: true })}
-                      size="small"
-                      options={sampleDivisions?.map(
-                        (division) => division.name
-                      )}
-                      defaultValue={defaultValues?.division}
-                      sx={{ flex: 1, margin: "0.5rem" }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          required
-                          error={!!errors.division}
-                          label="Division"
-                          name="division"
+                    <Controller
+                      name="division"
+                      control={control}
+                      defaultValue={defaultValues?.division ?? ""}
+                      rules={{ required: true }}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(event, newValue) =>
+                            field.onChange(newValue)
+                          }
+                          size="small"
+                          options={
+                            divisionData?.length
+                              ? divisionData.map(
+                                  (division) => division.divisionName
+                                )
+                              : []
+                          }
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              required
+                              error={!!errors.division}
+                              helperText={errors.division && "Required"}
+                              label="Division"
+                              name="division"
+                            />
+                          )}
                         />
                       )}
                     />
@@ -321,19 +379,36 @@ export default function AddOrEditIncidentDialog({
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("location", { required: true })}
                     />
-                    <Autocomplete
-                      {...register("circumstances", { required: true })}
-                      size="small"
-                      options={circumstancesOptions}
-                      defaultValue={defaultValues?.circumstances}
-                      sx={{ flex: 1, margin: "0.5rem" }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          required
-                          error={!!errors.circumstances}
-                          label="Circumstances"
-                          name="circumstances"
+                    <Controller
+                      name="circumstances"
+                      control={control}
+                      defaultValue={defaultValues?.circumstances ?? ""}
+                      rules={{ required: true }}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(event, newValue) =>
+                            field.onChange(newValue)
+                          }
+                          size="small"
+                          options={
+                            circumstancesData?.length
+                              ? circumstancesData.map(
+                                  (circumstance) => circumstance.name
+                                )
+                              : []
+                          }
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              required
+                              error={!!errors.circumstances}
+                              helperText={errors.circumstances && "Required"}
+                              label="Circumstances"
+                              name="circumstances"
+                            />
+                          )}
                         />
                       )}
                     />
@@ -503,60 +578,98 @@ export default function AddOrEditIncidentDialog({
                       flexDirection: isMobile ? "column" : "row",
                     }}
                   >
-                    <Autocomplete
-                      {...register("typeOfNearMiss", { required: true })}
-                      size="small"
-                      options={Object.values(IncidentTypeOfNearMiss)}
-                      defaultValue={defaultValues?.typeOfNearMiss}
-                      sx={{ flex: 1, margin: "0.5rem" }}
-                      onChange={(e, value) => {
-                        setValue("typeOfNearMiss", value);
-                      }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          required
-                          error={!!errors.typeOfNearMiss}
-                          label="Type of Near Miss"
-                          name="typeOfNearMiss"
+                    <Controller
+                      name="typeOfNearMiss"
+                      control={control}
+                      defaultValue={defaultValues?.typeOfNearMiss ?? null}
+                      rules={{ required: true }}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(event, newValue) =>
+                            field.onChange(newValue)
+                          }
+                          size="small"
+                          options={
+                            nearMissData?.length
+                              ? nearMissData.map((nearMiss) => nearMiss.type)
+                              : []
+                          }
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              required
+                              error={!!errors.typeOfNearMiss}
+                              helperText={errors.typeOfNearMiss && "Required"}
+                              label="Type of Near Miss"
+                              name="typeOfNearMiss"
+                            />
+                          )}
                         />
                       )}
                     />
-                    <Autocomplete
-                      {...register("typeOfConcern", { required: true })}
-                      size="small"
-                      options={Object.values(IncidentTypeOfConcern)}
-                      defaultValue={defaultValues?.typeOfConcern}
-                      sx={{ flex: 1, margin: "0.5rem" }}
-                      onChange={(e, value) => {
-                        setValue("typeOfConcern", value);
-                      }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          required
-                          error={!!errors.typeOfConcern}
-                          label="Type of Concern"
-                          name="typeOfConcern"
+                    <Controller
+                      name="typeOfConcern"
+                      control={control}
+                      defaultValue={defaultValues?.typeOfConcern ?? null}
+                      rules={{ required: true }}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(event, newValue) =>
+                            field.onChange(newValue)
+                          }
+                          size="small"
+                          options={
+                            concernData?.length
+                              ? concernData.map(
+                                  (concern) => concern.typeConcerns
+                                )
+                              : []
+                          }
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              required
+                              error={!!errors.typeOfConcern}
+                              helperText={errors.typeOfConcern && "Required"}
+                              label="Type of Concern"
+                              name="typeOfConcern"
+                            />
+                          )}
                         />
                       )}
                     />
-                    <Autocomplete
-                      {...register("factors", { required: true })}
-                      size="small"
-                      options={Object.values(IncidentFactors)}
-                      defaultValue={defaultValues?.factors}
-                      sx={{ flex: 1, margin: "0.5rem" }}
-                      onChange={(e, value) => {
-                        setValue("factors", value);
-                      }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          required
-                          error={!!errors.factors}
-                          label="Factors"
-                          name="factors"
+                    <Controller
+                      name="factors"
+                      control={control}
+                      defaultValue={defaultValues?.factors ?? null}
+                      rules={{ required: true }}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(event, newValue) =>
+                            field.onChange(newValue)
+                          }
+                          size="small"
+                          options={
+                            factorData?.length
+                              ? factorData.map((factors) => factors.factorName)
+                              : []
+                          }
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              required
+                              error={!!errors.factors}
+                              helperText={errors.factors && "Required"}
+                              label="Factors"
+                              name="factors"
+                            />
+                          )}
                         />
                       )}
                     />
@@ -753,7 +866,7 @@ export default function AddOrEditIncidentDialog({
                     return (
                       <DatePickerComponent
                         onChange={(e) => field.onChange(e)}
-                        value={field.value}
+                        value={field.value ? new Date(field.value) : undefined}
                         label="Incident Date"
                         error={errors?.incidentDate ? "Required" : ""}
                       />
@@ -770,7 +883,7 @@ export default function AddOrEditIncidentDialog({
                     return (
                       <TimePickerComponent
                         onChange={(e) => field.onChange(e)}
-                        value={field.value}
+                        value={field.value ? new Date(field.value) : undefined}
                         label="Incident Time"
                         error={errors?.incidentTime ? "Required" : ""}
                       />
@@ -852,21 +965,15 @@ export default function AddOrEditIncidentDialog({
               </Box>
 
               <Box sx={{ margin: "0.5rem" }}>
-                <Autocomplete
-                  {...register("assignee", { required: true })}
-                  size="small"
-                  options={sampleAssignees?.map((category) => category.name)}
-                  sx={{ flex: 1 }}
+                <UserAutoComplete
+                  name="assignee"
+                  label="Assignee"
+                  control={control}
+                  register={register}
+                  errors={errors}
+                  userData={userData}
                   defaultValue={defaultValues?.assignee}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      required
-                      error={!!errors.assignee}
-                      label="Assignee"
-                      name="assignee"
-                    />
-                  )}
+                  required={true}
                 />
               </Box>
             </Box>

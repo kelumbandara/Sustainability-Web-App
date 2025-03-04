@@ -9,7 +9,10 @@ import {
   Alert,
   Box,
   Button,
+  LinearProgress,
   Stack,
+  TableFooter,
+  TablePagination,
   Theme,
   Typography,
   useMediaQuery,
@@ -17,33 +20,170 @@ import {
 import theme from "../../theme";
 import PageTitle from "../../components/PageTitle";
 import Breadcrumb from "../../components/BreadCrumb";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
-import { Incident } from "../../api/accidentAndIncidentApi";
+import {
+  Incident,
+  getIncidentsList,
+  createIncidents,
+  updateIncident,
+  deleteIncident,
+  getIncidentsAssignedTaskList,
+} from "../../api/accidentAndIncidentApi";
 import AddOrEditIncidentDialog from "./AddOrEditIncidentDialog";
-import { sampleIncidentData } from "../../api/sampleData/incidentData";
 import ViewIncidentContent from "./ViewIncidentContent";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import queryClient from "../../state/queryClient";
+import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
+import { PermissionKeys } from "../Administration/SectionList";
 
-function IncidentTable() {
+function IncidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<Incident>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
-  const [incidentData, setIncidentData] =
-    useState<Incident[]>(sampleIncidentData);
+  // const [incidentData, setIncidentData] = useState<Incident[]>(sampleIncidentData);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  // handle pagination
+  const handleChangePage = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
-    { title: "Incident Management" },
+    { title: `${isAssignedTasks ? "Assigned " : ""}Incident Management` },
   ];
 
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("md")
+  );
+
+  const { data: incidentData, isFetching: isIncidentDataFetching } = useQuery({
+    queryKey: ["incidents"],
+    queryFn: getIncidentsList,
+  });
+
+  const {
+    data: incidentAssignedTaskData,
+    isFetching: isIncidentAssignedDataFetching,
+  } = useQuery({
+    queryKey: ["incidents-assigned-tasks"],
+    queryFn: getIncidentsAssignedTaskList,
+  });
+
+  const { mutate: createIncidentMutation } = useMutation({
+    mutationFn: createIncidents,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["incidents"] });
+      queryClient.invalidateQueries({ queryKey: ["incidents-assigned-tasks"] });
+      enqueueSnackbar("Incident Report Created Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Incident Creation Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: updateIncidentMutation } = useMutation({
+    mutationFn: updateIncident,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["incidents"] });
+      queryClient.invalidateQueries({ queryKey: ["incidents-assigned-tasks"] });
+      enqueueSnackbar("Incident Report Update Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Incident Updation Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: deleteIncidentMutation } = useMutation({
+    mutationFn: deleteIncident,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["incidents"] });
+      queryClient.invalidateQueries({ queryKey: ["incidents-assigned-tasks"] });
+      enqueueSnackbar("Incident Report Delete Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Incident Deletion Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const paginatedIncidentData = useMemo(() => {
+    if (isAssignedTasks) {
+      if (!incidentAssignedTaskData) return [];
+      return incidentAssignedTaskData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
+    } else {
+      if (!incidentData) return [];
+      return incidentData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
+    }
+  }, [
+    incidentData,
+    page,
+    rowsPerPage,
+    incidentAssignedTaskData,
+    isAssignedTasks,
+  ]);
+
+  const isIncidentCreateDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_REGISTER_INCIDENT_CREATE
+  );
+  const isIncidentEditDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_REGISTER_INCIDENT_EDIT
+  );
+  const isIncidentDeleteDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_REGISTER_INCIDENT_DELETE
+  );
+  const isIncidentAssignedTaskListDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_INCIDENT_CREATE
+  );
+  const isIncidentAssignedTaskEditDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_INCIDENT_EDIT
+  );
+  const isIncidentAssignedTaskDeleteDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_INCIDENT_DELETE
   );
 
   return (
@@ -57,7 +197,9 @@ function IncidentTable() {
           overflowX: "hidden",
         }}
       >
-        <PageTitle title="Incident Management" />
+        <PageTitle
+          title={`${isAssignedTasks ? "Assigned " : ""}Incident Management`}
+        />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
       <Stack sx={{ alignItems: "center" }}>
@@ -84,10 +226,18 @@ function IncidentTable() {
                 setSelectedRow(null);
                 setOpenAddOrEditDialog(true);
               }}
+              disabled={
+                isAssignedTasks
+                  ? isIncidentAssignedTaskListDisabled
+                  : isIncidentCreateDisabled
+              }
             >
               Report an incident
             </Button>
           </Box>
+          {(isIncidentDataFetching || isIncidentAssignedDataFetching) && (
+            <LinearProgress sx={{ width: "100%" }} />
+          )}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -103,8 +253,8 @@ function IncidentTable() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {incidentData?.length > 0 ? (
-                incidentData?.map((row) => (
+              {paginatedIncidentData?.length > 0 ? (
+                paginatedIncidentData?.map((row) => (
                   <TableRow
                     key={`${row.id}`}
                     sx={{
@@ -133,7 +283,7 @@ function IncidentTable() {
                     <TableCell align="right">{row.division}</TableCell>
                     <TableCell align="right">{row.location}</TableCell>
                     <TableCell align="right">{row.circumstances}</TableCell>
-                    <TableCell align="right">{row.assignee}</TableCell>
+                    <TableCell align="right">{row.assignee?.name}</TableCell>
                     <TableCell align="right">{row.status}</TableCell>
                   </TableRow>
                 ))
@@ -145,6 +295,21 @@ function IncidentTable() {
                 </TableRow>
               )}
             </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                  colSpan={100}
+                  count={paginatedIncidentData?.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  showFirstButton={true}
+                  showLastButton={true}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+              </TableRow>
+            </TableFooter>
           </Table>
         </TableContainer>
       </Stack>
@@ -161,7 +326,17 @@ function IncidentTable() {
                 setSelectedRow(selectedRow);
                 setOpenAddOrEditDialog(true);
               }}
+              disableEdit={
+                isAssignedTasks
+                  ? isIncidentAssignedTaskEditDisabled
+                  : isIncidentEditDisabled
+              }
               onDelete={() => setDeleteDialogOpen(true)}
+              disableDelete={
+                isAssignedTasks
+                  ? isIncidentAssignedTaskDeleteDisabled
+                  : isIncidentDeleteDisabled
+              }
             />
 
             {selectedRow && (
@@ -183,18 +358,20 @@ function IncidentTable() {
           onSubmit={(data) => {
             if (selectedRow) {
               console.log("Updating document", data);
-              setIncidentData(
-                incidentData.map((risk) => (risk.id === data.id ? data : risk))
-              ); // Update the document in the list if it already exists
-              enqueueSnackbar("Incident Details Updated Successfully!", {
-                variant: "success",
-              });
+              updateIncidentMutation(data);
+              // setIncidentData(
+              //   incidentData.map((risk) => (risk.id === data.id ? data : risk))
+              // ); // Update the document in the list if it already exists
+              // enqueueSnackbar("Incident Details Updated Successfully!", {
+              //   variant: "success",
+              // });
             } else {
               console.log("Adding new incident", data);
-              setIncidentData([...incidentData, data]); // Add new document to the list
-              enqueueSnackbar("Incident Created Successfully!", {
-                variant: "success",
-              });
+              createIncidentMutation(data);
+              // setIncidentData([...incidentData, data]); // Add new document to the list
+              // enqueueSnackbar("Incident Created Successfully!", {
+              //   variant: "success",
+              // });
             }
             setSelectedRow(null);
             setOpenViewDrawer(false);
@@ -217,17 +394,18 @@ function IncidentTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            setIncidentData(
-              incidentData.filter((doc) => doc.id !== selectedRow.id)
-            );
+            deleteIncidentMutation(selectedRow.id);
+            // setIncidentData(
+            //   incidentData.filter((doc) => doc.id !== selectedRow.id)
+            // );
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);
             setSelectedRow(null);
             setDeleteDialogOpen(false);
-            enqueueSnackbar("Incident Deleted Successfully!", {
-              variant: "success",
-            });
+            // enqueueSnackbar("Incident Deleted Successfully!", {
+            //   variant: "success",
+            // });
           }}
           handleReject={() => {
             setOpenViewDrawer(false);

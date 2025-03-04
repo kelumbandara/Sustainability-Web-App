@@ -20,7 +20,11 @@ import DatePickerComponent from "../../components/DatePickerComponent";
 import CustomButton from "../../components/CustomButton";
 import { useEffect } from "react";
 import { AccidentEffectedIndividual } from "../../api/accidentAndIncidentApi";
-import { genderOptions, personTypes } from "../../constants/accidentConstants";
+import {
+  genderOptions,
+  personTypes,
+  industryExperience,
+} from "../../constants/accidentConstants";
 
 type DialogProps = {
   open: boolean;
@@ -207,6 +211,7 @@ export default function AddOrEditPersonDialog({
               label="Age"
               error={!!errors.age}
               size="small"
+              type="number"
               sx={{ flex: 1, marginX: "0.5rem", marginTop: "1.3rem" }}
               {...register("age", { required: true })}
             />
@@ -218,7 +223,7 @@ export default function AddOrEditPersonDialog({
                 return (
                   <DatePickerComponent
                     onChange={(e) => field.onChange(e)}
-                    value={field.value}
+                    value={field.value ? new Date(field.value) : null}
                     label="Date of Join"
                     error={errors?.dateOfJoin ? "Required" : ""}
                   />
@@ -245,7 +250,7 @@ export default function AddOrEditPersonDialog({
             <Autocomplete
               {...register("industryExperience", { required: true })}
               size="small"
-              options={personTypes}
+              options={industryExperience}
               sx={{ flex: 1, margin: "0.5rem" }}
               defaultValue={defaultValues?.industryExperience}
               onChange={(e, value) => {

@@ -38,11 +38,12 @@ import { useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import AddIcon from "@mui/icons-material/Add";
 import { HazardAndRiskStatus } from "../../api/hazardRiskApi";
-import { sampleAssignees } from "../../api/sampleData/usersSampleDate";
+import { sampleAssignees } from "../../api/sampleData/usersSampleData";
 import {
   Accident,
   AccidentEffectedIndividual,
   AccidentWitness,
+  BodyPrimaryRegion,
   InjuryType,
   Severity,
 } from "../../api/accidentAndIncidentApi";
@@ -61,6 +62,16 @@ import RichTextComponent from "../../components/RichTextComponent";
 import AddOrEditWitnessDialog from "./AddOrEditWitnessDialog";
 import AddOrEditPersonDialog from "./AddOrEditPersonDialog";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useQuery } from "@tanstack/react-query";
+import { fetchDivision } from "../../api/divisionApi";
+import { fetchDepartmentData } from "../../api/departmentApi";
+import {
+  fetchAccidentSubCategory,
+  fetchMainAccidentCategory,
+} from "../../api/accidentCategory";
+import useCurrentUser from "../../hooks/useCurrentUser";
+import { fetchAllUsers } from "../../api/userApi";
+import UserAutoComplete from "../../components/UserAutoComplete";
 
 type DialogProps = {
   open: boolean;
@@ -128,11 +139,12 @@ export default function AddOrEditAccidentDialog({
     formState: { errors },
     reset,
     setValue,
-  } = useForm<Accident>({});
+  } = useForm<Accident>({ defaultValues });
 
   const witnessesWatch = watch("witnesses");
   const categoryWatch = watch("category");
   const effectedIndividualsWatch = watch("effectedIndividuals");
+  const { user } = useCurrentUser();
 
   const relatedSubCategories = useMemo(() => {
     return accidentCategories?.find(
@@ -140,27 +152,67 @@ export default function AddOrEditAccidentDialog({
     )?.subCategories;
   }, [categoryWatch]);
 
-  useEffect(() => {
-    if (defaultValues) {
-      reset(defaultValues);
-    } else {
-      reset();
-    }
-  }, [defaultValues, reset]);
+  // useEffect(() => {
+  //   if (defaultValues) {
+  //     reset(defaultValues);
+  //   } else {
+  //     reset();
+  //   }
+  // }, [defaultValues, reset]);
 
   const resetForm = () => {
     reset();
     setFiles([]);
   };
 
+  const { data: divisionData, isFetching: isCategoryDataFetching } = useQuery({
+    queryKey: ["divisions"],
+    queryFn: fetchDivision,
+  });
+
+  const { data: departmentData, isFetching: isDepartmentDataFetching } =
+    useQuery({
+      queryKey: ["departments"],
+      queryFn: fetchDepartmentData,
+    });
+
+  const { data: userData, isFetching: isUserDataFetching } = useQuery({
+    queryKey: ["users"],
+    queryFn: fetchAllUsers,
+  });
+
+  const category = watch("category");
+  const subCategory = watch("subCategory");
+  const assignee = watch("assignee");
+
+  const {
+    data: accidentCategoryData,
+    isFetching: isAccidentCategoryDataFetching,
+  } = useQuery({
+    queryKey: ["accidentCategory"],
+    queryFn: fetchMainAccidentCategory,
+  });
+
+  const {
+    data: accidentSubCategoryData,
+    isFetching: isAccidentSubCategoryDataFetching,
+  } = useQuery({
+    queryKey: ["accidentSubCategory", category],
+    queryFn: () => fetchAccidentSubCategory(category),
+    enabled: !!category,
+  });
+
   const handleCreateDocument = (data: Accident) => {
     const submitData: Partial<Accident> = data;
-    submitData.id = defaultValues?.id ?? uuidv4();
+    // submitData.id = defaultValues?.id ?? uuidv4();
     // submitData.createdDate = new Date();
     // submitData.createdByUser = sampleAssignees[0].name;
+    submitData.assigneeId = assignee?.id;
+    submitData.createdByUser = user.id;
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
     onSubmit(submitData as Accident);
-    resetForm();
+    // console.log(submitData)
+    // resetForm();
   };
 
   return (
@@ -305,21 +357,36 @@ export default function AddOrEditAccidentDialog({
                       flexDirection: isMobile ? "column" : "row",
                     }}
                   >
-                    <Autocomplete
-                      {...register("division", { required: true })}
-                      size="small"
-                      options={sampleDivisions?.map(
-                        (division) => division.name
-                      )}
-                      defaultValue={defaultValues?.division}
-                      sx={{ flex: 1, margin: "0.5rem" }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          required
-                          error={!!errors.division}
-                          label="Division"
-                          name="division"
+                    <Controller
+                      name="division"
+                      control={control}
+                      defaultValue={defaultValues?.division ?? ""}
+                      rules={{ required: true }}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(event, newValue) =>
+                            field.onChange(newValue)
+                          }
+                          size="small"
+                          options={
+                            divisionData?.length
+                              ? divisionData.map(
+                                  (division) => division.divisionName
+                                )
+                              : []
+                          }
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              required
+                              error={!!errors.division}
+                              helperText={errors.division && "Required"}
+                              label="Division"
+                              name="division"
+                            />
+                          )}
                         />
                       )}
                     />
@@ -328,6 +395,7 @@ export default function AddOrEditAccidentDialog({
                       id="location"
                       label="Location"
                       error={!!errors.location}
+                      helperText={errors.location && "Required"}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("location", { required: true })}
@@ -339,21 +407,36 @@ export default function AddOrEditAccidentDialog({
                       flexDirection: isMobile ? "column" : "row",
                     }}
                   >
-                    <Autocomplete
-                      {...register("department", { required: true })}
-                      size="small"
-                      options={sampleDepartments?.map(
-                        (department) => department.name
-                      )}
-                      defaultValue={defaultValues?.department}
-                      sx={{ flex: 1, margin: "0.5rem" }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          required
-                          error={!!errors.department}
-                          label="Department"
-                          name="department"
+                    <Controller
+                      name="department"
+                      control={control}
+                      defaultValue={defaultValues?.department ?? ""}
+                      rules={{ required: true }}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(event, newValue) =>
+                            field.onChange(newValue)
+                          }
+                          size="small"
+                          options={
+                            departmentData?.length
+                              ? departmentData.map(
+                                  (department) => department.department
+                                )
+                              : []
+                          }
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              required
+                              error={!!errors.department}
+                              helperText={errors.department && "Required"}
+                              label="Department"
+                              name="department"
+                            />
+                          )}
                         />
                       )}
                     />
@@ -362,6 +445,7 @@ export default function AddOrEditAccidentDialog({
                       id="supervisorName"
                       label="Supervisor"
                       error={!!errors.supervisorName}
+                      helperText={errors.supervisorName && "Required"}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("supervisorName", { required: true })}
@@ -650,43 +734,72 @@ export default function AddOrEditAccidentDialog({
                       flexDirection: isMobile ? "column" : "row",
                     }}
                   >
-                    <Autocomplete
-                      {...register("category", { required: true })}
-                      size="small"
-                      options={accidentCategories?.map(
-                        (category) => category.name
-                      )}
-                      defaultValue={defaultValues?.category}
-                      sx={{ flex: 1, margin: "0.5rem" }}
-                      onChange={(e, value) => {
-                        setValue("category", value);
-                      }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          required
-                          error={!!errors.category}
-                          label="Category"
-                          name="category"
+                    <Controller
+                      name="category"
+                      control={control}
+                      defaultValue={defaultValues?.category ?? ""}
+                      rules={{ required: true }}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(event, newValue) => {
+                            field.onChange(newValue);
+                            setValue("subCategory", "");
+                          }}
+                          size="small"
+                          options={
+                            accidentCategoryData?.length
+                              ? accidentCategoryData.map(
+                                  (cat) => cat.categoryName
+                                )
+                              : []
+                          }
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              required
+                              error={!!errors.category}
+                              helperText={errors.category && "Required"}
+                              label="Category"
+                              name="category"
+                            />
+                          )}
                         />
                       )}
                     />
-                    {categoryWatch && (
-                      <Autocomplete
-                        {...register("subCategory", { required: true })}
-                        size="small"
-                        options={relatedSubCategories?.map(
-                          (subCategory) => subCategory.name
-                        )}
-                        defaultValue={defaultValues?.subCategory}
-                        sx={{ flex: 1, margin: "0.5rem" }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            required
-                            error={!!errors.subCategory}
-                            label="Sub Category"
-                            name="subCategory"
+                    {category && ( // Correctly using category here
+                      <Controller
+                        name="subCategory"
+                        control={control}
+                        defaultValue={defaultValues?.subCategory ?? ""}
+                        rules={{ required: true }}
+                        render={({ field }) => (
+                          <Autocomplete
+                            {...field}
+                            onChange={(event, newValue) => {
+                              field.onChange(newValue);
+                              setValue("subCategory", newValue);
+                            }}
+                            size="small"
+                            options={
+                              accidentSubCategoryData?.length
+                                ? accidentSubCategoryData.map(
+                                    (cat) => cat.subCategoryName
+                                  )
+                                : []
+                            }
+                            sx={{ flex: 1, margin: "0.5rem" }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                required
+                                error={!!errors.subCategory}
+                                helperText={errors.subCategory && "Required"}
+                                label="Sub Category"
+                                name="subCategory"
+                              />
+                            )}
                           />
                         )}
                       />
@@ -698,112 +811,165 @@ export default function AddOrEditAccidentDialog({
                       flexDirection: isMobile ? "column" : "row",
                     }}
                   >
-                    <Autocomplete
-                      {...register("accidentType", { required: true })}
-                      size="small"
-                      options={accidentTypesOptions}
-                      defaultValue={defaultValues?.accidentType}
-                      sx={{ flex: 1, margin: "0.5rem" }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          required
-                          error={!!errors.accidentType}
-                          label="Accident Type"
-                          name="accidentType"
+                    <Controller
+                      name="accidentType"
+                      control={control}
+                      defaultValue={defaultValues?.accidentType ?? ""}
+                      rules={{ required: true }}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(event, newValue) =>
+                            field.onChange(newValue)
+                          }
+                          size="small"
+                          options={accidentTypesOptions}
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              required
+                              error={!!errors.accidentType}
+                              helperText={errors.accidentType && "Required"}
+                              label="Accident Type"
+                              name="accidentType"
+                            />
+                          )}
                         />
                       )}
                     />
                   </Box>
                   <Box sx={{ margin: "0.5rem" }}>
-                    <Autocomplete
-                      {...register("affectedPrimaryRegion", { required: true })}
-                      size="small"
-                      options={sampleAssignees?.map(
-                        (category) => category.name
-                      )}
-                      sx={{ flex: 1 }}
-                      defaultValue={defaultValues?.affectedPrimaryRegion}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          required
-                          error={!!errors.affectedPrimaryRegion}
-                          label="Body Primary Region"
-                          name="affectedPrimaryRegion"
+                    <Controller
+                      name="affectedPrimaryRegion"
+                      control={control}
+                      defaultValue={defaultValues?.affectedPrimaryRegion ?? ""}
+                      rules={{ required: true }}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(event, newValue) =>
+                            field.onChange(newValue)
+                          }
+                          size="small"
+                          options={Object.values(BodyPrimaryRegion)}
+                          sx={{ flex: 1 }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              required
+                              error={!!errors.affectedPrimaryRegion}
+                              helperText={
+                                errors.affectedPrimaryRegion && "Required"
+                              }
+                              label="Body Primary Region"
+                              name="affectedPrimaryRegion"
+                            />
+                          )}
                         />
                       )}
                     />
                   </Box>
 
                   <Box sx={{ margin: "0.5rem" }}>
-                    <Autocomplete
-                      {...register("affectedSecondaryRegion", {
-                        required: true,
-                      })}
-                      size="small"
-                      options={sampleAssignees?.map(
-                        (category) => category.name
-                      )}
-                      sx={{ flex: 1 }}
-                      defaultValue={defaultValues?.affectedSecondaryRegion}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          required
-                          error={!!errors.affectedSecondaryRegion}
-                          label="Body Secondary Region"
-                          name="affectedSecondaryRegion"
+                    <Controller
+                      name="affectedSecondaryRegion"
+                      control={control}
+                      defaultValue={
+                        defaultValues?.affectedSecondaryRegion ?? ""
+                      }
+                      rules={{ required: true }}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(event, newValue) =>
+                            field.onChange(newValue)
+                          }
+                          size="small"
+                          options={Object.values(BodyPrimaryRegion)}
+                          sx={{ flex: 1 }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              required
+                              error={!!errors.affectedSecondaryRegion}
+                              helperText={
+                                errors.affectedSecondaryRegion && "Required"
+                              }
+                              label="Body Secondary Region"
+                              name="affectedSecondaryRegion"
+                            />
+                          )}
                         />
                       )}
                     />
                   </Box>
                   <Box sx={{ margin: "0.5rem" }}>
-                    <Autocomplete
-                      {...register("affectedTertiaryRegion", {
-                        required: true,
-                      })}
-                      size="small"
-                      options={sampleAssignees?.map(
-                        (category) => category.name
-                      )}
-                      sx={{ flex: 1 }}
-                      defaultValue={defaultValues?.affectedTertiaryRegion}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          required
-                          error={!!errors.affectedTertiaryRegion}
-                          label="Body Tertiary Region"
-                          name="affectedTertiaryRegion"
+                    <Controller
+                      name="affectedTertiaryRegion"
+                      control={control}
+                      defaultValue={defaultValues?.affectedTertiaryRegion ?? ""}
+                      rules={{ required: true }}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(event, newValue) =>
+                            field.onChange(newValue)
+                          }
+                          size="small"
+                          options={Object.values(BodyPrimaryRegion)}
+                          sx={{ flex: 1 }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              required
+                              error={!!errors.affectedTertiaryRegion}
+                              helperText={
+                                errors.affectedTertiaryRegion && "Required"
+                              }
+                              label="Body Tertiary Region"
+                              name="affectedTertiaryRegion"
+                            />
+                          )}
                         />
                       )}
                     />
                   </Box>
                   <Box sx={{ display: "flex" }}>
-                    <Autocomplete
-                      {...register("injuryCause", { required: true })}
-                      size="small"
-                      options={sampleAssignees?.map(
-                        (category) => category.name
-                      )}
-                      sx={{ flex: 1, margin: "0.5rem" }}
-                      defaultValue={defaultValues?.injuryCause}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          required
-                          error={!!errors.injuryCause}
-                          label="Type"
-                          name="injuryCause"
+                    <Controller
+                      name="injuryCause"
+                      control={control}
+                      defaultValue={defaultValues?.injuryCause ?? ""}
+                      rules={{ required: true }}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(event, newValue) =>
+                            field.onChange(newValue)
+                          }
+                          size="small"
+                          options={Object.values(BodyPrimaryRegion)}
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              required
+                              error={!!errors.injuryCause}
+                              helperText={errors.injuryCause && "Required"}
+                              label="Injury Cause"
+                              name="injuryCause"
+                            />
+                          )}
                         />
                       )}
                     />
                     <TextField
                       required
                       id="rootCause"
+                      name="rootCause"
                       label="Cause"
                       error={!!errors.rootCause}
+                      helperText={errors.rootCause && "Required"}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("rootCause", { required: true })}
@@ -815,6 +981,7 @@ export default function AddOrEditAccidentDialog({
                       id="consultedHospital"
                       label="Consulted Hospital"
                       error={!!errors.consultedHospital}
+                      helperText={errors.consultedHospital && "Required"}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("consultedHospital", { required: true })}
@@ -824,6 +991,7 @@ export default function AddOrEditAccidentDialog({
                       id="consultedDoctor"
                       label="Consulted Doctor"
                       error={!!errors.consultedDoctor}
+                      helperText={errors.consultedDoctor && "Required"}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("consultedDoctor", { required: true })}
@@ -852,13 +1020,19 @@ export default function AddOrEditAccidentDialog({
                   <Box
                     sx={{
                       display: "flex",
-                      flexDirection: isMobile ? "column" : "row",
-                      margin: "0.5rem",
+                      flexDirection: "column",
+                      padding: "0.3rem",
+                      margin: "0.2rem",
+                      border: errors.description
+                        ? `1px solid ${theme.palette.error.main}`
+                        : "none",
+                      borderRadius: "0.5rem",
                     }}
                   >
                     <Controller
                       control={control}
                       name={"description"}
+                      rules={{ required: true }}
                       render={({ field }) => {
                         return (
                           <RichTextComponent
@@ -868,6 +1042,14 @@ export default function AddOrEditAccidentDialog({
                         );
                       }}
                     />
+                    {errors.description && (
+                      <Typography
+                        variant="caption"
+                        sx={{ color: theme.palette.error.main, ml: "0.5rem" }}
+                      >
+                        Required
+                      </Typography>
+                    )}
                   </Box>
                   <Box
                     sx={{
@@ -938,7 +1120,7 @@ export default function AddOrEditAccidentDialog({
                     return (
                       <DatePickerComponent
                         onChange={(e) => field.onChange(e)}
-                        value={field.value}
+                        value={field.value ? new Date(field.value) : null}
                         label="Accident Date"
                         error={errors?.accidentDate ? "Required" : ""}
                       />
@@ -955,7 +1137,7 @@ export default function AddOrEditAccidentDialog({
                     return (
                       <TimePickerComponent
                         onChange={(e) => field.onChange(e)}
-                        value={field.value}
+                        value={field.value ? new Date(field.value) : null}
                         label="Accident Time"
                         error={errors?.accidentTime ? "Required" : ""}
                       />
@@ -1073,21 +1255,15 @@ export default function AddOrEditAccidentDialog({
               </Box>
 
               <Box sx={{ margin: "0.5rem" }}>
-                <Autocomplete
-                  {...register("assignee", { required: true })}
-                  size="small"
-                  options={sampleAssignees?.map((category) => category.name)}
-                  sx={{ flex: 1 }}
+                <UserAutoComplete
+                  name="assignee"
+                  label="Assignee"
+                  control={control}
+                  register={register}
+                  errors={errors}
+                  userData={userData}
                   defaultValue={defaultValues?.assignee}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      required
-                      error={!!errors.assignee}
-                      label="Assignee"
-                      name="assignee"
-                    />
-                  )}
+                  required={true}
                 />
               </Box>
             </Box>

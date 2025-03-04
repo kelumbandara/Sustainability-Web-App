@@ -18,6 +18,9 @@ import DatasetLinkedOutlinedIcon from "@mui/icons-material/DatasetLinkedOutlined
 import SentimentSatisfiedAltOutlinedIcon from "@mui/icons-material/SentimentSatisfiedAltOutlined";
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import SubdirectoryArrowRightIcon from "@mui/icons-material/SubdirectoryArrowRight";
+import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
+import KeyIcon from "@mui/icons-material/Key";
+import { PermissionKeys } from "../../views/Administration/SectionList";
 
 export interface SidebarItem {
   title?: string;
@@ -26,13 +29,16 @@ export interface SidebarItem {
   open?: boolean;
   href?: string;
   disabled?: boolean;
+  accessKey?: string;
   nestedItems?: {
     title: string;
     href: string;
     icon: JSX.Element;
+    accessKey?: string;
     open?: boolean;
     disabled?: boolean;
     nestedItems?: {
+      accessKey?: string;
       title: string;
       href: string;
       icon: JSX.Element;
@@ -41,7 +47,7 @@ export interface SidebarItem {
   }[];
 }
 
-export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
+export const sidebarItems: Array<SidebarItem> = [
   {
     headline: "Main",
   },
@@ -49,7 +55,23 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
     title: "Insight",
     href: "/home",
     icon: <HomeIcon fontSize="small" />,
+    accessKey: PermissionKeys.INSIGHT_VIEW,
     // Add the data-cy attribute here
+  },
+  {
+    headline: "Administration",
+  },
+  {
+    title: "Users",
+    icon: <PeopleAltIcon fontSize="small" />,
+    href: "/admin/users",
+    accessKey: PermissionKeys.ADMIN_USERS_VIEW,
+  },
+  {
+    title: "Access Management",
+    icon: <KeyIcon fontSize="small" />,
+    href: "/admin/access-management",
+    accessKey: PermissionKeys.ADMIN_ACCESS_MNG_VIEW,
   },
   {
     headline: "Sustainability Apps",
@@ -65,21 +87,25 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
         title: "Dashboard",
         href: "/audit-inspection/dashboard",
         icon: <DashboardIcon fontSize="small" />,
+        accessKey: PermissionKeys.AUDIT_INSPECTION_DASHBOARD_VIEW,
       },
       {
         title: "Calendar",
         href: "/audit-inspection/calendar",
         icon: <CalendarMonthIcon fontSize="small" />,
+        accessKey: PermissionKeys.AUDIT_INSPECTION_CALENDAR_VIEW,
       },
       {
         title: "Internal Audit",
         href: "/audit-inspection/internal-audit",
         icon: <QueryStatsIcon fontSize="small" />,
+        accessKey: PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_QUEUE_VIEW,
       },
       {
         title: "External Audit",
         href: "/audit-inspection/external-audit",
         icon: <TravelExploreIcon fontSize="small" />,
+        accessKey: PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_VIEW,
       },
     ],
   },
@@ -93,11 +119,7 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
         title: "Register",
         href: "/sustainability/register",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-      },
-      {
-        title: "Report an Activity",
-        href: "/sustainability/report-activity",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+        accessKey: PermissionKeys.SUSTAINABILITY_SDG_REPORTING_VIEW,
       },
     ],
   },
@@ -111,6 +133,7 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
         title: "Dashboard",
         href: "/environment/dashboard",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+        accessKey: PermissionKeys.ENVIRONMENT_DASHBOARD_VIEW,
       },
       {
         title: "History",
@@ -121,29 +144,13 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
             title: "Consumption",
             href: "/environment/history/consumption",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey: PermissionKeys.ENVIRONMENT_HISTORY_CONSUMPTION_VIEW,
           },
           {
             title: "Target Setting",
             href: "/environment/history/target-setting",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-          },
-        ],
-      },
-      {
-        title: "Create",
-        href: "/environment/create",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-        disabled: true,
-        nestedItems: [
-          {
-            title: "Consumption",
-            href: "/environment/create/consumption",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-          },
-          {
-            title: "Target Setting",
-            href: "/environment/create/target-setting",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey: PermissionKeys.ENVIRONMENT_HISTORY_TARGET_SETTING_VIEW,
           },
         ],
       },
@@ -157,11 +164,15 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
             title: "Consumption",
             href: "/environment/assigned-tasks/consumption",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey:
+              PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_CONSUMPTION_VIEW,
           },
           {
             title: "Target Setting",
             href: "/environment/assigned-tasks/target-setting",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey:
+              PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_TARGET_SETTING_VIEW,
           },
         ],
       },
@@ -176,6 +187,7 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
         title: "Dashboard",
         href: "/chemical-mng/dashboard",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+        accessKey: PermissionKeys.CHEMICAL_MNG_DASHBOARD_VIEW,
       },
       {
         title: "Chemical Requests",
@@ -186,16 +198,19 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
         title: "Purchase & Inventory",
         href: "/chemical-mng/purchase-inventory",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+        accessKey: PermissionKeys.CHEMICAL_MNG_PURCHASE_INVENTORY_VIEW,
       },
       {
         title: "Transaction",
         href: "/chemical-mng/transaction",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+        accessKey: PermissionKeys.CHEMICAL_MNG_TRANSACTION_VIEW,
       },
       {
         title: "Assigned Tasks",
         href: "/chemical-mng/assigned-tasks",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+        accessKey: PermissionKeys.CHEMICAL_MNG_ASSIGNED_TASKS_VIEW,
       },
     ],
   },
@@ -211,16 +226,19 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
         title: "Dashboard",
         href: "/hazard-risk/dashboard",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+        accessKey: PermissionKeys.HAZARD_RISK_DASHBOARD_VIEW,
       },
       {
         title: "History",
         href: "/hazard-risk/history",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+        accessKey: PermissionKeys.HAZARD_RISK_REGISTER_VIEW,
       },
       {
         title: "Assigned Tasks",
         href: "/hazard-risk/assigned-tasks",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+        accessKey: PermissionKeys.HAZARD_RISK_ASSIGNED_TASKS_VIEW,
       },
     ],
   },
@@ -233,6 +251,7 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
         title: "Dashboard",
         href: "/accident-incident/dashboard",
         icon: <DashboardIcon fontSize="small" />,
+        accessKey: PermissionKeys.INCIDENT_ACCIDENT_DASHBOARD_VIEW,
       },
       {
         title: "Register",
@@ -243,16 +262,19 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
             title: "Accident Register",
             href: "/accident-incident/register/accident-register",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey: PermissionKeys.INCIDENT_ACCIDENT_REGISTER_ACCIDENT_VIEW,
           },
           {
             title: "Incident Register",
             href: "/accident-incident/register/incident-register",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey: PermissionKeys.INCIDENT_ACCIDENT_REGISTER_INCIDENT_VIEW,
           },
           {
             title: "Corrective Action",
             href: "/accident-incident/register/corrective-action",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey: PermissionKeys.INCIDENT_ACCIDENT_CORRECTIVE_ACTION_VIEW,
           },
         ],
       },
@@ -266,16 +288,22 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
             title: "Accident Assigned",
             href: "/accident-incident/assigned-tasks/accident-assigned",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey:
+              PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_ACCIDENT_VIEW,
           },
           {
             title: "Incident Assigned",
             href: "/accident-incident/assigned-tasks/incident-assigned",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey:
+              PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_INCIDENT_VIEW,
           },
           {
             title: "Corrective Action",
             href: "/accident-incident/assigned-tasks/corrective-action",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey:
+              PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_CORRECTIVE_ACTION_VIEW,
           },
         ],
       },
@@ -285,6 +313,7 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
     title: "Document",
     href: "/document",
     icon: <FolderIcon fontSize="small" />,
+    accessKey: PermissionKeys.DOCUMENT_REGISTER_EDIT,
   },
   {
     title: "Equipment MNG",
@@ -336,6 +365,7 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
         title: "Dashboard",
         href: "/occupational-health/dashboard",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+        accessKey: PermissionKeys.OCCUPATIONAL_HEALTH_DASHBOARD_VIEW,
       },
       {
         title: "Clinical Suite",
@@ -346,21 +376,29 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
             title: "Patient Register",
             href: "/occupational-health/clinical-suite/patient-register",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey:
+              PermissionKeys.OCCUPATIONAL_HEALTH_CLINICAL_SUITE_PATIENT_REGISTER_VIEW,
           },
           {
             title: "Consultation",
             href: "/occupational-health/clinical-suite/consultation",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey:
+              PermissionKeys.OCCUPATIONAL_HEALTH_CLINICAL_SUITE_CONSULTATION_VIEW,
           },
           {
             title: "Medicine Stock",
             href: "/occupational-health/clinical-suite/medicine-stock",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey:
+              PermissionKeys.OCCUPATIONAL_HEALTH_CLINICAL_SUITE_MEDICINE_STOCK_VIEW,
           },
           {
             title: "Pharmacy Queue",
             href: "/occupational-health/clinical-suite/pharmacy-queue",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey:
+              PermissionKeys.OCCUPATIONAL_HEALTH_CLINICAL_SUITE_PHARMACY_QUEUE_VIEW,
           },
         ],
       },
@@ -373,21 +411,29 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
             title: "Medicine Request",
             href: "/occupational-health/medicines-inventory/medicine-request",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey:
+              PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_MEDICINE_REQUEST_VIEW,
           },
           {
             title: "Purchase & Inventory",
             href: "/occupational-health/medicines-inventory/purchase-inventory",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey:
+              PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_PURCHASE_INVENTORY_VIEW,
           },
           {
             title: "Transaction",
             href: "/occupational-health/medicines-inventory/transaction",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey:
+              PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_TRANSACTION_VIEW,
           },
           {
             title: "Assigned Tasks",
             href: "/occupational-health/medicines-inventory/assigned-tasks",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey:
+              PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_ASSIGNED_TASKS_VIEW,
           },
         ],
       },
@@ -400,6 +446,8 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
             title: "Maternity Register",
             href: "/occupational-health/medical-records/maternity-register",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey:
+              PermissionKeys.OCCUPATIONAL_HEALTH_MEDICAL_RECORDS_MATERNITY_REGISTER_VIEW,
           },
         ],
       },
@@ -418,16 +466,19 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
         title: "Dashboard",
         href: "/grievance/dashboard",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+        accessKey: PermissionKeys.GRIEVANCE_DASHBOARD_VIEW,
       },
       {
         title: "Register",
         href: "/grievance/register",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+        accessKey: PermissionKeys.GRIEVANCE_REGISTER_VIEW,
       },
       {
         title: "Assigned Tasks",
         href: "/grievance/assigned-tasks",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+        accessKey: PermissionKeys.GRIEVANCE_ASSIGNED_TASKS_VIEW,
       },
     ],
   },
@@ -441,11 +492,13 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
         title: "Dashboard",
         href: "/rag/dashboard",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+        accessKey: PermissionKeys.RAG_DASHBOARD_VIEW,
       },
       {
         title: "Register",
         href: "/rag/register",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+        accessKey: PermissionKeys.RAG_REGISTER_VIEW,
       },
     ],
   },
@@ -456,14 +509,10 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
     disabled: true,
     nestedItems: [
       {
-        title: "Create",
-        href: "/engagement/create",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-      },
-      {
         title: "History",
         href: "/engagement/history",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+        accessKey: PermissionKeys.ENGAGEMENT_REGISTER_VIEW,
       },
     ],
   },
@@ -474,14 +523,10 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
     disabled: true,
     nestedItems: [
       {
-        title: "Create",
-        href: "/attrition/create",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-      },
-      {
         title: "History",
         href: "/attrition/history",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+        accessKey: PermissionKeys.ATTRITION_REGISTER_VIEW,
       },
     ],
   },
@@ -490,5 +535,6 @@ export const sidebarItems: Array<SidebarItem & { "data-cy"?: string }> = [
     href: "/satisfaction-survey",
     icon: <PollOutlinedIcon fontSize="small" />,
     disabled: true,
+    accessKey: PermissionKeys.SATISFACTION_SURVEY_VIEW,
   },
 ];

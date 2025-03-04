@@ -8,6 +8,7 @@ import {
   Box,
   Divider,
   IconButton,
+  LinearProgress,
   Stack,
   TextField,
   ToggleButton,
@@ -33,7 +34,17 @@ import {
   RiskLevel,
   UnsafeActOrCondition,
 } from "../../api/hazardRiskApi";
-import { sampleAssignees } from "../../api/sampleData/usersSampleDate";
+import { sampleAssignees } from "../../api/sampleData/usersSampleData";
+import {
+  fetchSubCategory,
+  fetchObservationType,
+  fetchMainCategory,
+} from "../../api/categoryApi";
+import { useQuery } from "@tanstack/react-query";
+import useCurrentUser from "../../hooks/useCurrentUser";
+import { fetchAllUsers } from "../../api/userApi";
+import { fetchDivision } from "../../api/divisionApi";
+import UserAutoComplete from "../../components/UserAutoComplete";
 
 type DialogProps = {
   open: boolean;
@@ -69,6 +80,9 @@ export default function AddOrEditHazardRiskDialog({
     },
   });
 
+  const assignee = watch("assignee");
+  console.log("assignee", assignee);
+
   useEffect(() => {
     if (defaultValues) {
       reset(defaultValues);
@@ -84,6 +98,36 @@ export default function AddOrEditHazardRiskDialog({
 
   const category = watch("category");
   const subCategory = watch("subCategory");
+  const { user } = useCurrentUser();
+
+  const { data: categoryData, isFetching: isCategoryDataFetching } = useQuery({
+    queryKey: ["categories"],
+    queryFn: fetchMainCategory,
+  });
+
+  const { data: userData, isFetching: isUserDataFetching } = useQuery({
+    queryKey: ["users"],
+    queryFn: fetchAllUsers,
+  });
+
+  const { data: subCategoryData, isFetching: isSubCategoryDataFetching } =
+    useQuery({
+      queryKey: ["Subcategories", category],
+      queryFn: () => fetchSubCategory(category),
+      enabled: !!category, // Prevents fetching when category is empty
+    });
+
+  const { data: observationData, isFetching: isObservationDataFetching } =
+    useQuery({
+      queryKey: ["observationType", subCategory],
+      queryFn: () => fetchObservationType(subCategory),
+      enabled: !!subCategory, // Prevents fetching when category is empty
+    });
+
+  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
+    queryKey: ["divisions"],
+    queryFn: fetchDivision,
+  });
 
   const subCategoryOptions = useMemo(() => {
     return category
@@ -105,10 +149,16 @@ export default function AddOrEditHazardRiskDialog({
   const handleCreateDocument = (data: HazardAndRisk) => {
     const submitData: Partial<HazardAndRisk> = data;
     submitData.id = defaultValues?.id ?? uuidv4();
-    submitData.createdDate = new Date();
-    submitData.createdByUser = sampleAssignees[0].name;
+    submitData.createdByUser = user.id;
+    submitData.assigneeId = assignee.id;
+    // submitData.createdDate = new Date();
+    // submitData.createdByUser = sampleAssignees[0].name;
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
+    if (files.length > 0) {
+      submitData.documents = files;
+    }
     onSubmit(submitData as HazardAndRisk);
+    console.log(submitData);
     resetForm();
   };
 
@@ -310,6 +360,7 @@ export default function AddOrEditHazardRiskDialog({
               </Typography>
               <Typography variant="body2" component="div">
                 {new Date().toDateString()}
+                {user.id}
               </Typography>
             </Box>
             <Box
@@ -321,14 +372,20 @@ export default function AddOrEditHazardRiskDialog({
               <Autocomplete
                 {...register("category", { required: true })}
                 size="small"
-                options={HazardOrRiskCategories?.map(
-                  (category) => category.name
-                )}
+                options={
+                  categoryData?.length
+                    ? categoryData.map((category) => category.categoryName)
+                    : []
+                }
                 sx={{ flex: 1, margin: "0.5rem" }}
                 defaultValue={defaultValues?.category}
                 onChange={(e, value) => {
                   console.log("e", e);
-                  setValue("category", value);
+                  reset({
+                    category: value,
+                    subCategory: null, // Reset subCategory
+                    observationType: null, // Reset observationType
+                  });
                 }}
                 renderInput={(params) => (
                   <TextField
@@ -344,11 +401,19 @@ export default function AddOrEditHazardRiskDialog({
                 <Autocomplete
                   {...register("subCategory", { required: true })}
                   size="small"
-                  options={subCategoryOptions}
+                  options={
+                    subCategoryData?.length
+                      ? subCategoryData.map((category) => category.subCategory)
+                      : []
+                  }
                   defaultValue={defaultValues?.subCategory}
                   onChange={(e, value) => {
                     console.log("e", e);
-                    setValue("subCategory", value);
+                    reset({
+                      category: watch("category"), // Preserve category
+                      subCategory: value,
+                      observationType: null, // Reset observationType
+                    });
                   }}
                   sx={{ flex: 1, margin: "0.5rem" }}
                   renderInput={(params) => (
@@ -381,7 +446,14 @@ export default function AddOrEditHazardRiskDialog({
                       </Typography>
                     </>
                   }
-                  options={[...observationTypeOptions, "$ADD_NEW_ITEM"]}
+                  options={[
+                    ...(observationData?.length
+                      ? observationData.map(
+                          (category) => category.observationType
+                        )
+                      : []),
+                    "$ADD_NEW_ITEM",
+                  ]}
                   renderOption={(props, option) => (
                     <>
                       {option === "$ADD_NEW_ITEM" ? (
@@ -415,7 +487,11 @@ export default function AddOrEditHazardRiskDialog({
               <Autocomplete
                 {...register("division", { required: true })}
                 size="small"
-                options={sampleDivisions?.map((division) => division.name)}
+                options={
+                  divisionData?.length
+                    ? divisionData.map((division) => division.divisionName)
+                    : []
+                }
                 defaultValue={defaultValues?.division}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (
@@ -605,30 +681,25 @@ export default function AddOrEditHazardRiskDialog({
                   return (
                     <DatePickerComponent
                       onChange={(e) => field.onChange(e)}
-                      value={field.value}
+                      value={field.value ? new Date(field.value) : undefined}
                       label="Due Date"
                       error={errors?.dueDate ? "Required" : ""}
+                      disablePast={true}
                     />
                   );
                 }}
               />
             </Box>
             <Box sx={{ margin: "0.5rem" }}>
-              <Autocomplete
-                {...register("assignee", { required: true })}
-                size="small"
-                options={sampleAssignees?.map((category) => category.name)}
-                sx={{ flex: 1 }}
+              <UserAutoComplete
+                name="assignee"
+                label="Assignee"
+                control={control}
+                register={register}
+                errors={errors}
+                userData={userData}
                 defaultValue={defaultValues?.assignee}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    error={!!errors.assignee}
-                    label="Assignee"
-                    name="assignee"
-                  />
-                )}
+                required={true}
               />
             </Box>
           </Stack>

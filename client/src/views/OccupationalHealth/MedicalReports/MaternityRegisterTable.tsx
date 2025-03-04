@@ -9,17 +9,25 @@ import {
   Alert,
   Box,
   Button,
+  LinearProgress,
   Stack,
+  TableFooter,
+  TablePagination,
   Theme,
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import { useSnackbar } from "notistack";
-import { MaternityRegister } from "../../../api/OccupationalHealth/maternityRegisterApi";
-import { sampleMaternityRegisterData } from "../../../api/sampleData/maternityRegisterData";
+import {
+  createMaternityRegister,
+  deleteMaternityRegister,
+  getMaternityRegistersList,
+  MaternityRegister,
+  updateMaternityRegister,
+} from "../../../api/OccupationalHealth/maternityRegisterApi";
 import theme from "../../../theme";
 import PageTitle from "../../../components/PageTitle";
 import Breadcrumb from "../../../components/BreadCrumb";
@@ -29,16 +37,34 @@ import ViewDataDrawer, {
 import ViewMaternityRegisterContent from "./ViewMaternityRegisterContent";
 import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
 import AddOrEditMaternityRegisterDialog from "./AddOrEditMaternityRegisterDialog";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import queryClient from "../../../state/queryClient";
+import useCurrentUserHaveAccess from "../../../hooks/useCurrentUserHaveAccess";
+import { PermissionKeys } from "../../Administration/SectionList";
 
 function MaternityRegisterTable() {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<MaternityRegister>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
-  const [maternityRegisterList, setMaternityRegisterList] = useState<
-    MaternityRegister[]
-  >(sampleMaternityRegisterData);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  // handle pagination
+  const handleChangePage = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
@@ -48,6 +74,73 @@ function MaternityRegisterTable() {
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("md")
   );
+
+  const { data: maternityRegisterList, isLoading } = useQuery({
+    queryKey: ["maternity-register"],
+    queryFn: getMaternityRegistersList,
+  });
+
+  const { mutate: createMaternityRegisterMutation } = useMutation({
+    mutationFn: createMaternityRegister,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["maternity-register"] });
+      enqueueSnackbar("Maternity Register Report Created Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Maternity Register Creation Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: updateMaternityRegisterMutation } = useMutation({
+    mutationFn: updateMaternityRegister,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["maternity-register"] });
+      enqueueSnackbar("Maternity Register Report Updated Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Maternity Register Update Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const paginatedMaternityRegisterData = useMemo(() => {
+    if (!maternityRegisterList) return [];
+    return maternityRegisterList.slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage
+    );
+  }, [maternityRegisterList, page, rowsPerPage]);
+
+  const { mutate: deleteMaternityRegisterMutation } = useMutation({
+    mutationFn: deleteMaternityRegister,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["maternity-register"] });
+      enqueueSnackbar("Maternity Register Report Deleted Successfully!", {
+        variant: "success",
+      });
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Maternity Register Delete Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   return (
     <Stack>
@@ -87,10 +180,16 @@ function MaternityRegisterTable() {
                 setSelectedRow(null);
                 setOpenAddOrEditDialog(true);
               }}
+              disabled={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.OCCUPATIONAL_HEALTH_MEDICAL_RECORDS_MATERNITY_REGISTER_CREATE
+                )
+              }
             >
               Add New Benefit
             </Button>
           </Box>
+          {isLoading && <LinearProgress sx={{ width: "100%" }} />}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -104,8 +203,8 @@ function MaternityRegisterTable() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {maternityRegisterList?.length > 0 ? (
-                maternityRegisterList.map((row) => (
+              {paginatedMaternityRegisterData?.length > 0 ? (
+                paginatedMaternityRegisterData.map((row) => (
                   <TableRow
                     key={`${row.id}`}
                     sx={{
@@ -118,19 +217,19 @@ function MaternityRegisterTable() {
                     }}
                   >
                     <TableCell component="th" scope="row">
-                      {row.employee_id}
+                      {row.employeeId}
                     </TableCell>
-                    <TableCell align="right">{row.name}</TableCell>
-                    <TableCell align="right">{row.application_id}</TableCell>
+                    <TableCell align="right">{row.employeeName}</TableCell>
+                    <TableCell align="right">{row.applicationId}</TableCell>
                     <TableCell align="right">
-                      {row?.application_date
-                        ? format(new Date(row.application_date), "yyyy-MM-dd")
+                      {row?.applicationDate
+                        ? format(new Date(row.applicationDate), "yyyy-MM-dd")
                         : "--"}
                     </TableCell>
-                    <TableCell align="right">{row?.leave_status}</TableCell>
+                    <TableCell align="right">{row?.leaveStatus}</TableCell>
                     <TableCell align="right">
-                      {row?.rejoining_date
-                        ? format(new Date(row.rejoining_date), "yyyy-MM-dd")
+                      {row?.reJoinDate
+                        ? format(new Date(row.reJoinDate), "yyyy-MM-dd")
                         : "--"}
                     </TableCell>
                     <TableCell align="right">{row?.status}</TableCell>
@@ -144,6 +243,21 @@ function MaternityRegisterTable() {
                 </TableRow>
               )}
             </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                  colSpan={100}
+                  count={maternityRegisterList?.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  showFirstButton={true}
+                  showLastButton={true}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+              </TableRow>
+            </TableFooter>
           </Table>
         </TableContainer>
       </Stack>
@@ -161,6 +275,16 @@ function MaternityRegisterTable() {
                 setOpenAddOrEditDialog(true);
               }}
               onDelete={() => setDeleteDialogOpen(true)}
+              disableEdit={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.OCCUPATIONAL_HEALTH_MEDICAL_RECORDS_MATERNITY_REGISTER_EDIT
+                )
+              }
+              disableDelete={
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.OCCUPATIONAL_HEALTH_MEDICAL_RECORDS_MATERNITY_REGISTER_DELETE
+                )
+              }
             />
 
             {selectedRow && (
@@ -181,20 +305,9 @@ function MaternityRegisterTable() {
           }}
           onSubmit={(data) => {
             if (selectedRow) {
-              setMaternityRegisterList(
-                maternityRegisterList.map((request) =>
-                  request.id === data.id ? data : request
-                )
-              ); // Update the patient in the list if it already exists
-              enqueueSnackbar("Medicine Request Updated Successfully!", {
-                variant: "success",
-              });
+              updateMaternityRegisterMutation(data);
             } else {
-              console.log("Adding new document", data);
-              setMaternityRegisterList([...maternityRegisterList, data]); // Add new medicine request to the list
-              enqueueSnackbar("Medicine Request Created Successfully!", {
-                variant: "success",
-              });
+              createMaternityRegisterMutation(data);
             }
             setSelectedRow(null);
             setOpenViewDrawer(false);
@@ -217,9 +330,9 @@ function MaternityRegisterTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            setMaternityRegisterList(
-              maternityRegisterList.filter((doc) => doc.id !== selectedRow.id)
-            );
+            if (selectedRow) {
+              deleteMaternityRegisterMutation(selectedRow.id);
+            }
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);

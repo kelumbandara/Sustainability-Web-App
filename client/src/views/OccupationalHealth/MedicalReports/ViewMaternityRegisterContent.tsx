@@ -21,6 +21,7 @@ import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import DescriptionIcon from "@mui/icons-material/Description";
 import AssignmentReturnIcon from "@mui/icons-material/AssignmentReturn";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
+import { format } from "date-fns";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -92,12 +93,12 @@ function ViewMaternityRegisterContent({
         >
           <DrawerContentItem
             label="Employee ID"
-            value={maternityRegister.employee_id}
+            value={maternityRegister.employeeId}
             sx={{ flex: 1 }}
           />
           <DrawerContentItem
             label="Created Date"
-            value={new Date(maternityRegister?.created_date).toDateString()}
+            value={new Date(maternityRegister?.createdDate).toDateString()}
             sx={{ flex: 1 }}
           />
         </Box>
@@ -216,12 +217,12 @@ function ViewMaternityRegisterContent({
             <Box sx={{ flex: 1, flexDirection: isTablet ? "column" : "row" }}>
               <DrawerContentItem
                 label="Employee Id"
-                value={maternityRegister.employee_id}
+                value={maternityRegister.employeeId}
                 sx={{ flex: 1 }}
               />
               <DrawerContentItem
                 label="Name"
-                value={maternityRegister.name}
+                value={maternityRegister.employeeName}
                 sx={{ flex: 1 }}
               />
 
@@ -234,7 +235,7 @@ function ViewMaternityRegisterContent({
             <Box sx={{ flex: 1, flexDirection: isTablet ? "column" : "row" }}>
               <DrawerContentItem
                 label="Contact Number"
-                value={maternityRegister.contact_number}
+                value={maternityRegister.contactNumber}
                 sx={{ flex: 1 }}
               />
               <DrawerContentItem
@@ -251,17 +252,17 @@ function ViewMaternityRegisterContent({
             <Box sx={{ flex: 1, flexDirection: isTablet ? "column" : "row" }}>
               <DrawerContentItem
                 label="Supervisor/Manager"
-                value={maternityRegister.supervisor_manager}
+                value={maternityRegister.supervisorOrManager}
                 sx={{ flex: 1 }}
               />
               <DrawerContentItem
                 label="Date of Join"
-                value={maternityRegister.date_of_join?.toDateString()}
+                value={format(maternityRegister.dateOfJoin, "dd/MM/yyyy")}
                 sx={{ flex: 1 }}
               />
               <DrawerContentItem
                 label="Average Wages"
-                value={maternityRegister.average_wages}
+                value={maternityRegister.averageWages}
                 sx={{ flex: 1 }}
               />
             </Box>
@@ -278,40 +279,40 @@ function ViewMaternityRegisterContent({
             <Box sx={{ flex: 1, flexDirection: isTablet ? "column" : "row" }}>
               <DrawerContentItem
                 label="Application ID"
-                value={maternityRegister.application_id}
+                value={maternityRegister.applicationId}
                 sx={{ flex: 1 }}
               />
               <DrawerContentItem
                 label="Application Date"
-                value={maternityRegister.application_date?.toDateString()}
+                value={format(maternityRegister.applicationDate, "dd/MM/yyyy")}
                 sx={{ flex: 1 }}
               />
               <DrawerContentItem
                 label="Expected Delivery Date"
-                value={maternityRegister.expected_delivery_date?.toDateString()}
+                value={format(maternityRegister.expectedDeliveryDate, "dd/MM/yyyy")} 
                 sx={{ flex: 1 }}
               />
             </Box>
             <Box sx={{ flex: 1, flexDirection: isTablet ? "column" : "row" }}>
               <DrawerContentItem
                 label="Leave Start Date"
-                value={maternityRegister.leave_start_date?.toDateString()}
+                value={format(maternityRegister.leaveStartDate, "dd/MM/yyyy")}
                 sx={{ flex: 1 }}
               />
               <DrawerContentItem
                 label="Leave End Date"
-                value={maternityRegister.leave_end_date?.toDateString()}
+                value={format(maternityRegister.leaveEndDate, "dd/MM/yyyy")}
                 sx={{ flex: 1 }}
               />
               <DrawerContentItem
                 label="Actual Delivery Date"
-                value={maternityRegister.actual_delivery_date?.toDateString()}
+                value={format(maternityRegister.actualDeliveryDate, "dd/MM/yyyy")}
                 sx={{ flex: 1 }}
               />
             </Box>
             <DrawerContentItem
               label="Leave Status"
-              value={maternityRegister.leave_status}
+              value={maternityRegister.leaveStatus}
               sx={{ flex: 1 }}
             />
           </Box>
@@ -331,8 +332,8 @@ function ViewMaternityRegisterContent({
               </TableRow>
             </TableHead>
             <TableBody>
-              {maternityRegister?.benefits_and_entitlements?.length > 0 ? (
-                maternityRegister?.benefits_and_entitlements?.map((row) => (
+              {maternityRegister?.benefitsAndEntitlements?.length > 0 ? (
+                maternityRegister?.benefitsAndEntitlements?.map((row) => (
                   <TableRow
                     key={`${row.id}`}
                     sx={{
@@ -341,11 +342,11 @@ function ViewMaternityRegisterContent({
                     }}
                   >
                     <TableCell align="center" component="th" scope="row">
-                      {row.benefit_type}
+                      {row.benefitType}
                     </TableCell>
-                    <TableCell align="center">{row.amount_value}</TableCell>
-                    <TableCell align="center">{row.total_days_paid}</TableCell>
-                    <TableCell align="center">{row.beneficiary_name}</TableCell>
+                    <TableCell align="center">{row.amountValue}</TableCell>
+                    <TableCell align="center">{row.totalDaysPaid}</TableCell>
+                    <TableCell align="center">{row.beneficiaryAddress}</TableCell>
                   </TableRow>
                 ))
               ) : (
@@ -368,17 +369,17 @@ function ViewMaternityRegisterContent({
           >
             <DrawerContentItem
               label="Notice Date After Delivery"
-              value={maternityRegister.notice_date_after_delivery?.toDateString()}
+              value={format(maternityRegister.noticeDateAfterDelivery, "dd/MM/yyyy")} //maternityRegister.noticeDateAfterDelivery?.toDateString()}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
               label="Rejoining Date"
-              value={new Date(maternityRegister.rejoining_date).toDateString()}
+              value={new Date(maternityRegister.reJoinDate).toDateString()}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
               label="Support Provided"
-              value={maternityRegister.support_provided}
+              value={maternityRegister.supportProvider}
               sx={{ flex: 1 }}
             />
           </Box>
@@ -397,8 +398,8 @@ function ViewMaternityRegisterContent({
               </TableRow>
             </TableHead>
             <TableBody>
-              {maternityRegister?.medical_documents?.length > 0 ? (
-                maternityRegister?.medical_documents?.map((row) => (
+              {maternityRegister?.medicalDocuments?.length > 0 ? (
+                maternityRegister?.medicalDocuments?.map((row) => (
                   <TableRow
                     key={`${row.id}`}
                     sx={{
@@ -407,10 +408,10 @@ function ViewMaternityRegisterContent({
                     }}
                   >
                     <TableCell align="center" component="th" scope="row">
-                      {row.document_type}
+                      {row.documentType}
                     </TableCell>
                     <TableCell align="center">
-                      {row.upload_date?.toDateString()}
+                      {row.uploadDate?.toDateString()}
                     </TableCell>
                     <TableCell align="center">{row.document}</TableCell>
                   </TableRow>

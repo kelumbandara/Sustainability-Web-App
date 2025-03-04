@@ -10,6 +10,8 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import useIsMobile from "../customHooks/useIsMobile";
+import CustomButton from "./CustomButton";
 
 function ViewDataDrawer({
   open,
@@ -48,11 +50,15 @@ export function DrawerHeader({
   handleClose,
   onEdit,
   onDelete,
+  disableEdit,
+  disableDelete,
 }: {
   title: string;
   handleClose: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  disableEdit?: boolean;
+  disableDelete?: boolean;
 }) {
   return (
     <Box
@@ -61,7 +67,7 @@ export function DrawerHeader({
         justifyContent: "space-between",
       }}
     >
-      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", my: 1 }}>
         <IconButton aria-label="delete" onClick={handleClose}>
           <CloseIcon sx={{ color: "var(--pallet-light-grey)" }} />
         </IconButton>
@@ -74,7 +80,12 @@ export function DrawerHeader({
         }}
       >
         <Typography variant="h6">{title}</Typography>
-        <DrawerEditAndDeleteButtons onEdit={onEdit} onDelete={onDelete} />
+        <DrawerEditAndDeleteButtons
+          onEdit={onEdit}
+          onDelete={onDelete}
+          disableEdit={disableEdit}
+          disableDelete={disableDelete}
+        />
       </Box>
     </Box>
   );
@@ -83,10 +94,15 @@ export function DrawerHeader({
 export function DrawerEditAndDeleteButtons({
   onEdit,
   onDelete,
+  disableEdit,
+  disableDelete,
 }: {
   onEdit: () => void;
   onDelete: () => void;
+  disableEdit?: boolean;
+  disableDelete?: boolean;
 }) {
+  const { isTablet } = useIsMobile();
   return (
     <Box
       sx={{
@@ -95,18 +111,62 @@ export function DrawerEditAndDeleteButtons({
       }}
     >
       {onEdit && (
-        <IconButton aria-label="edit" onClick={onEdit} sx={{ marginX: 1 }}>
-          <EditIcon
-            sx={{
-              color: "var(--pallet-blue)",
-            }}
-          />
-        </IconButton>
+        <>
+          {isTablet ? (
+            <IconButton
+              aria-label="edit"
+              onClick={onEdit}
+              disabled={disableEdit}
+            >
+              <EditIcon
+                sx={{
+                  color: "var(--pallet-blue)",
+                }}
+              />
+            </IconButton>
+          ) : (
+            <CustomButton
+              variant="contained"
+              sx={{
+                backgroundColor: "var(--pallet-blue)",
+              }}
+              size="medium"
+              onClick={onEdit}
+              startIcon={<EditIcon />}
+              disabled={disableEdit}
+            >
+              Edit
+            </CustomButton>
+          )}
+        </>
       )}
       {onDelete && (
-        <IconButton aria-label="delete" onClick={onDelete}>
-          <DeleteIcon sx={{ color: "var(--pallet-red)" }} />
-        </IconButton>
+        <>
+          {isTablet ? (
+            <IconButton
+              aria-label="delete"
+              onClick={onDelete}
+              sx={{ marginX: 1 }}
+              disabled={disableDelete}
+            >
+              <DeleteIcon sx={{ color: "var(--pallet-red)" }} />
+            </IconButton>
+          ) : (
+            <CustomButton
+              variant="contained"
+              sx={{
+                backgroundColor: "var(--pallet-red)",
+                marginX: 1,
+              }}
+              size="medium"
+              onClick={onDelete}
+              startIcon={<DeleteIcon />}
+              disabled={disableDelete}
+            >
+              Delete
+            </CustomButton>
+          )}
+        </>
       )}
     </Box>
   );
