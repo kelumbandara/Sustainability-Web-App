@@ -56,8 +56,8 @@ function UserTable() {
   const { mutate: updateUserMutation } = useMutation({
     mutationFn: updateUser,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
-      enqueueSnackbar("Hazard Risk Report Update Successfully!", {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      enqueueSnackbar("User Update Successfully!", {
         variant: "success",
       });
       setSelectedRow(null);
@@ -65,17 +65,17 @@ function UserTable() {
       setOpenEditUserRoleDialog(false);
     },
     onError: () => {
-      enqueueSnackbar(`Hazard Risk Update Failed`, {
+      enqueueSnackbar(`User Update Failed`, {
         variant: "error",
       });
     },
   });
 
-  const { mutate: deleteHazardRiskMutation } = useMutation({
+  const { mutate: deleteUserMutation } = useMutation({
     mutationFn: deleteUser,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
-      enqueueSnackbar("Hazard Risk Report Deleted Successfully!", {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      enqueueSnackbar("User Deleted Successfully!", {
         variant: "success",
       });
       setSelectedRow(null);
@@ -83,7 +83,7 @@ function UserTable() {
       setOpenEditUserRoleDialog(false);
     },
     onError: () => {
-      enqueueSnackbar(`Hazard Risk Delete Failed`, {
+      enqueueSnackbar(`User Delete Failed`, {
         variant: "error",
       });
     },
@@ -230,7 +230,7 @@ function UserTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            deleteHazardRiskMutation(userData.filter((doc) => doc.id !== selectedRow.id));
+            deleteUserMutation(userData.filter((doc) => doc.id !== selectedRow.id));
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);
