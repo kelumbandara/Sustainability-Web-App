@@ -5,6 +5,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import {
   Autocomplete,
+  Box,
   Divider,
   IconButton,
   Stack,
@@ -213,16 +214,18 @@ export default function AddOrEditMedicineRequestDialog({
               sx={{ flex: 1, margin: "0.5rem" }}
               {...register("requestQuantity", { required: true })}
             />
-            <UserAutoComplete
-              name="assignee"
-              label="assignee"
-              control={control}
-              register={register}
-              errors={errors}
-              userData={userData}
-              defaultValue={defaultValues?.assignee}
-              required={true}
-            />
+            <Box sx={{ flex: 1, margin: "0.5rem" }}>
+              <UserAutoComplete
+                name="assignee"
+                label="assignee"
+                control={control}
+                register={register}
+                errors={errors}
+                userData={userData}
+                defaultValue={defaultValues?.assignee}
+                required={true}
+              />
+            </Box>
           </Stack>
         </Stack>
       </DialogContent>

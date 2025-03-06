@@ -30,6 +30,7 @@ import ViewDataDrawer, {
 } from "../../../../components/ViewDataDrawer";
 import DeleteConfirmationModal from "../../../../components/DeleteConfirmationModal";
 import {
+  approveMedicineRequest,
   getMedicineAssignedTaskList,
   MedicineRequest,
 } from "../../../../api/medicineRequestApi";
@@ -158,10 +159,6 @@ function MedicineRequestTable({
     },
   });
 
-  const approveMedicineRequest = async (requestItem) => {
-    updateMedicineMutation({ ...requestItem, status: "Approved" });
-  };
-
   const paginatedMedicineData = useMemo(() => {
     if (isAssignedTasks) {
       if (!medicineAssignedTaskData) return [];
@@ -200,6 +197,22 @@ function MedicineRequestTable({
   const isMedicineDataAssignedTaskDeleteDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_ASSIGNED_TASKS_DELETE
   );
+
+  const { mutate: approveMedicineRequestMutation } = useMutation({
+    mutationFn: approveMedicineRequest,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["incidents"] });
+
+      enqueueSnackbar("Medicine Request Approved!", {
+        variant: "success",
+      });
+    },
+    onError: () => {
+      enqueueSnackbar(`Medicine Request Approve Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   return (
     <Stack>
@@ -452,17 +465,12 @@ function MedicineRequestTable({
           }
           handleClose={() => setApproveDialogOpen(false)}
           approveFunc={async () => {
-            if (selectedRow) {
-              approveMedicineRequest(selectedRow);
-            }
+            approveMedicineRequestMutation({ id: selectedRow.id });
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);
             setSelectedRow(null);
             setDeleteDialogOpen(false);
-            // enqueueSnackbar("Medicine Request Deleted Successfully!", {
-            //   variant: "success",
-            // });
           }}
           handleReject={() => {
             setOpenViewDrawer(false);

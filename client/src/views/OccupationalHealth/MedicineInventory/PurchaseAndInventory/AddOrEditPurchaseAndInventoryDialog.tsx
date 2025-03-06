@@ -31,7 +31,10 @@ import DatePickerComponent from "../../../../components/DatePickerComponent";
 import RichTextComponent from "../../../../components/RichTextComponent";
 import useIsMobile from "../../../../customHooks/useIsMobile";
 import theme from "../../../../theme";
-import { MedicineInventory } from "../../../../api/OccupationalHealth/medicineInventoryApi";
+import {
+  MedicineInventory,
+  publishMedicineInventory,
+} from "../../../../api/OccupationalHealth/medicineInventoryApi";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import ApartmentIcon from "@mui/icons-material/Apartment";
@@ -42,13 +45,15 @@ import {
   supplierTypes,
 } from "../../../../api/sampleData/medicineInventorySampleData";
 import { fetchMedicineList } from "../../../../api/OccupationalHealth/medicineNameApi";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../../../api/divisionApi";
 import { fetchAllSupplierName } from "../../../../api/OccupationalHealth/medicineSupplierNameApi";
 import { fetchAllSupplierTypes } from "../../../../api/OccupationalHealth/supplierType";
 import SaveIcon from "@mui/icons-material/Save";
 import PublishIcon from "@mui/icons-material/Publish";
 import ApproveConfirmationModal from "../MedicineRequest/ApproveConfirmationModal";
+import queryClient from "../../../../state/queryClient";
+import { useSnackbar } from "notistack";
 
 type DialogProps = {
   open: boolean;
@@ -93,6 +98,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
   defaultValues,
   onSubmit,
 }: DialogProps) {
+  const { enqueueSnackbar } = useSnackbar();
   const { isMobile, isTablet } = useIsMobile();
   const [files, setFiles] = useState<File[]>([]);
   const [activeTab, setActiveTab] = useState(0);
@@ -160,6 +166,21 @@ export default function AddOrEditPurchaseAndInventoryDialog({
       queryKey: ["supplierName"],
       queryFn: fetchAllSupplierName,
     });
+
+  const { mutate: publishMedicineInventoryMutation } = useMutation({
+    mutationFn: publishMedicineInventory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["medicine-inventory"] });
+      enqueueSnackbar("Medicine Inventory Report Published Successfully!", {
+        variant: "success",
+      });
+    },
+    onError: () => {
+      enqueueSnackbar(`Medicine Inventory Publish Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   return (
     <>
@@ -1058,7 +1079,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
             }
             handleClose={() => setPublishModalOpen(false)}
             approveFunc={async () => {
-              console.log("Publishing Medicine Inventory Item");
+              publishMedicineInventoryMutation({ id: defaultValues?.id });
             }}
             onSuccess={() => {
               setPublishModalOpen(false);

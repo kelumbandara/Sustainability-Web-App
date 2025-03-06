@@ -18,7 +18,7 @@ import {
 import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
-import { getMedicineInventoriesList } from "../../../api/OccupationalHealth/medicineInventoryApi";
+import { getMedicineInventoriesTransaction } from "../../../api/OccupationalHealth/medicineInventoryApi";
 import Breadcrumb from "../../../components/BreadCrumb";
 import PageTitle from "../../../components/PageTitle";
 import theme from "../../../theme";
@@ -51,18 +51,18 @@ function TransactionTable() {
     theme.breakpoints.down("md")
   );
 
-  const { data: medicineInventory, isLoading } = useQuery({
-    queryKey: ["medicine-inventory"],
-    queryFn: getMedicineInventoriesList,
+  const { data: medicineInventoryTransaction, isLoading } = useQuery({
+    queryKey: ["medicine-inventory-transaction"],
+    queryFn: getMedicineInventoriesTransaction,
   });
 
-  const paginatedMedicineInventoryData = useMemo(() => {
-    if (!medicineInventory) return [];
-    return medicineInventory.slice(
+  const paginatedMedicineInventoryTransactionData = useMemo(() => {
+    if (!medicineInventoryTransaction) return [];
+    return medicineInventoryTransaction.slice(
       page * rowsPerPage,
       page * rowsPerPage + rowsPerPage
     );
-  }, [medicineInventory, page, rowsPerPage]);
+  }, [medicineInventoryTransaction, page, rowsPerPage]);
 
   return (
     <Stack>
@@ -105,8 +105,8 @@ function TransactionTable() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {paginatedMedicineInventoryData?.length > 0 ? (
-                paginatedMedicineInventoryData.map((row) => (
+              {paginatedMedicineInventoryTransactionData?.length > 0 ? (
+                paginatedMedicineInventoryTransactionData.map((row) => (
                   <TableRow
                     key={`${row.id}${row.referenceNumber}`}
                     sx={{
@@ -162,7 +162,7 @@ function TransactionTable() {
                 <TablePagination
                   rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
                   colSpan={100}
-                  count={medicineInventory?.length}
+                  count={medicineInventoryTransaction?.length}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   showFirstButton={true}

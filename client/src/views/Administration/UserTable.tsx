@@ -20,25 +20,31 @@ import { useState } from "react";
 import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
-import { User } from "../../api/userApi";
+import { fetchAllUsers, User } from "../../api/userApi";
 import { sampleUsers } from "../../api/sampleData/usersSampleData";
 import ViewUserContent from "./ViewUserContent";
 import EditUserRoleDialog from "./EditUserRoleDialog";
 import { PermissionKeys } from "./SectionList";
 import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
+import { useQuery } from "@tanstack/react-query";
 
 function UserTable() {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<User>(null);
   const [openEditUserRoleDialog, setOpenEditUserRoleDialog] = useState(false);
-  const [userData, setUserData] = useState<User[]>(sampleUsers);
+  // const [userData, setUserData] = useState<User[]>(sampleUsers);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
     { title: "Users" },
   ];
+
+  const { data: userData, isFetching: isUserDataFetching } = useQuery({
+    queryKey: ["users"],
+    queryFn: fetchAllUsers,
+  });
 
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("md")
@@ -148,22 +154,7 @@ function UserTable() {
             setOpenEditUserRoleDialog(false);
           }}
           onSubmit={(data) => {
-            if (selectedRow) {
-              setUserData(
-                userData.map((user) => (user.id === data.id ? data : user))
-              ); // Update the user in the list if it already exists
-              enqueueSnackbar("User Details Updated Successfully!", {
-                variant: "success",
-              });
-            } else {
-              setUserData([...userData, data]); // Add new document to the list
-              enqueueSnackbar("User Created Successfully!", {
-                variant: "success",
-              });
-            }
-            setSelectedRow(null);
-            setOpenViewDrawer(false);
-            setOpenEditUserRoleDialog(false);
+            console.log(data);
           }}
           defaultValues={selectedRow}
         />
@@ -181,9 +172,7 @@ function UserTable() {
             </>
           }
           handleClose={() => setDeleteDialogOpen(false)}
-          deleteFunc={async () => {
-            setUserData(userData.filter((doc) => doc.id !== selectedRow.id));
-          }}
+          deleteFunc={async () => {}}
           onSuccess={() => {
             setOpenViewDrawer(false);
             setSelectedRow(null);
