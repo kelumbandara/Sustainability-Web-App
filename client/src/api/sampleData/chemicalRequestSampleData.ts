@@ -19,6 +19,37 @@ export const sampleChemicalCategoryList = [
   "Others",
 ];
 
+export const sampleProductStandardList = [
+  "ISO 9001",
+  "ISO 14001",
+  "ISO 45001",
+  "ISO 50001",
+  "ISO 22000",
+  "ISO 27001",
+  "ISO 13485",
+  "ISO 31000",
+  "ISO 22301",
+  "ISO 37001",
+  "ISO 39001",
+  "ISO 45001",
+  "ISO 50001",
+  "ISO 55001",
+  "ISO 9001",
+  "ISO 14001",
+  "ISO 45001",
+  "ISO 50001",
+  "ISO 22000",
+  "ISO 27001",
+  "ISO 13485",
+  "ISO 31000",
+  "ISO 22301",
+  "ISO 37001",
+  "ISO 39001",
+  "ISO 45001",
+  "ISO 50001",
+  "ISO 55001",
+];
+
 export const sampleChemicalRequestData: ChemicalRequest[] = [
   {
     id: "1",
@@ -61,7 +92,6 @@ export const sampleChemicalRequestData: ChemicalRequest[] = [
     created_date: "2024-11-26",
     approval_valid_date: null,
     category: null,
-    reviewer: "Nafee Uddeen",
     approver: "Mirza Kausar",
   },
   {
@@ -105,7 +135,6 @@ export const sampleChemicalRequestData: ChemicalRequest[] = [
     created_date: "2024-11-20",
     approval_valid_date: new Date("2025-01-01"),
     category: "Cleaning Agents",
-    reviewer: "Jane Smith",
     approver: "John Doe",
   },
 ];

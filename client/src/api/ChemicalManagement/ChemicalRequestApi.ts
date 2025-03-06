@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { userSchema } from "../userApi";
 
 export const ChemicalRequestSchema = z.object({
   id: z.string(),
@@ -41,7 +42,7 @@ export const ChemicalRequestSchema = z.object({
   created_date: z.string(),
   approval_valid_date: z.date().nullable(),
   category: z.string().nullable(),
-  reviewer: z.string(),
+  reviewer: userSchema,
   approver: z.string(),
 });
 

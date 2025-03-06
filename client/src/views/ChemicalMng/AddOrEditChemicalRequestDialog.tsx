@@ -15,7 +15,7 @@ import {
 import { Controller, useForm } from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
 import { grey } from "@mui/material/colors";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { ChemicalRequest } from "../../api/ChemicalManagement/ChemicalRequestApi";
 import useIsMobile from "../../customHooks/useIsMobile";
@@ -23,7 +23,15 @@ import CustomButton from "../../components/CustomButton";
 import {
   sampleChemicalCategoryList,
   sampleChemicalList,
+  sampleProductStandardList,
 } from "../../api/sampleData/chemicalRequestSampleData";
+import DatePickerComponent from "../../components/DatePickerComponent";
+import SwitchButton from "../../components/SwitchButton";
+import DropzoneComponent from "../../components/DropzoneComponent";
+import { useQuery } from "@tanstack/react-query";
+import { fetchDivision } from "../../api/divisionApi";
+import UserAutoComplete from "../../components/UserAutoComplete";
+import { fetchAllUsers } from "../../api/userApi";
 
 type DialogProps = {
   open: boolean;
@@ -39,6 +47,17 @@ export default function AddOrEditChemicalRequestDialog({
   onSubmit,
 }: DialogProps) {
   const { isMobile, isTablet } = useIsMobile();
+  const [files, setFiles] = useState<File[]>([]);
+
+  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
+    queryKey: ["divisions"],
+    queryFn: fetchDivision,
+  });
+
+  const { data: userData, isFetching: isUserDataFetching } = useQuery({
+    queryKey: ["users"],
+    queryFn: fetchAllUsers,
+  });
 
   const {
     register,
@@ -46,9 +65,12 @@ export default function AddOrEditChemicalRequestDialog({
     control,
     formState: { errors },
     reset,
+    watch,
   } = useForm<ChemicalRequest>({
     defaultValues,
   });
+
+  const watchMSDS = watch("msds_sds");
 
   useEffect(() => {
     if (defaultValues) {
@@ -122,7 +144,7 @@ export default function AddOrEditChemicalRequestDialog({
               display: "flex",
               flexDirection: "column",
               backgroundColor: "#fff",
-              flex: 1,
+              flex: 3,
               boxShadow: "0 0 10px rgba(0,0,0,0.1)",
               padding: "0.5rem",
               borderRadius: "0.3rem",
@@ -166,13 +188,11 @@ export default function AddOrEditChemicalRequestDialog({
                 )}
               />
               <TextField
-                required
                 id="substance_name"
                 label="Substance Name"
-                error={!!errors.substance_name}
                 size="small"
                 sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("substance_name", { required: true })}
+                {...register("substance_name")}
               />
             </Box>
 
@@ -183,19 +203,15 @@ export default function AddOrEditChemicalRequestDialog({
               }}
             >
               <TextField
-                required
                 id="formula"
                 label="Formula"
-                error={!!errors.formula}
                 size="small"
                 sx={{ flex: 1, margin: "0.5rem" }}
                 {...register("formula")}
               />
               <TextField
-                required
                 id="reach_registration_number"
                 label="Reach Registration Number"
-                error={!!errors.reach_registration_number}
                 size="small"
                 sx={{ flex: 1, margin: "0.5rem" }}
                 {...register("reach_registration_number")}
@@ -213,6 +229,7 @@ export default function AddOrEditChemicalRequestDialog({
                 label="Requested Quantity"
                 error={!!errors.requested_quantity}
                 size="small"
+                type="number"
                 sx={{ flex: 1, margin: "0.5rem" }}
                 {...register("requested_quantity", { required: true })}
               />
@@ -240,22 +257,6 @@ export default function AddOrEditChemicalRequestDialog({
                 flexDirection: isMobile ? "column" : "row",
               }}
             >
-              {/* <Autocomplete
-                {...register("division", { required: true })}
-                size="small"
-                options={sampleDivisions?.map((division) => division.name)}
-                defaultValue={defaultValues?.division}
-                sx={{ flex: 1, margin: "0.5rem" }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    error={!!errors.division}
-                    label="Division"
-                    name="division"
-                  />
-                )}
-              /> */}
               <Autocomplete
                 {...register("category")}
                 size="small"
@@ -314,6 +315,110 @@ export default function AddOrEditChemicalRequestDialog({
                 {...register("usage", { required: true })}
               />
             </Box>
+            <Box
+              sx={{
+                display: "flex",
+                flex: 2,
+                flexDirection: isMobile ? "column" : "row",
+              }}
+            >
+              <Autocomplete
+                {...register("product_standard")}
+                size="small"
+                options={sampleProductStandardList}
+                defaultValue={defaultValues?.product_standard}
+                sx={{ flex: 1, margin: "0.5rem" }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Product Standard"
+                    name="product_standard"
+                  />
+                )}
+              />
+              <Box sx={{ flex: 1, margin: "0.5rem" }}></Box>
+            </Box>
+            <Box sx={{ margin: "0.5rem" }}>
+              <Controller
+                control={control}
+                name={"msds_sds"}
+                render={({ field }) => {
+                  return (
+                    <SwitchButton
+                      label="Do you have an MSDS/SDS?"
+                      onChange={field.onChange}
+                      value={field.value}
+                    />
+                  );
+                }}
+              />
+            </Box>
+            {watchMSDS && (
+              <>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: isMobile ? "column" : "row",
+                    margin: "0.5rem",
+                  }}
+                >
+                  <DropzoneComponent
+                    files={files}
+                    setFiles={setFiles}
+                    dropzoneLabel={
+                      "Drop Your MSDS/SDS document. Please ensure the document size is less than 5MB."
+                    }
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flex: 1,
+                    flexDirection: isMobile ? "column" : "row",
+                  }}
+                >
+                  {" "}
+                  <Box sx={{ margin: "0.5rem", flex: 1 }}>
+                    <Controller
+                      control={control}
+                      {...register("msds_sds_issued_date", { required: true })}
+                      name={"msds_sds_issued_date"}
+                      render={({ field }) => {
+                        return (
+                          <DatePickerComponent
+                            onChange={(e) => field.onChange(e)}
+                            value={field.value}
+                            label="MSDS/SDS Issued Date"
+                            error={
+                              errors?.msds_sds_issued_date ? "Required" : ""
+                            }
+                          />
+                        );
+                      }}
+                    />
+                  </Box>
+                  <Box sx={{ margin: "0.5rem", flex: 1 }}>
+                    <Controller
+                      control={control}
+                      {...register("msds_sds_expiry_date", { required: true })}
+                      name={"msds_sds_expiry_date"}
+                      render={({ field }) => {
+                        return (
+                          <DatePickerComponent
+                            onChange={(e) => field.onChange(e)}
+                            value={field.value}
+                            label="MSDS/SDS Expiry Date"
+                            error={
+                              errors?.msds_sds_expiry_date ? "Required" : ""
+                            }
+                          />
+                        );
+                      }}
+                    />
+                  </Box>
+                </Box>
+              </>
+            )}
           </Stack>
           <Stack
             sx={{
@@ -332,173 +437,65 @@ export default function AddOrEditChemicalRequestDialog({
             <Box sx={{ margin: "0.5rem" }}>
               <Controller
                 control={control}
-                {...register("check_in_date", { required: true })}
-                name={"check_in_date"}
+                {...register("request_date", { required: true })}
+                name={"request_date"}
                 render={({ field }) => {
                   return (
                     <DatePickerComponent
                       onChange={(e) => field.onChange(e)}
                       value={field.value}
-                      label="Check In Date"
-                      error={errors?.check_in_date ? "Required" : ""}
+                      label="Request Date"
+                      error={errors?.request_date ? "Required" : ""}
                     />
                   );
                 }}
-              />
-              <Controller
-                control={control}
-                {...register("check_in", { required: true })}
-                name={"check_in"}
-                render={({ field }) => {
-                  return (
-                    <TimePickerComponent
-                      onChange={(e) => field.onChange(e)}
-                      value={field.value}
-                      label="Check In Time"
-                      error={errors?.check_in ? "Required" : ""}
-                    />
-                  );
-                }}
-              />
-            </Box>
-            <Typography
-              variant="body2"
-              sx={{
-                marginLeft: "0.5rem",
-                marginTop: "0.5rem",
-              }}
-            >
-              Preliminary Checkup Data
-            </Typography>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-                margin: "0.5rem",
-              }}
-            >
-              <TextField
-                required
-                id="body_temperature"
-                label="Body Temperature (°C)"
-                error={!!errors.body_temperature}
-                type="number"
-                size="small"
-                sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("body_temperature", { required: true })}
-              />
-              <TextField
-                required
-                id="weight"
-                label="Weight (Kg)"
-                error={!!errors.weight}
-                type="number"
-                size="small"
-                sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("weight", { required: true })}
-              />
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-                margin: "0.5rem",
-              }}
-            >
-              <TextField
-                required
-                id="height"
-                label="Height (cm)"
-                error={!!errors.height}
-                type="number"
-                size="small"
-                sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("height", { required: true })}
-              />
-              <TextField
-                required
-                id="blood_pressure"
-                label="Blood Pressure (mmHg)"
-                error={!!errors.blood_pressure}
-                size="small"
-                sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("blood_pressure", { required: true })}
-              />
-            </Box>
-            <Box sx={{ margin: "0.5rem" }}>
-              <TextField
-                required
-                id="random_blood_sugar"
-                label="Random Blood Sugar (mg/dL)"
-                error={!!errors.random_blood_sugar}
-                size="small"
-                sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("random_blood_sugar", { required: true })}
               />
             </Box>
             <Box sx={{ margin: "0.5rem" }}>
               <Autocomplete
-                {...register("consulting_doctor", { required: true })}
+                {...register("division", { required: false })}
                 size="small"
-                options={sampleDoctorData.map(
-                  (doctor) => doctor.first_name + " " + doctor.last_name
-                )}
-                defaultValue={defaultValues?.consulting_doctor}
-                sx={{ flex: 1, margin: "0.5rem" }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    error={!!errors.consulting_doctor}
-                    label="Consulting Doctor"
-                    name="consulting_doctor"
-                  />
-                )}
-              />
-              {/* <Autocomplete
-                {...register("consulting_doctor", { required: true })}
-                size="small"
-                options={sampleDoctorData}
-                getOptionLabel={(option) =>
-                  `${option.first_name} ${option.last_name}`
+                options={
+                  divisionData?.length
+                    ? divisionData.map((division) => division.divisionName)
+                    : []
                 }
-                renderOption={(props, option) => (
-                  <li
-                    {...props}
-                    onSelect={() => setValue("consulting_doctor", option)}
-                  >
-                    {`${option.first_name} ${option.last_name}`}
-                  </li>
-                )}
-                defaultValue={defaultValues?.consulting_doctor}
-                sx={{ flex: 1, margin: "0.5rem" }}
+                sx={{ flex: 1 }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
                     required
-                    error={!!errors.consulting_doctor}
-                    label="Consulting Doctor"
-                    name="consulting_doctor"
+                    error={!!errors.division}
+                    label="Division"
+                    name="division"
                   />
                 )}
-              /> */}
+              />
             </Box>
+            <TextField
+              id="requested_customer"
+              label="Requested Customer"
+              size="small"
+              sx={{ flex: 1, margin: "0.5rem" }}
+              {...register("requested_customer")}
+            />
+            <TextField
+              id="requested_merchandiser"
+              label="Requested Merchandiser"
+              size="small"
+              sx={{ flex: 1, margin: "0.5rem" }}
+              {...register("requested_merchandiser")}
+            />
             <Box sx={{ margin: "0.5rem" }}>
-              <Autocomplete
-                {...register("clinic_division", { required: true })}
-                size="small"
-                options={sampleDivisions?.map((division) => division.name)}
-                defaultValue={defaultValues?.clinic_division}
-                sx={{ flex: 1, margin: "0.5rem" }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    error={!!errors.clinic_division}
-                    label="Clinic Division"
-                    name="clinic_division"
-                  />
-                )}
+              <UserAutoComplete
+                name="assignee"
+                label="assignee"
+                control={control}
+                register={register}
+                errors={errors}
+                userData={userData}
+                defaultValue={defaultValues?.reviewer}
+                required={true}
               />
             </Box>
           </Stack>

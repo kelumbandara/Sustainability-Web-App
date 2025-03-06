@@ -26,6 +26,7 @@ import Breadcrumb from "../../components/BreadCrumb";
 import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import ViewChemicalRequestContent from "./ViewChemicalRequestContent";
+import AddOrEditChemicalRequestDialog from "./AddOrEditChemicalRequestDialog";
 
 function ChemicalRequestTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -134,7 +135,9 @@ function ChemicalRequestTable() {
                     <TableCell align="right">
                       {row?.requested_merchandiser ?? "--"}
                     </TableCell>
-                    <TableCell align="right">{row?.reviewer ?? "--"}</TableCell>
+                    <TableCell align="right">
+                      {row?.reviewer.name ?? "--"}
+                    </TableCell>
                     <TableCell align="right">{row?.approver ?? "--"}</TableCell>
                     <TableCell align="right">{row.status}</TableCell>
                   </TableRow>
@@ -176,8 +179,8 @@ function ChemicalRequestTable() {
           </Stack>
         }
       />
-      {/* {openAddOrEditDialog && (
-        <AddOrEditPatientDialog
+      {openAddOrEditDialog && (
+        <AddOrEditChemicalRequestDialog
           open={openAddOrEditDialog}
           handleClose={() => {
             setSelectedRow(null);
@@ -205,7 +208,7 @@ function ChemicalRequestTable() {
           }}
           defaultValues={selectedRow}
         />
-      )} */}
+      )}
       {deleteDialogOpen && (
         <DeleteConfirmationModal
           open={deleteDialogOpen}
