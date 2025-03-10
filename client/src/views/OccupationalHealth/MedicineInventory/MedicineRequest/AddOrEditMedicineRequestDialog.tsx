@@ -52,7 +52,7 @@ export default function AddOrEditMedicineRequestDialog({
     defaultValues,
   });
 
-  const assignee = watch("assignee");
+  const approver = watch("approver");
 
   useEffect(() => {
     if (defaultValues) {
@@ -69,7 +69,7 @@ export default function AddOrEditMedicineRequestDialog({
   const handleCreateDocument = (data: MedicineRequest) => {
     const submitData: Partial<MedicineRequest> = data;
     submitData.id = defaultValues?.id ?? uuidv4();
-    submitData.assigneeId = assignee?.id ?? defaultValues?.assigneeId;
+    submitData.approverId = approver?.id ?? defaultValues?.approverId;
     submitData.referenceNumber = defaultValues?.referenceNumber ?? uuidv4();
     submitData.requestDate =
       defaultValues?.requestDate ?? new Date().toDateString();
@@ -214,15 +214,15 @@ export default function AddOrEditMedicineRequestDialog({
               sx={{ flex: 1, margin: "0.5rem" }}
               {...register("requestQuantity", { required: true })}
             />
-            <Box sx={{ flex: 1, margin: "0.5rem" }}>
+            <Box sx={{ flex: 1 }}>
               <UserAutoComplete
-                name="assignee"
-                label="assignee"
+                name="approver"
+                label="Approver"
                 control={control}
                 register={register}
                 errors={errors}
                 userData={userData}
-                defaultValue={defaultValues?.assignee}
+                defaultValue={defaultValues?.approver}
                 required={true}
               />
             </Box>

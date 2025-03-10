@@ -300,7 +300,11 @@ function IncidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
                 <TablePagination
                   rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
                   colSpan={100}
-                  count={paginatedIncidentData?.length}
+                  count={
+                    isAssignedTasks
+                      ? incidentAssignedTaskData?.length
+                      : incidentData?.length
+                  }
                   rowsPerPage={rowsPerPage}
                   page={page}
                   showFirstButton={true}

@@ -334,7 +334,11 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
                 <TablePagination
                   rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
                   colSpan={100}
-                  count={riskData?.length}
+                  count={
+                    isAssignedTasks
+                      ? assignedRiskData?.length
+                      : riskData?.length
+                  }
                   rowsPerPage={rowsPerPage}
                   page={page}
                   showFirstButton={true}

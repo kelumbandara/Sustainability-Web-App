@@ -7,6 +7,8 @@ import theme from "../../theme";
 import useIsMobile from "../../customHooks/useIsMobile";
 import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import FireExtinguisherIcon from "@mui/icons-material/FireExtinguisher";
+import { FileItemsViewer } from "../../components/FileItemsViewer";
+import { StorageFile } from "../../utils/StorageFiles.util";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -167,6 +169,11 @@ function ViewHazardOrRiskContent({
             <DrawerContentItem
               label="Description"
               value={hazardOrRisk.description}
+            />
+            <FileItemsViewer
+              label="Evidence"
+              files={hazardOrRisk.documents as StorageFile[]}
+              sx={{ marginY: "1rem" }}
             />
           </Box>
         </TabPanel>

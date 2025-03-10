@@ -274,7 +274,7 @@ function DocumentTable() {
                 <TablePagination
                   rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
                   colSpan={100}
-                  count={paginatedDocumentData?.length}
+                  count={documents?.length ?? 0}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   showFirstButton={true}

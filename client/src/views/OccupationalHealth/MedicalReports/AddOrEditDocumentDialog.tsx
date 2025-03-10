@@ -54,7 +54,10 @@ const AddOrEditDocumentDialog = ({
   // }, [reset, defaultValues]);
   // console.log("def", defaultValues);
 
-  const { data: medicalReportTypeData, isFetching: isMedicalReportTypeDataFetching } = useQuery({
+  const {
+    data: medicalReportTypeData,
+    isFetching: isMedicalReportTypeDataFetching,
+  } = useQuery({
     queryKey: ["medicalReport"],
     queryFn: fetchAllMedicalReportType,
   });
@@ -82,7 +85,7 @@ const AddOrEditDocumentDialog = ({
         }}
       >
         <Typography variant="h6" component="div">
-          {defaultDocument ? "Edit Witness" : "Add Witness"}
+          {defaultDocument ? "Edit Document" : "Add Document"}
         </Typography>
         <IconButton
           aria-label="open drawer"
@@ -109,7 +112,10 @@ const AddOrEditDocumentDialog = ({
             {...register("documentType", { required: true })}
             size="small"
             options={
-              medicalReportTypeData?.length ? medicalReportTypeData.map((report) => report.documentName) : []}
+              medicalReportTypeData?.length
+                ? medicalReportTypeData.map((report) => report.documentName)
+                : []
+            }
             defaultValue={defaultDocument?.documentType || ""}
             sx={{ flex: 1 }}
             renderInput={(params) => (
@@ -127,7 +133,7 @@ const AddOrEditDocumentDialog = ({
             files={files}
             setFiles={setFiles}
             dropzoneLabel={
-              "Drop your evidence here. Please ensure the image size is less than 10mb."
+              "Drop your evidence here. Please ensure the file size is less than 10mb."
             }
           />
         </Stack>
