@@ -244,6 +244,7 @@ export default function AddOrEditPersonDialog({
               label="Employment Duration"
               error={!!errors.employmentDuration}
               size="small"
+              type="number"
               sx={{ flex: 1, margin: "0.5rem" }}
               {...register("employmentDuration", { required: true })}
             />

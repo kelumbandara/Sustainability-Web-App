@@ -7,6 +7,7 @@ export const userRoleSchema = z.object({
   userType: z.string(),
   description: z.string().optional(),
   permissionObject: PermissionKeysObjectSchema,
+  created_at: z.string(),
 });
 
 export type UserRole = z.infer<typeof userRoleSchema>;
@@ -96,11 +97,7 @@ export async function fetchAllUsers() {
   return res.data;
 }
 
-export async function forgotPassword({
-  email,
-}: {
-  email: string;
-}) {
+export async function forgotPassword({ email }: { email: string }) {
   const res = await axios.post("/api/forgot-password", {
     email,
   });
@@ -131,6 +128,19 @@ export async function resetPassword({
   const res = await axios.post("/api/change-password", {
     email,
     password,
+  });
+  return res.data;
+}
+
+export async function updateUserType({
+  id,
+  userTypeId,
+}: {
+  id: string;
+  userTypeId: string;
+}) {
+  const res = await axios.post(`/api/users/${id}/update`, {
+    userType: userTypeId,
   });
   return res.data;
 }

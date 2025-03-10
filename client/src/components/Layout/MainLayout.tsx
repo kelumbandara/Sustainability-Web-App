@@ -34,12 +34,10 @@ import theme from "../../theme";
 import useIsMobile from "../../customHooks/useIsMobile";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DeleteConfirmationModal from "../DeleteConfirmationModal";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useSnackbar } from "notistack";
-import {
-  defaultViewerPermissions,
-  PermissionKeysObject,
-} from "../../views/Administration/SectionList";
+import { PermissionKeysObject } from "../../views/Administration/SectionList";
+import useCurrentUser from "../../hooks/useCurrentUser";
 
 const drawerWidth = 265;
 
@@ -289,8 +287,14 @@ const DrawerContent = ({
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const { user } = useCurrentUser();
 
-  const userPermissionObject = defaultViewerPermissions;
+  const userPermissionObject = useMemo(() => {
+    if (user.permissionObject) {
+      return user.permissionObject;
+    }
+  }, [user]);
+
   return (
     <>
       <DrawerHeader sx={{ justifyContent: "flex-start" }}>

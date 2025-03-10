@@ -18,7 +18,9 @@ import { useEffect } from "react";
 import { sampleRoles } from "../../api/sampleData/usersSampleData";
 import CustomButton from "../../components/CustomButton";
 import useIsMobile from "../../customHooks/useIsMobile";
-import { User } from "../../api/userApi";
+import { User, UserRole } from "../../api/userApi";
+import { getAccessRolesList } from "../../api/accessManagementApi";
+import { useQuery } from "@tanstack/react-query";
 
 type DialogProps = {
   open: boolean;
@@ -34,6 +36,12 @@ export default function EditUserRoleDialog({
   onSubmit,
 }: DialogProps) {
   const { isTablet } = useIsMobile();
+  const { data: roles, isFetching: isFetchingRoles } = useQuery<UserRole[]>({
+    queryKey: ["access-roles"],
+    queryFn: getAccessRolesList,
+  });
+
+  console.log("roles", roles);
 
   const {
     handleSubmit,
@@ -56,14 +64,6 @@ export default function EditUserRoleDialog({
 
   const resetForm = () => {
     reset();
-  };
-
-  const handleCreateDocument = (data: User) => {
-    const submitData: Partial<User> = defaultValues;
-    submitData.role = data.role;
-    submitData.roleId = sampleRoles.find((role) => role.name === data.role)?.id;
-    onSubmit(submitData as User);
-    resetForm();
   };
 
   return (
@@ -152,7 +152,7 @@ export default function EditUserRoleDialog({
           }}
           size="medium"
           onClick={handleSubmit((data) => {
-            handleCreateDocument(data);
+            console.log(data);
           })}
         >
           {defaultValues ? "Update Changes" : "Save Medical Request"}

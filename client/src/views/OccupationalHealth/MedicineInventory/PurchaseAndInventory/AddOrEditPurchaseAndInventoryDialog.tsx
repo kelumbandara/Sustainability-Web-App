@@ -116,6 +116,8 @@ export default function AddOrEditPurchaseAndInventoryDialog({
     formState: { errors },
     reset,
     watch,
+    getValues,
+    trigger,
   } = useForm<MedicineInventory>({});
 
   const manufacturingDate = watch("manufacturingDate");
@@ -140,6 +142,12 @@ export default function AddOrEditPurchaseAndInventoryDialog({
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
     onSubmit(submitData as MedicineInventory);
     resetForm();
+  };
+
+  const handlePublishMedicineInventory = () => {
+    const data = getValues();
+    data.status = HazardAndRiskStatus.PUBLISHED.toLowerCase();
+    publishMedicineInventoryMutation(data);
   };
 
   const {
@@ -1079,7 +1087,16 @@ export default function AddOrEditPurchaseAndInventoryDialog({
             }
             handleClose={() => setPublishModalOpen(false)}
             approveFunc={async () => {
-              publishMedicineInventoryMutation({ id: defaultValues?.id });
+              const isValid = await trigger();
+              if (isValid) {
+                handlePublishMedicineInventory();
+              } else {
+                enqueueSnackbar("Please fill in all required fields.", {
+                  variant: "error",
+                });
+                setPublishModalOpen(false);
+                throw new Error("Form Validation Error");
+              }
             }}
             onSuccess={() => {
               setPublishModalOpen(false);
