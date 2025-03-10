@@ -66,6 +66,16 @@ export async function getMedicineInventoriesList() {
   return res.data;
 }
 
+export async function getMedicineInventoriesTransaction() {
+  const res = await axios.get("/api/transaction-published");
+  return res.data;
+}
+
+export async function publishMedicineInventory({ id }: { id: string }) {
+  const res = await axios.post(`/api/medicine-inventory/${id}/publish`);
+  return res.data;
+}
+
 export const createMedicineInventory = async (
   medicineInventory: MedicineInventory
 ) => {

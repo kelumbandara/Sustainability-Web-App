@@ -1,6 +1,7 @@
 import {
   AppBar,
   Box,
+  Chip,
   Stack,
   Tab,
   Table,
@@ -298,9 +299,7 @@ function ViewPurchaseAndInventoryContent({
             />
             <DrawerContentItem
               label="Delivery Date"
-              value={new Date(
-                purchaseAndInventory.deliveryDate
-              ).toDateString()}
+              value={new Date(purchaseAndInventory.deliveryDate).toDateString()}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
@@ -391,12 +390,8 @@ function ViewPurchaseAndInventoryContent({
                     <TableCell align="center" component="th" scope="row">
                       {row.disposalDate}
                     </TableCell>
-                    <TableCell align="center">
-                      {row.disposalQuantity}
-                    </TableCell>
-                    <TableCell align="center">
-                      {row.disposalQuantity}
-                    </TableCell>
+                    <TableCell align="center">{row.disposalQuantity}</TableCell>
+                    <TableCell align="center">{row.disposalQuantity}</TableCell>
                     <TableCell align="center">{row.contractor}</TableCell>
                     <TableCell align="center">{row.cost}</TableCell>
                     <TableCell align="center">{row.balanceQuantity}</TableCell>
@@ -427,6 +422,27 @@ function ViewPurchaseAndInventoryContent({
           height: "fit-content",
         }}
       >
+        <Typography
+          variant="caption"
+          sx={{ marginLeft: "0.5rem", color: "var(--pallet-grey)" }}
+        >
+          Status
+        </Typography>
+        <Box>
+          {purchaseAndInventory.status === "approved" ? (
+            <Chip label="Request Approved" />
+          ) : purchaseAndInventory.status === "published" ? (
+            <Chip
+              label="Published"
+              sx={{
+                backgroundColor: "var(--pallet-blue)",
+                color: "white",
+              }}
+            />
+          ) : (
+            "--"
+          )}
+        </Box>
         <DrawerContentItem
           label="Requested By"
           value={purchaseAndInventory.requestedBy}

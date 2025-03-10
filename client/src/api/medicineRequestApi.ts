@@ -32,6 +32,11 @@ export async function getMedicineAssignedTaskList() {
   return res.data;
 }
 
+export async function approveMedicineRequest({ id }: { id: string }) {
+  const res = await axios.post(`/api/medicine-request/${id}/approve`);
+  return res.data;
+}
+
 export const createMedicine = async (medicineRequest: MedicineRequest) => {
   const formData = new FormData();
 
