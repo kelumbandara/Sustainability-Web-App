@@ -68,10 +68,11 @@ export default function AddOrEditDocumentDialog({
     queryFn: fetchDivision,
   });
 
-  const { data: documentType, isFetching: isDocumentTypeDataFetching } = useQuery({
-    queryKey: ["documentTypes"],
-    queryFn: fetchAllDocumentType,
-  });
+  const { data: documentType, isFetching: isDocumentTypeDataFetching } =
+    useQuery({
+      queryKey: ["documentTypes"],
+      queryFn: fetchAllDocumentType,
+    });
 
   useEffect(() => {
     if (defaultValues) {
@@ -97,6 +98,7 @@ export default function AddOrEditDocumentDialog({
     } else {
       submitData.isNoExpiry = true;
     }
+    submitData.document = files;
     onSubmit(submitData as Document);
     resetForm();
   };
@@ -183,7 +185,10 @@ export default function AddOrEditDocumentDialog({
                 {...register("documentType", { required: true })}
                 size="small"
                 options={
-                  documentType?.length ? documentType.map((documents) => documents.documentType) : []}
+                  documentType?.length
+                    ? documentType.map((documents) => documents.documentType)
+                    : []
+                }
                 sx={{ flex: 1, margin: "0.5rem" }}
                 defaultValue={defaultValues?.documentType}
                 renderInput={(params) => (

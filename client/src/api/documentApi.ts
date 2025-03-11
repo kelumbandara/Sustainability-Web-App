@@ -1,5 +1,6 @@
 import { z } from "zod";
 import axios from "axios";
+import { StorageFileSchema } from "../utils/StorageFiles.util";
 
 export enum DocumentType {
   CERTIFICATE_AND_AUDIT = "Certificate and Audit",
@@ -24,34 +25,35 @@ export const ActivityStreamSchema = z.object({
   user: z.string(),
 });
 
-export const DocumentSchema = z.object({
-  id: z.string().optional(),
-  documentNumber: z.number(),
-  versionNumber: z.number(),
-  documentType: z.nativeEnum(DocumentType),
-  title: z.string(),
-  division: z.string(),
-  issuingAuthority: z.string(),
-  documentOwner: z.string().optional(),
-  documentReviewer: z.string(),
-  physicalLocation: z.string().optional(),
-  remarks: z.string().optional(),
-  document: z
-    .array(z.union([z.string().url(), z.instanceof(File)]))
-    .optional(),
-  issuedDate: z.date(),
-  isNoExpiry: z.boolean(),
-  expiryDate: z.date().optional(),
-  notifyDate: z.date().optional(),
-  createdDate: z.date().optional(),
-  createdBy: z.string().optional(),
-  documentHistory: z.array(DocumentHistoryItemSchema).optional(),
-  activityStream: z.array(ActivityStreamSchema).optional(),
-})
-.refine((data) => data.isNoExpiry || (data.expiryDate && data.notifyDate), {
-  message: "expiryDate and notifyDate are required when isNoExpiry is false",
-  path: ["expiryDate", "notifyDate"], // Set the path of the error
-});
+export const DocumentSchema = z
+  .object({
+    id: z.string().optional(),
+    documentNumber: z.number(),
+    versionNumber: z.number(),
+    documentType: z.nativeEnum(DocumentType),
+    title: z.string(),
+    division: z.string(),
+    issuingAuthority: z.string(),
+    documentOwner: z.string().optional(),
+    documentReviewer: z.string(),
+    physicalLocation: z.string().optional(),
+    remarks: z.string().optional(),
+    document: z
+      .union([z.array(StorageFileSchema), z.array(z.instanceof(File))])
+      .optional(),
+    issuedDate: z.date(),
+    isNoExpiry: z.boolean(),
+    expiryDate: z.date().optional(),
+    notifyDate: z.date().optional(),
+    createdDate: z.date().optional(),
+    createdBy: z.string().optional(),
+    documentHistory: z.array(DocumentHistoryItemSchema).optional(),
+    activityStream: z.array(ActivityStreamSchema).optional(),
+  })
+  .refine((data) => data.isNoExpiry || (data.expiryDate && data.notifyDate), {
+    message: "expiryDate and notifyDate are required when isNoExpiry is false",
+    path: ["expiryDate", "notifyDate"], // Set the path of the error
+  });
 
 export async function getDocumentList() {
   const res = await axios.get("/api/documents");
@@ -64,7 +66,11 @@ export const createDocumentRecord = async (document: Document) => {
   Object.keys(document).forEach((key) => {
     const value = document[key as keyof Document];
 
-    if (Array.isArray(value)) {
+    if (key === "document" && Array.isArray(value)) {
+      value.forEach((file, index) => {
+        formData.append(`document[${index}]`, file as File);
+      });
+    } else if (Array.isArray(value)) {
       value.forEach((item, index) => {
         formData.append(`${key}[${index}]`, JSON.stringify(item));
       });
@@ -82,7 +88,6 @@ export const createDocumentRecord = async (document: Document) => {
   });
 
   return res.data;
-
 };
 
 export const updateDocumentRecord = async (document: Document) => {
@@ -102,12 +107,15 @@ export const updateDocumentRecord = async (document: Document) => {
     }
   });
 
-  console.log(formData)
-  const res = await axios.post(`/api/documents/${document.id}/update`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const res = await axios.post(
+    `/api/documents/${document.id}/update`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
   return res.data;
 };
 

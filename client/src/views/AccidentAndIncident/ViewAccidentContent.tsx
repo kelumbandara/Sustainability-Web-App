@@ -21,6 +21,8 @@ import { Accident } from "../../api/accidentAndIncidentApi";
 import WarningIcon from "@mui/icons-material/Warning";
 import { formatDate } from "date-fns";
 import { format, parseISO } from "date-fns";
+import { FileItemsViewer } from "../../components/FileItemsViewer";
+import { StorageFile } from "../../utils/StorageFiles.util";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -235,6 +237,13 @@ function ViewAccidentContent({ accident }: { accident: Accident }) {
                 </TableBody>
               </Table>
             </Box>
+            {/* <Box>
+              <FileItemsViewer
+                label="Evidence"
+                files={accident.evidence as StorageFile[]}
+                sx={{ marginY: "1rem" }}
+              />
+            </Box> */}
           </Stack>
         </TabPanel>
         <TabPanel value={activeTab} index={1} dir={theme.direction}>
@@ -382,7 +391,11 @@ function ViewAccidentContent({ accident }: { accident: Accident }) {
         <DrawerContentItem label="Reported By" value={accident.reporter} />
         <DrawerContentItem
           label="Accident Date"
-          value={accident.accidentDate ? format(accident.accidentDate, "MM-dd-yyyy") : "N/A"}
+          value={
+            accident.accidentDate
+              ? format(accident.accidentDate, "MM-dd-yyyy")
+              : "N/A"
+          }
         />
         <DrawerContentItem
           label="Accident Time"

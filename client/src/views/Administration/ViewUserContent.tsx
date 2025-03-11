@@ -41,7 +41,7 @@ function ViewUserContent({ selectedUser }: { selectedUser: User }) {
         />
         <DrawerContentItem
           label="Role"
-          value={selectedUser?.role}
+          value={selectedUser?.userType?.userType}
           sx={{ flex: 1 }}
         />
         <DrawerContentItem

@@ -16,14 +16,14 @@ export function FileItemsViewer({
 }) {
   const imageFiles = useMemo(
     () =>
-      files.filter(
+      files?.filter(
         (file) => getStorageFileTypeFromName(file.fileName) === "image"
       ),
     [files]
   );
   const otherFiles = useMemo(
     () =>
-      files.filter(
+      files?.filter(
         (file) => getStorageFileTypeFromName(file.fileName) !== "image"
       ),
     [files]

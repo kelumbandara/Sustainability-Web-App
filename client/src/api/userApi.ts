@@ -12,6 +12,16 @@ export const userRoleSchema = z.object({
 
 export type UserRole = z.infer<typeof userRoleSchema>;
 
+export const userTypeSchema = z.object({
+  id: z.string(),
+  userType: z.string(),
+  description: z.string().optional(),
+  permissionObject: PermissionKeysObjectSchema,
+  created_at: z.string(),
+});
+
+export type UserType = z.infer<typeof userTypeSchema>;
+
 export const userSchema = z.object({
   id: z.string(),
   email: z.string(),
@@ -20,6 +30,7 @@ export const userSchema = z.object({
   emailVerifiedAt: z.string().nullable(),
   role: z.string(),
   roleId: z.string(),
+  userType: userTypeSchema,
   profileImage: z.string().nullable(),
   status: z.string(),
   isCompanyEmployee: z.boolean(),
@@ -93,7 +104,7 @@ export async function validateUser() {
 }
 
 export async function fetchAllUsers() {
-  const res = await axios.get("/api/all-users");
+  const res = await axios.get("/api/users");
   return res.data;
 }
 
@@ -140,7 +151,7 @@ export async function updateUserType({
   userTypeId: string;
 }) {
   const res = await axios.post(`/api/users/${id}/update`, {
-    userType: userTypeId,
+    userType: userTypeId.toString(),
   });
   return res.data;
 }

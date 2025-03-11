@@ -1,6 +1,7 @@
 import axios from "axios";
 import { z } from "zod";
 import { userSchema } from "./userApi";
+import { StorageFileSchema } from "../utils/StorageFiles.util";
 
 export enum Severity {
   MINOR = "Minor",
@@ -100,6 +101,9 @@ export const AccidentSchema = z.object({
   evidenceType: z.string().optional(),
   evidenceName: z.string().optional(),
   evidenceId: z.string().nullable(),
+  evidence: z
+    .union([z.array(StorageFileSchema), z.array(z.instanceof(File))])
+    .optional(),
   status: z.string(),
   assigneeNotification: z.boolean(),
   resolution: z.string(),
@@ -168,6 +172,9 @@ export const IncidentSchema = z.object({
   evidenceType: z.string().optional(),
   evidenceName: z.string().optional(),
   evidenceId: z.string().nullable(),
+  evidence: z
+    .union([z.array(StorageFileSchema), z.array(z.instanceof(File))])
+    .optional(),
   status: z.string(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -204,7 +211,11 @@ export const createAccident = async (accident: Accident) => {
   Object.keys(accident).forEach((key) => {
     const value = accident[key as keyof typeof accident];
 
-    if (Array.isArray(value)) {
+    if (key === "evidence" && Array.isArray(value)) {
+      value.forEach((file, index) => {
+        formData.append(`evidence[${index}]`, file as File);
+      });
+    } else if (Array.isArray(value)) {
       value.forEach((item, index) => {
         if (key === "witnesses" || key === "effectedIndividuals") {
           Object.keys(item).forEach((nestedKey) => {
@@ -239,7 +250,11 @@ export const updateAccident = async (accident: Accident) => {
   Object.keys(accident).forEach((key) => {
     const value = accident[key as keyof typeof accident];
 
-    if (Array.isArray(value)) {
+    if (key === "evidence" && Array.isArray(value)) {
+      value.forEach((file, index) => {
+        formData.append(`evidence[${index}]`, file as File);
+      });
+    } else if (Array.isArray(value)) {
       value.forEach((item, index) => {
         if (key === "witnesses" || key === "effectedIndividuals") {
           Object.keys(item).forEach((nestedKey) => {
@@ -293,7 +308,11 @@ export const createIncidents = async (incidents: Incident) => {
   Object.keys(incidents).forEach((key) => {
     const value = incidents[key as keyof typeof incidents];
 
-    if (Array.isArray(value)) {
+    if (key === "evidence" && Array.isArray(value)) {
+      value.forEach((file, index) => {
+        formData.append(`evidence[${index}]`, file as File);
+      });
+    } else if (Array.isArray(value)) {
       value.forEach((item, index) => {
         if (key === "witnesses" || key === "effectedIndividuals") {
           Object.keys(item).forEach((nestedKey) => {
@@ -329,7 +348,11 @@ export const updateIncident = async (incident: Incident) => {
   Object.keys(incident).forEach((key) => {
     const value = incident[key as keyof typeof incident];
 
-    if (Array.isArray(value)) {
+    if (key === "evidence" && Array.isArray(value)) {
+      value.forEach((file, index) => {
+        formData.append(`evidence[${index}]`, file as File);
+      });
+    } else if (Array.isArray(value)) {
       value.forEach((item, index) => {
         if (key === "witnesses" || key === "effectedIndividuals") {
           Object.keys(item).forEach((nestedKey) => {

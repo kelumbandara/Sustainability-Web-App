@@ -201,7 +201,7 @@ function MedicineRequestTable({
   const { mutate: approveMedicineRequestMutation } = useMutation({
     mutationFn: approveMedicineRequest,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["incidents"] });
+      queryClient.invalidateQueries({ queryKey: ["medicines"] });
 
       enqueueSnackbar("Medicine Request Approved!", {
         variant: "success",
@@ -306,7 +306,7 @@ function MedicineRequestTable({
                     <TableCell align="right">{row.genericName}</TableCell>
                     <TableCell align="right">{row?.division ?? "--"}</TableCell>
                     <TableCell align="right">
-                      {row?.assignee?.name ?? "--"}
+                      {row?.approver?.name ?? "--"}
                     </TableCell>
                     <TableCell align="right">
                       {row.status === "pending" ? (
@@ -366,9 +366,9 @@ function MedicineRequestTable({
               disableEdit={
                 isAssignedTasks
                   ? isMedicineDataAssignedTaskEditDisabled ||
-                    selectedRow?.status === "Approved"
+                    selectedRow?.status === "approved"
                   : isMedicineDataEditDisabled ||
-                    selectedRow?.status === "Approved"
+                    selectedRow?.status === "approved"
               }
               onDelete={() => setDeleteDialogOpen(true)}
               disableDelete={
@@ -381,7 +381,7 @@ function MedicineRequestTable({
             {selectedRow && (
               <Stack>
                 <ViewMedicineRequestContent medicalRequest={selectedRow} />
-                {selectedRow.status !== "Approved" && (
+                {selectedRow.status !== "approved" && (
                   <CustomButton
                     variant="contained"
                     sx={{
