@@ -127,7 +127,7 @@ function DocumentTable() {
       setOpenAddOrEditDialog(false);
     },
     onError: () => {
-      enqueueSnackbar(`Documwnt Delete Delete Failed`, {
+      enqueueSnackbar(`Document Delete Delete Failed`, {
         variant: "error",
       });
     },

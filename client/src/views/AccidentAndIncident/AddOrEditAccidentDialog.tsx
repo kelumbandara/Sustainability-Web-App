@@ -202,7 +202,7 @@ export default function AddOrEditAccidentDialog({
     enabled: !!category,
   });
 
-  const handleCreateDocument = (data: Accident) => {
+  const handleSubmitAccidentRecord = (data: Accident) => {
     const submitData: Partial<Accident> = data;
     // submitData.id = defaultValues?.id ?? uuidv4();
     // submitData.createdDate = new Date();
@@ -210,6 +210,8 @@ export default function AddOrEditAccidentDialog({
     submitData.assigneeId = assignee?.id;
     submitData.createdByUser = user.id;
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
+    submitData.evidence = files;
+
     onSubmit(submitData as Accident);
     // console.log(submitData)
     // resetForm();
@@ -572,7 +574,7 @@ export default function AddOrEditAccidentDialog({
                     <DropzoneComponent
                       files={files}
                       setFiles={setFiles}
-                      dropzoneLabel={"Drop Your Documents Here"}
+                      dropzoneLabel={"Drop Your Evidence Here"}
                     />
                   </Box>
 
@@ -1287,7 +1289,7 @@ export default function AddOrEditAccidentDialog({
             }}
             size="medium"
             onClick={handleSubmit((data) => {
-              handleCreateDocument(data);
+              handleSubmitAccidentRecord(data);
             })}
           >
             {defaultValues ? "Update Changes" : "Submit Report"}

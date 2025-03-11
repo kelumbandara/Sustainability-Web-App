@@ -9,6 +9,8 @@ import {
   Alert,
   Box,
   Stack,
+  TableFooter,
+  TablePagination,
   Theme,
   Typography,
   useMediaQuery,
@@ -16,7 +18,7 @@ import {
 import theme from "../../theme";
 import PageTitle from "../../components/PageTitle";
 import Breadcrumb from "../../components/BreadCrumb";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
@@ -35,13 +37,30 @@ function UserTable() {
   const [openEditUserRoleDialog, setOpenEditUserRoleDialog] = useState(false);
   // const [userData, setUserData] = useState<User[]>(sampleUsers);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  // handle pagination
+  const handleChangePage = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
     { title: "Users" },
   ];
 
-  const { data: userData, isFetching: isUserDataFetching } = useQuery({
+  const { data: usersData, isFetching: isUserDataFetching } = useQuery({
     queryKey: ["users"],
     queryFn: fetchAllUsers,
   });
@@ -49,6 +68,14 @@ function UserTable() {
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("md")
   );
+
+  const paginatedUsersData = useMemo(() => {
+    if (!usersData) return [];
+    return usersData.slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage
+    );
+  }, [usersData, page, rowsPerPage]);
 
   return (
     <Stack>
@@ -78,14 +105,14 @@ function UserTable() {
               <TableRow>
                 <TableCell>Id</TableCell>
                 <TableCell align="left">Name</TableCell>
-                <TableCell align="center">Email</TableCell>
-                <TableCell align="center">Role</TableCell>
+                <TableCell align="left">Email</TableCell>
+                <TableCell align="left">Role</TableCell>
                 <TableCell align="right">Job Position</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {userData?.length > 0 ? (
-                userData?.map((row) => (
+              {paginatedUsersData?.length > 0 ? (
+                paginatedUsersData?.map((row) => (
                   <TableRow
                     key={`${row.id}`}
                     sx={{
@@ -99,9 +126,11 @@ function UserTable() {
                   >
                     <TableCell align="left">{row.id}</TableCell>
                     <TableCell align="left">{row.name}</TableCell>
-                    <TableCell align="center">{row.email}</TableCell>
-                    <TableCell align="center">{row.role}</TableCell>
-                    <TableCell align="right">{row.jobPosition}</TableCell>
+                    <TableCell align="left">{row.email}</TableCell>
+                    <TableCell align="left">{row.userType?.userType}</TableCell>
+                    <TableCell align="right">
+                      {row.jobPosition ?? "--"}
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
@@ -112,6 +141,21 @@ function UserTable() {
                 </TableRow>
               )}
             </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                  colSpan={100}
+                  count={usersData?.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  showFirstButton={true}
+                  showLastButton={true}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+              </TableRow>
+            </TableFooter>
           </Table>
         </TableContainer>
       </Stack>

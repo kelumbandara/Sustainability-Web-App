@@ -15,12 +15,13 @@ import { Controller, useForm } from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
 import { grey } from "@mui/material/colors";
 import { useEffect } from "react";
-import { sampleRoles } from "../../api/sampleData/usersSampleData";
 import CustomButton from "../../components/CustomButton";
 import useIsMobile from "../../customHooks/useIsMobile";
-import { User, UserRole } from "../../api/userApi";
+import { updateUserType, User, UserRole } from "../../api/userApi";
 import { getAccessRolesList } from "../../api/accessManagementApi";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import queryClient from "../../state/queryClient";
+import { useSnackbar } from "notistack";
 
 type DialogProps = {
   open: boolean;
@@ -40,8 +41,7 @@ export default function EditUserRoleDialog({
     queryKey: ["access-roles"],
     queryFn: getAccessRolesList,
   });
-
-  console.log("roles", roles);
+  const { enqueueSnackbar } = useSnackbar();
 
   const {
     handleSubmit,
@@ -50,7 +50,7 @@ export default function EditUserRoleDialog({
     reset,
   } = useForm<User>({
     defaultValues: {
-      role: defaultValues?.role,
+      userType: defaultValues?.userType,
     },
   });
 
@@ -65,6 +65,23 @@ export default function EditUserRoleDialog({
   const resetForm = () => {
     reset();
   };
+
+  const { mutate: updateUserRoleMutation } = useMutation({
+    mutationFn: updateUserType,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      resetForm();
+      handleClose();
+      enqueueSnackbar("User Role Updated Successfully!", {
+        variant: "success",
+      });
+    },
+    onError: () => {
+      enqueueSnackbar(`User Role Update Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   return (
     <Dialog
@@ -109,24 +126,30 @@ export default function EditUserRoleDialog({
       <DialogContent>
         <Box sx={{ flex: 1 }}>
           <Controller
-            name="role"
+            name="userType"
             control={control}
-            defaultValue={defaultValues?.role}
+            defaultValue={defaultValues?.userType}
             rules={{ required: true }}
             render={({ field }) => (
               <Autocomplete
                 {...field}
-                onChange={(event, newValue) => field.onChange(newValue)}
+                onChange={(_, data) => field.onChange(data)}
+                getOptionLabel={(option) => option?.userType || ""}
                 size="small"
-                options={sampleRoles?.map((option) => option.name)}
+                options={roles || []}
                 sx={{ flex: 1, margin: "0.5rem" }}
+                renderOption={(props, option) => (
+                  <li {...props} key={option.id}>
+                    {option.userType}
+                  </li>
+                )}
                 renderInput={(params) => (
                   <TextField
                     {...params}
                     required
-                    error={!!errors.role}
+                    error={!!errors.userType}
                     label="Role"
-                    name="role"
+                    name="userType"
                   />
                 )}
               />
@@ -153,9 +176,13 @@ export default function EditUserRoleDialog({
           size="medium"
           onClick={handleSubmit((data) => {
             console.log(data);
+            updateUserRoleMutation({
+              id: defaultValues?.id,
+              userTypeId: data.userType?.id,
+            });
           })}
         >
-          {defaultValues ? "Update Changes" : "Save Medical Request"}
+          {defaultValues ? "Update Changes" : "Assign Role"}
         </CustomButton>
       </DialogActions>
     </Dialog>
