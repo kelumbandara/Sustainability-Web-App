@@ -20,6 +20,15 @@ export const userTypeSchema = z.object({
   created_at: z.string(),
 });
 
+export const userLevelSchema = z.object({
+  id: z.string(),
+  userLevel: z.string(),
+  userLevelName: z.string().optional(),
+  created_at: z.string(),
+});
+
+export type UserLevel = z.infer<typeof userLevelSchema>;
+
 export type UserType = z.infer<typeof userTypeSchema>;
 
 export const userSchema = z.object({
@@ -30,7 +39,10 @@ export const userSchema = z.object({
   emailVerifiedAt: z.string().nullable(),
   role: z.string(),
   roleId: z.string(),
+  availability: z.boolean(),
+  responsibleSection: z.array(z.string()),
   userType: userTypeSchema,
+  userLevel: userLevelSchema,
   profileImage: z.string().nullable(),
   status: z.string(),
   isCompanyEmployee: z.boolean(),

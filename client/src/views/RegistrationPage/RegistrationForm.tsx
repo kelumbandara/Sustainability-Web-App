@@ -303,9 +303,8 @@ function RegistrationForm() {
                 }}
                 variant="caption"
               >
-                {`${
-                  errors.mobileNumber.message || "Mobile number is required"
-                }`}
+                {`${errors.mobileNumber.message || "Mobile number is required"
+                  }`}
               </Typography>
             )
           }
@@ -389,7 +388,6 @@ function RegistrationForm() {
             {isFactoryFetched && factories && (
               <AutoCheckBox
                 {...register("assignedFactory", { required: true })}
-                error={!!errors.assignedFactory}
                 control={control}
                 limitTags={1}
                 name="assignedFactory"
