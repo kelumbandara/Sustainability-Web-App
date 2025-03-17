@@ -22,8 +22,8 @@ export const userTypeSchema = z.object({
 
 export const userLevelSchema = z.object({
   id: z.string(),
-  userLevel: z.string(),
-  userLevelName: z.string().optional(),
+  levelId: z.string(),
+  levelName: z.string().optional(),
   created_at: z.string(),
 });
 
@@ -52,7 +52,7 @@ export const userSchema = z.object({
   assignedFactory: z.array(z.string()),
   employeeNumber: z.string(),
   jobPosition: z.string(),
-  assigneeLevel: z.string(),
+  // assigneeLevel: z.string(),
   permissionObject: PermissionKeysObjectSchema,
 });
 
@@ -155,15 +155,39 @@ export async function resetPassword({
   return res.data;
 }
 
+export async function fetchAllAssigneeLevel() {
+  const res = await axios.get("/api/assignee-level");
+  return res.data;
+}
+
 export async function updateUserType({
   id,
   userTypeId,
+  assigneeLevel,
+  department,
+  availability,
+  jobPosition,
+  assignedFactory,
+  responsibleSection
+
 }: {
   id: string;
   userTypeId: string;
+  assigneeLevel: string;
+  department: string;
+  availability: boolean;
+  jobPosition: string;
+  assignedFactory: string[];
+  responsibleSection: string[];
 }) {
   const res = await axios.post(`/api/users/${id}/update`, {
     userType: userTypeId.toString(),
+    assigneeLevel: assigneeLevel.toString(),
+    department,
+    availability,
+    jobPosition,
+    assignedFactory,
+    responsibleSection
   });
   return res.data;
 }

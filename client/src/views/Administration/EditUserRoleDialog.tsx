@@ -18,17 +18,16 @@ import { grey } from "@mui/material/colors";
 import { useEffect, useState } from "react";
 import CustomButton from "../../components/CustomButton";
 import useIsMobile from "../../customHooks/useIsMobile";
-import { updateUserType, User, UserLevel, UserRole } from "../../api/userApi";
+import { fetchAllAssigneeLevel, updateUserType, User, UserLevel, UserRole } from "../../api/userApi";
 import { getAccessRolesList } from "../../api/accessManagementApi";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../state/queryClient";
 import { useSnackbar } from "notistack";
 import { fetchDepartmentData } from "../../api/departmentApi";
 import { fetchJobPositionData } from "../../api/jobPositionApi";
-import AutoCheckBox from "../../components/AutoCheckbox";
 import { fetchFactoryData } from "../../api/factoryApi";
 import { fetchResponsibleSectionData } from "../../api/responsibleSetionApi";
-import AutocompleteCheckbox from "../../components/AutoCheckbox";
+import AutoCheckBox from "../../components/AutoCheckbox";
 
 type DialogProps = {
   open: boolean;
@@ -50,7 +49,7 @@ export default function EditUserRoleDialog({
   });
   const { data: levels, isFetching: isFetchingLevels } = useQuery<UserLevel[]>({
     queryKey: ["access-levels"],
-    queryFn: getAccessRolesList,
+    queryFn: fetchAllAssigneeLevel,
   });
   const { data: departmentData, isFetching: isDepartmentDataFetching } =
     useQuery({
@@ -77,14 +76,11 @@ export default function EditUserRoleDialog({
     control,
     formState: { errors },
     reset,
-    setValue,
-    watch
   } = useForm<User>({
     defaultValues: {
       userType: defaultValues?.userType,
       userLevel: defaultValues?.userLevel,
       assignedFactory: defaultValues?.assignedFactory || [],
-
       ...defaultValues
     },
   });
@@ -209,13 +205,13 @@ export default function EditUserRoleDialog({
                 <Autocomplete
                   {...field}
                   onChange={(_, data) => field.onChange(data)}
-                  getOptionLabel={(option) => option?.userLevelName || ""}
+                  getOptionLabel={(option) => option?.levelName || ""}
                   size="small"
                   options={levels || []}
                   sx={{ flex: 1, margin: "0.5rem" }}
                   renderOption={(props, option) => (
                     <li {...props} key={option.id}>
-                      {option.userLevelName}
+                      {option.levelName}
                     </li>
                   )}
                   renderInput={(params) => (
@@ -334,7 +330,7 @@ export default function EditUserRoleDialog({
           </Box>
 
           <Box sx={{ flex: 1, margin: 1 }}>
-            <AutocompleteCheckbox
+            <AutoCheckBox
               control={control}
               name="assignedFactory"
               label="Select Factories"
@@ -342,14 +338,14 @@ export default function EditUserRoleDialog({
               selectedValues={selectedFactories}
               setSelectedValues={setSelectedFactories}
               getOptionLabel={(option) => option.factoryName}
-              getOptionValue={(option) => option.id}
+              getOptionValue={(option) => option.factoryName}
               placeholder="Choose Factories"
               limitTags={2}
             />
           </Box>
 
-          <Box sx={{ flex: 1, margin: 1}}>
-            <AutocompleteCheckbox
+          <Box sx={{ flex: 1, margin: 1 }}>
+            <AutoCheckBox
               control={control}
               name="responsibleSection"
               label="Select Responsible Sections"
@@ -357,7 +353,7 @@ export default function EditUserRoleDialog({
               selectedValues={selectedSections}
               setSelectedValues={setSelectedSections}
               getOptionLabel={(option) => option.sectionName}
-              getOptionValue={(option) => option.id}
+              getOptionValue={(option) => option.sectionName}
               placeholder="Select Sections"
               limitTags={2}
             />
@@ -388,6 +384,12 @@ export default function EditUserRoleDialog({
             updateUserRoleMutation({
               id: defaultValues?.id,
               userTypeId: data.userType?.id,
+              assigneeLevel: data.userLevel?.id,
+              department: data.department,
+              availability: data.availability,
+              jobPosition: data.jobPosition,
+              assignedFactory: data.assignedFactory,
+              responsibleSection: data.responsibleSection
             });
           })}
         >
