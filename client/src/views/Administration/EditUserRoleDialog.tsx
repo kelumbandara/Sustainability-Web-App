@@ -28,6 +28,7 @@ import { fetchJobPositionData } from "../../api/jobPositionApi";
 import { fetchFactoryData } from "../../api/factoryApi";
 import { fetchResponsibleSectionData } from "../../api/responsibleSetionApi";
 import AutoCheckBox from "../../components/AutoCheckbox";
+import SwitchButton from "../../components/SwitchButton";
 
 type DialogProps = {
   open: boolean;
@@ -76,6 +77,7 @@ export default function EditUserRoleDialog({
     control,
     formState: { errors },
     reset,
+    watch
   } = useForm<User>({
     defaultValues: {
       userType: defaultValues?.userType,
@@ -87,6 +89,7 @@ export default function EditUserRoleDialog({
 
   const [selectedFactories, setSelectedFactories] = useState([]);
   const [selectedSections, setSelectedSections] = useState([]);
+  const isAvailability = watch("availability");
 
   useEffect(() => {
     if (defaultValues) {
@@ -162,206 +165,196 @@ export default function EditUserRoleDialog({
           direction="column"
           gap={1}
         >
-          <Box sx={{ flex: 1 }}>
+          <Box>
             <Controller
-              name="userType"
               control={control}
-              defaultValue={defaultValues?.userType}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Autocomplete
-                  {...field}
-                  onChange={(_, data) => field.onChange(data)}
-                  getOptionLabel={(option) => option?.userType || ""}
-                  size="small"
-                  options={roles || []}
-                  sx={{ flex: 1, margin: "0.5rem" }}
-                  renderOption={(props, option) => (
-                    <li {...props} key={option.id}>
-                      {option.userType}
-                    </li>
-                  )}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      required
-                      error={!!errors.userType}
-                      label="Role"
-                      name="userType"
+              name={"availability"}
+              render={({ field }) => {
+                return (
+                  <SwitchButton
+                    label="Is User Available"
+                    onChange={field.onChange}
+                    value={field.value}
+                  />
+                );
+              }}
+            />
+          </Box>
+
+          {isAvailability ? (
+            <>
+              <Box sx={{ flex: 1 }}>
+                <Controller
+                  name="userType"
+                  control={control}
+                  defaultValue={defaultValues?.userType}
+                  rules={{ required: true }}
+                  render={({ field }) => (
+                    <Autocomplete
+                      {...field}
+                      onChange={(_, data) => field.onChange(data)}
+                      getOptionLabel={(option) => option?.userType || ""}
+                      size="small"
+                      options={roles || []}
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      renderOption={(props, option) => (
+                        <li {...props} key={option.id}>
+                          {option.userType}
+                        </li>
+                      )}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          error={!!errors.userType}
+                          label="Role"
+                          name="userType"
+                        />
+                      )}
                     />
                   )}
                 />
-              )}
-            />
-          </Box>
+              </Box>
 
-          <Box sx={{ flex: 1 }}>
-            <Controller
-              name="userLevel"
-              control={control}
-              defaultValue={defaultValues?.userLevel}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Autocomplete
-                  {...field}
-                  onChange={(_, data) => field.onChange(data)}
-                  getOptionLabel={(option) => option?.levelName || ""}
-                  size="small"
-                  options={levels || []}
-                  sx={{ flex: 1, margin: "0.5rem" }}
-                  renderOption={(props, option) => (
-                    <li {...props} key={option.id}>
-                      {option.levelName}
-                    </li>
-                  )}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      required
-                      error={!!errors.userLevel}
-                      label="User Level"
-                      name="userLevel"
+              <Box sx={{ flex: 1 }}>
+                <Controller
+                  name="userLevel"
+                  control={control}
+                  defaultValue={defaultValues?.userLevel}
+                  rules={{ required: true }}
+                  render={({ field }) => (
+                    <Autocomplete
+                      {...field}
+                      onChange={(_, data) => field.onChange(data)}
+                      getOptionLabel={(option) => option?.levelName || ""}
+                      size="small"
+                      options={levels || []}
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      renderOption={(props, option) => (
+                        <li {...props} key={option.id}>
+                          {option.levelName}
+                        </li>
+                      )}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          error={!!errors.userLevel}
+                          label="User Level"
+                          name="userLevel"
+                        />
+                      )}
                     />
                   )}
                 />
-              )}
-            />
-          </Box>
+              </Box>
 
-          <Box sx={{ flex: 1 }}>
-            <Controller
-              name="department"
-              control={control}
-              defaultValue={defaultValues?.department ?? ""}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Autocomplete
-                  {...field}
-                  onChange={(event, newValue) =>
-                    field.onChange(newValue)
-                  }
-                  size="small"
-                  options={
-                    departmentData?.length
-                      ? departmentData.map(
-                        (department) => department.department
-                      )
-                      : []
-                  }
-                  sx={{ flex: 1, margin: "0.5rem" }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      required
-                      error={!!errors.department}
-                      helperText={errors.department && "Required"}
-                      label="Department"
-                      name="department"
+              <Box sx={{ flex: 1 }}>
+                <Controller
+                  name="department"
+                  control={control}
+                  defaultValue={defaultValues?.department ?? ""}
+                  rules={{ required: true }}
+                  render={({ field }) => (
+                    <Autocomplete
+                      {...field}
+                      onChange={(event, newValue) =>
+                        field.onChange(newValue)
+                      }
+                      size="small"
+                      options={
+                        departmentData?.length
+                          ? departmentData.map(
+                            (department) => department.department
+                          )
+                          : []
+                      }
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          error={!!errors.department}
+                          helperText={errors.department && "Required"}
+                          label="Department"
+                          name="department"
+                        />
+                      )}
                     />
                   )}
                 />
-              )}
-            />
-          </Box>
+              </Box>
 
-          <Box sx={{ flex: 1 }}>
-            <Controller
-              name="jobPosition"
-              control={control}
-              defaultValue={defaultValues?.jobPosition ?? ""}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Autocomplete
-                  {...field}
-                  onChange={(event, newValue) =>
-                    field.onChange(newValue)
-                  }
-                  size="small"
-                  options={
-                    jobPositions?.length
-                      ? jobPositions.map(
-                        (jobPositions) => jobPositions.jobPosition
-                      )
-                      : []
-                  }
-                  sx={{ flex: 1, margin: "0.5rem" }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      required
-                      error={!!errors.jobPosition}
-                      helperText={errors.jobPosition && "Required"}
-                      label="Job Position"
-                      name="jobPosition"
+              <Box sx={{ flex: 1 }}>
+                <Controller
+                  name="jobPosition"
+                  control={control}
+                  defaultValue={defaultValues?.jobPosition ?? ""}
+                  rules={{ required: true }}
+                  render={({ field }) => (
+                    <Autocomplete
+                      {...field}
+                      onChange={(event, newValue) =>
+                        field.onChange(newValue)
+                      }
+                      size="small"
+                      options={
+                        jobPositions?.length
+                          ? jobPositions.map(
+                            (jobPositions) => jobPositions.jobPosition
+                          )
+                          : []
+                      }
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          error={!!errors.jobPosition}
+                          helperText={errors.jobPosition && "Required"}
+                          label="Job Position"
+                          name="jobPosition"
+                        />
+                      )}
                     />
                   )}
                 />
-              )}
-            />
-          </Box>
+              </Box>
 
-          <Box sx={{ flex: 1 }}>
-            <Controller
-              name="availability"
-              control={control}
-              defaultValue={defaultValues?.availability ?? false}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Autocomplete
-                  {...field}
-                  options={["Yes", "No"]}
-                  getOptionLabel={(option) => option}
-                  value={field.value ? "Yes" : "No"}
-                  onChange={(_, newValue) => field.onChange(newValue === "Yes")}
-                  size="small"
-                  sx={{ flex: 1, margin: "0.5rem" }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      required
-                      error={!!errors.availability}
-                      helperText={errors.availability && "Required"}
-                      label="Employee Availability"
-                    />
-                  )}
+              <Box sx={{ flex: 1, margin: 1 }}>
+                <AutoCheckBox
+                  control={control}
+                  required={true}
+                  name="assignedFactory"
+                  label="Select Factories"
+                  options={factories}
+                  selectedValues={selectedFactories}
+                  setSelectedValues={setSelectedFactories}
+                  getOptionLabel={(option) => option.factoryName}
+                  getOptionValue={(option) => option.factoryName}
+                  placeholder="Choose Factories"
+                  limitTags={2}
                 />
-              )}
-            />
-          </Box>
+              </Box>
 
-          <Box sx={{ flex: 1, margin: 1 }}>
-            <AutoCheckBox
-              control={control}
-              required={true}
-              name="assignedFactory"
-              label="Select Factories"
-              options={factories}
-              selectedValues={selectedFactories}
-              setSelectedValues={setSelectedFactories}
-              getOptionLabel={(option) => option.factoryName}
-              getOptionValue={(option) => option.factoryName}
-              placeholder="Choose Factories"
-              limitTags={2}
-            />
-          </Box>
+              <Box sx={{ flex: 1, margin: 1 }}>
+                <AutoCheckBox
+                  control={control}
+                  required={true}
+                  name="responsibleSection"
+                  label="Select Responsible Sections"
+                  options={sections}
+                  selectedValues={selectedSections}
+                  setSelectedValues={setSelectedSections}
+                  getOptionLabel={(option) => option.sectionName}
+                  getOptionValue={(option) => option.sectionName}
+                  placeholder="Select Sections"
+                  limitTags={2}
+                />
+              </Box>
 
-          <Box sx={{ flex: 1, margin: 1 }}>
-            <AutoCheckBox
-              control={control}
-              required={true}
-              name="responsibleSection"
-              label="Select Responsible Sections"
-              options={sections}
-              selectedValues={selectedSections}
-              setSelectedValues={setSelectedSections}
-              getOptionLabel={(option) => option.sectionName}
-              getOptionValue={(option) => option.sectionName}
-              placeholder="Select Sections"
-              limitTags={2}
-            />
-          </Box>
-
-
+            </>
+          ) : null}
         </Stack>
       </DialogContent>
       <Divider />

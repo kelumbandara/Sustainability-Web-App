@@ -386,17 +386,37 @@ function RegistrationForm() {
             )}
 
             {isFactoryFetched && factories && (
-              <AutoCheckBox
-                {...register("assignedFactory", { required: true })}
-                control={control}
-                limitTags={1}
-                name="assignedFactory"
-                options={factories}
-                selectedValues={selectedFactories}
-                setSelectedValues={setSelectedFactories}
-                label="Assigned Factories"
-                placeholder="Select factories"
-              />
+              // <AutoCheckBox
+              //   {...register("assignedFactory", { required: true })}
+              //   control={control}
+              //   limitTags={1}
+              //   name="assignedFactory"
+              //   options={factories}
+              //   selectedValues={selectedFactories}
+              //   setSelectedValues={setSelectedFactories}
+              //   label="Assigned Factories"
+              //   placeholder="Select factories"
+              // />
+
+              <Box
+                sx={{ marginTop: "1rem" }}
+              >
+                <AutoCheckBox
+                  {...register("assignedFactory", { required: true })}
+                  control={control}
+                  required={true}
+                  name="assignedFactory"
+                  label="Assigned Factories"
+                  options={factories}
+                  selectedValues={selectedFactories}
+                  setSelectedValues={setSelectedFactories}
+                  getOptionLabel={(option) => option.factoryName}
+                  getOptionValue={(option) => option.factoryName}
+                  placeholder="Choose Factories"
+                  limitTags={2}
+                />
+              </Box>
+
             )}
 
             <TextField
