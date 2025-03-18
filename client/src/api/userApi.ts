@@ -168,8 +168,7 @@ export async function updateUserType({
   availability,
   jobPosition,
   assignedFactory,
-  responsibleSection
-
+  responsibleSection,
 }: {
   id: string;
   userTypeId: string;
@@ -180,14 +179,20 @@ export async function updateUserType({
   assignedFactory: string[];
   responsibleSection: string[];
 }) {
+
+  const parsedAssignedFactory = Array.isArray(assignedFactory) ? assignedFactory : JSON.parse(assignedFactory || "[]");
+  const parsedResponsibleSection = Array.isArray(responsibleSection) ? responsibleSection : JSON.parse(responsibleSection || "[]");
+
   const res = await axios.post(`/api/users/${id}/update`, {
     userType: userTypeId.toString(),
     assigneeLevel: assigneeLevel.toString(),
     department,
     availability,
     jobPosition,
-    assignedFactory,
-    responsibleSection
+    assignedFactory: parsedAssignedFactory,
+    responsibleSection: parsedResponsibleSection,
   });
+
   return res.data;
 }
+

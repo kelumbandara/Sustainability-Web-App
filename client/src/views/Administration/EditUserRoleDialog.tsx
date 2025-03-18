@@ -332,6 +332,7 @@ export default function EditUserRoleDialog({
           <Box sx={{ flex: 1, margin: 1 }}>
             <AutoCheckBox
               control={control}
+              required={true}
               name="assignedFactory"
               label="Select Factories"
               options={factories}
@@ -347,6 +348,7 @@ export default function EditUserRoleDialog({
           <Box sx={{ flex: 1, margin: 1 }}>
             <AutoCheckBox
               control={control}
+              required={true}
               name="responsibleSection"
               label="Select Responsible Sections"
               options={sections}
