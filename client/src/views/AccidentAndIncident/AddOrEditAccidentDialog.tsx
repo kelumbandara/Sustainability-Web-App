@@ -254,18 +254,34 @@ export default function AddOrEditAccidentDialog({
     return result;
   };
 
-  const handleTabChange = async (
-    event: React.SyntheticEvent,
-    newValue: number
-  ) => {
+  const handleTabChange = async (event: React.SyntheticEvent, newValue: number) => {
+    // Check if General Details form is empty
+    const isGeneralEmpty =
+      !watch("division") && !watch("location") && !watch("department") && !watch("supervisorName");
+
+    // Check if Accident Details form is empty
+    const isAccidentEmpty =
+      !watch("category") &&
+      !watch("subCategory") &&
+      !watch("accidentType") &&
+      !watch("affectedPrimaryRegion") &&
+      !watch("affectedSecondaryRegion") &&
+      !watch("affectedTertiaryRegion") &&
+      !watch("injuryCause") &&
+      !watch("rootCause") &&
+      !watch("consultedHospital") &&
+      !watch("consultedDoctor") &&
+      !watch("description");
+
     if (newValue === 1) {
-      const isGeneralValid = await triggerGeneralDetailsSection();
-      if (!isGeneralValid && isAccidentDetailsValid) return;
+      if (isGeneralEmpty || (await triggerGeneralDetailsSection())) {
+        setActiveTab(newValue);
+      }
     } else {
-      const isAccidentValid = await triggerAccidentDetailsSection();
-      if (!isAccidentValid && isGeneralDetailsValid) return;
+      if (isAccidentEmpty || (await triggerAccidentDetailsSection())) {
+        setActiveTab(newValue);
+      }
     }
-    setActiveTab(newValue);
   };
 
   return (
