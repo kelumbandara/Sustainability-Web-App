@@ -70,7 +70,7 @@ import {
   fetchMainAccidentCategory,
 } from "../../api/accidentCategory";
 import useCurrentUser from "../../hooks/useCurrentUser";
-import { fetchAllUsers } from "../../api/userApi";
+import { fetchAccidentAssignee, fetchAllUsers, fetchIncidentAssignee } from "../../api/userApi";
 import UserAutoComplete from "../../components/UserAutoComplete";
 
 type DialogProps = {
@@ -179,6 +179,11 @@ export default function AddOrEditAccidentDialog({
   const { data: userData, isFetching: isUserDataFetching } = useQuery({
     queryKey: ["users"],
     queryFn: fetchAllUsers,
+  });
+
+  const { data: asigneeData, isFetching: isAssigneeDataFetching } = useQuery({
+    queryKey: ["accident-assignee"],
+    queryFn: fetchAccidentAssignee,
   });
 
   const category = watch("category");
@@ -1263,7 +1268,7 @@ export default function AddOrEditAccidentDialog({
                   control={control}
                   register={register}
                   errors={errors}
-                  userData={userData}
+                  userData={asigneeData}
                   defaultValue={defaultValues?.assignee}
                   required={true}
                 />

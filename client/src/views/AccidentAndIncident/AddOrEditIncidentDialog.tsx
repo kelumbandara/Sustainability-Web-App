@@ -58,7 +58,7 @@ import AddOrEditPersonDialog from "./AddOrEditPersonDialog";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { circumstancesOptions } from "../../api/sampleData/incidentData";
 import useCurrentUser from "../../hooks/useCurrentUser";
-import { fetchAllUsers } from "../../api/userApi";
+import { fetchAllUsers, fetchIncidentAssignee } from "../../api/userApi";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../api/divisionApi";
 import { fetchNearMiss } from "../../api/nearMissApi";
@@ -151,11 +151,15 @@ export default function AddOrEditIncidentDialog({
     queryFn: fetchAllFactors,
   });
 
-  const { data: circumstancesData, isFetching: isCircumstancesDataFetching } =
-    useQuery({
-      queryKey: ["circumstancesData"],
-      queryFn: fetchAllCircumstances,
-    });
+  const { data: circumstancesData, isFetching: isCircumstancesDataFetching } = useQuery({
+    queryKey: ["circumstancesData"],
+    queryFn: fetchAllCircumstances,
+  });
+
+  const { data: asigneeData, isFetching: isAssigneeDataFetching } = useQuery({
+    queryKey: ["incident-assignee"],
+    queryFn: fetchIncidentAssignee,
+  });
 
   const {
     register,
@@ -353,8 +357,8 @@ export default function AddOrEditIncidentDialog({
                           options={
                             divisionData?.length
                               ? divisionData.map(
-                                  (division) => division.divisionName
-                                )
+                                (division) => division.divisionName
+                              )
                               : []
                           }
                           sx={{ flex: 1, margin: "0.5rem" }}
@@ -395,8 +399,8 @@ export default function AddOrEditIncidentDialog({
                           options={
                             circumstancesData?.length
                               ? circumstancesData.map(
-                                  (circumstance) => circumstance.name
-                                )
+                                (circumstance) => circumstance.name
+                              )
                               : []
                           }
                           sx={{ flex: 1, margin: "0.5rem" }}
@@ -625,8 +629,8 @@ export default function AddOrEditIncidentDialog({
                           options={
                             concernData?.length
                               ? concernData.map(
-                                  (concern) => concern.typeConcerns
-                                )
+                                (concern) => concern.typeConcerns
+                              )
                               : []
                           }
                           sx={{ flex: 1, margin: "0.5rem" }}
@@ -972,7 +976,7 @@ export default function AddOrEditIncidentDialog({
                   control={control}
                   register={register}
                   errors={errors}
-                  userData={userData}
+                  userData={asigneeData}
                   defaultValue={defaultValues?.assignee}
                   required={true}
                 />
