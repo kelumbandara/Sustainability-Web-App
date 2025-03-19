@@ -4,6 +4,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import {
+  Alert,
   Autocomplete,
   Box,
   Divider,
@@ -26,24 +27,19 @@ import {
 import useIsMobile from "../../customHooks/useIsMobile";
 import { Controller, useForm } from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
-import { sampleDivisions } from "../../api/sampleData/documentData";
 import DropzoneComponent from "../../components/DropzoneComponent";
 import { grey } from "@mui/material/colors";
 import DatePickerComponent from "../../components/DatePickerComponent";
 import CustomButton from "../../components/CustomButton";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import AddIcon from "@mui/icons-material/Add";
 import { HazardAndRiskStatus } from "../../api/hazardRiskApi";
-import { sampleAssignees } from "../../api/sampleData/usersSampleData";
 import {
   AccidentEffectedIndividual,
   AccidentWitness,
   Incident,
-  IncidentFactors,
   IncidentSeverity,
-  IncidentTypeOfConcern,
-  IncidentTypeOfNearMiss,
 } from "../../api/accidentAndIncidentApi";
 import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import WarningIcon from "@mui/icons-material/Warning";
@@ -56,7 +52,6 @@ import RichTextComponent from "../../components/RichTextComponent";
 import AddOrEditWitnessDialog from "./AddOrEditWitnessDialog";
 import AddOrEditPersonDialog from "./AddOrEditPersonDialog";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { circumstancesOptions } from "../../api/sampleData/incidentData";
 import useCurrentUser from "../../hooks/useCurrentUser";
 import { fetchAllUsers } from "../../api/userApi";
 import { useQuery } from "@tanstack/react-query";
@@ -121,41 +116,35 @@ export default function AddOrEditIncidentDialog({
     useState<AccidentEffectedIndividual>(null);
   const { user } = useCurrentUser();
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    console.log("event", event);
-    setActiveTab(newValue);
-  };
-
-  const { data: userData, isFetching: isUserDataFetching } = useQuery({
+  const { data: userData } = useQuery({
     queryKey: ["users"],
     queryFn: fetchAllUsers,
   });
 
-  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
+  const { data: divisionData } = useQuery({
     queryKey: ["divisions"],
     queryFn: fetchDivision,
   });
 
-  const { data: nearMissData, isFetching: isNearMissDataFetching } = useQuery({
+  const { data: nearMissData } = useQuery({
     queryKey: ["nearMissData"],
     queryFn: fetchNearMiss,
   });
 
-  const { data: concernData, isFetching: isConcernDataFetching } = useQuery({
+  const { data: concernData } = useQuery({
     queryKey: ["concernData"],
     queryFn: fetchTypeOfConcerns,
   });
 
-  const { data: factorData, isFetching: isFactorDataFetching } = useQuery({
+  const { data: factorData } = useQuery({
     queryKey: ["factorData"],
     queryFn: fetchAllFactors,
   });
 
-  const { data: circumstancesData, isFetching: isCircumstancesDataFetching } =
-    useQuery({
-      queryKey: ["circumstancesData"],
-      queryFn: fetchAllCircumstances,
-    });
+  const { data: circumstancesData } = useQuery({
+    queryKey: ["circumstancesData"],
+    queryFn: fetchAllCircumstances,
+  });
 
   const {
     register,
@@ -165,7 +154,11 @@ export default function AddOrEditIncidentDialog({
     formState: { errors },
     reset,
     setValue,
-  } = useForm<Incident>({});
+    trigger,
+  } = useForm<Incident>({
+    reValidateMode: "onChange",
+    mode: "onChange",
+  });
 
   const witnessesWatch = watch("witnesses");
   const effectedIndividualsWatch = watch("effectedIndividuals");
@@ -187,8 +180,6 @@ export default function AddOrEditIncidentDialog({
   const handleSubmitIncident = (data: Incident) => {
     const submitData: Partial<Incident> = data;
     submitData.id = defaultValues?.id ?? uuidv4();
-    // submitData.createdDate = new Date();
-    // submitData.createdByUser = sampleAssignees[0].name;
     submitData.assigneeId = assignee?.id;
     submitData.createdByUser = user.id;
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
@@ -196,6 +187,30 @@ export default function AddOrEditIncidentDialog({
     onSubmit(submitData as Incident);
   };
 
+  const isGeneralDetailsValid = useMemo(() => {
+    return !errors.division && !errors.location && !errors.circumstances;
+  }, [errors.division, errors.location, errors.circumstances]);
+
+  const isIncidentDetailsValid = useMemo(() => {
+    return !errors.typeOfNearMiss && !errors.typeOfConcern && !errors.factors;
+  }, [errors.typeOfNearMiss, errors.typeOfConcern, errors.factors]);
+
+  const triggerGeneralDetailsSection = () => {
+    trigger(["division", "location", "circumstances"]);
+  };
+
+  const triggerIncidentDetailsSection = () => {
+    trigger(["typeOfNearMiss", "typeOfConcern", "factors"]);
+  };
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    if (newValue === 1) {
+      triggerGeneralDetailsSection();
+    } else {
+      triggerIncidentDetailsSection();
+    }
+    setActiveTab(newValue);
+  };
   return (
     <>
       <Dialog
@@ -236,6 +251,15 @@ export default function AddOrEditIncidentDialog({
         </DialogTitle>
         <Divider />
         <DialogContent>
+          {Object.keys(errors).length > 0 && (
+            <Alert
+              severity="error"
+              style={{ marginLeft: "1rem", marginRight: "1rem" }}
+            >
+              Please make sure to fill all the required fields with valid data
+            </Alert>
+          )}
+
           <Stack
             sx={{
               display: "flex",
@@ -272,11 +296,14 @@ export default function AddOrEditIncidentDialog({
               </Box>
               <Tabs
                 value={activeTab}
-                onChange={handleChange}
+                onChange={handleTabChange}
                 indicatorColor="secondary"
                 TabIndicatorProps={{
                   style: {
-                    backgroundColor: "var(--pallet-blue)",
+                    backgroundColor:
+                      isIncidentDetailsValid && isGeneralDetailsValid
+                        ? "var(--pallet-blue)"
+                        : "var(--pallet-red)",
                     height: "3px",
                   },
                 }}
@@ -291,7 +318,9 @@ export default function AddOrEditIncidentDialog({
                   label={
                     <Box
                       sx={{
-                        color: "var(--pallet-blue)",
+                        color: isGeneralDetailsValid
+                          ? "var(--pallet-blue)"
+                          : "var(--pallet-red)",
                         display: "flex",
                         alignItems: "center",
                       }}
@@ -300,6 +329,14 @@ export default function AddOrEditIncidentDialog({
                       <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                         General Details
                       </Typography>
+                      {!isGeneralDetailsValid && (
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ ml: "0.3rem", color: "var(--pallet-red)" }}
+                        >
+                          *
+                        </Typography>
+                      )}
                     </Box>
                   }
                   {...a11yProps(0)}
@@ -308,7 +345,9 @@ export default function AddOrEditIncidentDialog({
                   label={
                     <Box
                       sx={{
-                        color: "var(--pallet-blue)",
+                        color: isIncidentDetailsValid
+                          ? "var(--pallet-blue)"
+                          : "var(--pallet-red)",
                         display: "flex",
                         alignItems: "center",
                       }}
@@ -317,6 +356,14 @@ export default function AddOrEditIncidentDialog({
                       <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                         Incident Details
                       </Typography>
+                      {!isIncidentDetailsValid && (
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ ml: "0.3rem", color: "var(--pallet-red)" }}
+                        >
+                          *
+                        </Typography>
+                      )}
                     </Box>
                   }
                   {...a11yProps(1)}
@@ -342,7 +389,7 @@ export default function AddOrEditIncidentDialog({
                       name="division"
                       control={control}
                       defaultValue={defaultValues?.division ?? ""}
-                      rules={{ required: true }}
+                      {...register("division", { required: true })}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -384,7 +431,7 @@ export default function AddOrEditIncidentDialog({
                       name="circumstances"
                       control={control}
                       defaultValue={defaultValues?.circumstances ?? ""}
-                      rules={{ required: true }}
+                      {...register("circumstances", { required: true })}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -554,7 +601,7 @@ export default function AddOrEditIncidentDialog({
                       }}
                       size="medium"
                       onClick={() => {
-                        setActiveTab(1);
+                        handleTabChange(null, 1);
                       }}
                       endIcon={<ArrowForwardIcon />}
                     >
@@ -583,7 +630,7 @@ export default function AddOrEditIncidentDialog({
                       name="typeOfNearMiss"
                       control={control}
                       defaultValue={defaultValues?.typeOfNearMiss ?? null}
-                      rules={{ required: true }}
+                      {...register("typeOfNearMiss", { required: true })}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -614,7 +661,7 @@ export default function AddOrEditIncidentDialog({
                       name="typeOfConcern"
                       control={control}
                       defaultValue={defaultValues?.typeOfConcern ?? null}
-                      rules={{ required: true }}
+                      {...register("typeOfConcern", { required: true })}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -647,7 +694,7 @@ export default function AddOrEditIncidentDialog({
                       name="factors"
                       control={control}
                       defaultValue={defaultValues?.factors ?? null}
-                      rules={{ required: true }}
+                      {...register("factors", { required: true })}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -701,6 +748,7 @@ export default function AddOrEditIncidentDialog({
                     <Controller
                       control={control}
                       name={"incidentDetails"}
+                      {...register("incidentDetails")}
                       render={({ field }) => {
                         return (
                           <RichTextComponent
@@ -834,7 +882,7 @@ export default function AddOrEditIncidentDialog({
                       }}
                       size="medium"
                       onClick={() => {
-                        setActiveTab(0);
+                        handleTabChange(null, 0);
                       }}
                       startIcon={<ArrowBackIcon />}
                     >
