@@ -18,7 +18,13 @@ import { grey } from "@mui/material/colors";
 import { useEffect, useState } from "react";
 import CustomButton from "../../components/CustomButton";
 import useIsMobile from "../../customHooks/useIsMobile";
-import { fetchAllAssigneeLevel, updateUserType, User, UserLevel, UserRole } from "../../api/userApi";
+import {
+  fetchAllAssigneeLevel,
+  updateUserType,
+  User,
+  UserLevel,
+  UserRole,
+} from "../../api/userApi";
 import { getAccessRolesList } from "../../api/accessManagementApi";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../state/queryClient";
@@ -71,19 +77,18 @@ export default function EditUserRoleDialog({
   });
   const { enqueueSnackbar } = useSnackbar();
 
-
   const {
     handleSubmit,
     control,
     formState: { errors },
     reset,
-    watch
+    watch,
   } = useForm<User>({
     defaultValues: {
       userType: defaultValues?.userType,
       userLevel: defaultValues?.userLevel,
       assignedFactory: defaultValues?.assignedFactory || [],
-      ...defaultValues
+      ...defaultValues,
     },
   });
 
@@ -103,7 +108,7 @@ export default function EditUserRoleDialog({
     reset();
   };
 
-  const { mutate: updateUserRoleMutation } = useMutation({
+  const { mutate: updateUserRoleMutation, isPending } = useMutation({
     mutationFn: updateUserType,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
@@ -127,8 +132,7 @@ export default function EditUserRoleDialog({
         resetForm();
         handleClose();
       }}
-      fullScreen={isTablet}
-      maxWidth={isTablet ? "lg" : "lg"}
+      fullScreen={true}
       PaperProps={{
         style: {
           backgroundColor: grey[50],
@@ -161,10 +165,7 @@ export default function EditUserRoleDialog({
       </DialogTitle>
       <Divider />
       <DialogContent>
-        <Stack
-          direction="column"
-          gap={1}
-        >
+        <Stack direction="column" gap={1}>
           <Box>
             <Controller
               control={control}
@@ -258,15 +259,13 @@ export default function EditUserRoleDialog({
                   render={({ field }) => (
                     <Autocomplete
                       {...field}
-                      onChange={(event, newValue) =>
-                        field.onChange(newValue)
-                      }
+                      onChange={(event, newValue) => field.onChange(newValue)}
                       size="small"
                       options={
                         departmentData?.length
                           ? departmentData.map(
-                            (department) => department.department
-                          )
+                              (department) => department.department
+                            )
                           : []
                       }
                       sx={{ flex: 1, margin: "0.5rem" }}
@@ -294,15 +293,13 @@ export default function EditUserRoleDialog({
                   render={({ field }) => (
                     <Autocomplete
                       {...field}
-                      onChange={(event, newValue) =>
-                        field.onChange(newValue)
-                      }
+                      onChange={(event, newValue) => field.onChange(newValue)}
                       size="small"
                       options={
                         jobPositions?.length
                           ? jobPositions.map(
-                            (jobPositions) => jobPositions.jobPosition
-                          )
+                              (jobPositions) => jobPositions.jobPosition
+                            )
                           : []
                       }
                       sx={{ flex: 1, margin: "0.5rem" }}
@@ -352,7 +349,6 @@ export default function EditUserRoleDialog({
                   limitTags={2}
                 />
               </Box>
-
             </>
           ) : null}
         </Stack>
@@ -373,6 +369,7 @@ export default function EditUserRoleDialog({
           sx={{
             backgroundColor: "var(--pallet-blue)",
           }}
+          disabled={isPending}
           size="medium"
           onClick={handleSubmit((data) => {
             console.log(data);
@@ -384,7 +381,7 @@ export default function EditUserRoleDialog({
               availability: data.availability,
               jobPosition: data.jobPosition,
               assignedFactory: data.assignedFactory,
-              responsibleSection: data.responsibleSection
+              responsibleSection: data.responsibleSection,
             });
           })}
         >
