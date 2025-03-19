@@ -2,59 +2,54 @@ import React from "react";
 import { Controller } from "react-hook-form";
 import { Autocomplete, Checkbox, TextField } from "@mui/material";
 
-const AutoCheckBox = ({
+const AutocompleteCheckbox = ({
   control,
   name,
-  options,
-  selectedValues,
+  options = [],
+  selectedValues = [],
   setSelectedValues,
   label,
   placeholder,
   limitTags,
-  error,
+  required = false,
+  getOptionLabel = (option) => option.label,
+  getOptionValue = (option) => option.value,
 }) => {
   return (
     <Controller
       control={control}
       name={name}
-      rules={{ required: "This field is required" }} // Add validation here
-      render={({ field }) => (
+      rules={required ? { required: "This field is required" } : {}}
+      render={({ field: { onChange, value }, fieldState: { error } }) => (
         <Autocomplete
-          {...field}
           multiple
           limitTags={limitTags}
-          id={`${name}`}
+          id={name}
           options={options}
           disableCloseOnSelect
-          getOptionLabel={(option) => option.factoryName}
-          onChange={(event, newValue) => {
-            const selectedFactoryNames = newValue.map(
-              (item) => item.factoryName
-            );
-            field.onChange(selectedFactoryNames);
-            setSelectedValues(selectedFactoryNames);
-          }}
-          value={options?.filter((option) =>
-            selectedValues.includes(option.factoryName)
+          getOptionLabel={getOptionLabel}
+          value={options.filter((option) =>
+            (value || []).includes(getOptionValue(option))
           )}
-          renderOption={(props, option, { selected }) => {
-            const { key, ...optionProps } = props;
-            return (
-              <li key={key} {...optionProps}>
-                <Checkbox style={{ marginRight: 8 }} checked={selected} />
-                {option.factoryName}
-              </li>
-            );
+          onChange={(event, newValue) => {
+            const values = newValue.map(getOptionValue);
+            onChange(values);
+            setSelectedValues?.(values);
           }}
-          sx={{ marginTop: "1rem" }}
+          renderOption={(props, option, { selected }) => (
+            <li {...props}>
+              <Checkbox style={{ marginRight: 8 }} checked={selected} />
+              {getOptionLabel(option)}
+            </li>
+          )}
           renderInput={(params) => (
             <TextField
               {...params}
               label={label}
               placeholder={placeholder}
               size="small"
-              error={error} // Pass error to TextField
-              helperText={error ? "This field is required" : ""}
+              error={!!error}
+              helperText={error?.message || ""}
             />
           )}
         />
@@ -63,4 +58,4 @@ const AutoCheckBox = ({
   );
 };
 
-export default AutoCheckBox;
+export default AutocompleteCheckbox;
