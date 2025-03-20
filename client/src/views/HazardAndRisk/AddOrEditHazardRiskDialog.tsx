@@ -392,6 +392,7 @@ export default function AddOrEditHazardRiskDialog({
                     {...params}
                     required
                     error={!!errors.category}
+                    helperText={errors.category ? "Required" : ""}
                     label="Category"
                     name="category"
                   />
@@ -421,6 +422,7 @@ export default function AddOrEditHazardRiskDialog({
                       {...params}
                       required
                       error={!!errors.subCategory}
+                      helperText={errors.subCategory ? "Required" : ""}
                       label="Sub Category"
                       name="subCategory"
                     />
@@ -499,6 +501,7 @@ export default function AddOrEditHazardRiskDialog({
                     {...params}
                     required
                     error={!!errors.division}
+                    helperText={errors.division ? "Required" : ""}
                     label="Division"
                     name="division"
                   />
@@ -509,6 +512,7 @@ export default function AddOrEditHazardRiskDialog({
                 id="locationOrDepartment"
                 label="Location or Department"
                 error={!!errors.locationOrDepartment}
+                helperText={errors.locationOrDepartment ? "Required" : ""}
                 size="small"
                 sx={{ flex: 1, margin: "0.5rem" }}
                 {...register("locationOrDepartment", { required: true })}
