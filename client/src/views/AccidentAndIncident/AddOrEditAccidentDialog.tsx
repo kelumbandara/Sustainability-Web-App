@@ -186,7 +186,6 @@ export default function AddOrEditAccidentDialog({
     submitData.createdByUser = user.id;
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
     submitData.evidence = files;
-
     onSubmit(submitData as Accident);
   };
 
@@ -232,18 +231,12 @@ export default function AddOrEditAccidentDialog({
     errors.description,
   ]);
 
-  const triggerGeneralDetailsSection = async () => {
-    const result = await trigger([
-      "division",
-      "location",
-      "department",
-      "supervisorName",
-    ]);
-    return result;
+  const triggerGeneralDetailsSection = () => {
+    trigger(["division", "location", "department", "supervisorName"]);
   };
 
-  const triggerAccidentDetailsSection = async () => {
-    const result = await trigger([
+  const triggerAccidentDetailsSection = () => {
+    trigger([
       "category",
       "subCategory",
       "accidentType",
@@ -256,19 +249,13 @@ export default function AddOrEditAccidentDialog({
       "consultedDoctor",
       "description",
     ]);
-    return result;
   };
 
-  const handleTabChange = async (
-    event: React.SyntheticEvent,
-    newValue: number
-  ) => {
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     if (newValue === 1) {
-      const isGeneralValid = await triggerGeneralDetailsSection();
-      if (!isGeneralValid && isAccidentDetailsValid) return;
+      triggerGeneralDetailsSection();
     } else {
-      const isAccidentValid = await triggerAccidentDetailsSection();
-      if (!isAccidentValid && isGeneralDetailsValid) return;
+      triggerAccidentDetailsSection();
     }
     setActiveTab(newValue);
   };
