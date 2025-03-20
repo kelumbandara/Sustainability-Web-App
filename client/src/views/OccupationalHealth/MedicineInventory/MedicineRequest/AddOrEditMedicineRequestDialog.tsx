@@ -23,7 +23,7 @@ import CustomButton from "../../../../components/CustomButton";
 import { useQuery } from "@tanstack/react-query";
 import { fetchMedicineList } from "../../../../api/OccupationalHealth/medicineNameApi";
 import { fetchDivision } from "../../../../api/divisionApi";
-import { fetchAllUsers } from "../../../../api/userApi";
+import { fetchAllUsers, fetchMedicineRequestAssignee } from "../../../../api/userApi";
 import UserAutoComplete from "../../../../components/UserAutoComplete";
 
 type DialogProps = {
@@ -94,6 +94,11 @@ export default function AddOrEditMedicineRequestDialog({
   const { data: userData, isFetching: isUserDataFetching } = useQuery({
     queryKey: ["users"],
     queryFn: fetchAllUsers,
+  });
+
+  const { data: asigneeData, isFetching: isAssigneeDataFetching } = useQuery({
+    queryKey: ["medicine-assignee"],
+    queryFn: fetchMedicineRequestAssignee,
   });
 
   return (
@@ -221,7 +226,7 @@ export default function AddOrEditMedicineRequestDialog({
                 control={control}
                 register={register}
                 errors={errors}
-                userData={userData}
+                userData={asigneeData}
                 defaultValue={defaultValues?.approver}
                 required={true}
               />

@@ -42,7 +42,7 @@ import {
 } from "../../api/categoryApi";
 import { useQuery } from "@tanstack/react-query";
 import useCurrentUser from "../../hooks/useCurrentUser";
-import { fetchAllUsers } from "../../api/userApi";
+import { fetchAllUsers, fetchHazardRiskAssignee } from "../../api/userApi";
 import { fetchDivision } from "../../api/divisionApi";
 import UserAutoComplete from "../../components/UserAutoComplete";
 
@@ -108,6 +108,11 @@ export default function AddOrEditHazardRiskDialog({
   const { data: userData, isFetching: isUserDataFetching } = useQuery({
     queryKey: ["users"],
     queryFn: fetchAllUsers,
+  });
+
+  const { data: assigneeData, isFetching: isAssigneeDataFetching } = useQuery({
+    queryKey: ["hr-assignee"],
+    queryFn: fetchHazardRiskAssignee,
   });
 
   const { data: subCategoryData, isFetching: isSubCategoryDataFetching } =
@@ -701,7 +706,7 @@ export default function AddOrEditHazardRiskDialog({
                 control={control}
                 register={register}
                 errors={errors}
-                userData={userData}
+                userData={assigneeData}
                 defaultValue={defaultValues?.assignee}
                 required={true}
               />
