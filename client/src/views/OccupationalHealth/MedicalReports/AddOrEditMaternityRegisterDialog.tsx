@@ -4,6 +4,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import {
+  Alert,
   Autocomplete,
   Box,
   Divider,
@@ -24,7 +25,7 @@ import {
 import { Controller, useForm } from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
 import { grey } from "@mui/material/colors";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -46,7 +47,6 @@ import CustomButton from "../../../components/CustomButton";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { sampleDivisions } from "../../../api/sampleData/documentData";
 import AddOrEditBenefitEntitlementDialog from "./AddOrEditBenefitEntitlementDialog";
 import AddOrEditDocumentDialog from "./AddOrEditDocumentDialog";
 import { fetchDivision } from "../../../api/divisionApi";
@@ -110,10 +110,6 @@ export default function AddOrEditMaternityRegisterDialog({
   ] = useState(false);
   const [selectedMedicalDocument, setSelectedMedicalDocument] =
     useState<MedicalDocument>(null);
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    console.log("event", event);
-    setActiveTab(newValue);
-  };
 
   const {
     register,
@@ -123,7 +119,11 @@ export default function AddOrEditMaternityRegisterDialog({
     reset,
     watch,
     setValue,
-  } = useForm<MaternityRegister>({});
+    trigger,
+  } = useForm<MaternityRegister>({
+    reValidateMode: "onChange",
+    mode: "onChange",
+  });
 
   const watchBenefitAndEntitlements = watch("benefitsAndEntitlements");
   const watchMedicalDocuments = watch("medicalDocuments");
@@ -152,6 +152,93 @@ export default function AddOrEditMaternityRegisterDialog({
     queryKey: ["divisions"],
     queryFn: fetchDivision,
   });
+
+  const isEmployeeInfoValid = useMemo(() => {
+    return (
+      !errors.employeeId &&
+      !errors.employeeName &&
+      !errors.age &&
+      !errors.contactNumber &&
+      !errors.designation &&
+      !errors.department &&
+      !errors.supervisorOrManager &&
+      !errors.dateOfJoin &&
+      !errors.averageWages
+    );
+  }, [
+    errors.employeeId,
+    errors.employeeName,
+    errors.age,
+    errors.contactNumber,
+    errors.designation,
+    errors.department,
+    errors.supervisorOrManager,
+    errors.dateOfJoin,
+    errors.averageWages,
+  ]);
+
+  const isMaternityLeaveApplicationValid = useMemo(() => {
+    return (
+      !errors.applicationId &&
+      !errors.applicationDate &&
+      !errors.leaveStartDate &&
+      !errors.leaveEndDate &&
+      !errors.actualDeliveryDate &&
+      !errors.leaveStatus
+    );
+  }, [
+    errors.applicationId,
+    errors.applicationDate,
+    errors.leaveStartDate,
+    errors.leaveEndDate,
+    errors.actualDeliveryDate,
+    errors.leaveStatus,
+  ]);
+
+  const isReturnToWorkPlanValid = useMemo(() => {
+    return !errors.noticeDateAfterDelivery && !errors.reJoinDate;
+  }, [errors.noticeDateAfterDelivery, errors.reJoinDate]);
+
+  const triggerEmployeeInfoSection = () => {
+    trigger([
+      "employeeId",
+      "employeeName",
+      "age",
+      "contactNumber",
+      "designation",
+      "department",
+      "supervisorOrManager",
+      "dateOfJoin",
+      "averageWages",
+    ]);
+  };
+
+  const triggerMaternityLeaveApplicationSection = () => {
+    trigger([
+      "applicationId",
+      "applicationDate",
+      "leaveStartDate",
+      "leaveEndDate",
+      "actualDeliveryDate",
+      "leaveStatus",
+    ]);
+  };
+
+  const triggerReturnToWorkPlanSection = () => {
+    trigger(["noticeDateAfterDelivery", "reJoinDate", "supportProvider"]);
+  };
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    if (activeTab === 0) {
+      triggerEmployeeInfoSection();
+    } else if (activeTab === 1) {
+      triggerMaternityLeaveApplicationSection();
+    } else if (activeTab === 3) {
+      triggerReturnToWorkPlanSection();
+    }
+
+    setActiveTab(newValue);
+  };
 
   return (
     <>
@@ -195,6 +282,14 @@ export default function AddOrEditMaternityRegisterDialog({
         </DialogTitle>
         <Divider />
         <DialogContent>
+          {Object.keys(errors).length > 0 && (
+            <Alert
+              severity="error"
+              style={{ marginLeft: "1rem", marginRight: "1rem" }}
+            >
+              Please make sure to fill all the required fields with valid data
+            </Alert>
+          )}
           <Stack
             sx={{
               display: "flex",
@@ -231,11 +326,16 @@ export default function AddOrEditMaternityRegisterDialog({
               </Box>
               <Tabs
                 value={activeTab}
-                onChange={handleChange}
+                onChange={handleTabChange}
                 indicatorColor="secondary"
                 TabIndicatorProps={{
                   style: {
-                    backgroundColor: "var(--pallet-blue)",
+                    backgroundColor:
+                      isEmployeeInfoValid &&
+                      isMaternityLeaveApplicationValid &&
+                      isReturnToWorkPlanValid
+                        ? "var(--pallet-blue)"
+                        : "var(--pallet-red)",
                     height: "3px",
                   },
                 }}
@@ -252,7 +352,9 @@ export default function AddOrEditMaternityRegisterDialog({
                   label={
                     <Box
                       sx={{
-                        color: "var(--pallet-blue)",
+                        color: isEmployeeInfoValid
+                          ? "var(--pallet-blue)"
+                          : "var(--pallet-red)",
                         display: "flex",
                         alignItems: "center",
                       }}
@@ -261,6 +363,14 @@ export default function AddOrEditMaternityRegisterDialog({
                       <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                         Employee Information
                       </Typography>
+                      {!isEmployeeInfoValid && (
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ ml: "0.3rem", color: "var(--pallet-red)" }}
+                        >
+                          *
+                        </Typography>
+                      )}
                     </Box>
                   }
                   {...a11yProps(0)}
@@ -269,7 +379,9 @@ export default function AddOrEditMaternityRegisterDialog({
                   label={
                     <Box
                       sx={{
-                        color: "var(--pallet-blue)",
+                        color: isMaternityLeaveApplicationValid
+                          ? "var(--pallet-blue)"
+                          : "var(--pallet-red)",
                         display: "flex",
                         alignItems: "center",
                       }}
@@ -278,6 +390,14 @@ export default function AddOrEditMaternityRegisterDialog({
                       <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                         Maternity Leave Application
                       </Typography>
+                      {!isMaternityLeaveApplicationValid && (
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ ml: "0.3rem", color: "var(--pallet-red)" }}
+                        >
+                          *
+                        </Typography>
+                      )}
                     </Box>
                   }
                   {...a11yProps(1)}
@@ -303,7 +423,9 @@ export default function AddOrEditMaternityRegisterDialog({
                   label={
                     <Box
                       sx={{
-                        color: "var(--pallet-blue)",
+                        color: isReturnToWorkPlanValid
+                          ? "var(--pallet-blue)"
+                          : "var(--pallet-red)",
                         display: "flex",
                         alignItems: "center",
                       }}
@@ -312,6 +434,14 @@ export default function AddOrEditMaternityRegisterDialog({
                       <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                         Return to Work Plan
                       </Typography>
+                      {!isReturnToWorkPlanValid && (
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ ml: "0.3rem", color: "var(--pallet-red)" }}
+                        >
+                          *
+                        </Typography>
+                      )}
                     </Box>
                   }
                   {...a11yProps(3)}
@@ -376,7 +506,7 @@ export default function AddOrEditMaternityRegisterDialog({
                       size="small"
                       type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("age")}
+                      {...register("age", { required: true })}
                     />
                   </Box>
                   <Box
@@ -393,7 +523,7 @@ export default function AddOrEditMaternityRegisterDialog({
                       size="small"
                       type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("contactNumber")}
+                      {...register("contactNumber", { required: true })}
                     />
                     <TextField
                       required
@@ -430,7 +560,7 @@ export default function AddOrEditMaternityRegisterDialog({
                         margin: "0.5rem",
                         marginTop: isTablet ? "0.5rem" : "1.8rem",
                       }}
-                      {...register("supervisorOrManager")}
+                      {...register("supervisorOrManager", { required: true })}
                     />
                     <Controller
                       control={control}
@@ -444,7 +574,7 @@ export default function AddOrEditMaternityRegisterDialog({
                               value={
                                 field.value ? new Date(field.value) : undefined
                               }
-                              label="Manufacturing Date"
+                              label="Date of Join"
                               error={errors?.dateOfJoin ? "Required" : ""}
                             />
                           </Box>
@@ -463,7 +593,7 @@ export default function AddOrEditMaternityRegisterDialog({
                         margin: "0.5rem",
                         marginTop: isTablet ? "0.5rem" : "1.8rem",
                       }}
-                      {...register("averageWages")}
+                      {...register("averageWages", { required: true })}
                     />
                   </Box>
                   <Box
@@ -481,7 +611,7 @@ export default function AddOrEditMaternityRegisterDialog({
                       }}
                       size="medium"
                       onClick={() => {
-                        setActiveTab(1);
+                        handleTabChange(null, 1);
                       }}
                       endIcon={<ArrowForwardIcon />}
                     >
@@ -627,7 +757,7 @@ export default function AddOrEditMaternityRegisterDialog({
                       name="leaveStatus"
                       control={control}
                       defaultValue={defaultValues?.leaveStatus}
-                      rules={{ required: true }}
+                      {...register("leaveStatus", { required: true })}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -665,7 +795,7 @@ export default function AddOrEditMaternityRegisterDialog({
                       }}
                       size="medium"
                       onClick={() => {
-                        setActiveTab(0);
+                        handleTabChange(null, 0);
                       }}
                       endIcon={<ArrowBackIcon />}
                     >
@@ -679,7 +809,7 @@ export default function AddOrEditMaternityRegisterDialog({
                       }}
                       size="medium"
                       onClick={() => {
-                        setActiveTab(2);
+                        handleTabChange(null, 2);
                       }}
                       endIcon={<ArrowForwardIcon />}
                     >
@@ -824,7 +954,7 @@ export default function AddOrEditMaternityRegisterDialog({
                       }}
                       size="medium"
                       onClick={() => {
-                        setActiveTab(1);
+                        handleTabChange(null, 1);
                       }}
                       endIcon={<ArrowBackIcon />}
                     >
@@ -838,7 +968,7 @@ export default function AddOrEditMaternityRegisterDialog({
                       }}
                       size="medium"
                       onClick={() => {
-                        setActiveTab(3);
+                        handleTabChange(null, 3);
                       }}
                       endIcon={<ArrowForwardIcon />}
                     >
@@ -862,7 +992,7 @@ export default function AddOrEditMaternityRegisterDialog({
                       display: "flex",
                     }}
                   >
-                    <Controller
+                    {/* <Controller
                       control={control}
                       {...register("dateOfJoin", { required: true })}
                       name={"dateOfJoin"}
@@ -872,13 +1002,13 @@ export default function AddOrEditMaternityRegisterDialog({
                             <DatePickerComponent
                               onChange={(e) => field.onChange(e)}
                               value={field.value ? new Date(field.value) : null}
-                              label="Manufacturing Date"
+                              label="Date of Join"
                               error={errors?.dateOfJoin ? "Required" : ""}
                             />
                           </Box>
                         );
                       }}
-                    />
+                    /> */}
                     <Controller
                       control={control}
                       {...register("noticeDateAfterDelivery", {
@@ -922,7 +1052,6 @@ export default function AddOrEditMaternityRegisterDialog({
                       }}
                     />
                     <TextField
-                      required
                       id="supportProvider"
                       label="Support Provided"
                       error={!!errors.supportProvider}
@@ -950,7 +1079,7 @@ export default function AddOrEditMaternityRegisterDialog({
                       }}
                       size="medium"
                       onClick={() => {
-                        setActiveTab(2);
+                        handleTabChange(null, 2);
                       }}
                       endIcon={<ArrowBackIcon />}
                     >
@@ -964,7 +1093,7 @@ export default function AddOrEditMaternityRegisterDialog({
                       }}
                       size="medium"
                       onClick={() => {
-                        setActiveTab(4);
+                        handleTabChange(null, 4);
                       }}
                       endIcon={<ArrowForwardIcon />}
                     >
@@ -1139,8 +1268,12 @@ export default function AddOrEditMaternityRegisterDialog({
                       onChange={(event, newValue) => field.onChange(newValue)}
                       size="small"
                       options={
-                        divisionData?.length ? divisionData.map((division) => division.divisionName) : []}
-
+                        divisionData?.length
+                          ? divisionData.map(
+                              (division) => division.divisionName
+                            )
+                          : []
+                      }
                       sx={{ flex: 1, margin: "0.5rem" }}
                       renderInput={(params) => (
                         <TextField
@@ -1156,7 +1289,6 @@ export default function AddOrEditMaternityRegisterDialog({
                   )}
                 />
                 <TextField
-                  required
                   id="remarks"
                   label="Remarks"
                   error={!!errors.remarks}

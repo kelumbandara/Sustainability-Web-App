@@ -5,7 +5,7 @@ function PermissionDenied() {
   return (
     <Stack>
       <Typography
-        variant="h3"
+        variant="h4"
         align="center"
         sx={{ mt: 2, mb: 2, fontWeight: "bold", color: "var(--pallet-orange)" }}
       >
@@ -27,7 +27,7 @@ function PermissionDenied() {
       <Typography
         variant="body1"
         align="center"
-        sx={{ mt: 2, color: "var(--pallet-main-blue)" }}
+        sx={{ mt: 2, color: "var(--pallet-green)" }}
       >
         You do not have permission to access this page. Please contact your
         administrator for more information.

@@ -91,14 +91,14 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   const { mutate: createAccidentMutation } = useMutation({
     mutationFn: createAccident,
     onSuccess: () => {
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
       queryClient.invalidateQueries({ queryKey: ["accidents"] });
       queryClient.invalidateQueries({ queryKey: ["accidents-assigned-task"] });
       enqueueSnackbar("Accident Report Created Successfully!", {
         variant: "success",
       });
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
     },
     onError: () => {
       enqueueSnackbar(`Accident Creation Failed`, {
@@ -110,14 +110,14 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   const { mutate: updateAccidentMutation } = useMutation({
     mutationFn: updateAccident,
     onSuccess: () => {
+      setSelectedRow(null);
+      setOpenViewDrawer(false);
+      setOpenAddOrEditDialog(false);
       queryClient.invalidateQueries({ queryKey: ["accidents"] });
       queryClient.invalidateQueries({ queryKey: ["accidents-assigned-task"] });
       enqueueSnackbar("Accident Report Updated Successfully!", {
         variant: "success",
       });
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
     },
     onError: () => {
       enqueueSnackbar(`Accident Update Failed`, {

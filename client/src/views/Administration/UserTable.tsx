@@ -8,6 +8,7 @@ import Paper from "@mui/material/Paper";
 import {
   Alert,
   Box,
+  LinearProgress,
   Stack,
   TableFooter,
   TablePagination,
@@ -23,7 +24,6 @@ import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
 import { fetchAllUsers, User } from "../../api/userApi";
-import { sampleUsers } from "../../api/sampleData/usersSampleData";
 import ViewUserContent from "./ViewUserContent";
 import EditUserRoleDialog from "./EditUserRoleDialog";
 import { PermissionKeys } from "./SectionList";
@@ -100,6 +100,7 @@ function UserTable() {
             maxWidth: isMobile ? "88vw" : "100%",
           }}
         >
+          {isUserDataFetching && <LinearProgress sx={{ width: "100%" }} />}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
