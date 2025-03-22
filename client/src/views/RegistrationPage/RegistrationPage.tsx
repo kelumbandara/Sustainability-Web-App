@@ -95,7 +95,9 @@ function RegistrationPage() {
             Authorization shall attract strict action, including legal recourse.
           </Typography>
         </Stack>
-        <Stack sx={{ flex: isMdUp ? 2 : 1 }}>
+        <Stack
+          sx={{ flex: isMdUp ? 2 : 1, height: "100vh", overflowY: "auto" }}
+        >
           <RegistrationForm />
         </Stack>
       </Stack>

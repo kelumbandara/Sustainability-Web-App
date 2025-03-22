@@ -38,6 +38,7 @@ import { useMemo, useState } from "react";
 import { useSnackbar } from "notistack";
 import { PermissionKeysObject } from "../../views/Administration/SectionList";
 import useCurrentUser from "../../hooks/useCurrentUser";
+import "./MainLayout.css";
 
 const drawerWidth = 265;
 
@@ -186,15 +187,38 @@ export default function MainLayout({ children }: Props) {
               </Box>
             </Box>
             {!isMobile && (
-              <Box>
+              <Box
+                sx={{
+                  display: "flex",
+                }}
+              >
                 <Typography
                   variant="subtitle1"
                   noWrap
                   component="div"
-                  sx={{ color: "#000" }}
+                  sx={{
+                    color: "var(--pallet-blue)",
+                    display: "flex",
+                    marginRight: "0.5rem",
+                  }}
                 >
-                  Monitor and Manage{" "}
-                  <span style={{ fontWeight: 600 }}>Health & Safety</span>
+                  Monitor and Manage
+                </Typography>
+                <Typography
+                  variant="subtitle1"
+                  noWrap
+                  component="div"
+                  sx={{ color: "#000", display: "flex" }}
+                >
+                  <span className="slider-text" style={{ fontWeight: 600 }}>
+                    Sustainability
+                  </span>
+                  <span className="slider-text" style={{ fontWeight: 600 }}>
+                    Health & Safety
+                  </span>
+                  <span className="slider-text" style={{ fontWeight: 600 }}>
+                    Social
+                  </span>
                 </Typography>
               </Box>
             )}
@@ -332,9 +356,6 @@ const DrawerContent = ({
         }}
       >
         {sidebarItems.map((item, i) => {
-          if (item?.accessKey && !userPermissionObject[`${item?.accessKey}`])
-            return null;
-
           if (item?.headline) {
             return (
               <Typography
@@ -484,12 +505,6 @@ const NestedItem = React.memo(
         <Collapse in={open} unmountOnExit>
           <List>
             {item.nestedItems.map((item) => {
-              if (
-                item?.accessKey &&
-                !userPermissionObject[`${item?.accessKey}`]
-              )
-                return null;
-
               if (item.nestedItems) {
                 return (
                   <Box key={item.accessKey} sx={{ marginLeft: "0.5rem" }}>

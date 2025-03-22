@@ -142,7 +142,6 @@ function RegistrationForm() {
     <Stack
       spacing={2}
       sx={{
-        height: isMdUp ? "100vh" : "auto",
         justifyContent: "center",
         margin: "2.5rem",
         marginBottom: isMdUp ? "2.5rem" : "22vh",
@@ -303,8 +302,9 @@ function RegistrationForm() {
                 }}
                 variant="caption"
               >
-                {`${errors.mobileNumber.message || "Mobile number is required"
-                  }`}
+                {`${
+                  errors.mobileNumber.message || "Mobile number is required"
+                }`}
               </Typography>
             )
           }
@@ -398,9 +398,7 @@ function RegistrationForm() {
               //   placeholder="Select factories"
               // />
 
-              <Box
-                sx={{ marginTop: "1rem" }}
-              >
+              <Box sx={{ marginTop: "1rem" }}>
                 <AutoCheckBox
                   {...register("assignedFactory", { required: true })}
                   control={control}
@@ -416,7 +414,6 @@ function RegistrationForm() {
                   limitTags={2}
                 />
               </Box>
-
             )}
 
             <TextField
