@@ -33,10 +33,9 @@ function UserAutoComplete({
       name={name}
       control={control}
       defaultValue={defaultValue ?? null}
-      rules={{ required: true }}
+      {...register(`${name}`, { required })}
       render={({ field }) => (
         <Autocomplete
-          {...register(`${name}`, { required })}
           size="small"
           options={userData && Array.isArray(userData) ? userData : []}
           sx={{ flex: 1, margin: "0.5rem", ...style }}

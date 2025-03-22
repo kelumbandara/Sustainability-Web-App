@@ -49,10 +49,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import TimePickerComponent from "../../components/TimePickerComponent";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import {
-  accidentCategories,
-  accidentTypesOptions,
-} from "../../constants/accidentConstants";
+import { accidentTypesOptions } from "../../constants/accidentConstants";
 import RichTextComponent from "../../components/RichTextComponent";
 import AddOrEditWitnessDialog from "./AddOrEditWitnessDialog";
 import AddOrEditPersonDialog from "./AddOrEditPersonDialog";
@@ -65,8 +62,10 @@ import {
   fetchMainAccidentCategory,
 } from "../../api/accidentCategory";
 import useCurrentUser from "../../hooks/useCurrentUser";
-import { fetchAccidentAssignee, fetchAllUsers, fetchIncidentAssignee } from "../../api/userApi";
+import { fetchAccidentAssignee, fetchAllUsers } from "../../api/userApi";
 import UserAutoComplete from "../../components/UserAutoComplete";
+import { StorageFile } from "../../utils/StorageFiles.util";
+import { ExistingFileItemsEdit } from "../../components/ExistingFileItemsEdit";
 
 type DialogProps = {
   open: boolean;
@@ -113,6 +112,10 @@ export default function AddOrEditAccidentDialog({
 }: DialogProps) {
   const { isMobile, isTablet } = useIsMobile();
   const [files, setFiles] = useState<File[]>([]);
+  const [existingFiles, setExistingFiles] = useState<StorageFile[]>(
+    defaultValues?.evidence as StorageFile[]
+  );
+  const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState(0);
   const [addWitnessDialogOpen, setAddWitnessDialogOpen] = useState(false);
   const [openAddOrEditPersonDialog, setOpenAddOrEditPersonDialog] =
@@ -120,6 +123,8 @@ export default function AddOrEditAccidentDialog({
   const [selectedWitness, setSelectedWitness] = useState<AccidentWitness>(null);
   const [selectedPerson, setSelectedPerson] =
     useState<AccidentEffectedIndividual>(null);
+
+  console.log("defaultValues", filesToRemove);
 
   const {
     register,
@@ -131,7 +136,10 @@ export default function AddOrEditAccidentDialog({
     setValue,
     trigger,
   } = useForm<Accident>({
-    defaultValues,
+    defaultValues: {
+      evidence: [],
+      ...defaultValues,
+    },
     reValidateMode: "onChange",
     mode: "onChange",
   });
@@ -183,9 +191,9 @@ export default function AddOrEditAccidentDialog({
   const handleSubmitAccidentRecord = (data: Accident) => {
     const submitData: Partial<Accident> = data;
     submitData.assigneeId = assignee?.id;
-    submitData.createdByUser = user.id;
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
     submitData.evidence = files;
+    if (filesToRemove?.length > 0) submitData.removeDoc = filesToRemove;
     onSubmit(submitData as Accident);
   };
 
@@ -638,7 +646,19 @@ export default function AddOrEditAccidentDialog({
                       </Table>
                     </TableContainer>
                   </Stack>
-
+                  {/* <ExistingFileItemsEdit
+                    label="Existing evidence"
+                    files={existingFiles}
+                    sx={{ marginY: "1rem" }}
+                    handleRemoveItem={(file) => {
+                      setFilesToRemove([...filesToRemove, file.gsutil_uri]);
+                      setExistingFiles(
+                        existingFiles.filter(
+                          (f) => f.gsutil_uri !== file.gsutil_uri
+                        )
+                      );
+                    }}
+                  /> */}
                   <Box
                     sx={{
                       display: "flex",

@@ -154,6 +154,7 @@ export const AccidentSchema = z.object({
   imageUrl: z.string().optional(),
   reporter: z.string(),
   createdByUser: z.string(),
+  removeDoc: z.array(z.string()).optional(),
 });
 
 export type Accident = z.infer<typeof AccidentSchema>;

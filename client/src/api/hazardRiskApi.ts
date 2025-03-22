@@ -213,6 +213,7 @@ export const HazardAndRiskSchema = z.object({
   created_at: z.string(),
   referenceNumber: z.string(),
   createdByUserName: z.string(),
+  removeDoc: z.array(z.string()).optional(),
 });
 
 export type HazardAndRisk = z.infer<typeof HazardAndRiskSchema>;
@@ -270,8 +271,16 @@ export const updateHazardRisk = async (hazardRisk: HazardAndRisk) => {
   Object.keys(hazardRisk).forEach((key) => {
     const value = hazardRisk[key as keyof HazardAndRisk];
 
-    if (value instanceof File) {
-      formData.append(key, value);
+    if (key === "documents" && Array.isArray(value)) {
+      value.forEach((file, index) => {
+        formData.append(`documents[${index}]`, file as File);
+      });
+    } else if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        formData.append(`${key}[${index}]`, JSON.stringify(item));
+      });
+    } else if (value instanceof Date) {
+      formData.append(key, value.toISOString());
     } else if (value !== null && value !== undefined) {
       formData.append(key, value.toString());
     }

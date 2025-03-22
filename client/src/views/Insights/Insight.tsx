@@ -1,7 +1,9 @@
 import { Box, Stack, Typography } from "@mui/material";
 import welcome from "../../assets/welcomeInsight.png";
+import useCurrentUser from "../../hooks/useCurrentUser";
 
 function Insight() {
+  const { user } = useCurrentUser();
   return (
     <Stack>
       <Typography
@@ -9,7 +11,7 @@ function Insight() {
         align="center"
         sx={{ mt: 2, mb: 2, fontWeight: "bold", color: "var(--pallet-orange)" }}
       >
-        Welcome Back!
+        {`Welcome ${user?.name}!`}
       </Typography>
       <Box
         component="img"
@@ -29,7 +31,7 @@ function Insight() {
         align="center"
         sx={{ mt: 2, color: "var(--pallet-main-blue)" }}
       >
-        We are glad to have you back. Explore the insights and make informed
+        We are glad to have you here. Explore the insights and make informed
       </Typography>
     </Stack>
   );

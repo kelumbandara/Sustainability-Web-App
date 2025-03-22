@@ -182,10 +182,10 @@ const AppRoutes = () => {
             MainLayout,
             () => (
               <UnderDevelopment pageName="Audit & Inspection > Dashboard" />
-            ),
-            !userPermissionObject?.[
-              PermissionKeys.AUDIT_INSPECTION_DASHBOARD_VIEW
-            ]
+            )
+            // !userPermissionObject?.[
+            //   PermissionKeys.AUDIT_INSPECTION_DASHBOARD_VIEW
+            // ]
           )}
         />
         <Route
@@ -194,10 +194,10 @@ const AppRoutes = () => {
             MainLayout,
             () => (
               <UnderDevelopment pageName="Audit & Inspection > Calendar" />
-            ),
-            !userPermissionObject?.[
-              PermissionKeys.AUDIT_INSPECTION_CALENDAR_VIEW
-            ]
+            )
+            // !userPermissionObject?.[
+            //   PermissionKeys.AUDIT_INSPECTION_CALENDAR_VIEW
+            // ]
           )}
         />
         <Route
@@ -206,10 +206,10 @@ const AppRoutes = () => {
             MainLayout,
             () => (
               <UnderDevelopment pageName="Audit & Inspection > Internal Audit" />
-            ),
-            !userPermissionObject?.[
-              PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_QUEUE_VIEW
-            ]
+            )
+            // !userPermissionObject?.[
+            //   PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_QUEUE_VIEW
+            // ]
           )}
         />
         <Route
@@ -218,10 +218,10 @@ const AppRoutes = () => {
             MainLayout,
             () => (
               <UnderDevelopment pageName="Audit & Inspection > External Audit" />
-            ),
-            !userPermissionObject?.[
-              PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_VIEW
-            ]
+            )
+            // !userPermissionObject?.[
+            //   PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_VIEW
+            // ]
           )}
         />
         {/* document */}
@@ -305,10 +305,10 @@ const AppRoutes = () => {
             MainLayout,
             () => (
               <UnderDevelopment pageName="Accident & Incident > Corrective Action" />
-            ),
-            !userPermissionObject?.[
-              PermissionKeys.INCIDENT_ACCIDENT_CORRECTIVE_ACTION_VIEW
-            ]
+            )
+            // !userPermissionObject?.[
+            //   PermissionKeys.INCIDENT_ACCIDENT_CORRECTIVE_ACTION_VIEW
+            // ]
           )}
         />
         {/* Assigned Tasks */}
@@ -342,11 +342,11 @@ const AppRoutes = () => {
             MainLayout,
             () => (
               <UnderDevelopment pageName="Assigned Tasks > Corrective Action" />
-            ),
-            !userPermissionObject?.[
-              PermissionKeys
-                .INCIDENT_ACCIDENT_ASSIGNED_TASKS_CORRECTIVE_ACTION_VIEW
-            ]
+            )
+            // !userPermissionObject?.[
+            //   PermissionKeys
+            //     .INCIDENT_ACCIDENT_ASSIGNED_TASKS_CORRECTIVE_ACTION_VIEW
+            // ]
           )}
         />
 
@@ -380,11 +380,11 @@ const AppRoutes = () => {
             MainLayout,
             () => (
               <UnderDevelopment pageName="Clinical Suite > Consultation" />
-            ),
-            !userPermissionObject?.[
-              PermissionKeys
-                .OCCUPATIONAL_HEALTH_CLINICAL_SUITE_CONSULTATION_VIEW
-            ]
+            )
+            // !userPermissionObject?.[
+            //   PermissionKeys
+            //     .OCCUPATIONAL_HEALTH_CLINICAL_SUITE_CONSULTATION_VIEW
+            // ]
           )}
         />
         <Route
@@ -404,11 +404,11 @@ const AppRoutes = () => {
             MainLayout,
             () => (
               <UnderDevelopment pageName="Clinical Suite > Pharmacy Queue" />
-            ),
-            !userPermissionObject?.[
-              PermissionKeys
-                .OCCUPATIONAL_HEALTH_CLINICAL_SUITE_PHARMACY_QUEUE_VIEW
-            ]
+            )
+            // !userPermissionObject?.[
+            //   PermissionKeys
+            //     .OCCUPATIONAL_HEALTH_CLINICAL_SUITE_PHARMACY_QUEUE_VIEW
+            // ]
           )}
         />
         {/* Medicine Inventory */}

@@ -133,6 +133,7 @@ export default function MainLayout({ children }: Props) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [open, setOpen] = React.useState(isMobile ? false : true);
+  const { user } = useCurrentUser();
 
   const toggleDrawerOpen = () => {
     setOpen(!open);
@@ -223,7 +224,7 @@ export default function MainLayout({ children }: Props) {
               </Box>
             )}
             <Box sx={{ display: "flex", alignItems: "center" }}>
-              {!isMobile && (
+              {/* {!isMobile && (
                 <>
                   <IconButton
                     size="small"
@@ -251,11 +252,15 @@ export default function MainLayout({ children }: Props) {
                     </Badge>
                   </IconButton>
                 </>
-              )}
+              )} */}
               <Avatar
-                sx={{ bgcolor: "#024271", height: "2rem", width: "2rem" }}
+                sx={{
+                  bgcolor: "var(--pallet-orange)",
+                  height: "2rem",
+                  width: "2rem",
+                }}
               >
-                A
+                {user?.name?.charAt(0).toUpperCase()}
               </Avatar>
             </Box>
           </Box>
