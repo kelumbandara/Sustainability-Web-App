@@ -19,6 +19,8 @@ import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import { Incident } from "../../api/accidentAndIncidentApi";
 import WarningIcon from "@mui/icons-material/Warning";
 import { format, formatDate } from "date-fns";
+import { FileItemsViewer } from "../../components/FileItemsViewer";
+import { StorageFile } from "../../utils/StorageFiles.util";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -227,6 +229,13 @@ function ViewIncidentContent({ incident }: { incident: Incident }) {
                   )}
                 </TableBody>
               </Table>
+            </Box>
+            <Box>
+              <FileItemsViewer
+                label="Evidence"
+                files={incident.evidence as StorageFile[]}
+                sx={{ marginY: "1rem" }}
+              />
             </Box>
           </Stack>
         </TabPanel>

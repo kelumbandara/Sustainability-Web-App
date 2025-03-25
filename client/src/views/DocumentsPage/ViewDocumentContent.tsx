@@ -12,8 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import { DrawerContentItem } from "../../components/ViewDataDrawer";
-import { HazardAndRisk } from "../../api/hazardRiskApi";
-import { differenceInDays,format } from "date-fns";
+import { format } from "date-fns";
 import { useState } from "react";
 import theme from "../../theme";
 import useIsMobile from "../../customHooks/useIsMobile";
@@ -21,6 +20,8 @@ import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import ListIcon from "@mui/icons-material/List";
 import { Document } from "../../api/documentApi";
 import HistoryIcon from "@mui/icons-material/History";
+import { FileItemsViewer } from "../../components/FileItemsViewer";
+import { StorageFile } from "../../utils/StorageFiles.util";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -93,7 +94,11 @@ function ViewDocumentContent({ document }: { document: Document }) {
           />
           <DrawerContentItem
             label="Reported Date"
-            value={document.createdDate ? format(new Date(document.createdDate), "yyyy-MM-dd") : "N/A"}
+            value={
+              document.createdDate
+                ? format(new Date(document.createdDate), "yyyy-MM-dd")
+                : "N/A"
+            }
             sx={{ flex: 1 }}
           />
         </Box>
@@ -250,6 +255,13 @@ function ViewDocumentContent({ document }: { document: Document }) {
               value={document.remarks}
               sx={{ flex: 1 }}
             />
+            <Box>
+              <FileItemsViewer
+                label="Document Files"
+                files={document.document as StorageFile[]}
+                sx={{ marginY: "1rem" }}
+              />
+            </Box>
           </Box>
         </TabPanel>
         <TabPanel value={activeTab} index={1} dir={theme.direction}>
@@ -362,15 +374,27 @@ function ViewDocumentContent({ document }: { document: Document }) {
         <DrawerContentItem label="Reported By" value={document.createdBy} />
         <DrawerContentItem
           label="Issued Date"
-          value={document.issuedDate ? format(new Date(document.issuedDate), "yyyy-MM-dd") : "N/A"}
+          value={
+            document.issuedDate
+              ? format(new Date(document.issuedDate), "yyyy-MM-dd")
+              : "N/A"
+          }
         />
         <DrawerContentItem
           label="Expiry Date"
-          value={document.expiryDate ? format(new Date(document.expiryDate), "yyyy-MM-dd") : "N/A"}
+          value={
+            document.expiryDate
+              ? format(new Date(document.expiryDate), "yyyy-MM-dd")
+              : "N/A"
+          }
         />
         <DrawerContentItem
           label="Notify Date"
-          value={document.notifyDate ? format(new Date(document.notifyDate), "yyyy-MM-dd") : "N/A"}
+          value={
+            document.notifyDate
+              ? format(new Date(document.notifyDate), "yyyy-MM-dd")
+              : "N/A"
+          }
         />
       </Box>
     </Stack>
