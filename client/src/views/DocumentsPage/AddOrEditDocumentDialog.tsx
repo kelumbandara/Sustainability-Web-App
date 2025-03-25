@@ -29,6 +29,8 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../api/divisionApi";
 import theme from "../../theme";
 import { fetchAllDocumentType } from "../../api/documentType";
+import { ExistingFileItemsEdit } from "../../components/ExistingFileItemsEdit";
+import { StorageFile } from "../../utils/StorageFiles.util";
 
 type DialogProps = {
   open: boolean;
@@ -61,7 +63,10 @@ export default function AddOrEditDocumentDialog({
   const versionNumber = watch("versionNumber");
   const issuedDate = watch("issuedDate");
 
-  console.log("versionNumber", versionNumber, defaultValues);
+  const [existingFiles, setExistingFiles] = useState<StorageFile[]>(
+    (defaultValues?.document as StorageFile[]) ?? []
+  );
+  const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
   const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
     queryKey: ["divisions"],
@@ -99,6 +104,7 @@ export default function AddOrEditDocumentDialog({
       submitData.isNoExpiry = true;
     }
     submitData.document = files;
+    if (filesToRemove?.length > 0) submitData.removeDoc = filesToRemove;
     onSubmit(submitData as Document);
     resetForm();
   };
@@ -332,6 +338,23 @@ export default function AddOrEditDocumentDialog({
                 }}
               />
             </Box>
+            {defaultValues && (
+              <ExistingFileItemsEdit
+                label="Existing documents"
+                files={existingFiles}
+                sx={{ marginY: "1rem" }}
+                handleRemoveItem={(file) => {
+                  if (file.gsutil_uri) {
+                    setFilesToRemove([...filesToRemove, file.gsutil_uri]);
+                    setExistingFiles(
+                      existingFiles.filter(
+                        (f) => f.gsutil_uri !== file.gsutil_uri
+                      )
+                    );
+                  }
+                }}
+              />
+            )}
             <Box
               sx={{
                 display: "flex",

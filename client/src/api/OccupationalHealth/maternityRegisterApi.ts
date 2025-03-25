@@ -1,5 +1,6 @@
 import axios from "axios";
 import { z } from "zod";
+import { StorageFileSchema } from "../../utils/StorageFiles.util";
 
 export const benefitAndEntitlementsSchema = z.object({
   id: z.string(),
@@ -28,7 +29,9 @@ export type BenefitAndEntitlements = z.infer<
 export const medicalDocumentSchema = z.object({
   id: z.string(),
   documentType: z.string(),
-  document: z.string(),
+  document: z
+    .union([z.array(StorageFileSchema), z.array(z.instanceof(File))])
+    .optional(),
   uploadDate: z.date(),
   updatedAt: z.string().optional(),
 });

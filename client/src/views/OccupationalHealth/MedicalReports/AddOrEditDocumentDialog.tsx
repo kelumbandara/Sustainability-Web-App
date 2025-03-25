@@ -21,6 +21,8 @@ import DropzoneComponent from "../../../components/DropzoneComponent";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchAllMedicalReportType } from "../../../api/OccupationalHealth/medicalReportTypeApi";
+import { ExistingFileItemsEdit } from "../../../components/ExistingFileItemsEdit";
+import { StorageFile } from "../../../utils/StorageFiles.util";
 
 const AddOrEditDocumentDialog = ({
   open,
@@ -35,6 +37,11 @@ const AddOrEditDocumentDialog = ({
 }) => {
   const { isMobile } = useIsMobile();
   const [files, setFiles] = useState<File[]>([]);
+  const [existingFiles, setExistingFiles] = useState<StorageFile[]>(
+    (defaultDocument?.document as StorageFile[]) || []
+  );
+  const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
+
   const {
     register,
     handleSubmit,
@@ -128,12 +135,28 @@ const AddOrEditDocumentDialog = ({
               />
             )}
           />
-
+          {defaultDocument && (
+            <ExistingFileItemsEdit
+              label="Existing documents"
+              files={existingFiles}
+              sx={{ marginY: "1rem" }}
+              handleRemoveItem={(file) => {
+                if (file.gsutil_uri) {
+                  setFilesToRemove([...filesToRemove, file.gsutil_uri]);
+                  setExistingFiles(
+                    existingFiles.filter(
+                      (f) => f.gsutil_uri !== file.gsutil_uri
+                    )
+                  );
+                }
+              }}
+            />
+          )}
           <DropzoneComponent
             files={files}
             setFiles={setFiles}
             dropzoneLabel={
-              "Drop your evidence here. Please ensure the file size is less than 10mb."
+              "Drop your documents here. Please ensure the file size is less than 10mb."
             }
           />
         </Stack>

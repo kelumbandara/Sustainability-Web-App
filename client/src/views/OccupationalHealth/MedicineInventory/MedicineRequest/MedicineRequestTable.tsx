@@ -202,7 +202,7 @@ function MedicineRequestTable({
     mutationFn: approveMedicineRequest,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["medicines"] });
-
+      queryClient.invalidateQueries({ queryKey: ["medicine-inventory"] });
       enqueueSnackbar("Medicine Request Approved!", {
         variant: "success",
       });

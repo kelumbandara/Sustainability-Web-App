@@ -51,6 +51,8 @@ import AddOrEditBenefitEntitlementDialog from "./AddOrEditBenefitEntitlementDial
 import AddOrEditDocumentDialog from "./AddOrEditDocumentDialog";
 import { fetchDivision } from "../../../api/divisionApi";
 import { useQuery } from "@tanstack/react-query";
+import { FileItemsViewer } from "../../../components/FileItemsViewer";
+import { StorageFile } from "../../../utils/StorageFiles.util";
 
 type DialogProps = {
   open: boolean;
@@ -1178,7 +1180,11 @@ export default function AddOrEditMaternityRegisterDialog({
                                 {row.uploadDate?.toDateString()}
                               </TableCell>
                               <TableCell align="center">
-                                {row.document}
+                                <FileItemsViewer
+                                  label=""
+                                  files={row.document as StorageFile[]}
+                                  sx={{ marginY: "1rem" }}
+                                />
                               </TableCell>
                               <TableCell align="center">
                                 <IconButton

@@ -57,7 +57,7 @@ export function FileItemsViewer({
         </Typography>
       )}
       <Box sx={{ display: "flex", flexWrap: "wrap" }}>
-        {otherFiles.map((file, index) => (
+        {otherFiles?.map((file, index) => (
           <Chip
             key={index}
             label={file?.fileName}
@@ -67,7 +67,7 @@ export function FileItemsViewer({
         ))}
       </Box>
       <Box sx={{ display: "flex", flexWrap: "wrap" }}>
-        {imageFiles.map((file, index) => (
+        {imageFiles?.map((file, index) => (
           <Box
             key={index}
             sx={{

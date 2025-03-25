@@ -124,8 +124,6 @@ export default function AddOrEditAccidentDialog({
   const [selectedPerson, setSelectedPerson] =
     useState<AccidentEffectedIndividual>(null);
 
-  console.log("defaultValues", filesToRemove);
-
   const {
     register,
     handleSubmit,
@@ -646,19 +644,21 @@ export default function AddOrEditAccidentDialog({
                       </Table>
                     </TableContainer>
                   </Stack>
-                  {/* <ExistingFileItemsEdit
+                  <ExistingFileItemsEdit
                     label="Existing evidence"
                     files={existingFiles}
                     sx={{ marginY: "1rem" }}
                     handleRemoveItem={(file) => {
-                      setFilesToRemove([...filesToRemove, file.gsutil_uri]);
-                      setExistingFiles(
-                        existingFiles.filter(
-                          (f) => f.gsutil_uri !== file.gsutil_uri
-                        )
-                      );
+                      if (file.gsutil_uri) {
+                        setFilesToRemove([...filesToRemove, file.gsutil_uri]);
+                        setExistingFiles(
+                          existingFiles.filter(
+                            (f) => f.gsutil_uri !== file.gsutil_uri
+                          )
+                        );
+                      }
                     }}
-                  /> */}
+                  />
                   <Box
                     sx={{
                       display: "flex",

@@ -237,13 +237,13 @@ function ViewAccidentContent({ accident }: { accident: Accident }) {
                 </TableBody>
               </Table>
             </Box>
-            {/* <Box>
+            <Box>
               <FileItemsViewer
                 label="Evidence"
                 files={accident.evidence as StorageFile[]}
                 sx={{ marginY: "1rem" }}
               />
-            </Box> */}
+            </Box>
           </Stack>
         </TabPanel>
         <TabPanel value={activeTab} index={1} dir={theme.direction}>
