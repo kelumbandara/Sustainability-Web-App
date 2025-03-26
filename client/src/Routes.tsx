@@ -89,6 +89,12 @@ const MaternityRegisterTable = React.lazy(
     import("./views/OccupationalHealth/MedicalReports/MaternityRegisterTable")
 );
 
+//External Audit And Inspection
+const ExternalAuditTable = React.lazy(
+  () =>
+    import("./views/ExternalAudit/AuditTable")
+);
+
 function withLayout(Layout: any, Component: any, restrictAccess = false) {
   return (
     <Layout>
@@ -469,6 +475,19 @@ const AppRoutes = () => {
             !userPermissionObject?.[
               PermissionKeys
                 .OCCUPATIONAL_HEALTH_MEDICAL_RECORDS_MATERNITY_REGISTER_VIEW
+            ]
+          )}
+        />
+
+        {/* External Audits */}
+        <Route
+          path="/audit-inspection/external-audit/register"
+          element={withLayout(
+            MainLayout,
+            ExternalAuditTable,
+            !userPermissionObject?.[
+              PermissionKeys
+                .AUDIT_INSPECTION_EXTERNAL_AUDIT_REGISTER_VIEW
             ]
           )}
         />

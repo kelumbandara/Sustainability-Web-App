@@ -81,7 +81,7 @@ export const sidebarItems: Array<SidebarItem> = [
     icon: <LayersIcon fontSize="small" />,
     href: "/audit-inspection",
     open: false,
-    disabled: true,
+    disabled: false,
     nestedItems: [
       {
         title: "Dashboard",
@@ -106,6 +106,32 @@ export const sidebarItems: Array<SidebarItem> = [
         href: "/audit-inspection/external-audit",
         icon: <TravelExploreIcon fontSize="small" />,
         accessKey: PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_VIEW,
+        nestedItems: [
+          {
+            title: "External Audit Register",
+            href: "/audit-inspection/external-audit/register",
+            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey: PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_VIEW,
+          },
+          {
+            title: "Assigned Audit",
+            href: "/audit-inspection/external-audit/assigned-tasks",
+            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey: PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_VIEW,
+          },
+          {
+            title: "External Audit Queue",
+            href: "/audit-inspection/external-audit/audit-queue",
+            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey: PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_VIEW,
+          },
+          {
+            title: "Corrective Action",
+            href: "/audit-inspection/external-audit/corrective-action",
+            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey: PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_VIEW,
+          },
+        ],
       },
     ],
   },
