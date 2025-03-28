@@ -492,6 +492,30 @@ const AppRoutes = () => {
           )}
         />
       </Route>
+      <Route
+          path="/audit-inspection/external-audit/assigned-tasks"
+          element={withLayout(
+            MainLayout,
+            () => (
+              <ExternalAuditTable isAssignedTasks={true} />
+            ),
+            !userPermissionObject?.[
+              PermissionKeys.HAZARD_RISK_ASSIGNED_TASKS_VIEW
+            ]
+          )}
+        />
+        <Route
+          path="/audit-inspection/external-audit/audit-queue"
+          element={withLayout(
+            MainLayout,
+            () => (
+              <ExternalAuditTable isAssignedTasks={true} />
+            ),
+            !userPermissionObject?.[
+              PermissionKeys.HAZARD_RISK_ASSIGNED_TASKS_VIEW
+            ]
+          )}
+        />
     </Routes>
   );
 };
