@@ -89,6 +89,12 @@ const MaternityRegisterTable = React.lazy(
     import("./views/OccupationalHealth/MedicalReports/MaternityRegisterTable")
 );
 
+//Sustainability
+const SustainabilityTable = React.lazy(
+  () =>
+    import("./views/Sustainability/SustainabilityTable")
+);
+
 function withLayout(Layout: any, Component: any, restrictAccess = false) {
   return (
     <Layout>
@@ -469,6 +475,17 @@ const AppRoutes = () => {
             !userPermissionObject?.[
               PermissionKeys
                 .OCCUPATIONAL_HEALTH_MEDICAL_RECORDS_MATERNITY_REGISTER_VIEW
+            ]
+          )}
+        />
+        <Route
+          path="/sustainability/register"
+          element={withLayout(
+            MainLayout,
+            SustainabilityTable,
+            !userPermissionObject?.[
+              PermissionKeys
+                .SUSTAINABILITY_SDG_REPORTING_CREATE
             ]
           )}
         />
