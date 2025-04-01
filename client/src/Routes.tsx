@@ -25,6 +25,15 @@ const DocumentRegister = React.lazy(
   () => import("./views/DocumentsPage/DocumentsTable")
 );
 
+//audit and inspection
+const InternalAuditTable = React.lazy(
+  () => import("./views/AuditAndInspection/InternalAudit/InternalAuditTable")
+);
+
+const AuditBuilderTable = React.lazy(
+  () => import("./views/AuditAndInspection/AuditBuilder/AuditBuilderTable")
+);
+
 //hazard and risk
 const HazardRiskDashboard = React.lazy(
   () => import("./views/HazardAndRisk/Dashboard")
@@ -201,12 +210,20 @@ const AppRoutes = () => {
           )}
         />
         <Route
-          path="/audit-inspection/internal-audit"
+          path="/audit-inspection/internal-audit/form-builder"
           element={withLayout(
             MainLayout,
-            () => (
-              <UnderDevelopment pageName="Audit & Inspection > Internal Audit" />
-            )
+            AuditBuilderTable
+            // !userPermissionObject?.[
+            //   PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_QUEUE_VIEW
+            // ]
+          )}
+        />
+        <Route
+          path="/audit-inspection/internal-audit/scheduled-audits"
+          element={withLayout(
+            MainLayout,
+            InternalAuditTable
             // !userPermissionObject?.[
             //   PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_QUEUE_VIEW
             // ]

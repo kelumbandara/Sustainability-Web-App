@@ -160,7 +160,6 @@ export default function AddOrEditHazardRiskDialog({
   const handleSubmitHazardAndRisk = (data: HazardAndRisk) => {
     const submitData: Partial<HazardAndRisk> = data;
     submitData.id = defaultValues?.id ?? uuidv4();
-    submitData.createdByUser = user.id;
     submitData.assigneeId = assignee.id;
     // submitData.createdDate = new Date();
     // submitData.createdByUser = sampleAssignees[0].name;
