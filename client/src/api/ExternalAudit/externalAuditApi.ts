@@ -1,6 +1,7 @@
 import { z } from "zod";
 import axios from "axios";
 import { userSchema } from "../userApi";
+import { StorageFileSchema } from "../../utils/StorageFiles.util";
 
 export enum Announcement {
     ANNOUNCED = "Announced",
@@ -25,8 +26,22 @@ export const ExternalAuditSchema = z.object({
     created_At: z.date(),
     createdBy: z.string(),
     status: z.string(),
-    expiryDate: z.date(),
-    announcement: z.nativeEnum(Announcement)
+    announcement: z.nativeEnum(Announcement),
+    remarks: z.string(),
+    auditStatus: z.string(),
+    auditScore: z.string(),
+    numberOfNonCom: z.string(),
+    auditFee: z.string(),
+    auditGrade: z.string(),
+    documents: z
+        .union([z.array(StorageFileSchema), z.array(z.instanceof(File))])
+        .optional(),
+    responsibleSection: z.string(),
+    assigneeLevel: z.string(),
+    assessmentDate: z.date(),
+    auditExpiryDate: z.date(),
+
+
 });
 
 export type ExternalAudit = z.infer<typeof ExternalAuditSchema>;
