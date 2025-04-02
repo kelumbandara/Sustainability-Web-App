@@ -201,7 +201,7 @@ export default function AddOrEditSustainabilityDialog({
       triggerGeneralDetailsSection();
     } else if (activeTab === 1) {
       triggerSGDDetailsSection();
-    } else if (activeTab === 3) {
+    } else if (activeTab === 2) {
       triggerotherSection();
     }
     setActiveTab(newValue);
@@ -233,8 +233,8 @@ export default function AddOrEditSustainabilityDialog({
         >
           <Typography variant="h6" component="div">
             {defaultValues
-              ? "Edit Benefit Request"
-              : "Create New Benefit Request"}
+              ? "Edit Sustainability Report"
+              : "Create Sustainability Report"}
           </Typography>
           <IconButton
             aria-label="open drawer"
@@ -400,9 +400,7 @@ export default function AddOrEditSustainabilityDialog({
                   label={
                     <Box
                       sx={{
-                        color: isOtherDetailsValid
-                          ? "var(--pallet-blue)"
-                          : "var(--pallet-red)",
+                        color: "var(--pallet-blue)",
                         display: "flex",
                         alignItems: "center",
                       }}
@@ -411,14 +409,6 @@ export default function AddOrEditSustainabilityDialog({
                       <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                         Activity Impacts
                       </Typography>
-                      {!isOtherDetailsValid && (
-                        <Typography
-                          variant="subtitle1"
-                          sx={{ ml: "0.3rem", color: "var(--pallet-red)" }}
-                        >
-                          *
-                        </Typography>
-                      )}
                     </Box>
                   }
                   {...a11yProps(3)}
@@ -489,7 +479,7 @@ export default function AddOrEditSustainabilityDialog({
                         placeholder="Materiality Type"
                         limitTags={2}
                         //need to change
-                      /> 
+                      />
                     </Box>
                     <Box
                       sx={{
@@ -501,7 +491,7 @@ export default function AddOrEditSustainabilityDialog({
                         control={control}
                         required={true}
                         name="materialityIssue"
-                        label="Materiality Type"
+                        label="Materiality Issue"
                         options={divisionData}
                         selectedValues={materialityIssue}
                         setSelectedValues={setMaterialityIssue}
@@ -873,6 +863,7 @@ export default function AddOrEditSustainabilityDialog({
                           <TableCell align="center">Impact Type</TableCell>
                           <TableCell align="center">Unit</TableCell>
                           <TableCell align="center">Value</TableCell>
+                          <TableCell align="center"></TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
