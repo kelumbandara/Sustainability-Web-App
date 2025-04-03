@@ -1,8 +1,28 @@
 import React from "react";
-import { Controller } from "react-hook-form";
+import { Controller, Control } from "react-hook-form";
 import { Autocomplete, Checkbox, TextField } from "@mui/material";
 
-const AutocompleteCheckbox = ({
+interface OptionType {
+  divisionName: string; // Add this
+  label?: string; // Optional if not needed
+  value?: string | number; // Optional if not needed
+}
+
+interface AutocompleteCheckboxProps {
+  control: Control<any>;
+  name: string;
+  options: OptionType[];
+  selectedValues?: (string | number)[];
+  setSelectedValues?: (values: (string | number)[]) => void;
+  label: string;
+  placeholder?: string;
+  limitTags?: number;
+  required?: boolean;
+  getOptionLabel?: (option: OptionType) => string;
+  getOptionValue?: (option: OptionType) => string | number;
+}
+
+const AutocompleteCheckbox: React.FC<AutocompleteCheckboxProps> = ({
   control,
   name,
   options = [],

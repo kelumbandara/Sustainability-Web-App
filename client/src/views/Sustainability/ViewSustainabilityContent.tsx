@@ -100,9 +100,12 @@ function ViewMaternityRegisterContent({
             sx={{ flex: 1 }}
           />
           <DrawerContentItem
-            label="Project Date"
-            value={new Date(sustainability?.projectDate).toDateString()}
-            sx={{ flex: 1 }}
+            label="Project Time Line"
+            value={
+              sustainability.timeLines
+                ? format(sustainability.timeLines, "MM-dd-yyyy")
+                : "N/A"
+            }
           />
         </Box>
         <AppBar position="static">
@@ -317,8 +320,8 @@ function ViewMaternityRegisterContent({
               </TableRow>
             </TableHead>
             <TableBody>
-              {sustainability?.impact?.length > 0 ? (
-                sustainability?.impact?.map((row) => (
+              {sustainability?.impactDetails?.length > 0 ? (
+                sustainability?.impactDetails?.map((row) => (
                   <TableRow
                     key={`${row.id}`}
                     sx={{
@@ -346,7 +349,7 @@ function ViewMaternityRegisterContent({
         <TabPanel value={activeTab} index={4} dir={theme.direction}>
           <FileItemsViewer
             label=""
-            files={sustainability.document as StorageFile[]}
+            files={sustainability.documents as StorageFile[]}
             sx={{ marginY: "1rem" }}
           />
         </TabPanel>
@@ -366,13 +369,8 @@ function ViewMaternityRegisterContent({
         }}
       >
         <DrawerContentItem
-          label="Date Of Join"
-          value={format(sustainability.dateOfJoin, "dd/MM/yyyy")}
-          sx={{ flex: 1 }}
-        />
-        <DrawerContentItem
           label="Project Location"
-          value={sustainability.projectLocation}
+          value={sustainability.location}
         />
         <DrawerContentItem label="Division" value={sustainability.division} />
       </Box>

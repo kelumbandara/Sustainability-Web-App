@@ -22,7 +22,7 @@ export function MultiDrawerContent({
     if (typeof value === "string") {
       const parsed = JSON.parse(value);
       if (Array.isArray(parsed)) {
-        displayValue = parsed;
+        displayValue = parsed.map(item => item.replace(/^\"|\"$/g, ''));
       }
     }
   } catch (error) {

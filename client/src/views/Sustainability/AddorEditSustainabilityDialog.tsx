@@ -116,14 +116,14 @@ export default function AddOrEditSustainabilityDialog({
     mode: "onChange",
   });
 
-  const watchImpacts = watch("impact");
+  const watchImpacts = watch("impactDetails");
   const [materialityType, setMaterialityType] = useState([]);
   const [materialityIssue, setMaterialityIssue] = useState([]);
   const [pillars, setPillars] = useState([]);
   const [additionalSdg, SetAdditionalSdg] = useState([]);
 
   const [existingFiles, setExistingFiles] = useState<StorageFile[]>(
-    defaultValues?.document as StorageFile[]
+    defaultValues?.documents as StorageFile[]
   );
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
@@ -143,6 +143,7 @@ export default function AddOrEditSustainabilityDialog({
   const handleCreateSustainability = (data: Sustainability) => {
     const submitData: Partial<Sustainability> = data;
     submitData.id = defaultValues?.id ?? uuidv4();
+    submitData.documents = files;
     onSubmit(submitData as Sustainability);
     resetForm();
   };
@@ -478,7 +479,7 @@ export default function AddOrEditSustainabilityDialog({
                         getOptionValue={(option) => option.divisionName}
                         placeholder="Materiality Type"
                         limitTags={2}
-                        //need to change
+                        
                       />
                     </Box>
                     <Box
@@ -782,6 +783,29 @@ export default function AddOrEditSustainabilityDialog({
                       display: "flex",
                       flexDirection: isMobile ? "column" : "row",
                       margin: "0.5rem",
+                    }}
+                  >
+                    <Controller
+                      control={control}
+                      name={"contributing"}
+                      render={({ field }) => {
+                        return (
+                          <RichTextComponent
+                            onChange={(e) => field.onChange(e)}
+                            placeholder={
+                              field.value ?? "Who are the Contributers"
+                            }
+                          />
+                        );
+                      }}
+                    />
+                  </Box>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: isMobile ? "column" : "row",
+                      margin: "0.5rem",
                       justifyContent: "flex-end",
                       marginTop: "1.2rem",
                     }}
@@ -902,7 +926,7 @@ export default function AddOrEditSustainabilityDialog({
                                 <IconButton
                                   onClick={() => {
                                     setValue(
-                                      "impact",
+                                      "impactDetails",
                                       (watchImpacts ?? []).filter(
                                         (item) => item.id !== row.id
                                       )
@@ -1046,8 +1070,8 @@ export default function AddOrEditSustainabilityDialog({
               <Box sx={{ margin: "0.5rem" }}>
                 <Controller
                   control={control}
-                  {...register("projectDate", { required: true })}
-                  name={"projectDate"}
+                  {...register("timeLines", { required: true })}
+                  name={"timeLines"}
                   render={({ field }) => {
                     return (
                       <Box sx={{ flex: 1, margin: "0.5rem" }}>
@@ -1057,7 +1081,7 @@ export default function AddOrEditSustainabilityDialog({
                             field.value ? new Date(field.value) : undefined
                           }
                           label="Date of Join"
-                          error={errors?.projectDate ? "Required" : ""}
+                          error={errors?.timeLines ? "Required" : ""}
                         />
                       </Box>
                     );
@@ -1070,10 +1094,10 @@ export default function AddOrEditSustainabilityDialog({
                   id="projectLocation"
                   type="text"
                   label="Project Location"
-                  error={!!errors.projectLocation}
+                  error={!!errors.location}
                   size="small"
                   sx={{ width: "100%" }}
-                  {...register("projectLocation", { required: true })}
+                  {...register("location", { required: true })}
                 />
               </Box>
 
@@ -1144,7 +1168,7 @@ export default function AddOrEditSustainabilityDialog({
           handleClose={() => setOpenAddOrEditImpactDialog(false)}
           onSubmit={(data) => {
             if (selectedImpactDocument) {
-              setValue("impact", [
+              setValue("impactDetails", [
                 ...(watchImpacts ?? []).map((item) => {
                   if (item.id === selectedImpactDocument.id) {
                     return {
@@ -1157,7 +1181,7 @@ export default function AddOrEditSustainabilityDialog({
                 }),
               ]);
             } else {
-              setValue("impact", [...(watchImpacts ?? []), { ...data }]);
+              setValue("impactDetails", [...(watchImpacts ?? []), { ...data }]);
             }
             setOpenAddOrEditImpactDialog(false);
             setSelectedImpactDocument(null);

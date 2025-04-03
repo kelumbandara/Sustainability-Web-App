@@ -41,6 +41,7 @@ import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
 import { PermissionKeys } from "../Administration/SectionList";
 import { sampleSustainabilityData } from "../../api/sampleData/sustainabilityData";
 import MultiTableCell from "../../components/MultiTableCell";
+import { createSustainabilityReport, deleteSustainabilityRecord, getSustainabilityList, updateSustainabilityReport } from "../../api/Sustainability/sustainabilityApi";
 
 function SustainabilityTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -75,16 +76,16 @@ function SustainabilityTable() {
     theme.breakpoints.down("md")
   );
 
-  const { data: documents, isFetching: isDocumentDataFetching } = useQuery({
-    queryKey: ["documentRecords"],
-    queryFn: getDocumentList,
-  }); //need to change
+  const { data: sustainabilityData, isFetching: isSustainabilityDataFetching } = useQuery({
+    queryKey: ["sustainabilityReports"],
+    queryFn: getSustainabilityList,
+  });
 
-  const { mutate: createDocumentMutation } = useMutation({
-    mutationFn: createDocumentRecord,
+  const { mutate: createSustainabilityMutation } = useMutation({
+    mutationFn: createSustainabilityReport,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["documentRecords"] });
-      enqueueSnackbar("Document Record Created Successfully!", {
+      queryClient.invalidateQueries({ queryKey: ["sustainabilityReports"] });
+      enqueueSnackbar("Sustainability Record Created Successfully!", {
         variant: "success",
       });
       setSelectedRow(null);
@@ -92,17 +93,17 @@ function SustainabilityTable() {
       setOpenAddOrEditDialog(false);
     },
     onError: () => {
-      enqueueSnackbar(`Document Record Creation Failed`, {
+      enqueueSnackbar(`Sustainability Record Creation Failed`, {
         variant: "error",
       });
     },
-  }); //need to change
+  });
 
-  const { mutate: updateDocumentMutation } = useMutation({
-    mutationFn: updateDocumentRecord,
+  const { mutate: updateSustainabilityMutation } = useMutation({
+    mutationFn: updateSustainabilityReport,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["documentRecords"] });
-      enqueueSnackbar("Document Record Updated Successfully!", {
+      queryClient.invalidateQueries({ queryKey: ["sustainabilityReports"] });
+      enqueueSnackbar("Sustainability Record Updated Successfully!", {
         variant: "success",
       });
       setSelectedRow(null);
@@ -110,17 +111,17 @@ function SustainabilityTable() {
       setOpenAddOrEditDialog(false);
     },
     onError: () => {
-      enqueueSnackbar(`Document Record Updation Failed`, {
+      enqueueSnackbar(`Sustainability Record Updation Failed`, {
         variant: "error",
       });
     },
-  }); //need to change
+  });
 
-  const { mutate: deleteDocumentMutation } = useMutation({
-    mutationFn: deleteDocumentRecord,
+  const { mutate: deleteSustainabilityMutation } = useMutation({
+    mutationFn: deleteSustainabilityRecord,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["documentRecords"] });
-      enqueueSnackbar("Document Records Deleted Successfully!", {
+      queryClient.invalidateQueries({ queryKey: ["sustainabilityReports"] });
+      enqueueSnackbar("Sustainability Records Deleted Successfully!", {
         variant: "success",
       });
       setSelectedRow(null);
@@ -128,19 +129,19 @@ function SustainabilityTable() {
       setOpenAddOrEditDialog(false);
     },
     onError: () => {
-      enqueueSnackbar(`Document Delete Delete Failed`, {
+      enqueueSnackbar(`Sustainability Delete Delete Failed`, {
         variant: "error",
       });
     },
-  }); //need to change
+  });
 
-  const paginatedDocumentData = useMemo(() => {
-    if (!documents) return [];
-    return documents.slice(
+  const paginatedSustainabilityData = useMemo(() => {
+    if (!sustainabilityData) return [];
+    return sustainabilityData.slice(
       page * rowsPerPage,
       page * rowsPerPage + rowsPerPage
     );
-  }, [documents, page, rowsPerPage]);
+  }, [sustainabilityData, page, rowsPerPage]);
 
   return (
     <Stack>
@@ -189,7 +190,7 @@ function SustainabilityTable() {
               Add New Sustanability Report
             </Button>
           </Box>
-          {isDocumentDataFetching && <LinearProgress sx={{ width: "100%" }} />}
+          {isSustainabilityDataFetching && <LinearProgress sx={{ width: "100%" }} />}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -204,8 +205,8 @@ function SustainabilityTable() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {sampleSustainabilityData?.length > 0 ? (
-                sampleSustainabilityData.map((row) => (
+              {paginatedSustainabilityData?.length > 0 ? (
+                paginatedSustainabilityData.map((row) => (
                   <TableRow
                     key={`${row.id}${row.title}`}
                     sx={{
@@ -217,14 +218,14 @@ function SustainabilityTable() {
                       setOpenViewDrawer(true);
                     }}
                   >
-                    <TableCell align="right">{row.referenceNumber}</TableCell>
+                    <TableCell align="left">{row.referenceNumber}</TableCell>
                     <TableCell align="right">{row.title}</TableCell>
-                    <TableCell align="right">{row.projectLocation}</TableCell>
+                    <TableCell align="right">{row.location}</TableCell>
                     <TableCell align="right">{row.division}</TableCell>
                     <TableCell align="right">{row.sdg}</TableCell>
                     <MultiTableCell row={row} columnKey="pillars" />
                     <TableCell align="right">
-                      {format(new Date(row.projectDate), "yyyy-MM-dd")}
+                      {row.timeLines ? format(new Date(row.timeLines), "yyyy-MM-dd") : "N/A"}
                     </TableCell>
                     <TableCell align="right">{row.status}</TableCell>
                   </TableRow>
@@ -244,7 +245,7 @@ function SustainabilityTable() {
                 <TablePagination
                   rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
                   colSpan={100}
-                  count={documents?.length ?? 0}
+                  count={sustainabilityData?.length ?? 0}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   showFirstButton={true}
@@ -302,10 +303,10 @@ function SustainabilityTable() {
           onSubmit={(data) => {
             if (selectedRow) {
               console.log("Updating document", data);
-              updateDocumentMutation(data);
+              updateSustainabilityMutation(data);
             } else {
               console.log("Adding new document", data);
-              createDocumentMutation(data);
+              createSustainabilityMutation(data);
             }
             setSelectedRow(null);
             setOpenViewDrawer(false);
@@ -328,7 +329,7 @@ function SustainabilityTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            deleteDocumentMutation(selectedRow.id);
+            deleteSustainabilityMutation(selectedRow.id);
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);
