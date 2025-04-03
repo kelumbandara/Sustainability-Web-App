@@ -31,6 +31,7 @@ export const ExternalAuditSchema = z.object({
     auditStatus: z.string(),
     auditScore: z.string(),
     numberOfNonCom: z.string(),
+    gracePeriod: z.string(),
     auditFee: z.string(),
     auditGrade: z.string(),
     documents: z
@@ -40,7 +41,8 @@ export const ExternalAuditSchema = z.object({
     assigneeLevel: z.string(),
     assessmentDate: z.date(),
     auditExpiryDate: z.date(),
-
+    assesmentDate: z.date(),
+    auditorName: z.string(),
 
 });
 

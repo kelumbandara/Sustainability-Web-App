@@ -38,7 +38,7 @@ import {
   deleteExternalAudit,
   getExternalAssignedAudit,
   getExternalAuditData,
-  updateExternalAudit
+  updateExternalAudit,
 } from "../../api/ExternalAudit/externalAuditApi";
 import { sampleAuditData } from "../../api/sampleData/auditData";
 
@@ -72,10 +72,11 @@ function ExternalAuditTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
     { title: `${isAssignedTasks ? "Assigned " : ""}Audit Management` },
   ];
 
-  const { data: externalAuditData, isFetching: isExternalAuditDataFetching } = useQuery({
-    queryKey: ["external-audit"],
-    queryFn: getExternalAuditData,
-  });
+  const { data: externalAuditData, isFetching: isExternalAuditDataFetching } =
+    useQuery({
+      queryKey: ["external-audit"],
+      queryFn: getExternalAuditData,
+    });
 
   const {
     data: externalAuditTaskData,
@@ -200,7 +201,9 @@ function ExternalAuditTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
         }}
       >
         <PageTitle
-          title={`${isAssignedTasks ? "Assigned " : ""}External Audit Management`}
+          title={`${
+            isAssignedTasks ? "Assigned " : ""
+          }External Audit Management`}
         />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
@@ -276,7 +279,9 @@ function ExternalAuditTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
                       {format(new Date(row.auditDate), "yyyy-MM-dd")}
                     </TableCell>
                     <TableCell align="right">
-                      {format(new Date(row.expiryDate), "yyyy-MM-dd")}
+                      {row.auditExpiryDate
+                        ? format(new Date(row.auditExpiryDate), "yyyy-MM-dd")
+                        : "N/A"}
                     </TableCell>
                     <TableCell align="right">{row.auditType}</TableCell>
                     <TableCell align="right">{row.auditCategory}</TableCell>

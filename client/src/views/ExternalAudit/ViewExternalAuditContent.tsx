@@ -1,11 +1,4 @@
-import {
-  AppBar,
-  Box,
-  Stack,
-  Tab,
-  Tabs,
-  Typography,
-} from "@mui/material";
+import { AppBar, Box, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { DrawerContentItem } from "../../components/ViewDataDrawer";
 import { format } from "date-fns";
 import { useState } from "react";
@@ -13,8 +6,10 @@ import theme from "../../theme";
 import useIsMobile from "../../customHooks/useIsMobile";
 import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import ListIcon from "@mui/icons-material/List";
-import Diversity3Icon from '@mui/icons-material/Diversity3';
+import Diversity3Icon from "@mui/icons-material/Diversity3";
 import { ExternalAudit } from "../../api/ExternalAudit/externalAuditApi";
+import { FileItemsViewer } from "../../components/FileItemsViewer";
+import { StorageFile } from "../../utils/StorageFiles.util";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -87,7 +82,11 @@ function ViewExternalAuditContent({ audit }: { audit: ExternalAudit }) {
           />
           <DrawerContentItem
             label="Reported Date"
-            value={audit.created_At ? format(new Date(audit.created_At), "yyyy-MM-dd") : "N/A"}
+            value={
+              audit.created_At
+                ? format(new Date(audit.created_At), "yyyy-MM-dd")
+                : "N/A"
+            }
             sx={{ flex: 1 }}
           />
         </Box>
@@ -237,11 +236,45 @@ function ViewExternalAuditContent({ audit }: { audit: ExternalAudit }) {
           </Box>
         </TabPanel>
         <TabPanel value={activeTab} index={1} dir={theme.direction}>
-
+          <DrawerContentItem
+            label="Audit Status"
+            value={audit.auditStatus}
+            sx={{ flex: 1 }}
+          />
+          <DrawerContentItem
+            label="Audit Score"
+            value={audit.auditScore}
+            sx={{ flex: 1 }}
+          />
+          <DrawerContentItem
+            label="Grace Period"
+            value={audit.gracePeriod}
+            sx={{ flex: 1 }}
+          />
+          <DrawerContentItem
+            label="Number of Non Com"
+            value={audit.numberOfNonCom}
+            sx={{ flex: 1 }}
+          />
+          <DrawerContentItem
+            label="Audit Fee"
+            value={audit.auditFee}
+            sx={{ flex: 1 }}
+          />
+          <DrawerContentItem
+            label="Audit Grade"
+            value={audit.auditGrade}
+            sx={{ flex: 1 }}
+          />
+          <Box>
+              <FileItemsViewer
+                label="Evidence"
+                files={audit.documents as StorageFile]}
+                sx={{ marginY: "1rem" }}
+              />
+            </Box>
         </TabPanel>
-        <TabPanel value={activeTab} index={2} dir={theme.direction}>
-
-        </TabPanel>
+        <TabPanel value={activeTab} index={2} dir={theme.direction}></TabPanel>
       </Box>
       <Box
         sx={{
@@ -260,11 +293,19 @@ function ViewExternalAuditContent({ audit }: { audit: ExternalAudit }) {
         <DrawerContentItem label="Reported By" value={audit.createdBy} />
         <DrawerContentItem
           label="Issued Date"
-          value={audit.auditDate ? format(new Date(audit.auditDate), "yyyy-MM-dd") : "N/A"}
+          value={
+            audit.auditDate
+              ? format(new Date(audit.auditDate), "yyyy-MM-dd")
+              : "N/A"
+          }
         />
         <DrawerContentItem
           label="Expiry Date"
-          value={audit.expiryDate ? format(new Date(audit.expiryDate), "yyyy-MM-dd") : "N/A"}
+          value={
+            audit.auditExpiryDate
+              ? format(new Date(audit.auditExpiryDate), "yyyy-MM-dd")
+              : "N/A"
+          }
         />
       </Box>
     </Stack>
