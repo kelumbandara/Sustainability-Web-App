@@ -1,4 +1,15 @@
-import { AppBar, Box, Stack, Tab, Tabs, Typography } from "@mui/material";
+import {
+  AppBar,
+  Box,
+  Stack,
+  Tab,
+  Table,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tabs,
+  Typography,
+} from "@mui/material";
 import { DrawerContentItem } from "../../components/ViewDataDrawer";
 import { format } from "date-fns";
 import { useState } from "react";
@@ -267,14 +278,28 @@ function ViewExternalAuditContent({ audit }: { audit: ExternalAudit }) {
             sx={{ flex: 1 }}
           />
           <Box>
-              <FileItemsViewer
-                label="Evidence"
-                files={audit.documents as StorageFile]}
-                sx={{ marginY: "1rem" }}
-              />
-            </Box>
+            <FileItemsViewer
+              label="Document File"
+              files={audit.documents as StorageFile[]}
+              sx={{ marginY: "1rem" }}
+            />
+          </Box>
         </TabPanel>
-        <TabPanel value={activeTab} index={2} dir={theme.direction}></TabPanel>
+        <TabPanel value={activeTab} index={2} dir={theme.direction}>
+          <Table aria-label="simple table">
+            <TableHead
+              sx={{
+                backgroundColor: "var(--pallet-lighter-grey)",
+              }}
+            >
+              <TableRow>
+                <TableCell align="center">#</TableCell>
+                <TableCell align="center">Finding</TableCell>
+                <TableCell align="center"></TableCell>
+              </TableRow>
+            </TableHead>
+          </Table>
+        </TabPanel>
       </Box>
       <Box
         sx={{

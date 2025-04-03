@@ -33,17 +33,20 @@ import {
   ExternalAudit,
 } from "../../api/ExternalAudit/externalAuditApi";
 import useIsMobile from "../../customHooks/useIsMobile";
-import DescriptionIcon from "@mui/icons-material/Description";
 import theme from "../../theme";
 import CustomButton from "../../components/CustomButton";
 import { fetchDivision } from "../../api/divisionApi";
 import { useQuery } from "@tanstack/react-query";
-import DifferenceIcon from "@mui/icons-material/Difference";
 import RichTextComponent from "../../components/RichTextComponent";
 import { ExistingFileItemsEdit } from "../../components/ExistingFileItemsEdit";
 import DropzoneComponent from "../../components/DropzoneComponent";
 import { StorageFile } from "../../utils/StorageFiles.util";
 import DatePickerComponent from "../../components/DatePickerComponent";
+import UserAutoComplete from "../../components/UserAutoComplete";
+import { fetchHazardRiskAssignee } from "../../api/userApi";
+import TextSnippetIcon from "@mui/icons-material/TextSnippet";
+import ListIcon from "@mui/icons-material/List";
+import Diversity3Icon from "@mui/icons-material/Diversity3";
 
 type DialogProps = {
   open: boolean;
@@ -91,6 +94,11 @@ export default function AddOrEditSustainabilityDialog({
   const { isMobile, isTablet } = useIsMobile();
   const [files, setFiles] = useState<File[]>([]);
   const [activeTab, setActiveTab] = useState(0);
+
+  const { data: assigneeData, isFetching: isAssigneeDataFetching } = useQuery({
+    queryKey: ["hr-assignee"],
+    queryFn: fetchHazardRiskAssignee, //need to change
+  });
 
   const {
     register,
@@ -290,7 +298,7 @@ export default function AddOrEditSustainabilityDialog({
                         alignItems: "center",
                       }}
                     >
-                      <DescriptionIcon fontSize="small" />
+                      <TextSnippetIcon fontSize="small" />
                       <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                         General
                       </Typography>
@@ -316,7 +324,7 @@ export default function AddOrEditSustainabilityDialog({
                         display: "flex",
                       }}
                     >
-                      <DifferenceIcon fontSize="small" />
+                      <ListIcon fontSize="small" />
                       <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                         Audit details
                       </Typography>
@@ -334,7 +342,7 @@ export default function AddOrEditSustainabilityDialog({
                         display: "flex",
                       }}
                     >
-                      <DescriptionIcon fontSize="small" />
+                      <Diversity3Icon fontSize="small" />
                       <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                         Action Plan
                       </Typography>
@@ -667,7 +675,7 @@ export default function AddOrEditSustainabilityDialog({
 
                     <TextField
                       id="auditScore"
-                      type="text"
+                      type="number"
                       label="Audit Score"
                       error={!!errors.auditScore}
                       size="small"
@@ -698,7 +706,7 @@ export default function AddOrEditSustainabilityDialog({
                   >
                     <TextField
                       id="numberOfNonCom"
-                      type="text"
+                      type="number"
                       label="Number Of Non Com"
                       error={!!errors.numberOfNonCom}
                       size="small"
@@ -708,7 +716,7 @@ export default function AddOrEditSustainabilityDialog({
 
                     <TextField
                       id="auditFee"
-                      type="text"
+                      type="number"
                       label="Audit Fee"
                       error={!!errors.auditFee}
                       size="small"
@@ -902,36 +910,15 @@ export default function AddOrEditSustainabilityDialog({
               </Box>
 
               <Box sx={{ margin: "0.5rem" }}>
-                <Controller
+                <UserAutoComplete
                   name="approver"
+                  label="Approver"
                   control={control}
-                  defaultValue={defaultValues?.approver ?? null}
-                  rules={{ required: true }}
-                  render={({ field }) => (
-                    <Autocomplete
-                      {...field}
-                      onChange={(event, newValue) => field.onChange(newValue)}
-                      size="small"
-                      options={
-                        divisionData?.length
-                          ? divisionData.map(
-                              (division) => division.divisionName
-                            )
-                          : []
-                      }
-                      sx={{ flex: 1, margin: "0.5rem" }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          required
-                          error={!!errors.approver}
-                          helperText={errors.approver && "Required"}
-                          label="Approver"
-                          name="approver"
-                        />
-                      )}
-                    />
-                  )}
+                  register={register}
+                  errors={errors}
+                  userData={assigneeData}
+                  defaultValue={defaultValues?.approver}
+                  required={true}
                 />
               </Box>
 

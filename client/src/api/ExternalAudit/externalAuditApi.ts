@@ -29,10 +29,10 @@ export const ExternalAuditSchema = z.object({
     announcement: z.nativeEnum(Announcement),
     remarks: z.string(),
     auditStatus: z.string(),
-    auditScore: z.string(),
-    numberOfNonCom: z.string(),
+    auditScore: z.number(),
+    numberOfNonCom: z.number(),
     gracePeriod: z.string(),
-    auditFee: z.string(),
+    auditFee: z.number(),
     auditGrade: z.string(),
     documents: z
         .union([z.array(StorageFileSchema), z.array(z.instanceof(File))])
