@@ -12,19 +12,18 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import useIsMobile from "../../customHooks/useIsMobile";
 import { DrawerContentItem } from "../../components/ViewDataDrawer";
 import theme from "../../theme";
-import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import DescriptionIcon from "@mui/icons-material/Description";
-import AssignmentReturnIcon from "@mui/icons-material/AssignmentReturn";
-import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import { format } from "date-fns";
 import { FileItemsViewer } from "../../components/FileItemsViewer";
+import ImageIcon from "@mui/icons-material/Image";
+import ArchiveIcon from "@mui/icons-material/Archive";
 import { StorageFile } from "../../utils/StorageFiles.util";
 import { Sustainability } from "../../api/Sustainability/sustainabilityApi";
 import MultiDrawerContent from "../../components/MultiDrawerContent";
+import DifferenceIcon from "@mui/icons-material/Difference";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -134,7 +133,7 @@ function ViewMaternityRegisterContent({
                     alignItems: "center",
                   }}
                 >
-                  <AccountBoxIcon fontSize="small" />
+                  <DescriptionIcon fontSize="small" />
                   <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                     General Details
                   </Typography>
@@ -151,7 +150,7 @@ function ViewMaternityRegisterContent({
                     alignItems: "center",
                   }}
                 >
-                  <DescriptionIcon fontSize="small" />
+                  <DifferenceIcon fontSize="small" />
                   <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                     SDG Details
                   </Typography>
@@ -168,7 +167,7 @@ function ViewMaternityRegisterContent({
                     alignItems: "center",
                   }}
                 >
-                  <ReceiptLongIcon fontSize="small" />
+                  <DescriptionIcon fontSize="small" />
                   <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                     Others
                   </Typography>
@@ -185,7 +184,7 @@ function ViewMaternityRegisterContent({
                     alignItems: "center",
                   }}
                 >
-                  <AssignmentReturnIcon fontSize="small" />
+                  <ArchiveIcon fontSize="small" />
                   <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                     Activity Impacts
                   </Typography>
@@ -202,7 +201,7 @@ function ViewMaternityRegisterContent({
                     alignItems: "center",
                   }}
                 >
-                  <MedicalServicesIcon fontSize="small" />
+                  <ImageIcon fontSize="small" />
                   <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                     Gallery
                   </Typography>

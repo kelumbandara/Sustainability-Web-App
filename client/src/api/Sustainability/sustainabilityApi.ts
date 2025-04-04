@@ -153,3 +153,43 @@ export async function getSustainabilityList() {
     return res.data;
 }
 
+export async function getAdditionalSDGList() {
+    const res = await axios.get("/api/additional-SDG");
+    return res.data;
+}
+
+export async function getAlignmentSDGList() {
+    const res = await axios.get("/api/alignment-SDG");
+    return res.data;
+}
+
+export async function getMaterialityissuesList() {
+    const res = await axios.get("/api/materiality-issues");
+    return res.data;
+}
+
+export async function getMaterialitytypeList() {
+    const res = await axios.get("/api/materiality-type");
+    return res.data;
+}
+
+export async function getPillarList() {
+    const res = await axios.get("/api/pillars");
+    return res.data;
+}
+
+export async function getSdgValueList() {
+    const res = await axios.get("/api/sdg-value");
+    return res.data;
+}
+
+export async function getImpactList() {
+    const res = await axios.get("/api/impact-type");
+    return res.data;
+}
+
+export async function fetchImpactUnit(impactType: string) {
+    const res = await axios.get(`/api/impact-types/${impactType}/impactUnit`);
+    return res.data;
+}
+

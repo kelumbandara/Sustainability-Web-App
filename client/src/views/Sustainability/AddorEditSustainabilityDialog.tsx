@@ -29,7 +29,15 @@ import { useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { Sustainability } from "../../api/Sustainability/sustainabilityApi";
+import {
+  Sustainability,
+  getAdditionalSDGList,
+  getAlignmentSDGList,
+  getMaterialityissuesList,
+  getMaterialitytypeList,
+  getPillarList,
+  getSdgValueList,
+} from "../../api/Sustainability/sustainabilityApi";
 import useIsMobile from "../../customHooks/useIsMobile";
 import DescriptionIcon from "@mui/icons-material/Description";
 import theme from "../../theme";
@@ -151,6 +159,44 @@ export default function AddOrEditSustainabilityDialog({
   const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
     queryKey: ["divisions"],
     queryFn: fetchDivision,
+  });
+
+  const { data: aditionalSDGData, isFetching: isAddditionalSDGFetching } =
+    useQuery({
+      queryKey: ["additional-sdg"],
+      queryFn: getAdditionalSDGList,
+    });
+
+  const { data: aligmentSDGData, isFetching: isAligmentSDGDataFetching } =
+    useQuery({
+      queryKey: ["alignment-SDG"],
+      queryFn: getAlignmentSDGList,
+    });
+
+  const {
+    data: materialityIssueData,
+    isFetching: isMaterialityIssueDataFetching,
+  } = useQuery({
+    queryKey: ["materiality-issues"],
+    queryFn: getMaterialityissuesList,
+  });
+
+  const {
+    data: materialityTypeData,
+    isFetching: isMaterialityTypeDataFetching,
+  } = useQuery({
+    queryKey: ["materiality-type"],
+    queryFn: getMaterialitytypeList,
+  });
+
+  const { data: pillarsData, isFetching: isPillarsDataFetching } = useQuery({
+    queryKey: ["pillars"],
+    queryFn: getPillarList,
+  });
+
+  const { data: sdgValueData, isFetching: isSdgValueDataFetching } = useQuery({
+    queryKey: ["sdg-value"],
+    queryFn: getSdgValueList,
   });
 
   const isGeneralDetailsValid = useMemo(() => {
@@ -472,14 +518,13 @@ export default function AddOrEditSustainabilityDialog({
                         required={true}
                         name="materialityType"
                         label="Materiality Type"
-                        options={divisionData}
+                        options={materialityTypeData}
                         selectedValues={materialityType}
                         setSelectedValues={setMaterialityType}
-                        getOptionLabel={(option) => option.divisionName}
-                        getOptionValue={(option) => option.divisionName}
+                        getOptionLabel={(option) => option.materialityType}
+                        getOptionValue={(option) => option.materialityType}
                         placeholder="Materiality Type"
                         limitTags={2}
-                        
                       />
                     </Box>
                     <Box
@@ -493,14 +538,13 @@ export default function AddOrEditSustainabilityDialog({
                         required={true}
                         name="materialityIssue"
                         label="Materiality Issue"
-                        options={divisionData}
+                        options={materialityIssueData}
                         selectedValues={materialityIssue}
                         setSelectedValues={setMaterialityIssue}
-                        getOptionLabel={(option) => option.divisionName}
-                        getOptionValue={(option) => option.divisionName}
+                        getOptionLabel={(option) => option.materialityIssue}
+                        getOptionValue={(option) => option.materialityIssue}
                         placeholder="Materiality Issue"
                         limitTags={2}
-                        //need to change
                       />
                     </Box>
                   </Stack>
@@ -526,14 +570,13 @@ export default function AddOrEditSustainabilityDialog({
                         required={true}
                         name="pillars"
                         label="Pillars"
-                        options={divisionData}
+                        options={pillarsData}
                         selectedValues={pillars}
                         setSelectedValues={setPillars}
-                        getOptionLabel={(option) => option.divisionName}
-                        getOptionValue={(option) => option.divisionName}
+                        getOptionLabel={(option) => option.pillarName}
+                        getOptionValue={(option) => option.pillarName}
                         placeholder="Pillars"
                         limitTags={2}
-                        //need to change
                       />
                     </Box>
                   </Stack>
@@ -583,19 +626,17 @@ export default function AddOrEditSustainabilityDialog({
                         onChange={(event, newValue) => field.onChange(newValue)}
                         size="small"
                         options={
-                          divisionData?.length
-                            ? divisionData.map(
-                                (division) => division.divisionName
-                              )
+                          sdgValueData?.length
+                            ? sdgValueData.map((sdg) => sdg.sdg)
                             : []
-                        } //need to change
+                        }
                         sx={{ flex: 1, margin: "0.5rem" }}
                         renderInput={(params) => (
                           <TextField
                             {...params}
                             required
-                            error={!!errors.division}
-                            helperText={errors.division && "Required"}
+                            error={!!errors.sdg}
+                            helperText={errors.sdg && "Required"}
                             label="SDG"
                             name="sdg"
                           />
@@ -625,14 +666,13 @@ export default function AddOrEditSustainabilityDialog({
                         required={true}
                         name="additionalSdg"
                         label="Additional SDGs"
-                        options={divisionData}
+                        options={aditionalSDGData}
                         selectedValues={additionalSdg}
                         setSelectedValues={SetAdditionalSdg}
-                        getOptionLabel={(option) => option.divisionName}
-                        getOptionValue={(option) => option.divisionName}
+                        getOptionLabel={(option) => option.name}
+                        getOptionValue={(option) => option.name}
                         placeholder="Choose Additional SDGs"
                         limitTags={2}
-                        //need to change
                       />
                     </Box>
                   </Stack>
@@ -647,19 +687,17 @@ export default function AddOrEditSustainabilityDialog({
                         onChange={(event, newValue) => field.onChange(newValue)}
                         size="small"
                         options={
-                          divisionData?.length
-                            ? divisionData.map(
-                                (division) => division.divisionName
-                              )
+                          aligmentSDGData?.length
+                            ? aligmentSDGData.map((division) => division.name)
                             : []
-                        } //need to change
+                        }
                         sx={{ flex: 1, margin: "0.5rem" }}
                         renderInput={(params) => (
                           <TextField
                             {...params}
                             required
-                            error={!!errors.division}
-                            helperText={errors.division && "Required"}
+                            error={!!errors.alignmentSdg}
+                            helperText={errors.alignmentSdg && "Required"}
                             label="Alignment With SDGs"
                             name="alignmentSdg"
                           />

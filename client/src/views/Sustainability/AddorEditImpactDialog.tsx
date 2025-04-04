@@ -16,7 +16,11 @@ import { Controller, useForm } from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
 import { grey } from "@mui/material/colors";
 import { useEffect } from "react";
-import { ImpactSchema } from "../../api/Sustainability/sustainabilityApi";
+import {
+  ImpactSchema,
+  fetchImpactUnit,
+  getImpactList,
+} from "../../api/Sustainability/sustainabilityApi";
 import CustomButton from "../../components/CustomButton";
 import useIsMobile from "../../customHooks/useIsMobile";
 import { useQuery } from "@tanstack/react-query";
@@ -43,6 +47,7 @@ export default function AddOrEditImpactDialog({
     control,
     formState: { errors },
     reset,
+    watch,
     setValue,
   } = useForm<ImpactSchema>({
     defaultValues,
@@ -60,10 +65,19 @@ export default function AddOrEditImpactDialog({
     reset();
   };
 
-  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
-    queryKey: ["divisions"],
-    queryFn: fetchDivision,
-  }); //need to change
+  const impactType = watch("impactType");
+
+  const { data: impactTypeData, isFetching: isImpactTypeDataFetching } =
+    useQuery({
+      queryKey: ["impact-type"],
+      queryFn: getImpactList,
+    });
+  const { data: impactUnitData, isFetching: isImpactUnitDataFetching } =
+    useQuery({
+      queryKey: ["impact-unit", impactType],
+      queryFn: () => fetchImpactUnit(impactType),
+      enabled: !!impactType, // Prevents fetching when category is empty
+    });
 
   return (
     <Dialog
@@ -126,10 +140,10 @@ export default function AddOrEditImpactDialog({
                 onChange={(event, newValue) => field.onChange(newValue)}
                 size="small"
                 options={
-                  divisionData?.length
-                    ? divisionData.map((division) => division.divisionName)
+                  impactTypeData?.length
+                    ? impactTypeData.map((impact) => impact.impactType)
                     : []
-                } //need to change
+                }
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (
                   <TextField
@@ -145,64 +159,44 @@ export default function AddOrEditImpactDialog({
             )}
           />
 
-          <Controller
-            name="unit"
-            control={control}
-            defaultValue={defaultValues?.unit ?? ""}
-            {...register("unit", { required: true })}
-            render={({ field }) => (
-              <Autocomplete
-                {...field}
-                onChange={(event, newValue) => field.onChange(newValue)}
-                size="small"
-                options={
-                  divisionData?.length
-                    ? divisionData.map((division) => division.divisionName)
-                    : []
-                } //need to change
-                sx={{ flex: 1, margin: "0.5rem" }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    error={!!errors.unit}
-                    helperText={errors.unit && "Required"}
-                    label="Unit"
-                    name="unit"
-                  />
-                )}
-              />
-            )}
-          />
+          {impactType && (
+            <Controller
+              name="unit"
+              control={control}
+              defaultValue={defaultValues?.unit ?? ""}
+              {...register("unit", { required: true })}
+              render={({ field }) => (
+                <Autocomplete
+                  {...field}
+                  onChange={(event, newValue) => field.onChange(newValue)}
+                  size="small"
+                  options={
+                    impactUnitData?.map((impact) => impact.impactUnit) ?? []
+                  }
+                  sx={{ flex: 1, margin: "0.5rem" }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      required
+                      error={!!errors.unit}
+                      helperText={errors.unit && "Required"}
+                      label="Unit"
+                      name="unit"
+                    />
+                  )}
+                />
+              )}
+            />
+          )}
 
-          <Controller
-            name="value"
-            control={control}
-            defaultValue={defaultValues?.unit ?? ""}
+          <TextField
+            id="value"
+            type="text"
+            label="Impact Value"
+            error={!!errors.value}
+            size="small"
+            sx={{ flex: 1, margin: "0.5rem" }}
             {...register("value", { required: true })}
-            render={({ field }) => (
-              <Autocomplete
-                {...field}
-                onChange={(event, newValue) => field.onChange(newValue)}
-                size="small"
-                options={
-                  divisionData?.length
-                    ? divisionData.map((division) => division.divisionName)
-                    : []
-                } //need to change
-                sx={{ flex: 1, margin: "0.5rem" }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    error={!!errors.value}
-                    helperText={errors.unit && "Required"}
-                    label="Value"
-                    name="value"
-                  />
-                )}
-              />
-            )}
           />
         </Stack>
       </DialogContent>
