@@ -2,11 +2,13 @@ import {
   Auditee,
   Factory,
   InternalAudit,
+  InternalAuditQuestionAnswerRating,
   InternalAuditQuestionAnswersStatus,
   InternalAuditQuestionGroup,
   InternalAuditType,
   ScheduledInternalAudit,
   ScheduledInternalAuditStatus,
+  ScheduledTaskActionPlanPriority,
   SupplierType,
 } from "../AuditAndInspection/internalAudit";
 import { sampleUsers } from "./usersSampleData";
@@ -119,12 +121,22 @@ export const sampleFactories: Factory[] = [
   {
     id: "1",
     name: "Factory 1",
-    email: "samplefac@gg.cc",
+    email: "ssd@sss.sss",
+    factoryAddress: "abudabi",
+    contactNumber: "123456789",
+    designation: "manager",
+    factoryContactPerson: sampleUsers[0],
+    factoryContactPersonId: sampleUsers[0].id,
   },
   {
     id: "2",
     name: "Factory 2",
-    email: "smaple2fac@gg.cc",
+    email: "ssd@sss.sss",
+    factoryAddress: "abudabi",
+    contactNumber: "123456789",
+    designation: "manager",
+    factoryContactPerson: sampleUsers[1],
+    factoryContactPersonId: sampleUsers[1].id,
   },
 ];
 
@@ -138,6 +150,21 @@ export const sampleAuditees: Auditee[] = [
     id: "2",
     name: "Auditee 2",
     email: "auditee2@gg.cc",
+  },
+];
+
+export const sampleProcessData = [
+  {
+    id: "1",
+    name: "Process 1",
+  },
+  {
+    id: "2",
+    name: "Process 2",
+  },
+  {
+    id: "3",
+    name: "Process 3",
   },
 ];
 
@@ -243,18 +270,21 @@ export const sampleScheduledInternalAudits: ScheduledInternalAudit[] = [
             questionId: "1",
             score: 5,
             status: InternalAuditQuestionAnswersStatus.YES,
+            rating: InternalAuditQuestionAnswerRating.COMPILED,
           },
           {
             id: "2",
             questionId: "2",
             score: 5,
             status: InternalAuditQuestionAnswersStatus.YES,
+            rating: InternalAuditQuestionAnswerRating.COMPILED,
           },
           {
             id: "3",
             questionId: "3",
             score: 5,
             status: InternalAuditQuestionAnswersStatus.PARTIAL_YES,
+            rating: InternalAuditQuestionAnswerRating.CRITICAL,
           },
         ],
       },
@@ -268,14 +298,38 @@ export const sampleScheduledInternalAudits: ScheduledInternalAudit[] = [
             questionId: "1",
             score: 5,
             status: InternalAuditQuestionAnswersStatus.YES,
+            rating: InternalAuditQuestionAnswerRating.COMPILED,
           },
           {
             id: "5",
             questionId: "2",
             score: 5,
             status: InternalAuditQuestionAnswersStatus.NO,
+            rating: InternalAuditQuestionAnswerRating.CRITICAL,
           },
         ],
+      },
+    ],
+    actionPlan: [
+      {
+        id: "123",
+        scheduledAuditId: "3",
+        correctiveOrPreventiveAction: "sample action plan",
+        date: new Date(),
+        priority: ScheduledTaskActionPlanPriority.LOW,
+        dueDate: new Date("2026-01-20"),
+        targetCompletionDate: new Date("2026-01-20"),
+        approver: sampleUsers[0],
+      },
+      {
+        id: "124",
+        scheduledAuditId: "3",
+        correctiveOrPreventiveAction: "sample action plan 2",
+        date: new Date(),
+        priority: ScheduledTaskActionPlanPriority.HIGH,
+        dueDate: new Date("2026-01-20"),
+        targetCompletionDate: new Date("2026-01-20"),
+        approver: sampleUsers[0],
       },
     ],
   },

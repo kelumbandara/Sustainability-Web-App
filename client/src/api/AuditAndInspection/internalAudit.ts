@@ -52,6 +52,12 @@ export enum InternalAuditQuestionAnswerRating {
   CRITICAL = "Critical",
 }
 
+export enum ScheduledTaskActionPlanPriority {
+  HIGH = "High",
+  MEDIUM = "Medium",
+  LOW = "Low",
+}
+
 export const InternalAuditQuestionSchema = z.object({
   id: z.string().optional(),
   question: z.string(),
@@ -114,6 +120,10 @@ export const InternalAuditAnswerToQuestionsSchema = z.object({
   rating: z.nativeEnum(InternalAuditQuestionAnswerRating).optional(),
 });
 
+export type InternalAuditAnswerToQuestions = z.infer<
+  typeof InternalAuditAnswerToQuestionsSchema
+>;
+
 export const ScheduledInternalAuditQuestionGroupAnswersSchema = z.object({
   id: z.string().optional(),
   auditId: z.string().optional(),
@@ -123,6 +133,21 @@ export const ScheduledInternalAuditQuestionGroupAnswersSchema = z.object({
 
 export type ScheduledInternalAuditQuestionAnswers = z.infer<
   typeof ScheduledInternalAuditQuestionGroupAnswersSchema
+>;
+
+export const ScheduledInternalAuditActionPlanSchema = z.object({
+  id: z.string().optional(),
+  scheduledAuditId: z.string(),
+  correctiveOrPreventiveAction: z.string(),
+  date: z.date(),
+  priority: z.nativeEnum(ScheduledTaskActionPlanPriority).optional(),
+  dueDate: z.date(),
+  targetCompletionDate: z.date(),
+  approver: userSchema.optional(),
+});
+
+export type ScheduledInternalAuditActionPlan = z.infer<
+  typeof ScheduledInternalAuditActionPlanSchema
 >;
 
 export const ScheduledInternalAuditSchema = z.object({
@@ -144,7 +169,9 @@ export const ScheduledInternalAuditSchema = z.object({
   factoryName: z.string(),
   factory: FactorySchema,
   factoryId: z.string(),
+  factoryAddress: z.string(),
   factoryEmail: z.string(),
+  factoryContactPerson: z.string(),
   factoryContactNumber: z.string(),
   supplierType: z.nativeEnum(SupplierType).optional(),
   factoryLicenseNo: z.string().optional(),
@@ -152,6 +179,7 @@ export const ScheduledInternalAuditSchema = z.object({
   zdhcId: z.string().optional(),
   processType: z.string().optional(),
   description: z.string().optional(),
+  designation: z.string().optional(),
   auditee: auditeeSchema.optional(),
   auditeeId: z.string().optional(),
   approver: userSchema,
@@ -161,6 +189,7 @@ export const ScheduledInternalAuditSchema = z.object({
   createdAt: z.date(),
   createdBy: userSchema,
   auditStatus: z.string().optional(),
+  actionPlan: z.array(ScheduledInternalAuditActionPlanSchema).optional(),
 });
 
 export type ScheduledInternalAudit = z.infer<

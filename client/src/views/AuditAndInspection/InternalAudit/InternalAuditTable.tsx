@@ -10,6 +10,7 @@ import {
   Box,
   Button,
   Chip,
+  colors,
   LinearProgress,
   Stack,
   TableFooter,
@@ -42,6 +43,7 @@ import {
 } from "../../../api/AuditAndInspection/internalAudit";
 import { sampleScheduledInternalAudits } from "../../../api/sampleData/sampleInternalAuditData";
 import ViewInternalAuditContent from "./ViewInternalAuditContent";
+import AddScheduledInternalAudit from "./AddScheduledInternalAudit";
 
 function InternalAuditTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -299,6 +301,22 @@ function InternalAuditTable() {
           </Stack>
         }
       />
+      {openAddOrEditDialog && (
+        <AddScheduledInternalAudit
+          open={openAddOrEditDialog}
+          handleClose={() => {
+            setSelectedRow(null);
+            setOpenViewDrawer(false);
+            setOpenAddOrEditDialog(false);
+          }}
+          onSubmit={(data) => {
+            // createInternalAuditMutation(data);
+            setSelectedRow(null);
+            setOpenViewDrawer(false);
+            setOpenAddOrEditDialog(false);
+          }}
+        />
+      )}
       {/* {openAddOrEditDialog && (
         <AddOrEditDocumentDialog
           open={openAddOrEditDialog}
@@ -390,7 +408,7 @@ export function RenderInternalAuditStatusChip(
           label={status}
           sx={{
             color: "var(--pallet-orange)",
-            backgroundColor: "var(--pallet-lighter-orange)",
+            backgroundColor: colors.orange[50],
           }}
         />
       );
@@ -400,7 +418,7 @@ export function RenderInternalAuditStatusChip(
           label={status}
           sx={{
             color: "var(--pallet-green)",
-            backgroundColor: "var(--pallet-lighter-green)",
+            backgroundColor: colors.green[50],
           }}
         />
       );
@@ -410,7 +428,7 @@ export function RenderInternalAuditStatusChip(
           label={status}
           sx={{
             color: "var(--pallet-green)",
-            backgroundColor: "var(--pallet-lighter-green)",
+            backgroundColor: colors.green[50],
           }}
         />
       );
