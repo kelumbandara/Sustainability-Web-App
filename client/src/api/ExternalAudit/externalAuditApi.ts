@@ -20,9 +20,8 @@ export const ExternalAuditSchema = z.object({
     division: z.string(),
     auditDate: z.date(),
     approvalDate: z.date(),
-    approver: userSchema,
-    approverId: z.string(),
-    representer: userSchema,
+    approverId: userSchema.optional(),
+    representor: userSchema.optional(),
     created_At: z.date(),
     createdBy: z.string(),
     status: z.string(),
@@ -43,14 +42,11 @@ export const ExternalAuditSchema = z.object({
     auditExpiryDate: z.date(),
     assesmentDate: z.date(),
     auditorName: z.string(),
-
+    removeDoc: z.array(z.string()).optional(),
 });
 
 export type ExternalAudit = z.infer<typeof ExternalAuditSchema>;
 
-export async function createExternalAudit(data: ExternalAudit) {
-    const res = await axios.post("/api/external-audit", data)
-}
 export async function updateExternalAudit(data: ExternalAudit) {
     const res = await axios.post("/api/external-audit", data)
 }
@@ -65,5 +61,35 @@ export async function getExternalAssignedAudit() {
     const res = await axios.get("/api/external-audit-assigned-audit");
     return res.data;
 }
+
+export const createExternalAudit = async (externalAudit: ExternalAudit) => {
+    const formData = new FormData();
+  
+    Object.keys(externalAudit).forEach((key) => {
+      const value = externalAudit[key as keyof ExternalAudit];
+  
+      if (key === "documents" && Array.isArray(value)) {
+        value.forEach((file, index) => {
+          formData.append(`documents[${index}]`, file as File);
+        });
+      } else if (Array.isArray(value)) {
+        value.forEach((item, index) => {
+          formData.append(`${key}[${index}]`, JSON.stringify(item));
+        });
+      } else if (value instanceof Date) {
+        formData.append(key, value.toISOString());
+      } else if (value !== null && value !== undefined) {
+        formData.append(key, value.toString());
+      }
+    });
+  
+    const res = await axios.post("/api/external-audit", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  
+    return res.data;
+  };
 
 

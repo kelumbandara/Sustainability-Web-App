@@ -148,27 +148,27 @@ function ExternalAuditTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
     },
   });
 
-  // const paginatedExternalAuditData = useMemo(() => {
-  //   if (isAssignedTasks) {
-  //     if (!sampleAuditData) return [];
-  //     return externalAuditTaskData.slice(
-  //       page * rowsPerPage,
-  //       page * rowsPerPage + rowsPerPage
-  //     );
-  //   } else {
-  //     if (!sampleAuditData) return [];
-  //     return externalAuditData.slice(
-  //       page * rowsPerPage,
-  //       page * rowsPerPage + rowsPerPage
-  //     );
-  //   }
-  // }, [
-  //   externalAuditData,
-  //   page,
-  //   rowsPerPage,
-  //   externalAuditTaskData,
-  //   isAssignedTasks,
-  // ]);
+  const paginatedExternalAuditData = useMemo(() => {
+    if (isAssignedTasks) {
+      if (!externalAuditData) return [];
+      return externalAuditTaskData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
+    } else {
+      if (!externalAuditData) return [];
+      return externalAuditData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
+    }
+  }, [
+    externalAuditData,
+    page,
+    rowsPerPage,
+    externalAuditTaskData,
+    isAssignedTasks,
+  ]);
 
   const isExternalAuditCreateDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_REGISTER_CREATE
@@ -261,8 +261,8 @@ function ExternalAuditTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {sampleAuditData?.length > 0 ? (
-                sampleAuditData?.map((row) => (
+              {paginatedExternalAuditData?.length > 0 ? (
+                paginatedExternalAuditData?.map((row) => (
                   <TableRow
                     key={`${row.id}`}
                     sx={{
@@ -309,8 +309,8 @@ function ExternalAuditTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
                   colSpan={100}
                   count={
                     isAssignedTasks
-                      ? sampleAuditData?.length
-                      : sampleAuditData?.length
+                      ? paginatedExternalAuditData?.length
+                      : paginatedExternalAuditData?.length
                   }
                   rowsPerPage={rowsPerPage}
                   page={page}

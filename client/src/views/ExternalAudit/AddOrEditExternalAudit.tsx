@@ -133,6 +133,8 @@ export default function AddOrEditSustainabilityDialog({
   const handleCreateSustainability = (data: ExternalAudit) => {
     const submitData: Partial<ExternalAudit> = data;
     submitData.id = defaultValues?.id ?? uuidv4();
+    submitData.documents = files;
+    if (filesToRemove?.length > 0) submitData.removeDoc = filesToRemove;
     onSubmit(submitData as ExternalAudit);
     resetForm();
   };
@@ -911,13 +913,26 @@ export default function AddOrEditSustainabilityDialog({
 
               <Box sx={{ margin: "0.5rem" }}>
                 <UserAutoComplete
-                  name="approver"
+                  name="approverId"
                   label="Approver"
                   control={control}
                   register={register}
                   errors={errors}
                   userData={assigneeData}
-                  defaultValue={defaultValues?.approver}
+                  defaultValue={defaultValues?.approverId}
+                  required={true}
+                />
+              </Box>
+
+              <Box sx={{ margin: "0.5rem" }}>
+                <UserAutoComplete
+                  name="representor"
+                  label="Management Representative"
+                  control={control}
+                  register={register}
+                  errors={errors}
+                  userData={assigneeData}
+                  defaultValue={defaultValues?.representor}
                   required={true}
                 />
               </Box>
