@@ -490,6 +490,7 @@ export default function AddOrEditSustainabilityDialog({
                 >
                   <TextField
                     id="title"
+                    required
                     type="text"
                     label="Tilte"
                     error={!!errors.title}
@@ -708,6 +709,7 @@ export default function AddOrEditSustainabilityDialog({
                   <TextField
                     id="griStandards"
                     type="text"
+                    required
                     label="GRI Standards and Sub-Standards"
                     error={!!errors.griStandards}
                     size="small"
@@ -774,6 +776,7 @@ export default function AddOrEditSustainabilityDialog({
                   >
                     <TextField
                       id="organizer"
+                      required
                       type="text"
                       label="Organizer"
                       error={!!errors.organizer}
@@ -784,6 +787,7 @@ export default function AddOrEditSustainabilityDialog({
 
                     <TextField
                       id="volunteer"
+                      required
                       type="text"
                       label="Volunteera Participated"
                       error={!!errors.volunteer}
@@ -831,7 +835,7 @@ export default function AddOrEditSustainabilityDialog({
                           <RichTextComponent
                             onChange={(e) => field.onChange(e)}
                             placeholder={
-                              field.value ?? "Who are the Contributers"
+                              field.value ?? "Who are the Contributors"
                             }
                           />
                         );
@@ -1037,21 +1041,43 @@ export default function AddOrEditSustainabilityDialog({
                     borderRadius: "0.3rem",
                   }}
                 >
-                  <ExistingFileItemsEdit
-                    label="Existing evidence"
-                    files={existingFiles}
-                    sx={{ marginY: "1rem" }}
-                    handleRemoveItem={(file) => {
-                      if (file.gsutil_uri) {
-                        setFilesToRemove([...filesToRemove, file.gsutil_uri]);
-                        setExistingFiles(
-                          existingFiles.filter(
-                            (f) => f.gsutil_uri !== file.gsutil_uri
-                          )
-                        );
-                      }
-                    }}
-                  />
+                  {defaultValues && (
+                    <>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "row",
+                          margin: "0.5rem",
+                        }}
+                      >
+                        <Typography variant="body2" component="div">
+                          <b>Evidence</b>
+                        </Typography>
+                        <Typography variant="body2" component="div">
+                          {` ${defaultValues?.documents}`}
+                        </Typography>
+                      </Box>
+
+                      <ExistingFileItemsEdit
+                        label="Existing evidence"
+                        files={existingFiles}
+                        sx={{ marginY: "1rem" }}
+                        handleRemoveItem={(file) => {
+                          if (file.gsutil_uri) {
+                            setFilesToRemove([
+                              ...filesToRemove,
+                              file.gsutil_uri,
+                            ]);
+                            setExistingFiles(
+                              existingFiles.filter(
+                                (f) => f.gsutil_uri !== file.gsutil_uri
+                              )
+                            );
+                          }
+                        }}
+                      />
+                    </>
+                  )}
                   <Box
                     sx={{
                       display: "flex",
@@ -1133,6 +1159,7 @@ export default function AddOrEditSustainabilityDialog({
                   type="text"
                   label="Project Location"
                   error={!!errors.location}
+                  required
                   size="small"
                   sx={{ width: "100%" }}
                   {...register("location", { required: true })}

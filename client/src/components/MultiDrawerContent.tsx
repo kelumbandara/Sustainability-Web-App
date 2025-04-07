@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Chip, Typography } from "@mui/material";
 import { SxProps } from "@mui/system";
 
 interface DrawerContentItemProps {
@@ -22,7 +22,7 @@ export function MultiDrawerContent({
     if (typeof value === "string") {
       const parsed = JSON.parse(value);
       if (Array.isArray(parsed)) {
-        displayValue = parsed.map(item => item.replace(/^\"|\"$/g, ''));
+        displayValue = parsed.map((item) => item.replace(/^"|"$/g, ""));
       }
     }
   } catch (error) {
@@ -54,11 +54,11 @@ export function MultiDrawerContent({
           }}
         />
       ) : (
-        <Typography variant="body2">
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
           {Array.isArray(displayValue)
-            ? displayValue.map((item, index) => <div key={index}>{item}</div>)
+            ? displayValue.map((item, index) => <Chip label={item} />)
             : displayValue}
-        </Typography>
+        </Box>
       )}
     </Box>
   );

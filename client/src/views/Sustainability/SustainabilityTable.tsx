@@ -41,7 +41,12 @@ import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
 import { PermissionKeys } from "../Administration/SectionList";
 import { sampleSustainabilityData } from "../../api/sampleData/sustainabilityData";
 import MultiTableCell from "../../components/MultiTableCell";
-import { createSustainabilityReport, deleteSustainabilityRecord, getSustainabilityList, updateSustainabilityReport } from "../../api/Sustainability/sustainabilityApi";
+import {
+  createSustainabilityReport,
+  deleteSustainabilityRecord,
+  getSustainabilityList,
+  updateSustainabilityReport,
+} from "../../api/Sustainability/sustainabilityApi";
 
 function SustainabilityTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -76,10 +81,11 @@ function SustainabilityTable() {
     theme.breakpoints.down("md")
   );
 
-  const { data: sustainabilityData, isFetching: isSustainabilityDataFetching } = useQuery({
-    queryKey: ["sustainabilityReports"],
-    queryFn: getSustainabilityList,
-  });
+  const { data: sustainabilityData, isFetching: isSustainabilityDataFetching } =
+    useQuery({
+      queryKey: ["sustainabilityReports"],
+      queryFn: getSustainabilityList,
+    });
 
   const { mutate: createSustainabilityMutation } = useMutation({
     mutationFn: createSustainabilityReport,
@@ -190,7 +196,9 @@ function SustainabilityTable() {
               Add New Sustanability Report
             </Button>
           </Box>
-          {isSustainabilityDataFetching && <LinearProgress sx={{ width: "100%" }} />}
+          {isSustainabilityDataFetching && (
+            <LinearProgress sx={{ width: "100%" }} />
+          )}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -225,7 +233,9 @@ function SustainabilityTable() {
                     <TableCell align="right">{row.sdg}</TableCell>
                     <MultiTableCell row={row} columnKey="pillars" />
                     <TableCell align="right">
-                      {row.timeLines ? format(new Date(row.timeLines), "yyyy-MM-dd") : "N/A"}
+                      {row.timeLines
+                        ? format(new Date(row.timeLines), "yyyy-MM-dd")
+                        : "N/A"}
                     </TableCell>
                     <TableCell align="right">{row.status}</TableCell>
                   </TableRow>
@@ -318,7 +328,7 @@ function SustainabilityTable() {
       {deleteDialogOpen && (
         <DeleteConfirmationModal
           open={deleteDialogOpen}
-          title="Remove Document Confirmation"
+          title="Remove Sustainability Report"
           content={
             <>
               Are you sure you want to remove this Sustainability?

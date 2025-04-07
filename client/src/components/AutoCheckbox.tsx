@@ -65,7 +65,9 @@ const AutocompleteCheckbox = <T extends Record<string, any>>({
             const values = newValue.map((option) =>
               getOptionValue
                 ? getOptionValue(option)
-                : (optionValueKey ? option[optionValueKey] : "") as string | number
+                : ((optionValueKey ? option[optionValueKey] : "") as
+                    | string
+                    | number)
             );
             onChange(values);
             setSelectedValues?.(values);
@@ -83,6 +85,7 @@ const AutocompleteCheckbox = <T extends Record<string, any>>({
           renderInput={(params) => (
             <TextField
               {...params}
+              required={required}
               label={label}
               placeholder={placeholder}
               size="small"
