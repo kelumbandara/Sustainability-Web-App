@@ -150,7 +150,7 @@ export default function EditUserRoleDialog({
         }}
       >
         <Typography variant="h6" component="div">
-          {defaultValues.role ? "Edit User Role" : "Add User Role"}
+          {defaultValues ? "Edit User Role" : "Add User Role"}
         </Typography>
         <IconButton
           aria-label="open drawer"
