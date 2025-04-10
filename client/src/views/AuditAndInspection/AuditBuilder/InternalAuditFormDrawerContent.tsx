@@ -151,10 +151,13 @@ const SectionAccordion = ({
 
 export default InternalAuditFormDrawerContent;
 
-export function RenderAuditQuestionColorTag(color: string) {
+export function RenderAuditQuestionColorTag(
+  color: string,
+  fontSize?: "small" | "inherit" | "large" | "medium"
+) {
   return (
     <BookmarkIcon
-      fontSize="small"
+      fontSize={fontSize ?? "small"}
       sx={{
         color: color,
       }}

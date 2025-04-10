@@ -20,7 +20,7 @@ import { useMemo, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import { useSnackbar } from "notistack";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import Breadcrumb from "../../../components/BreadCrumb";
 import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
 import PageTitle from "../../../components/PageTitle";
@@ -32,10 +32,11 @@ import queryClient from "../../../state/queryClient";
 import theme from "../../../theme";
 import { PermissionKeys } from "../../Administration/SectionList";
 import {
-  createInternalAudit,
   updateInternalAudit,
   deleteInternalAudit,
   InternalAudit,
+  getInternalAuditFormsList,
+  createInternalAuditForm,
 } from "../../../api/AuditAndInspection/internalAudit";
 import { sampleInternalAudits } from "../../../api/sampleData/sampleInternalAuditData";
 import InternalAuditFormDrawerContent from "./InternalAuditFormDrawerContent";
@@ -76,10 +77,13 @@ function AuditBuilderTable() {
     theme.breakpoints.down("md")
   );
 
-  //   const { data: internalAuditData, isFetching: isInternalAuditDataFetching } = useQuery({
-  //     queryKey: ["internal-audits"],
-  //     queryFn: getInternalAuditList,
-  //   });
+  const {
+    data: internalAuditFormsData,
+    isFetching: isInternalAuditFormsFetching,
+  } = useQuery({
+    queryKey: ["internal-audit-forms"],
+    queryFn: getInternalAuditFormsList,
+  });
 
   const paginatedInternalAuditData = useMemo(() => {
     if (!internalAuditData) return [];
@@ -90,9 +94,9 @@ function AuditBuilderTable() {
   }, [page, rowsPerPage, internalAuditData]);
 
   const { mutate: createInternalAuditFormMutation } = useMutation({
-    mutationFn: createInternalAudit,
+    mutationFn: createInternalAuditForm,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["internal-audit"] });
+      queryClient.invalidateQueries({ queryKey: ["internal-audit-forms"] });
       enqueueSnackbar("Internal Audit Form Created Successfully!", {
         variant: "success",
       });

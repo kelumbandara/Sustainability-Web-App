@@ -5,6 +5,7 @@ import {
   Alert,
   AppBar,
   Box,
+  IconButton,
   Paper,
   Stack,
   Tab,
@@ -26,6 +27,7 @@ import {
   InternalAuditQuestionGroup,
   ScheduledInternalAudit,
   ScheduledInternalAuditActionPlan,
+  ScheduledInternalAuditStatus,
 } from "../../../api/AuditAndInspection/internalAudit";
 import { RenderInternalAuditStatusChip } from "./InternalAuditTable";
 import theme from "../../../theme";
@@ -33,6 +35,7 @@ import ArticleIcon from "@mui/icons-material/Article";
 import ContentPasteSearchIcon from "@mui/icons-material/ContentPasteSearch";
 import Diversity3Icon from "@mui/icons-material/Diversity3";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import EditIcon from "@mui/icons-material/Edit";
 import { RenderAuditQuestionColorTag } from "../AuditBuilder/InternalAuditFormDrawerContent";
 import { CircularProgressWithLabel } from "../../../components/CircularProgressWithLabel";
 
@@ -185,23 +188,25 @@ function ViewInternalAuditContent({
               }
               {...a11yProps(1)}
             />
-            <Tab
-              label={
-                <Box
-                  sx={{
-                    color: "var(--pallet-blue)",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <Diversity3Icon fontSize="small" />
-                  <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                    Action Plan
-                  </Typography>
-                </Box>
-              }
-              {...a11yProps(1)}
-            />
+            {internalAudit.status !== ScheduledInternalAuditStatus.DRAFT && (
+              <Tab
+                label={
+                  <Box
+                    sx={{
+                      color: "var(--pallet-blue)",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Diversity3Icon fontSize="small" />
+                    <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                      Action Plan
+                    </Typography>
+                  </Box>
+                }
+                {...a11yProps(1)}
+              />
+            )}
           </Tabs>
         </AppBar>
         <TabPanel value={activeTab} index={0} dir={theme.direction}>
@@ -315,24 +320,27 @@ function ViewInternalAuditContent({
                     (answer) => answer.questionGroupId === group.id
                   )?.answers ?? []
                 }
+                auditStatus={internalAudit.status}
               />
             ))}
           </Stack>
         </TabPanel>
-        <TabPanel value={activeTab} index={2} dir={theme.direction}>
-          {internalAudit?.actionPlan?.length === 0 && (
-            <Box sx={{ padding: "1rem" }}>
-              <Alert variant="standard" severity="info">
-                No Action Plans Found
-              </Alert>
-            </Box>
-          )}
-          <Stack spacing={1}>
-            {internalAudit?.actionPlan?.map((actionPlan) => (
-              <ActionPlanItem key={actionPlan.id} actionPlan={actionPlan} />
-            ))}
-          </Stack>
-        </TabPanel>
+        {internalAudit.status !== ScheduledInternalAuditStatus.DRAFT && (
+          <TabPanel value={activeTab} index={2} dir={theme.direction}>
+            {internalAudit?.actionPlan?.length === 0 && (
+              <Box sx={{ padding: "1rem" }}>
+                <Alert variant="standard" severity="info">
+                  No Action Plans Found
+                </Alert>
+              </Box>
+            )}
+            <Stack spacing={1}>
+              {internalAudit?.actionPlan?.map((actionPlan) => (
+                <ActionPlanItem key={actionPlan.id} actionPlan={actionPlan} />
+              ))}
+            </Stack>
+          </TabPanel>
+        )}
       </Box>
     </Stack>
   );
@@ -340,12 +348,14 @@ function ViewInternalAuditContent({
 
 export default ViewInternalAuditContent;
 
-const AuditQuestionsSectionAccordion = ({
+export const AuditQuestionsSectionAccordion = ({
   questionGroup,
   auditAnswers,
+  auditStatus,
 }: {
   questionGroup: InternalAuditQuestionGroup;
   auditAnswers: InternalAuditAnswerToQuestions[];
+  auditStatus: ScheduledInternalAuditStatus;
 }) => {
   const { isMobile } = useIsMobile();
 
@@ -361,7 +371,7 @@ const AuditQuestionsSectionAccordion = ({
           justifyContent="space-between"
           sx={{ width: "100%" }}
         >
-          <Typography component="span">{questionGroup.name}</Typography>
+          <Typography component="span">{questionGroup.groupName}</Typography>
           <Box
             sx={{
               display: "flex",
@@ -385,25 +395,33 @@ const AuditQuestionsSectionAccordion = ({
                 : 0}{" "}
               Allocated Score
             </Typography>
-            <Box
-              sx={{ marginLeft: "1rem", display: "flex", alignItems: "center" }}
-            >
-              <CircularProgressWithLabel
-                value={
-                  (auditAnswers.length /
-                    (questionGroup?.questions?.length || 1)) *
-                  100
-                }
-              />
-              <Typography
-                variant="caption"
-                sx={{
-                  marginLeft: "0.5rem",
-                }}
-              >
-                Completed
-              </Typography>
-            </Box>
+            {auditStatus !== ScheduledInternalAuditStatus.DRAFT && (
+              <>
+                <Box
+                  sx={{
+                    marginLeft: "1rem",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <CircularProgressWithLabel
+                    value={
+                      (auditAnswers.length /
+                        (questionGroup?.questions?.length || 1)) *
+                      100
+                    }
+                  />
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      marginLeft: "0.5rem",
+                    }}
+                  >
+                    Completed
+                  </Typography>
+                </Box>
+              </>
+            )}
           </Box>
         </Stack>
       </AccordionSummary>
@@ -420,9 +438,13 @@ const AuditQuestionsSectionAccordion = ({
                 <TableCell align="center">Color Code</TableCell>
                 <TableCell align="left">Question</TableCell>
                 <TableCell align="center">Allocated Score</TableCell>
-                <TableCell align="center">Status</TableCell>
-                <TableCell align="center">Rating</TableCell>
-                <TableCell align="center">Score</TableCell>
+                {auditStatus !== ScheduledInternalAuditStatus.DRAFT && (
+                  <>
+                    <TableCell align="center">Status</TableCell>
+                    <TableCell align="center">Rating</TableCell>
+                    <TableCell align="center">Score</TableCell>
+                  </>
+                )}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -463,15 +485,19 @@ const AuditQuestionsSectionAccordion = ({
                         {row.allocatedScore}
                       </Typography>
                     </TableCell>
-                    <TableCell align="center">
-                      {questionAnswers?.status ?? "--"}
-                    </TableCell>
-                    <TableCell align="center">
-                      {questionAnswers?.rating ?? "--"}
-                    </TableCell>
-                    <TableCell align="center">
-                      {questionAnswers?.score ?? "--"}
-                    </TableCell>
+                    {auditStatus !== ScheduledInternalAuditStatus.DRAFT && (
+                      <>
+                        <TableCell align="center">
+                          {questionAnswers?.status ?? "--"}
+                        </TableCell>
+                        <TableCell align="center">
+                          {questionAnswers?.rating ?? "--"}
+                        </TableCell>
+                        <TableCell align="center">
+                          {questionAnswers?.score ?? "--"}
+                        </TableCell>
+                      </>
+                    )}
                   </TableRow>
                 );
               })}
@@ -506,7 +532,19 @@ const ActionPlanItem = ({
           {actionPlan.correctiveOrPreventiveAction}
         </Typography>
       </Box>
-      <Box sx={{ flex: 1 }}>
+      <Box sx={{ flex: 1, position: "relative" }}>
+        <Box sx={{ position: "absolute", top: 0, right: 0 }}>
+          <IconButton
+            aria-label="edit"
+            size="small"
+            onClick={() => {
+              // setSelectedQuestion(row);
+              // setOpenEditQuestionDialog(true);
+            }}
+          >
+            <EditIcon fontSize="inherit" />
+          </IconButton>
+        </Box>
         <Box sx={{ display: "flex", flexDirection: "row" }}>
           <DrawerContentItem
             label="Due date"

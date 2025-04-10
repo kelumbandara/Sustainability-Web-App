@@ -47,6 +47,7 @@ function AddOrEditInternalAuditFormDialog({
   open,
   defaultValues,
   handleClose,
+  onSubmit,
 }: {
   open: boolean;
   defaultValues: InternalAudit;
@@ -81,7 +82,7 @@ function AddOrEditInternalAuditFormDialog({
 
   const handleSubmitInternalAudit = (data: Partial<InternalAudit>) => {
     console.log("data", data);
-    // onSubmit(submitData);
+    onSubmit(data);
     handleClose();
   };
 
@@ -302,7 +303,7 @@ function AddOrEditInternalAuditFormDialog({
                 "questionGroups",
                 questionGroups.map((group) =>
                   group.id === selectedQuestionGroup.id
-                    ? { ...group, name: data.name }
+                    ? { ...group, name: data.groupName }
                     : group
                 )
               );
@@ -402,7 +403,7 @@ const SectionAccordion = ({
           justifyContent="space-between"
           sx={{ width: "100%" }}
         >
-          <Typography component="span">{questionGroup.name}</Typography>
+          <Typography component="span">{questionGroup.groupName}</Typography>
           <Box
             sx={{ display: "flex", gap: "1rem" }}
             onClick={(e) => e.stopPropagation()}
@@ -545,7 +546,7 @@ const AddOrEditQuestionGroupDialog = ({
   } = useForm<InternalAuditQuestionGroup>({
     defaultValues: {
       id: defaultValues?.id,
-      name: defaultValues?.name,
+      groupName: defaultValues?.groupName,
     },
   });
 
@@ -600,9 +601,9 @@ const AddOrEditQuestionGroupDialog = ({
               label="Name"
               size="small"
               sx={{ margin: "0.5rem" }}
-              error={!!errors.name}
-              {...register("name", { required: true })}
-              helperText={errors.name ? "Name is required" : ""}
+              error={!!errors.groupName}
+              {...register("groupName", { required: true })}
+              helperText={errors.groupName ? "Name is required" : ""}
             />
           </Box>
         </Stack>

@@ -37,19 +37,20 @@ import { PermissionKeys } from "../../Administration/SectionList";
 import {
   ScheduledInternalAuditStatus,
   ScheduledInternalAudit,
-  createInternalAudit,
   updateInternalAudit,
   deleteInternalAudit,
 } from "../../../api/AuditAndInspection/internalAudit";
 import { sampleScheduledInternalAudits } from "../../../api/sampleData/sampleInternalAuditData";
 import ViewInternalAuditContent from "./ViewInternalAuditContent";
 import AddScheduledInternalAudit from "./AddScheduledInternalAudit";
+import EditScheduledInternalAudit from "./EditScheduledInternalAudit";
 
 function InternalAuditTable() {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<ScheduledInternalAudit>(null);
-  const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
+  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
   const [internalAuditData, setInternalAuditData] = useState<
     ScheduledInternalAudit[]
   >(sampleScheduledInternalAudits);
@@ -94,23 +95,23 @@ function InternalAuditTable() {
     );
   }, [page, rowsPerPage, internalAuditData]);
 
-  const { mutate: createInternalAuditMutation } = useMutation({
-    mutationFn: createInternalAudit,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["internal-audit"] });
-      enqueueSnackbar("Internal Audit Scheduled Successfully!", {
-        variant: "success",
-      });
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
-    },
-    onError: () => {
-      enqueueSnackbar(`Internal Audit Schedule Failed`, {
-        variant: "error",
-      });
-    },
-  });
+  // const { mutate: createInternalAuditMutation } = useMutation({
+  //   mutationFn: createInternalAudit,
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: ["internal-audit"] });
+  //     enqueueSnackbar("Internal Audit Scheduled Successfully!", {
+  //       variant: "success",
+  //     });
+  //     setSelectedRow(null);
+  //     setOpenViewDrawer(false);
+  //     setOpenAddDialog(false);
+  //   },
+  //   onError: () => {
+  //     enqueueSnackbar(`Internal Audit Schedule Failed`, {
+  //       variant: "error",
+  //     });
+  //   },
+  // });
 
   const { mutate: updateInternalAuditMutation } = useMutation({
     mutationFn: updateInternalAudit,
@@ -121,7 +122,7 @@ function InternalAuditTable() {
       });
       setSelectedRow(null);
       setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
+      setOpenEditDialog(false);
     },
     onError: () => {
       enqueueSnackbar(`Scheduled Internal Audit Update Failed`, {
@@ -139,7 +140,7 @@ function InternalAuditTable() {
       });
       setSelectedRow(null);
       setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
+      setOpenEditDialog(false);
     },
     onError: () => {
       enqueueSnackbar(`Scheduled Internal Audit Delete Failed`, {
@@ -194,7 +195,7 @@ function InternalAuditTable() {
               startIcon={<AddIcon />}
               onClick={() => {
                 setSelectedRow(null);
-                setOpenAddOrEditDialog(true);
+                setOpenAddDialog(true);
               }}
               disabled={isInternalAuditCreateDisabled}
             >
@@ -284,10 +285,13 @@ function InternalAuditTable() {
             <DrawerHeader
               title="Internal Audit Details"
               handleClose={() => setOpenViewDrawer(false)}
-              disableEdit={isInternalAuditEditDisabled}
+              disableEdit={
+                isInternalAuditEditDisabled ||
+                selectedRow?.status === ScheduledInternalAuditStatus.COMPLETED
+              }
               onEdit={() => {
                 setSelectedRow(selectedRow);
-                setOpenAddOrEditDialog(true);
+                setOpenEditDialog(true);
               }}
               onDelete={() => setDeleteDialogOpen(true)}
               disableDelete={isInternalAuditDeleteDisabled}
@@ -301,55 +305,39 @@ function InternalAuditTable() {
           </Stack>
         }
       />
-      {openAddOrEditDialog && (
+      {openAddDialog && (
         <AddScheduledInternalAudit
-          open={openAddOrEditDialog}
+          open={openAddDialog}
           handleClose={() => {
             setSelectedRow(null);
             setOpenViewDrawer(false);
-            setOpenAddOrEditDialog(false);
+            setOpenAddDialog(false);
           }}
           onSubmit={(data) => {
             // createInternalAuditMutation(data);
             setSelectedRow(null);
             setOpenViewDrawer(false);
-            setOpenAddOrEditDialog(false);
+            setOpenAddDialog(false);
           }}
         />
       )}
-      {/* {openAddOrEditDialog && (
-        <AddOrEditDocumentDialog
-          open={openAddOrEditDialog}
+      {openEditDialog && (
+        <EditScheduledInternalAudit
+          open={openEditDialog}
           handleClose={() => {
             setSelectedRow(null);
             setOpenViewDrawer(false);
-            setOpenAddOrEditDialog(false);
+            setOpenEditDialog(false);
           }}
           onSubmit={(data) => {
-            if (selectedRow) {
-              console.log("Updating document", data);
-              updateHazardRiskMutation(data);
-              // setRiskData(
-              //   riskData.map((risk) => (risk.id === data.id ? data : risk))
-              // ); // Update the document in the list if it already exists
-              // enqueueSnackbar("Details Updated Successfully!", {
-              //   variant: "success",
-              // });
-            } else {
-              console.log("Adding new hazard/risk", data);
-              // setRiskData([...riskData, data]); // Add new document to the list
-              createHazardRiskMutation(data);
-              // enqueueSnackbar("Hazard/Risk Created Successfully!", {
-              //   variant: "success",
-              // });
-            }
+            // createInternalAuditMutation(data);
             setSelectedRow(null);
             setOpenViewDrawer(false);
-            setOpenAddOrEditDialog(false);
+            setOpenEditDialog(false);
           }}
           defaultValues={selectedRow}
         />
-      )} */}
+      )}
       {deleteDialogOpen && (
         <DeleteConfirmationModal
           open={deleteDialogOpen}
@@ -364,16 +352,12 @@ function InternalAuditTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            // setRiskData(riskData.filter((doc) => doc.id !== selectedRow.id));
             deleteInternalAuditMutation(selectedRow.id);
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);
             setSelectedRow(null);
             setDeleteDialogOpen(false);
-            // enqueueSnackbar("Hazard Risk Record Deleted Successfully!", {
-            //   variant: "success",
-            // });
           }}
           handleReject={() => {
             setOpenViewDrawer(false);

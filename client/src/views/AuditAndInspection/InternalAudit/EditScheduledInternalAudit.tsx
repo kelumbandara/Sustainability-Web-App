@@ -4,11 +4,24 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Alert,
+  AppBar,
   Autocomplete,
   Box,
   Divider,
   IconButton,
   Stack,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
   TextField,
   Typography,
 } from "@mui/material";
@@ -28,13 +41,19 @@ import CustomButton from "../../../components/CustomButton";
 import DatePickerComponent from "../../../components/DatePickerComponent";
 import RichTextComponent from "../../../components/RichTextComponent";
 import UserAutoComplete from "../../../components/UserAutoComplete";
-import useIsMobile from "../../../customHooks/useIsMobile";
 import AutoCheckBox from "../../../components/AutoCheckbox";
 import {
   Factory,
+  InternalAuditAnswerToQuestions,
+  InternalAuditQuestionGroup,
   InternalAuditType,
   ScheduledInternalAudit,
+  ScheduledInternalAuditStatus,
   SupplierType,
+  InternalAuditQuestion,
+  InternalAuditQuestionAnswersStatus,
+  InternalAuditRating,
+  InternalAuditQuestionAnswerRating,
 } from "../../../api/AuditAndInspection/internalAudit";
 import { fetchDepartmentData } from "../../../api/departmentApi";
 import {
@@ -43,22 +62,70 @@ import {
   sampleProcessData,
 } from "../../../api/sampleData/sampleInternalAuditData";
 import SwitchButton from "../../../components/SwitchButton";
+import ArticleIcon from "@mui/icons-material/Article";
+import ContentPasteSearchIcon from "@mui/icons-material/ContentPasteSearch";
+import Diversity3Icon from "@mui/icons-material/Diversity3";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import theme from "../../../theme";
+import { RenderInternalAuditStatusChip } from "./InternalAuditTable";
+import { CircularProgressWithLabel } from "../../../components/CircularProgressWithLabel";
+import { RenderAuditQuestionColorTag } from "../AuditBuilder/InternalAuditFormDrawerContent";
+import EditIcon from "@mui/icons-material/Edit";
+import useIsMobile from "../../../customHooks/useIsMobile";
+import { DrawerContentItem } from "../../../components/ViewDataDrawer";
 
 type DialogProps = {
   open: boolean;
   handleClose: () => void;
   onSubmit?: (data: ScheduledInternalAudit) => void;
+  defaultValues?: ScheduledInternalAudit;
 };
 
-export default function AddScheduledInternalAudit({
+interface TabPanelProps {
+  children?: React.ReactNode;
+  dir?: string;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`full-width-tabpanel-${index}`}
+      aria-labelledby={`full-width-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
+  );
+}
+
+function a11yProps(index: number) {
+  return {
+    id: `full-width-tab-${index}`,
+    "aria-controls": `full-width-tabpanel-${index}`,
+  };
+}
+
+export default function EditScheduledInternalAudit({
   open,
   handleClose,
   onSubmit,
+  defaultValues,
 }: DialogProps) {
-  const { isMobile, isTablet } = useIsMobile();
+  const { isTablet } = useIsMobile();
   const [openAddNewFactoryDialog, setOpenAddNewFactoryDialog] = useState(false);
   const [openAddNewProcessTypeDialog, setOpenAddNewProcessTypeDialog] =
     useState(false);
+  const [activeTab, setActiveTab] = useState(0);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
+  };
 
   const {
     register,
@@ -72,6 +139,7 @@ export default function AddScheduledInternalAudit({
   } = useForm<ScheduledInternalAudit>({
     mode: "onChange",
     reValidateMode: "onChange",
+    defaultValues,
   });
 
   const resetForm = () => {
@@ -199,7 +267,7 @@ export default function AddScheduledInternalAudit({
         }}
       >
         <Typography variant="h6" component="div">
-          Schedule Internal Audit
+          Edit Internal Audit
         </Typography>
         <IconButton
           aria-label="open drawer"
@@ -217,25 +285,206 @@ export default function AddScheduledInternalAudit({
         <Stack
           sx={{
             display: "flex",
-            flexDirection: isTablet ? "column" : "row",
-            padding: "1rem",
+            flexDirection: "column",
+            backgroundColor: "#fff",
+            flex: { lg: 3, md: 1 },
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+            padding: "0.5rem",
+            borderRadius: "0.3rem",
+            justifyContent: "space-between",
           }}
         >
-          <Stack
+          <Box
             sx={{
               display: "flex",
-              flexDirection: "column",
-              backgroundColor: "#fff",
-              flex: { lg: 3, md: 1 },
-              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-              padding: "0.5rem",
-              borderRadius: "0.3rem",
+              flexDirection: isTablet ? "column" : "row",
+              alignItems: "center",
+              marginY: "0.54rem",
             }}
           >
             <Box
               sx={{
+                paddingY: "0.3rem",
+                paddingX: "0.5rem",
+                minWidth: "8rem",
                 display: "flex",
-                flexDirection: isMobile ? "column" : "row",
+                flexDirection: "column",
+                flex: 1,
+              }}
+            >
+              <Typography
+                variant="caption"
+                sx={{ paddingBottom: 0, color: "var(--pallet-grey)" }}
+              >
+                Status
+              </Typography>
+              <Box>{RenderInternalAuditStatusChip(defaultValues.status)}</Box>
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                margin: "0.5rem",
+                flex: 1,
+              }}
+            >
+              <Typography variant="body2" component="div">
+                <b>Date</b>
+              </Typography>
+              <Typography variant="body2" component="div">
+                {new Date().toDateString()}
+              </Typography>
+            </Box>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+            }}
+          >
+            <Box sx={{ margin: "0.5rem", flex: 1 }}>
+              <Controller
+                control={control}
+                {...register("auditDate")}
+                name={"auditDate"}
+                render={({ field }) => {
+                  return (
+                    <DatePickerComponent
+                      onChange={(e) => field.onChange(e)}
+                      value={field.value ? new Date(field.value) : null}
+                      label="Audit Date"
+                    />
+                  );
+                }}
+              />
+            </Box>
+            <Box sx={{ margin: "0.5rem", flex: 1 }}>
+              <Controller
+                control={control}
+                {...register("dateForApproval", { required: true })}
+                name={"dateForApproval"}
+                render={({ field }) => {
+                  return (
+                    <DatePickerComponent
+                      onChange={(e) => field.onChange(e)}
+                      value={field.value ? new Date(field.value) : null}
+                      label="Date for Approval"
+                      error={errors?.dateForApproval ? "Required" : ""}
+                    />
+                  );
+                }}
+              />
+            </Box>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+            }}
+          >
+            <Box sx={{ flex: 1 }}>
+              <UserAutoComplete
+                name="auditee"
+                label="Auditee"
+                control={control}
+                register={register}
+                errors={errors}
+                userData={assigneeData}
+                required={true}
+              />
+            </Box>
+            <Box sx={{ flex: 1 }}>
+              <UserAutoComplete
+                name="approver"
+                label="Approver"
+                control={control}
+                register={register}
+                errors={errors}
+                userData={assigneeData}
+                required={true}
+              />
+            </Box>
+          </Box>
+          <AppBar position="static" sx={{ marginY: "1rem" }}>
+            <Tabs
+              value={activeTab}
+              onChange={handleChange}
+              indicatorColor="secondary"
+              TabIndicatorProps={{
+                style: {
+                  backgroundColor: "var(--pallet-blue)",
+                  height: "3px",
+                },
+              }}
+              sx={{
+                backgroundColor: "var(--pallet-lighter-grey)",
+                color: "var(--pallet-blue)",
+              }}
+              textColor="inherit"
+              variant="scrollable"
+              scrollButtons={true}
+            >
+              <Tab
+                label={
+                  <Box
+                    sx={{
+                      color: "var(--pallet-blue)",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <ArticleIcon fontSize="small" />
+                    <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                      General Details
+                    </Typography>
+                  </Box>
+                }
+                {...a11yProps(0)}
+              />
+              {defaultValues.status !== ScheduledInternalAuditStatus.DRAFT && (
+                <Tab
+                  label={
+                    <Box
+                      sx={{
+                        color: "var(--pallet-blue)",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <ContentPasteSearchIcon fontSize="small" />
+                      <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                        {defaultValues.audit?.name}
+                      </Typography>
+                    </Box>
+                  }
+                  {...a11yProps(1)}
+                />
+              )}
+              {defaultValues.status ===
+                ScheduledInternalAuditStatus.COMPLETED && (
+                <Tab
+                  label={
+                    <Box
+                      sx={{
+                        color: "var(--pallet-blue)",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Diversity3Icon fontSize="small" />
+                      <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                        Action Plan
+                      </Typography>
+                    </Box>
+                  }
+                  {...a11yProps(1)}
+                />
+              )}
+            </Tabs>
+          </AppBar>
+          <TabPanel value={activeTab} index={0} dir={theme.direction}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: isTablet ? "column" : "row",
               }}
             >
               <Autocomplete
@@ -277,7 +526,7 @@ export default function AddScheduledInternalAudit({
             <Box
               sx={{
                 display: "flex",
-                flexDirection: isMobile ? "column" : "row",
+                flexDirection: isTablet ? "column" : "row",
               }}
             >
               <Controller
@@ -356,7 +605,7 @@ export default function AddScheduledInternalAudit({
                 <Box
                   sx={{
                     display: "flex",
-                    flexDirection: isMobile ? "column" : "row",
+                    flexDirection: isTablet ? "column" : "row",
                   }}
                 >
                   <Autocomplete
@@ -400,7 +649,7 @@ export default function AddScheduledInternalAudit({
                 <Box
                   sx={{
                     display: "flex",
-                    flexDirection: isMobile ? "column" : "row",
+                    flexDirection: isTablet ? "column" : "row",
                   }}
                 >
                   <Box sx={{ flex: 1, margin: "0.5rem" }}>
@@ -465,7 +714,7 @@ export default function AddScheduledInternalAudit({
             <Box
               sx={{
                 display: "flex",
-                flexDirection: isMobile ? "column" : "row",
+                flexDirection: isTablet ? "column" : "row",
               }}
             >
               <Autocomplete
@@ -562,7 +811,7 @@ export default function AddScheduledInternalAudit({
             <Box
               sx={{
                 display: "flex",
-                flexDirection: isMobile ? "column" : "row",
+                flexDirection: isTablet ? "column" : "row",
               }}
             >
               <Box sx={{ flex: 1, margin: "0.5rem" }}>
@@ -624,84 +873,30 @@ export default function AddScheduledInternalAudit({
                 }}
               />
             </Box>
-
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-              }}
-            ></Box>
-          </Stack>
-          <Stack
-            sx={{
-              display: "flex",
-              flex: { lg: 1, md: 1 },
-              flexDirection: "column",
-              backgroundColor: "#fff",
-              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-              padding: "0.5rem",
-              borderRadius: "0.3rem",
-              marginY: isTablet ? "0.5rem" : 0,
-              marginLeft: isTablet ? 0 : "0.5rem",
-              height: "fit-content",
-            }}
-          >
-            <Box sx={{ margin: "0.5rem" }}>
-              <Controller
-                control={control}
-                {...register("auditDate")}
-                name={"auditDate"}
-                render={({ field }) => {
-                  return (
-                    <DatePickerComponent
-                      onChange={(e) => field.onChange(e)}
-                      value={field.value ? new Date(field.value) : null}
-                      label="Audit Date"
-                    />
-                  );
-                }}
-              />
-            </Box>
-            <Box sx={{ flex: 1 }}>
-              <UserAutoComplete
-                name="auditee"
-                label="Auditee"
-                control={control}
-                register={register}
-                errors={errors}
-                userData={assigneeData}
-                required={true}
-              />
-            </Box>
-            <Box sx={{ flex: 1 }}>
-              <UserAutoComplete
-                name="approver"
-                label="Approver"
-                control={control}
-                register={register}
-                errors={errors}
-                userData={assigneeData}
-                required={true}
-              />
-            </Box>
-            <Box sx={{ margin: "0.5rem" }}>
-              <Controller
-                control={control}
-                {...register("dateForApproval", { required: true })}
-                name={"dateForApproval"}
-                render={({ field }) => {
-                  return (
-                    <DatePickerComponent
-                      onChange={(e) => field.onChange(e)}
-                      value={field.value ? new Date(field.value) : null}
-                      label="Date for Approval"
-                      error={errors?.dateForApproval ? "Required" : ""}
-                    />
-                  );
-                }}
-              />
-            </Box>
-          </Stack>
+          </TabPanel>
+          <TabPanel value={activeTab} index={1} dir={theme.direction}>
+            <Stack>
+              {!defaultValues?.audit?.questionGroups?.length && (
+                <Box sx={{ padding: "1rem" }}>
+                  <Alert variant="standard" severity="info">
+                    No Question Groups Added
+                  </Alert>
+                </Box>
+              )}
+              {defaultValues?.audit?.questionGroups?.map((group) => (
+                <AuditQuestionsSectionAccordion
+                  key={group.id}
+                  questionGroup={group}
+                  auditAnswers={
+                    defaultValues?.auditAnswers?.find(
+                      (answer) => answer.questionGroupId === group.id
+                    )?.answers ?? []
+                  }
+                  auditStatus={defaultValues.status}
+                />
+              ))}
+            </Stack>
+          </TabPanel>
         </Stack>
       </DialogContent>
       <Divider />
@@ -715,30 +910,62 @@ export default function AddScheduledInternalAudit({
         >
           Cancel
         </Button>
-        <CustomButton
-          variant="outlined"
-          sx={{
-            border: "1px solid var(--pallet-blue)",
-          }}
-          size="medium"
-          onClick={handleSubmit((data) => {
-            handleSubmitScheduledInternalAudit(data);
-          })}
-        >
-          Save Draft
-        </CustomButton>
-        <CustomButton
-          variant="contained"
-          sx={{
-            backgroundColor: "var(--pallet-blue)",
-          }}
-          size="medium"
-          onClick={handleSubmit((data) => {
-            handleSubmitScheduledInternalAudit(data);
-          })}
-        >
-          Schedule Internal Audit
-        </CustomButton>
+        {defaultValues.status === ScheduledInternalAuditStatus.DRAFT ? (
+          <>
+            <CustomButton
+              variant="outlined"
+              sx={{
+                border: "1px solid var(--pallet-blue)",
+              }}
+              size="medium"
+              onClick={handleSubmit((data) => {
+                handleSubmitScheduledInternalAudit(data);
+              })}
+            >
+              Update Draft
+            </CustomButton>
+
+            <CustomButton
+              variant="contained"
+              sx={{
+                backgroundColor: "var(--pallet-blue)",
+              }}
+              size="medium"
+              onClick={handleSubmit((data) => {
+                handleSubmitScheduledInternalAudit(data);
+              })}
+            >
+              Schedule Internal Audit
+            </CustomButton>
+          </>
+        ) : (
+          <>
+            <CustomButton
+              variant="outlined"
+              sx={{
+                border: "1px solid var(--pallet-blue)",
+              }}
+              size="medium"
+              onClick={handleSubmit((data) => {
+                handleSubmitScheduledInternalAudit(data);
+              })}
+            >
+              Update Internal Audit
+            </CustomButton>
+            <CustomButton
+              variant="contained"
+              sx={{
+                backgroundColor: "var(--pallet-blue)",
+              }}
+              size="medium"
+              onClick={handleSubmit((data) => {
+                handleSubmitScheduledInternalAudit(data);
+              })}
+            >
+              Complete Internal Audit
+            </CustomButton>
+          </>
+        )}
       </DialogActions>
     </Dialog>
   );
@@ -764,7 +991,7 @@ const AddNewFactoryDialog = ({
     queryFn: fetchMedicineRequestAssignee,
   });
 
-  const { isMobile } = useIsMobile();
+  const { isTablet } = useIsMobile();
 
   const handleCreateFactory = (data: Partial<Factory>) => {
     setOpen(false);
@@ -807,7 +1034,7 @@ const AddNewFactoryDialog = ({
       <Dialog
         open={openAddNewContactPersonDialog}
         onClose={() => setOpenAddNewContactPersonDialog(false)}
-        fullScreen={isMobile}
+        fullScreen={isTablet}
         fullWidth
         maxWidth="sm"
         PaperProps={{
@@ -884,7 +1111,7 @@ const AddNewFactoryDialog = ({
     <Dialog
       open={open}
       onClose={() => setOpen(false)}
-      fullScreen={isMobile}
+      fullScreen={isTablet}
       fullWidth
       maxWidth="sm"
       PaperProps={{
@@ -1060,7 +1287,7 @@ const AddNewProcessTypeDialog = ({
   setOpen: (open: boolean) => void;
 }) => {
   const { register, handleSubmit } = useForm();
-  const { isMobile } = useIsMobile();
+  const { isTablet } = useIsMobile();
 
   const handleCreateProcessType = (data) => {
     console.log("Creating process type", data);
@@ -1070,7 +1297,7 @@ const AddNewProcessTypeDialog = ({
     <Dialog
       open={open}
       onClose={() => setOpen(false)}
-      fullScreen={isMobile}
+      fullScreen={isTablet}
       fullWidth
       maxWidth="sm"
       PaperProps={{
@@ -1137,6 +1364,428 @@ const AddNewProcessTypeDialog = ({
           onClick={handleSubmit(handleCreateProcessType)}
         >
           Add New Process Type
+        </CustomButton>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+export const AuditQuestionsSectionAccordion = ({
+  questionGroup,
+  auditAnswers,
+  auditStatus,
+}: {
+  questionGroup: InternalAuditQuestionGroup;
+  auditAnswers: InternalAuditAnswerToQuestions[];
+  auditStatus: ScheduledInternalAuditStatus;
+}) => {
+  const { isTablet } = useIsMobile();
+  const [selectedQuestion, setSelectedQuestion] =
+    useState<InternalAuditQuestion | null>(null);
+  const [openEditQuestionDialog, setOpenEditQuestionDialog] = useState(false);
+
+  return (
+    <>
+      <Accordion>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1-content"
+          id="panel1-header"
+        >
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            sx={{ width: "100%" }}
+          >
+            <Typography component="span">{questionGroup.groupName}</Typography>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                marginX: "1rem",
+              }}
+            >
+              <Typography variant="body2" sx={{ color: "var(--pallet-grey)" }}>
+                {questionGroup.questions.length} Questions
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ color: "var(--pallet-grey)", marginLeft: "1rem" }}
+              >
+                {questionGroup.questions
+                  ? questionGroup.questions.reduce(
+                      (acc, question) => acc + question.allocatedScore,
+                      0
+                    )
+                  : 0}{" "}
+                Allocated Score
+              </Typography>
+              {auditStatus !== ScheduledInternalAuditStatus.DRAFT && (
+                <>
+                  <Box
+                    sx={{
+                      marginLeft: "1rem",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <CircularProgressWithLabel
+                      value={
+                        (auditAnswers.length /
+                          (questionGroup?.questions?.length || 1)) *
+                        100
+                      }
+                    />
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        marginLeft: "0.5rem",
+                      }}
+                    >
+                      Completed
+                    </Typography>
+                  </Box>
+                </>
+              )}
+            </Box>
+          </Stack>
+        </AccordionSummary>
+        <AccordionDetails>
+          <TableContainer
+            sx={{
+              overflowX: "auto",
+              maxWidth: isTablet ? "88vw" : "100%",
+            }}
+          >
+            <Table aria-label="simple table">
+              <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
+                <TableRow>
+                  <TableCell align="center">Color Code</TableCell>
+                  <TableCell align="left">Question</TableCell>
+                  <TableCell align="center">Allocated Score</TableCell>
+                  <TableCell align="center">Status</TableCell>
+                  <TableCell align="center">Rating</TableCell>
+                  <TableCell align="center">Score</TableCell>
+                  <TableCell align="center"></TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {questionGroup?.questions.length === 0 && (
+                  <TableRow key="no-questions">
+                    <TableCell colSpan={3} align="center">
+                      <Typography variant="body2">
+                        No Questions found
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
+                {questionGroup?.questions.map((row) => {
+                  const questionAnswers = auditAnswers.find(
+                    (answer) => answer.questionId === row.id
+                  );
+
+                  return (
+                    <TableRow key={row.id}>
+                      <TableCell align="center">
+                        <Typography variant="body2">
+                          {RenderAuditQuestionColorTag(row.colorCode)}
+                        </Typography>
+                      </TableCell>
+                      <TableCell
+                        align="left"
+                        sx={{
+                          marginTop: "0.5rem",
+                        }}
+                      >
+                        <Typography variant="body2">{row.question}</Typography>
+                      </TableCell>
+                      <TableCell
+                        align="center"
+                        sx={{
+                          marginTop: "0.5rem",
+                        }}
+                      >
+                        <Typography variant="body2">
+                          {row.allocatedScore}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        {questionAnswers?.status ?? "--"}
+                      </TableCell>
+                      <TableCell align="center">
+                        {questionAnswers?.rating ?? "--"}
+                      </TableCell>
+                      <TableCell align="center">
+                        {questionAnswers?.score ?? "--"}
+                      </TableCell>
+                      <TableCell align="center">
+                        <IconButton
+                          aria-label="edit"
+                          size="small"
+                          onClick={() => {
+                            setSelectedQuestion(row);
+                            setOpenEditQuestionDialog(true);
+                          }}
+                        >
+                          <EditIcon fontSize="inherit" />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </AccordionDetails>
+      </Accordion>
+      <EditInternalAuditQuestionDialog
+        open={openEditQuestionDialog}
+        setOpen={setOpenEditQuestionDialog}
+        question={selectedQuestion}
+        answer={auditAnswers.find(
+          (answer) => answer.questionId === selectedQuestion?.id
+        )}
+      />
+    </>
+  );
+};
+
+const EditInternalAuditQuestionDialog = ({
+  open,
+  setOpen,
+  question,
+  answer,
+  onSubmit,
+}: {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  question: InternalAuditQuestion;
+  answer: InternalAuditAnswerToQuestions | null;
+  onSubmit?: (data: InternalAuditAnswerToQuestions) => void;
+}) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    control,
+  } = useForm<InternalAuditAnswerToQuestions>({
+    defaultValues: {
+      score: answer?.score ?? null,
+      status: answer?.status ?? null,
+      rating: answer?.rating ?? null,
+    },
+    mode: "onChange",
+    reValidateMode: "onChange",
+  });
+  const { isTablet } = useIsMobile();
+
+  const handleCreateFactory = (
+    data: Partial<InternalAuditAnswerToQuestions>
+  ) => {
+    console.log("Creating factory", { ...data, questionId: question.id });
+    reset({
+      score: null,
+      status: null,
+      rating: null,
+    });
+    setOpen(false);
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onClose={() => {
+        reset({
+          score: null,
+          status: null,
+          rating: null,
+        });
+        setOpen(false);
+      }}
+      fullScreen={isTablet}
+      fullWidth
+      maxWidth="md"
+      PaperProps={{
+        style: {
+          backgroundColor: grey[50],
+        },
+        component: "form",
+      }}
+    >
+      <DialogTitle
+        sx={{
+          paddingY: "1rem",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <Typography variant="h6" component="div">
+          Answer Question
+        </Typography>
+        <IconButton
+          aria-label="open drawer"
+          onClick={() => setOpen(false)}
+          edge="start"
+          sx={{
+            color: "#024271",
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+      <Divider />
+      <DialogContent>
+        <Stack
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            paddingX: "0.5rem",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+            }}
+          >
+            <Box
+              sx={{
+                backgroundColor: "var(--pallet-lighter-grey)",
+                padding: "0.3rem",
+                borderRadius: "0.3rem",
+                display: "flex",
+                alignItems: "center",
+                marginRight: "0.5rem",
+                marginTop: "0.8rem",
+                objectFit: "contain",
+                width: "fit-content",
+                height: "fit-content",
+              }}
+            >
+              {RenderAuditQuestionColorTag(question?.colorCode, "medium")}
+            </Box>
+            <DrawerContentItem label="Question" value={question?.question} />
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "flex-end",
+              marginBottom: "1rem",
+            }}
+          >
+            <Typography variant="caption" sx={{ color: "var(--pallet-grey)" }}>
+              {`${question?.allocatedScore} Allocated Score`}
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+            }}
+          >
+            <Controller
+              name="status"
+              control={control}
+              {...register("status", {
+                required: true,
+              })}
+              render={({ field }) => (
+                <Autocomplete
+                  {...field}
+                  size="small"
+                  options={Object.values(InternalAuditQuestionAnswersStatus)}
+                  onChange={(_, value) => field.onChange(value)}
+                  sx={{ flex: 1, margin: "0.5rem" }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      required
+                      error={!!errors.status}
+                      helperText={errors.status && "Required"}
+                      label="Status"
+                      name="status"
+                    />
+                  )}
+                />
+              )}
+            />
+            <Controller
+              name="rating"
+              control={control}
+              {...register("rating", {
+                required: true,
+              })}
+              render={({ field }) => (
+                <Autocomplete
+                  {...field}
+                  size="small"
+                  options={Object.values(InternalAuditQuestionAnswerRating)}
+                  onChange={(_, value) => field.onChange(value)}
+                  sx={{ flex: 1, margin: "0.5rem" }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      required
+                      error={!!errors.rating}
+                      helperText={errors.rating && "Required"}
+                      label="Rating"
+                      name="rating"
+                    />
+                  )}
+                />
+              )}
+            />
+            <Controller
+              name="score"
+              control={control}
+              rules={{
+                required: "Score is required",
+                min: {
+                  value: 0,
+                  message: "Score must be greater than 0",
+                },
+                max: {
+                  value: question?.allocatedScore,
+                  message: `Score must be less than ${question?.allocatedScore}`,
+                },
+              }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  required
+                  id="score"
+                  label="Score"
+                  size="small"
+                  fullWidth
+                  type="number"
+                  sx={{ margin: "0.5rem", flex: 1 }}
+                  error={!!errors.score}
+                  helperText={errors.score ? errors.score.message : ""}
+                />
+              )}
+            />
+          </Box>
+        </Stack>
+      </DialogContent>
+      <DialogActions sx={{ padding: "1rem" }}>
+        <Button
+          onClick={() => setOpen(false)}
+          sx={{ color: "var(--pallet-blue)" }}
+        >
+          Cancel
+        </Button>
+        <CustomButton
+          variant="contained"
+          sx={{
+            backgroundColor: "var(--pallet-blue)",
+          }}
+          size="medium"
+          onClick={handleSubmit(handleCreateFactory)}
+        >
+          Submit Answer
         </CustomButton>
       </DialogActions>
     </Dialog>

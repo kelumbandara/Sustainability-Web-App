@@ -70,7 +70,7 @@ export type InternalAuditQuestion = z.infer<typeof InternalAuditQuestionSchema>;
 export const InternalAuditQuestionGroupSchema = z.object({
   id: z.string().optional(),
   auditId: z.string().optional(),
-  name: z.string(),
+  groupName: z.string(),
   questions: z.array(InternalAuditQuestionSchema),
 });
 
@@ -196,32 +196,6 @@ export type ScheduledInternalAudit = z.infer<
   typeof ScheduledInternalAuditSchema
 >;
 
-export const createInternalAudit = async (
-  internalAuditRequest: Partial<ScheduledInternalAudit>
-) => {
-  const formData = new FormData();
-
-  Object.keys(internalAuditRequest).forEach((key) => {
-    const value = internalAuditRequest[key as keyof ScheduledInternalAudit];
-
-    if (Array.isArray(value)) {
-      value.forEach((item, index) => {
-        formData.append(`${key}[${index}]`, JSON.stringify(item));
-      });
-    } else if (value !== null && value !== undefined) {
-      formData.append(key, value.toString());
-    }
-  });
-
-  const res = await axios.post("/api/internal-audit", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-
-  return res.data;
-};
-
 export async function getInternalAuditList() {
   const res = await axios.get("/api/internal-audit");
   return res.data;
@@ -257,3 +231,15 @@ export const deleteInternalAudit = async (id: string) => {
   const res = await axios.delete(`/api/internal-audit/${id}/delete`);
   return res.data;
 };
+
+export async function getInternalAuditFormsList() {
+  const res = await axios.get("/api/question-reports");
+  return res.data;
+}
+
+export async function createInternalAuditForm(data: Partial<InternalAudit>) {
+  const res = await axios.post("/api/question-reports", {
+    ...data,
+  });
+  return res.data;
+}
