@@ -222,7 +222,7 @@ function ViewExternalAuditContent({ audit }: { audit: ExternalAudit }) {
             >
               <DrawerContentItem
                 label="Audit Approver"
-                value={audit.approverId.name}
+                value={audit.approver.name}
                 sx={{ flex: 1 }}
               />
             </Box>
@@ -234,8 +234,8 @@ function ViewExternalAuditContent({ audit }: { audit: ExternalAudit }) {
               }}
             >
               <DrawerContentItem
-                label="Representer"
-                value={audit.representor.name}
+                label="Representor"
+                value={audit.representorSchema?.name}
                 sx={{ flex: 1 }}
               />
               <DrawerContentItem

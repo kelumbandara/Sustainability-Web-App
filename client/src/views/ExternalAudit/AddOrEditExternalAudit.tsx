@@ -106,6 +106,7 @@ export default function AddOrEditSustainabilityDialog({
     control,
     formState: { errors },
     reset,
+    watch,
     trigger,
   } = useForm<ExternalAudit>({
     reValidateMode: "onChange",
@@ -116,6 +117,9 @@ export default function AddOrEditSustainabilityDialog({
     defaultValues?.documents as StorageFile[]
   );
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
+
+  const approver = watch("approver");
+  const representorSchema = watch("representorSchema");
 
   useEffect(() => {
     if (defaultValues) {
@@ -130,10 +134,12 @@ export default function AddOrEditSustainabilityDialog({
     setFiles([]);
   };
 
-  const handleCreateSustainability = (data: ExternalAudit) => {
+  const handleCreateExternalAudit = (data: ExternalAudit) => {
     const submitData: Partial<ExternalAudit> = data;
     submitData.id = defaultValues?.id ?? uuidv4();
     submitData.documents = files;
+    submitData.approverId = approver.id
+    submitData.representor = representorSchema.id
     if (filesToRemove?.length > 0) submitData.removeDoc = filesToRemove;
     onSubmit(submitData as ExternalAudit);
     resetForm();
@@ -913,26 +919,26 @@ export default function AddOrEditSustainabilityDialog({
 
               <Box sx={{ margin: "0.5rem" }}>
                 <UserAutoComplete
-                  name="approverId"
+                  name="approver"
                   label="Approver"
                   control={control}
                   register={register}
                   errors={errors}
                   userData={assigneeData}
-                  defaultValue={defaultValues?.approverId}
+                  defaultValue={defaultValues?.approver}
                   required={true}
                 />
               </Box>
 
               <Box sx={{ margin: "0.5rem" }}>
                 <UserAutoComplete
-                  name="representor"
+                  name="representorSchema"
                   label="Management Representative"
                   control={control}
                   register={register}
                   errors={errors}
                   userData={assigneeData}
-                  defaultValue={defaultValues?.representor}
+                  defaultValue={defaultValues?.representorSchema}
                   required={true}
                 />
               </Box>
@@ -952,8 +958,8 @@ export default function AddOrEditSustainabilityDialog({
               <Box sx={{ margin: "0.5rem" }}>
                 <Controller
                   control={control}
-                  {...register("assesmentDate", { required: true })}
-                  name={"assesmentDate"}
+                  {...register("assessmentDate", { required: true })}
+                  name={"assessmentDate"}
                   render={({ field }) => {
                     return (
                       <Box sx={{ flex: 1, margin: "0.5rem" }}>
@@ -963,7 +969,7 @@ export default function AddOrEditSustainabilityDialog({
                             field.value ? new Date(field.value) : undefined
                           }
                           label="Assesment Date"
-                          error={errors?.assesmentDate ? "Required" : ""}
+                          error={errors?.assessmentDate ? "Required" : ""}
                         />
                       </Box>
                     );
@@ -1069,7 +1075,7 @@ export default function AddOrEditSustainabilityDialog({
             }}
             size="medium"
             onClick={handleSubmit((data) => {
-              handleCreateSustainability(data);
+              handleCreateExternalAudit(data);
             })}
           >
             {defaultValues ? "Update Changes" : "Submit Item"}
