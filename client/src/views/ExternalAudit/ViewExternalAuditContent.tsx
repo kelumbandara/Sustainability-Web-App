@@ -235,7 +235,7 @@ function ViewExternalAuditContent({ audit }: { audit: ExternalAudit }) {
             >
               <DrawerContentItem
                 label="Representor"
-                value={audit.representorSchema?.name}
+                value={audit.representor?.name}
                 sx={{ flex: 1 }}
               />
               <DrawerContentItem
@@ -259,7 +259,7 @@ function ViewExternalAuditContent({ audit }: { audit: ExternalAudit }) {
           />
           <DrawerContentItem
             label="Grace Period"
-            value={audit.gracePeriod}
+            value={audit.gradePeriod}
             sx={{ flex: 1 }}
           />
           <DrawerContentItem

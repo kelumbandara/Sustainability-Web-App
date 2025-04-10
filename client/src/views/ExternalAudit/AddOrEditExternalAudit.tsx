@@ -31,6 +31,10 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {
   Announcement,
   ExternalAudit,
+  fetchAuditCategory,
+  fetchAuditFirm,
+  fetchAuditStandard,
+  fetchAuditType,
 } from "../../api/ExternalAudit/externalAuditApi";
 import useIsMobile from "../../customHooks/useIsMobile";
 import theme from "../../theme";
@@ -119,7 +123,7 @@ export default function AddOrEditSustainabilityDialog({
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
   const approver = watch("approver");
-  const representorSchema = watch("representorSchema");
+  const representorSchema = watch("representor");
 
   useEffect(() => {
     if (defaultValues) {
@@ -138,8 +142,8 @@ export default function AddOrEditSustainabilityDialog({
     const submitData: Partial<ExternalAudit> = data;
     submitData.id = defaultValues?.id ?? uuidv4();
     submitData.documents = files;
-    submitData.approverId = approver.id
-    submitData.representor = representorSchema.id
+    submitData.approverId = approver.id;
+    submitData.representorId = representorSchema.id;
     if (filesToRemove?.length > 0) submitData.removeDoc = filesToRemove;
     onSubmit(submitData as ExternalAudit);
     resetForm();
@@ -150,6 +154,27 @@ export default function AddOrEditSustainabilityDialog({
     queryFn: fetchDivision,
   });
 
+  const { data: auditTypes, isFetching: isAuditTypeDataFetching } = useQuery({
+    queryKey: ["audit-types"],
+    queryFn: fetchAuditType,
+  });
+
+  const { data: auditCategory, isFetching: isAuditCategoryDataFetching } =
+    useQuery({
+      queryKey: ["audit-category"],
+      queryFn: fetchAuditCategory,
+    });
+
+  const { data: auditStandards, isFetching: isAuditStandardsDataFetching } =
+    useQuery({
+      queryKey: ["audit-standards"],
+      queryFn: fetchAuditStandard,
+    });
+
+  const { data: auditFirms, isFetching: isAuditFirmsDataFetching } = useQuery({
+    queryKey: ["audit-firms"],
+    queryFn: fetchAuditFirm,
+  });
   const isGeneralDetailsValid = useMemo(() => {
     return (
       !errors.auditType &&
@@ -392,12 +417,10 @@ export default function AddOrEditSustainabilityDialog({
                           }
                           size="small"
                           options={
-                            divisionData?.length
-                              ? divisionData.map(
-                                  (division) => division.divisionName
-                                )
+                            auditTypes?.length
+                              ? auditTypes.map((types) => types.auditTypeName)
                               : []
-                          } //need to change
+                          }
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -426,12 +449,12 @@ export default function AddOrEditSustainabilityDialog({
                           }
                           size="small"
                           options={
-                            divisionData?.length
-                              ? divisionData.map(
-                                  (division) => division.divisionName
+                            auditCategory?.length
+                              ? auditCategory.map(
+                                  (category) => category.auditCategoryName
                                 )
                               : []
-                          } //need to change
+                          }
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -447,38 +470,15 @@ export default function AddOrEditSustainabilityDialog({
                       )}
                     />
 
-                    <Controller
-                      name="customer"
-                      control={control}
-                      defaultValue={defaultValues?.customer ?? ""}
+                    <TextField
+                      id="customer"
+                      type="text"
+                      label="Customer"
+                      required
+                      error={!!errors.customer}
+                      size="small"
+                      sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("customer", { required: true })}
-                      render={({ field }) => (
-                        <Autocomplete
-                          {...field}
-                          onChange={(event, newValue) =>
-                            field.onChange(newValue)
-                          }
-                          size="small"
-                          options={
-                            divisionData?.length
-                              ? divisionData.map(
-                                  (division) => division.divisionName
-                                )
-                              : []
-                          } //need to change
-                          sx={{ flex: 1, margin: "0.5rem" }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              required
-                              error={!!errors.customer}
-                              helperText={errors.customer && "Required"}
-                              label="Customer"
-                              name="customer"
-                            />
-                          )}
-                        />
-                      )}
                     />
                   </Stack>
 
@@ -505,12 +505,12 @@ export default function AddOrEditSustainabilityDialog({
                           }
                           size="small"
                           options={
-                            divisionData?.length
-                              ? divisionData.map(
-                                  (division) => division.divisionName
+                            auditStandards?.length
+                              ? auditStandards.map(
+                                  (standard) => standard.auditStandardName
                                 )
                               : []
-                          } //need to change
+                          }
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -550,12 +550,10 @@ export default function AddOrEditSustainabilityDialog({
                           }
                           size="small"
                           options={
-                            divisionData?.length
-                              ? divisionData.map(
-                                  (division) => division.divisionName
-                                )
+                            auditFirms?.length
+                              ? auditFirms.map((firm) => firm.auditFirmName)
                               : []
-                          } //need to change
+                          }
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -676,6 +674,7 @@ export default function AddOrEditSustainabilityDialog({
                       type="text"
                       label="Audit Status"
                       error={!!errors.auditStatus}
+                      required
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("auditStatus", { required: true })}
@@ -687,18 +686,20 @@ export default function AddOrEditSustainabilityDialog({
                       label="Audit Score"
                       error={!!errors.auditScore}
                       size="small"
+                      required
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("auditScore", { required: true })}
                     />
 
                     <TextField
-                      id="gracePeriod"
+                      id="gradePeriod"
                       type="text"
-                      label="Grace Period"
-                      error={!!errors.gracePeriod}
+                      label="Grade Period"
+                      error={!!errors.gradePeriod}
+                      required
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("gracePeriod", { required: true })}
+                      {...register("gradePeriod", { required: true })}
                     />
                   </Stack>
 
@@ -716,6 +717,7 @@ export default function AddOrEditSustainabilityDialog({
                       id="numberOfNonCom"
                       type="number"
                       label="Number Of Non Com"
+                      required
                       error={!!errors.numberOfNonCom}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
@@ -728,6 +730,7 @@ export default function AddOrEditSustainabilityDialog({
                       label="Audit Fee"
                       error={!!errors.auditFee}
                       size="small"
+                      required
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("auditFee", { required: true })}
                     />
@@ -736,6 +739,7 @@ export default function AddOrEditSustainabilityDialog({
                       id="auditGrade"
                       type="text"
                       label="Audit Grade"
+                      required
                       error={!!errors.auditGrade}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
@@ -938,7 +942,7 @@ export default function AddOrEditSustainabilityDialog({
                   register={register}
                   errors={errors}
                   userData={assigneeData}
-                  defaultValue={defaultValues?.representorSchema}
+                  defaultValue={defaultValues?.representor}
                   required={true}
                 />
               </Box>
@@ -948,6 +952,7 @@ export default function AddOrEditSustainabilityDialog({
                   id="auditorName"
                   type="text"
                   label="Auditor Name"
+                  required
                   error={!!errors.auditorName}
                   size="small"
                   sx={{ width: "100%" }}

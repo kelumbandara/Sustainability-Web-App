@@ -22,8 +22,7 @@ export const ExternalAuditSchema = z.object({
   approvalDate: z.date(),
   approver: userSchema,
   approverId: z.string().optional(),
-  representorSchema: userSchema.optional(),
-  representor: z.string().optional(),
+  representor: userSchema.optional(),
   created_At: z.date(),
   createdBy: z.string(),
   status: z.string(),
@@ -32,7 +31,7 @@ export const ExternalAuditSchema = z.object({
   auditStatus: z.string(),
   auditScore: z.number(),
   numberOfNonCom: z.number(),
-  gracePeriod: z.string(),
+  gradePeriod: z.string(),
   auditFee: z.number(),
   auditGrade: z.string(),
   documents: z
@@ -42,6 +41,7 @@ export const ExternalAuditSchema = z.object({
   assigneeLevel: z.string(),
   assessmentDate: z.date(),
   auditExpiryDate: z.date(),
+  representorId: z.string(),
   assesmentDate: z.date(),
   auditorName: z.string(),
   removeDoc: z.array(z.string()).optional(),
@@ -128,5 +128,25 @@ export const createExternalAudit = async (externalAudit: ExternalAudit) => {
 
   return res.data;
 };
+
+export async function fetchAuditType() {
+  const res = await axios.get("/api/external-audit-type");
+  return res.data;
+}
+
+export async function fetchAuditCategory() {
+  const res = await axios.get("/api/external-audit-category");
+  return res.data;
+}
+
+export async function fetchAuditStandard() {
+  const res = await axios.get("/api/external-audit-standard");
+  return res.data;
+}
+
+export async function fetchAuditFirm() {
+  const res = await axios.get("/api/external-audit-firm");
+  return res.data;
+}
 
 
