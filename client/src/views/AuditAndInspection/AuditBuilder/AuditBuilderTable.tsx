@@ -9,6 +9,7 @@ import {
   Alert,
   Box,
   Button,
+  LinearProgress,
   Stack,
   TableFooter,
   TablePagination,
@@ -32,11 +33,11 @@ import queryClient from "../../../state/queryClient";
 import theme from "../../../theme";
 import { PermissionKeys } from "../../Administration/SectionList";
 import {
-  updateInternalAudit,
-  deleteInternalAudit,
   InternalAudit,
   getInternalAuditFormsList,
   createInternalAuditForm,
+  updateInternalAuditForm,
+  deleteInternalAuditForm,
 } from "../../../api/AuditAndInspection/internalAudit";
 import { sampleInternalAudits } from "../../../api/sampleData/sampleInternalAuditData";
 import InternalAuditFormDrawerContent from "./InternalAuditFormDrawerContent";
@@ -47,8 +48,8 @@ function AuditBuilderTable() {
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<InternalAudit>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
-  const [internalAuditData, setInternalAuditData] =
-    useState<InternalAudit[]>(sampleInternalAudits);
+  // const [internalAuditData, setInternalAuditData] =
+  //   useState<InternalAudit[]>(sampleInternalAudits);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -77,13 +78,13 @@ function AuditBuilderTable() {
     theme.breakpoints.down("md")
   );
 
-  const {
-    data: internalAuditFormsData,
-    isFetching: isInternalAuditFormsFetching,
-  } = useQuery({
-    queryKey: ["internal-audit-forms"],
-    queryFn: getInternalAuditFormsList,
-  });
+  const { data: internalAuditData, isFetching: isInternalAuditFormsFetching } =
+    useQuery({
+      queryKey: ["internal-audit-forms"],
+      queryFn: getInternalAuditFormsList,
+    });
+
+  console.log("internalAuditFormsData", internalAuditData);
 
   const paginatedInternalAuditData = useMemo(() => {
     if (!internalAuditData) return [];
@@ -112,9 +113,9 @@ function AuditBuilderTable() {
   });
 
   const { mutate: updateInternalAuditFormMutation } = useMutation({
-    mutationFn: updateInternalAudit,
+    mutationFn: updateInternalAuditForm,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["internal-audit"] });
+      queryClient.invalidateQueries({ queryKey: ["internal-audit-forms"] });
       enqueueSnackbar("Internal Audit Form Updated Successfully!", {
         variant: "success",
       });
@@ -130,9 +131,9 @@ function AuditBuilderTable() {
   });
 
   const { mutate: deleteInternalAuditFormMutation } = useMutation({
-    mutationFn: deleteInternalAudit,
+    mutationFn: deleteInternalAuditForm,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["internal-audit"] });
+      queryClient.invalidateQueries({ queryKey: ["internal-audit-forms"] });
       enqueueSnackbar("Internal Audit Form Deleted Successfully!", {
         variant: "success",
       });
@@ -200,9 +201,9 @@ function AuditBuilderTable() {
               Create Internal Audit Form
             </Button>
           </Box>
-          {/* {isInternalAuditDataFetching && (
+          {isInternalAuditFormsFetching && (
             <LinearProgress sx={{ width: "100%" }} />
-          )} */}
+          )}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -213,6 +214,7 @@ function AuditBuilderTable() {
                   Name
                 </TableCell>
                 <TableCell align="left">Created At</TableCell>
+                <TableCell align="left">Last Updated At</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -232,8 +234,19 @@ function AuditBuilderTable() {
                     <TableCell align="left">{row.id}</TableCell>
                     <TableCell align="left">{row.name}</TableCell>
                     <TableCell component="th" scope="row">
-                      {row.createdAt
-                        ? format(new Date(row.createdAt), "yyyy-MM-dd hh:mm aa")
+                      {row.created_at
+                        ? format(
+                            new Date(row.created_at),
+                            "yyyy-MM-dd hh:mm aa"
+                          )
+                        : "N/A"}
+                    </TableCell>
+                    <TableCell component="th" scope="row">
+                      {row.updated_at
+                        ? format(
+                            new Date(row.updated_at),
+                            "yyyy-MM-dd hh:mm aa"
+                          )
                         : "N/A"}
                     </TableCell>
                   </TableRow>
@@ -303,7 +316,10 @@ function AuditBuilderTable() {
           onSubmit={(data) => {
             if (selectedRow) {
               console.log("Updating document", data);
-              updateInternalAuditFormMutation(data);
+              updateInternalAuditFormMutation({
+                id: selectedRow.id,
+                data,
+              });
               // enqueueSnackbar("Details Updated Successfully!", {
               //   variant: "success",
               // });
@@ -336,7 +352,7 @@ function AuditBuilderTable() {
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
             // setRiskData(riskData.filter((doc) => doc.id !== selectedRow.id));
-            deleteInternalAuditFormMutation(selectedRow.id);
+            deleteInternalAuditFormMutation({ id: selectedRow.id });
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);

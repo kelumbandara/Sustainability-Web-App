@@ -59,17 +59,19 @@ export enum ScheduledTaskActionPlanPriority {
 }
 
 export const InternalAuditQuestionSchema = z.object({
-  id: z.string().optional(),
+  queId: z.number().optional(),
   question: z.string(),
   colorCode: z.string(),
   allocatedScore: z.number(),
+  queGroupId: z.number().optional(),
+  questionRecoId: z.number().optional(),
 });
 
 export type InternalAuditQuestion = z.infer<typeof InternalAuditQuestionSchema>;
 
 export const InternalAuditQuestionGroupSchema = z.object({
-  id: z.string().optional(),
-  auditId: z.string().optional(),
+  queGroupId: z.number().optional(),
+  quectionRecoId: z.number().optional(),
   groupName: z.string(),
   questions: z.array(InternalAuditQuestionSchema),
 });
@@ -85,7 +87,8 @@ export const InternalAuditSchema = z.object({
   questionGroups: z.array(InternalAuditQuestionGroupSchema),
   totalNumberOfQuestions: z.number(),
   achievableScore: z.number(),
-  createdAt: z.date(),
+  created_at: z.date(),
+  updated_at: z.date(),
   createdBy: userSchema,
 });
 
@@ -114,7 +117,7 @@ export type Auditee = z.infer<typeof auditeeSchema>;
 
 export const InternalAuditAnswerToQuestionsSchema = z.object({
   id: z.string().optional(),
-  questionId: z.string().optional(),
+  questionId: z.number().optional(),
   score: z.number(),
   status: z.nativeEnum(InternalAuditQuestionAnswersStatus).optional(),
   rating: z.nativeEnum(InternalAuditQuestionAnswerRating).optional(),
@@ -127,7 +130,7 @@ export type InternalAuditAnswerToQuestions = z.infer<
 export const ScheduledInternalAuditQuestionGroupAnswersSchema = z.object({
   id: z.string().optional(),
   auditId: z.string().optional(),
-  questionGroupId: z.string().optional(),
+  questionGroupId: z.number().optional(),
   answers: z.array(InternalAuditAnswerToQuestionsSchema).optional(),
 });
 
@@ -241,5 +244,23 @@ export async function createInternalAuditForm(data: Partial<InternalAudit>) {
   const res = await axios.post("/api/question-reports", {
     ...data,
   });
+  return res.data;
+}
+
+export async function updateInternalAuditForm({
+  id,
+  data,
+}: {
+  id: string;
+  data: Partial<InternalAudit>;
+}) {
+  const res = await axios.post(`/api/question-reports/${id}/update`, {
+    ...data,
+  });
+  return res.data;
+}
+
+export async function deleteInternalAuditForm({ id }: { id: string }) {
+  const res = await axios.delete(`/api/question-reports/${id}/delete`);
   return res.data;
 }

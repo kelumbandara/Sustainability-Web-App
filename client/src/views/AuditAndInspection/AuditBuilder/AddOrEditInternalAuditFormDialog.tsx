@@ -42,6 +42,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useState } from "react";
 import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
+import { generateRandomNumberId } from "../../../util/numbers.util";
 
 function AddOrEditInternalAuditFormDialog({
   open,
@@ -76,7 +77,7 @@ function AddOrEditInternalAuditFormDialog({
   const [selectedQuestionGroup, setSelectedQuestionGroup] =
     useState<InternalAuditQuestionGroup | null>(null);
   const [selectedQuestion, setSelectedQuestion] =
-    useState<InternalAuditQuestionGroup | null>(null);
+    useState<InternalAuditQuestion | null>(null);
   const [openDeleteQuestionGroupModal, setOpenDeleteQuestionGroupModal] =
     useState(false);
 
@@ -198,7 +199,7 @@ function AddOrEditInternalAuditFormDialog({
               )}
               {questionGroups?.map((group) => (
                 <SectionAccordion
-                  key={group.id}
+                  key={group.queGroupId}
                   questionGroup={group}
                   setOpenAddOrEditQuestionGroupModal={
                     setOpenAddOrEditQuestionGroupModal
@@ -214,12 +215,12 @@ function AddOrEditInternalAuditFormDialog({
                     setValue(
                       "questionGroups",
                       questionGroups.map((qGroup) =>
-                        qGroup.id === group.id
+                        qGroup.queGroupId === group.queGroupId
                           ? {
                               ...qGroup,
                               questions: qGroup.questions.filter(
                                 (question) =>
-                                  question.id !== questionToRemove?.id
+                                  question.queId !== questionToRemove?.queId
                               ),
                             }
                           : qGroup
@@ -275,7 +276,8 @@ function AddOrEditInternalAuditFormDialog({
               setValue(
                 "questionGroups",
                 questionGroups.filter(
-                  (group) => group.id !== selectedQuestionGroup.id
+                  (group) =>
+                    group.queGroupId !== selectedQuestionGroup.queGroupId
                 )
               );
             }
@@ -298,19 +300,29 @@ function AddOrEditInternalAuditFormDialog({
             setSelectedQuestionGroup(null);
           }}
           onSubmit={(data) => {
-            if (data.id) {
+            if (data.queGroupId) {
+              console.log(
+                "data",
+                data,
+                selectedQuestionGroup.queGroupId,
+                questionGroups
+              );
               setValue(
                 "questionGroups",
                 questionGroups.map((group) =>
-                  group.id === selectedQuestionGroup.id
-                    ? { ...group, name: data.groupName }
+                  group.queGroupId === selectedQuestionGroup.queGroupId
+                    ? { ...group, groupName: data.groupName }
                     : group
                 )
               );
             } else {
               setValue("questionGroups", [
                 ...(questionGroups || []),
-                { ...data, id: uuid(), questions: [] },
+                {
+                  ...data,
+                  queGroupId: generateRandomNumberId(),
+                  questions: [],
+                },
               ]);
             }
             setOpenAddOrEditQuestionGroupModal(false);
@@ -329,15 +341,15 @@ function AddOrEditInternalAuditFormDialog({
             setSelectedQuestionGroup(null);
           }}
           onSubmit={(data) => {
-            if (data.id) {
+            if (data.queId) {
               setValue(
                 "questionGroups",
                 questionGroups.map((group) =>
-                  group.id === selectedQuestionGroup?.id
+                  group.queGroupId === selectedQuestionGroup?.queGroupId
                     ? {
                         ...group,
                         questions: group.questions.map((question) =>
-                          question.id === data.id ? { ...data } : question
+                          question.queId === data.queId ? { ...data } : question
                         ),
                       }
                     : group
@@ -347,12 +359,16 @@ function AddOrEditInternalAuditFormDialog({
               setValue(
                 "questionGroups",
                 questionGroups.map((group) =>
-                  group.id === selectedQuestionGroup?.id
+                  group.queGroupId === selectedQuestionGroup?.queGroupId
                     ? {
                         ...group,
                         questions: [
                           ...(group?.questions || []),
-                          { ...data, id: uuid() },
+                          {
+                            ...data,
+                            queId: generateRandomNumberId(),
+                            queGroupId: group.queGroupId,
+                          },
                         ],
                       }
                     : group
@@ -385,7 +401,7 @@ const SectionAccordion = ({
   setOpenAddOrEditQuestionGroupModal: (open: boolean) => void;
   setSelectedQuestionGroup: (questionGroup: InternalAuditQuestionGroup) => void;
   setOpenAddOrEditQuestionModal: (open: boolean) => void;
-  setSelectedQuestion: (question: InternalAuditQuestionGroup) => void;
+  setSelectedQuestion: (question: InternalAuditQuestion) => void;
   onRemoveQuestionGroup: () => void;
   onRemoveQuestion: (questionToRemove: InternalAuditQuestion) => void;
 }) => {
@@ -545,7 +561,7 @@ const AddOrEditQuestionGroupDialog = ({
     formState: { errors },
   } = useForm<InternalAuditQuestionGroup>({
     defaultValues: {
-      id: defaultValues?.id,
+      queGroupId: defaultValues?.queGroupId,
       groupName: defaultValues?.groupName,
     },
   });
@@ -654,7 +670,7 @@ const AddOrEditQuestionDialog = ({
     control,
   } = useForm<InternalAuditQuestion>({
     defaultValues: {
-      id: defaultValues?.id,
+      queId: defaultValues?.queId,
       question: defaultValues?.question,
       colorCode: defaultValues?.colorCode,
       allocatedScore: defaultValues?.allocatedScore,

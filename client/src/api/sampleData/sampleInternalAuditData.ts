@@ -15,37 +15,37 @@ import { sampleUsers } from "./usersSampleData";
 
 export const sampleInternalAuditQuestions: InternalAuditQuestionGroup[] = [
   {
-    id: "1",
-    auditId: "1",
+    queGroupId: 1,
+    quectionRecoId: 1,
     groupName: "Health and Safety",
     questions: [
       {
-        id: "1",
+        queId: 1,
         question:
           "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
         colorCode: "red",
         allocatedScore: 10,
       },
       {
-        id: "2",
+        queId: 2,
         question: "Is the factory following the health and safety guidelines?",
         colorCode: "green",
         allocatedScore: 10,
       },
       {
-        id: "3",
+        queId: 3,
         question: "Is the factory following the health and safety guidelines?",
         colorCode: "yellow",
         allocatedScore: 10,
       },
       {
-        id: "4",
+        queId: 4,
         question: "Is the factory following the health and safety guidelines?",
         colorCode: "red",
         allocatedScore: 10,
       },
       {
-        id: "5",
+        queId: 5,
         question: "Is the factory following the health and safety guidelines?",
         colorCode: "green",
         allocatedScore: 10,
@@ -53,26 +53,26 @@ export const sampleInternalAuditQuestions: InternalAuditQuestionGroup[] = [
     ],
   },
   {
-    id: "2",
-    auditId: "1",
+    queGroupId: 2,
+    quectionRecoId: 1,
     groupName: "Environmental Management",
     questions: [
       {
-        id: "1",
+        queId: 1,
         question:
           "Is the factory following the environmental management guidelines?",
         colorCode: "red",
         allocatedScore: 10,
       },
       {
-        id: "2",
+        queId: 2,
         question:
           "Is the factory following the environmental management guidelines?",
         colorCode: "green",
         allocatedScore: 15,
       },
       {
-        id: "3",
+        queId: 3,
         question:
           "Is the factory following the environmental management guidelines?",
         colorCode: "yellow",
@@ -86,7 +86,7 @@ export const sampleInternalAudits: InternalAudit[] = [
   {
     id: "1",
     name: "Internal Audit 1",
-    createdAt: new Date(),
+    created_at: new Date(),
     createdBy: sampleUsers[0],
     questionGroups: sampleInternalAuditQuestions,
     totalNumberOfQuestions: 8,
@@ -97,7 +97,7 @@ export const sampleInternalAudits: InternalAudit[] = [
   {
     id: "2",
     name: "Internal Audit 2",
-    createdAt: new Date(),
+    created_at: new Date(),
     createdBy: sampleUsers[0],
     questionGroups: sampleInternalAuditQuestions,
     totalNumberOfQuestions: 8,
@@ -108,7 +108,7 @@ export const sampleInternalAudits: InternalAudit[] = [
   {
     id: "3",
     name: "Internal Audit 3",
-    createdAt: new Date(),
+    created_at: new Date(),
     createdBy: sampleUsers[0],
     questionGroups: sampleInternalAuditQuestions,
     totalNumberOfQuestions: 8,
@@ -264,25 +264,25 @@ export const sampleScheduledInternalAudits: ScheduledInternalAudit[] = [
       {
         id: "1",
         auditId: "1",
-        questionGroupId: "1",
+        questionGroupId: 1,
         answers: [
           {
             id: "1",
-            questionId: "1",
+            questionId: 1,
             score: 5,
             status: InternalAuditQuestionAnswersStatus.YES,
             rating: InternalAuditQuestionAnswerRating.COMPILED,
           },
           {
             id: "2",
-            questionId: "2",
+            questionId: 2,
             score: 5,
             status: InternalAuditQuestionAnswersStatus.YES,
             rating: InternalAuditQuestionAnswerRating.COMPILED,
           },
           {
             id: "3",
-            questionId: "3",
+            questionId: 3,
             score: 5,
             status: InternalAuditQuestionAnswersStatus.PARTIAL_YES,
             rating: InternalAuditQuestionAnswerRating.CRITICAL,
@@ -292,18 +292,18 @@ export const sampleScheduledInternalAudits: ScheduledInternalAudit[] = [
       {
         id: "2",
         auditId: "1",
-        questionGroupId: "2",
+        questionGroupId: 4,
         answers: [
           {
             id: "4",
-            questionId: "1",
+            questionId: 5,
             score: 5,
             status: InternalAuditQuestionAnswersStatus.YES,
             rating: InternalAuditQuestionAnswerRating.COMPILED,
           },
           {
             id: "5",
-            questionId: "2",
+            questionId: 6,
             score: 5,
             status: InternalAuditQuestionAnswersStatus.NO,
             rating: InternalAuditQuestionAnswerRating.CRITICAL,

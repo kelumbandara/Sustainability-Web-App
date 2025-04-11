@@ -885,11 +885,11 @@ export default function EditScheduledInternalAudit({
               )}
               {defaultValues?.audit?.questionGroups?.map((group) => (
                 <AuditQuestionsSectionAccordion
-                  key={group.id}
+                  key={group.queGroupId}
                   questionGroup={group}
                   auditAnswers={
                     defaultValues?.auditAnswers?.find(
-                      (answer) => answer.questionGroupId === group.id
+                      (answer) => answer.questionGroupId === group.queGroupId
                     )?.answers ?? []
                   }
                   auditStatus={defaultValues.status}
@@ -1482,11 +1482,11 @@ export const AuditQuestionsSectionAccordion = ({
                 )}
                 {questionGroup?.questions.map((row) => {
                   const questionAnswers = auditAnswers.find(
-                    (answer) => answer.questionId === row.id
+                    (answer) => answer.questionId === row.queId
                   );
 
                   return (
-                    <TableRow key={row.id}>
+                    <TableRow key={row.queId}>
                       <TableCell align="center">
                         <Typography variant="body2">
                           {RenderAuditQuestionColorTag(row.colorCode)}
@@ -1544,7 +1544,7 @@ export const AuditQuestionsSectionAccordion = ({
         setOpen={setOpenEditQuestionDialog}
         question={selectedQuestion}
         answer={auditAnswers.find(
-          (answer) => answer.questionId === selectedQuestion?.id
+          (answer) => answer.questionId === selectedQuestion?.queId
         )}
       />
     </>
@@ -1584,7 +1584,7 @@ const EditInternalAuditQuestionDialog = ({
   const handleCreateFactory = (
     data: Partial<InternalAuditAnswerToQuestions>
   ) => {
-    console.log("Creating factory", { ...data, questionId: question.id });
+    console.log("Creating factory", { ...data, questionId: question.queId });
     reset({
       score: null,
       status: null,

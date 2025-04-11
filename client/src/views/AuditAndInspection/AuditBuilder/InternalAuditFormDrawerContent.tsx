@@ -45,7 +45,7 @@ function InternalAuditFormDrawerContent({
         <DrawerContentItem
           label="Created At"
           value={format(
-            new Date(internalAuditForm.createdAt),
+            new Date(internalAuditForm.created_at),
             "yyyy-MM-dd hh:mm aa"
           )}
           sx={{ flex: 1 }}
@@ -74,7 +74,7 @@ function InternalAuditFormDrawerContent({
       </Box>
       <Stack>
         {internalAuditForm.questionGroups.map((group) => (
-          <SectionAccordion questionGroup={group} key={group.id} />
+          <SectionAccordion questionGroup={group} key={group.queGroupId} />
         ))}
       </Stack>
     </Stack>
@@ -94,7 +94,7 @@ const SectionAccordion = ({
         aria-controls="panel1-content"
         id="panel1-header"
       >
-        <Typography component="span">{questionGroup.name}</Typography>
+        <Typography component="span">{questionGroup.groupName}</Typography>
       </AccordionSummary>
       <AccordionDetails>
         <TableContainer

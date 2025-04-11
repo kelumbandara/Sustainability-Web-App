@@ -313,11 +313,11 @@ function ViewInternalAuditContent({
             )}
             {internalAudit?.audit?.questionGroups?.map((group) => (
               <AuditQuestionsSectionAccordion
-                key={group.id}
+                key={group.queGroupId}
                 questionGroup={group}
                 auditAnswers={
                   internalAudit?.auditAnswers?.find(
-                    (answer) => answer.questionGroupId === group.id
+                    (answer) => answer.questionGroupId === group.queGroupId
                   )?.answers ?? []
                 }
                 auditStatus={internalAudit.status}
@@ -457,11 +457,11 @@ export const AuditQuestionsSectionAccordion = ({
               )}
               {questionGroup?.questions.map((row) => {
                 const questionAnswers = auditAnswers.find(
-                  (answer) => answer.questionId === row.id
+                  (answer) => answer.questionId === row.queId
                 );
 
                 return (
-                  <TableRow key={row.id}>
+                  <TableRow key={row.queId}>
                     <TableCell align="center">
                       <Typography variant="body2">
                         {RenderAuditQuestionColorTag(row.colorCode)}
