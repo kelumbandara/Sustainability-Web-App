@@ -136,7 +136,7 @@ function ChemicalRequestTable() {
                       {row?.requested_merchandiser ?? "--"}
                     </TableCell>
                     <TableCell align="right">
-                      {row?.reviewer.name ?? "--"}
+                      {row?.reviewer?.name ?? "--"}
                     </TableCell>
                     <TableCell align="right">{row?.approver ?? "--"}</TableCell>
                     <TableCell align="right">{row.status}</TableCell>

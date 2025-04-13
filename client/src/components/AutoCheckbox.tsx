@@ -1,6 +1,12 @@
 import React from "react";
 import { Controller } from "react-hook-form";
-import { Autocomplete, Checkbox, TextField } from "@mui/material";
+import {
+  Autocomplete,
+  Checkbox,
+  SxProps,
+  TextField,
+  Theme,
+} from "@mui/material";
 
 const AutocompleteCheckbox = ({
   control,
@@ -14,6 +20,20 @@ const AutocompleteCheckbox = ({
   required = false,
   getOptionLabel = (option) => option.label,
   getOptionValue = (option) => option.value,
+  style,
+}: {
+  control: any;
+  name: string;
+  options: { label: string; value: string }[];
+  selectedValues?: string[];
+  setSelectedValues?: (values: string[]) => void;
+  label: string;
+  placeholder?: string;
+  limitTags?: number;
+  required?: boolean;
+  getOptionLabel?: (option: any) => string;
+  getOptionValue?: (option: any) => string;
+  style?: SxProps<Theme>;
 }) => {
   return (
     <Controller
@@ -26,6 +46,7 @@ const AutocompleteCheckbox = ({
           limitTags={limitTags}
           id={name}
           options={options}
+          sx={style}
           disableCloseOnSelect
           getOptionLabel={getOptionLabel}
           value={options.filter((option) =>

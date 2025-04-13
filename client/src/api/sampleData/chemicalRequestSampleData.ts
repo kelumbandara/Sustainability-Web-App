@@ -1,4 +1,7 @@
-import { ChemicalRequest } from "../ChemicalManagement/ChemicalRequestApi";
+import {
+  ChemicalRequest,
+  ProductStandard,
+} from "../ChemicalManagement/ChemicalRequestApi";
 
 export const sampleChemicalList = [
   "Lava FIN U 41",
@@ -19,35 +22,31 @@ export const sampleChemicalCategoryList = [
   "Others",
 ];
 
-export const sampleProductStandardList = [
-  "ISO 9001",
-  "ISO 14001",
-  "ISO 45001",
-  "ISO 50001",
-  "ISO 22000",
-  "ISO 27001",
-  "ISO 13485",
-  "ISO 31000",
-  "ISO 22301",
-  "ISO 37001",
-  "ISO 39001",
-  "ISO 45001",
-  "ISO 50001",
-  "ISO 55001",
-  "ISO 9001",
-  "ISO 14001",
-  "ISO 45001",
-  "ISO 50001",
-  "ISO 22000",
-  "ISO 27001",
-  "ISO 13485",
-  "ISO 31000",
-  "ISO 22301",
-  "ISO 37001",
-  "ISO 39001",
-  "ISO 45001",
-  "ISO 50001",
-  "ISO 55001",
+export const sampleProductStandardList: ProductStandard[] = [
+  {
+    id: "1",
+    name: "ISO 9001",
+  },
+  {
+    id: "2",
+    name: "ISO 14001",
+  },
+  {
+    id: "3",
+    name: "OHSAS 18001",
+  },
+  {
+    id: "4",
+    name: "REACH",
+  },
+  {
+    id: "5",
+    name: "GOTS",
+  },
+  {
+    id: "6",
+    name: "OEKO-TEX",
+  },
 ];
 
 export const sampleChemicalRequestData: ChemicalRequest[] = [
@@ -57,10 +56,10 @@ export const sampleChemicalRequestData: ChemicalRequest[] = [
     reference_number: "CHE-32",
     commercial_name: "Lava FIN U 41",
     substance_name: "",
-    formula: "",
+    molecular_formula: "",
     reach_registration_number: "",
-    ZDHC_use_category: "Others",
-    usage: "Wet Process",
+    zdhc_use_category: "Others",
+    where_and_why_it_is_used: "Wet Process",
     division: "Vintage Denim Studio Ltd.",
     requested_customer: "All",
     requested_merchandiser: "",
@@ -100,10 +99,10 @@ export const sampleChemicalRequestData: ChemicalRequest[] = [
     reference_number: "CHE-33",
     commercial_name: "Aqua Clean X",
     substance_name: "Water",
-    formula: "H2O",
-    reach_registration_number: "12345",
-    ZDHC_use_category: "Cleaning",
-    usage: "Surface Cleaning",
+    molecular_formula: "",
+    reach_registration_number: "",
+    zdhc_use_category: "Others",
+    where_and_why_it_is_used: "Wet Process",
     division: "Vintage Denim Studio Ltd.",
     requested_customer: "All",
     requested_merchandiser: "John Doe",
