@@ -29,6 +29,8 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../api/divisionApi";
 import theme from "../../theme";
 import { fetchAllDocumentType } from "../../api/documentType";
+import { ExistingFileItemsEdit } from "../../components/ExistingFileItemsEdit";
+import { StorageFile } from "../../utils/StorageFiles.util";
 
 type DialogProps = {
   open: boolean;
@@ -61,17 +63,21 @@ export default function AddOrEditDocumentDialog({
   const versionNumber = watch("versionNumber");
   const issuedDate = watch("issuedDate");
 
-  console.log("versionNumber", versionNumber, defaultValues);
+  const [existingFiles, setExistingFiles] = useState<StorageFile[]>(
+    (defaultValues?.document as StorageFile[]) ?? []
+  );
+  const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
   const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
     queryKey: ["divisions"],
     queryFn: fetchDivision,
   });
 
-  const { data: documentType, isFetching: isDocumentTypeDataFetching } = useQuery({
-    queryKey: ["documentTypes"],
-    queryFn: fetchAllDocumentType,
-  });
+  const { data: documentType, isFetching: isDocumentTypeDataFetching } =
+    useQuery({
+      queryKey: ["documentTypes"],
+      queryFn: fetchAllDocumentType,
+    });
 
   useEffect(() => {
     if (defaultValues) {
@@ -97,6 +103,8 @@ export default function AddOrEditDocumentDialog({
     } else {
       submitData.isNoExpiry = true;
     }
+    submitData.document = files;
+    if (filesToRemove?.length > 0) submitData.removeDoc = filesToRemove;
     onSubmit(submitData as Document);
     resetForm();
   };
@@ -183,7 +191,10 @@ export default function AddOrEditDocumentDialog({
                 {...register("documentType", { required: true })}
                 size="small"
                 options={
-                  documentType?.length ? documentType.map((documents) => documents.documentType) : []}
+                  documentType?.length
+                    ? documentType.map((documents) => documents.documentType)
+                    : []
+                }
                 sx={{ flex: 1, margin: "0.5rem" }}
                 defaultValue={defaultValues?.documentType}
                 renderInput={(params) => (
@@ -327,6 +338,23 @@ export default function AddOrEditDocumentDialog({
                 }}
               />
             </Box>
+            {defaultValues && (
+              <ExistingFileItemsEdit
+                label="Existing documents"
+                files={existingFiles}
+                sx={{ marginY: "1rem" }}
+                handleRemoveItem={(file) => {
+                  if (file.gsutil_uri) {
+                    setFilesToRemove([...filesToRemove, file.gsutil_uri]);
+                    setExistingFiles(
+                      existingFiles.filter(
+                        (f) => f.gsutil_uri !== file.gsutil_uri
+                      )
+                    );
+                  }
+                }}
+              />
+            )}
             <Box
               sx={{
                 display: "flex",

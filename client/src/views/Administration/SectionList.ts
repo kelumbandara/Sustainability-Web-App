@@ -467,6 +467,16 @@ export const PermissionSectionsMap: PermissionSection[] = [
           DELETE: true,
         },
       },
+      {
+        name: "Medical Records > Maternity Register",
+        key: "OCCUPATIONAL_HEALTH_MEDICAL_RECORDS_MATERNITY_REGISTER",
+        permissionsExists: {
+          VIEW: true,
+          CREATE: true,
+          EDIT: true,
+          DELETE: true,
+        },
+      },
     ],
   },
   {
@@ -992,5 +1002,4 @@ export const defaultViewerPermissions: PermissionKeysObject = {
   SATISFACTION_SURVEY_CREATE: true,
   SATISFACTION_SURVEY_EDIT: true,
   SATISFACTION_SURVEY_DELETE: true,
-  // OCCUPATIONAL_HEALTH_MEDICAL_RECORDS_MATERNITY_REGISTER_VIEW: true,
 };

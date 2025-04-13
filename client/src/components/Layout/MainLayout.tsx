@@ -34,12 +34,11 @@ import theme from "../../theme";
 import useIsMobile from "../../customHooks/useIsMobile";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DeleteConfirmationModal from "../DeleteConfirmationModal";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useSnackbar } from "notistack";
-import {
-  defaultViewerPermissions,
-  PermissionKeysObject,
-} from "../../views/Administration/SectionList";
+import { PermissionKeysObject } from "../../views/Administration/SectionList";
+import useCurrentUser from "../../hooks/useCurrentUser";
+import "./MainLayout.css";
 
 const drawerWidth = 265;
 
@@ -134,6 +133,7 @@ export default function MainLayout({ children }: Props) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [open, setOpen] = React.useState(isMobile ? false : true);
+  const { user } = useCurrentUser();
 
   const toggleDrawerOpen = () => {
     setOpen(!open);
@@ -188,20 +188,43 @@ export default function MainLayout({ children }: Props) {
               </Box>
             </Box>
             {!isMobile && (
-              <Box>
+              <Box
+                sx={{
+                  display: "flex",
+                }}
+              >
                 <Typography
                   variant="subtitle1"
                   noWrap
                   component="div"
-                  sx={{ color: "#000" }}
+                  sx={{
+                    color: "var(--pallet-blue)",
+                    display: "flex",
+                    marginRight: "0.5rem",
+                  }}
                 >
-                  Monitor and Manage{" "}
-                  <span style={{ fontWeight: 600 }}>Health & Safety</span>
+                  Monitor and Manage
+                </Typography>
+                <Typography
+                  variant="subtitle1"
+                  noWrap
+                  component="div"
+                  sx={{ color: "#000", display: "flex" }}
+                >
+                  <span className="slider-text" style={{ fontWeight: 600 }}>
+                    Sustainability
+                  </span>
+                  <span className="slider-text" style={{ fontWeight: 600 }}>
+                    Health & Safety
+                  </span>
+                  <span className="slider-text" style={{ fontWeight: 600 }}>
+                    Social
+                  </span>
                 </Typography>
               </Box>
             )}
             <Box sx={{ display: "flex", alignItems: "center" }}>
-              {!isMobile && (
+              {/* {!isMobile && (
                 <>
                   <IconButton
                     size="small"
@@ -229,11 +252,15 @@ export default function MainLayout({ children }: Props) {
                     </Badge>
                   </IconButton>
                 </>
-              )}
+              )} */}
               <Avatar
-                sx={{ bgcolor: "#024271", height: "2rem", width: "2rem" }}
+                sx={{
+                  bgcolor: "var(--pallet-orange)",
+                  height: "2rem",
+                  width: "2rem",
+                }}
               >
-                A
+                {user?.name?.charAt(0).toUpperCase()}
               </Avatar>
             </Box>
           </Box>
@@ -289,8 +316,14 @@ const DrawerContent = ({
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const { user } = useCurrentUser();
 
-  const userPermissionObject = defaultViewerPermissions;
+  const userPermissionObject = useMemo(() => {
+    if (user.permissionObject) {
+      return user.permissionObject;
+    }
+  }, [user]);
+
   return (
     <>
       <DrawerHeader sx={{ justifyContent: "flex-start" }}>
@@ -328,9 +361,6 @@ const DrawerContent = ({
         }}
       >
         {sidebarItems.map((item, i) => {
-          if (item?.accessKey && !userPermissionObject[`${item?.accessKey}`])
-            return null;
-
           if (item?.headline) {
             return (
               <Typography
@@ -480,12 +510,6 @@ const NestedItem = React.memo(
         <Collapse in={open} unmountOnExit>
           <List>
             {item.nestedItems.map((item) => {
-              if (
-                item?.accessKey &&
-                !userPermissionObject[`${item?.accessKey}`]
-              )
-                return null;
-
               if (item.nestedItems) {
                 return (
                   <Box key={item.accessKey} sx={{ marginLeft: "0.5rem" }}>

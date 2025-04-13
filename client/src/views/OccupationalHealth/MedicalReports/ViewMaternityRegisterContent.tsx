@@ -22,6 +22,8 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import AssignmentReturnIcon from "@mui/icons-material/AssignmentReturn";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
 import { format } from "date-fns";
+import { FileItemsViewer } from "../../../components/FileItemsViewer";
+import { StorageFile } from "../../../utils/StorageFiles.util";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -289,7 +291,10 @@ function ViewMaternityRegisterContent({
               />
               <DrawerContentItem
                 label="Expected Delivery Date"
-                value={format(maternityRegister.expectedDeliveryDate, "dd/MM/yyyy")} 
+                value={format(
+                  maternityRegister.expectedDeliveryDate,
+                  "dd/MM/yyyy"
+                )}
                 sx={{ flex: 1 }}
               />
             </Box>
@@ -306,7 +311,10 @@ function ViewMaternityRegisterContent({
               />
               <DrawerContentItem
                 label="Actual Delivery Date"
-                value={format(maternityRegister.actualDeliveryDate, "dd/MM/yyyy")}
+                value={format(
+                  maternityRegister.actualDeliveryDate,
+                  "dd/MM/yyyy"
+                )}
                 sx={{ flex: 1 }}
               />
             </Box>
@@ -346,7 +354,9 @@ function ViewMaternityRegisterContent({
                     </TableCell>
                     <TableCell align="center">{row.amountValue}</TableCell>
                     <TableCell align="center">{row.totalDaysPaid}</TableCell>
-                    <TableCell align="center">{row.beneficiaryAddress}</TableCell>
+                    <TableCell align="center">
+                      {row.beneficiaryAddress}
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
@@ -369,7 +379,10 @@ function ViewMaternityRegisterContent({
           >
             <DrawerContentItem
               label="Notice Date After Delivery"
-              value={format(maternityRegister.noticeDateAfterDelivery, "dd/MM/yyyy")} //maternityRegister.noticeDateAfterDelivery?.toDateString()}
+              value={format(
+                maternityRegister.noticeDateAfterDelivery,
+                "dd/MM/yyyy"
+              )} //maternityRegister.noticeDateAfterDelivery?.toDateString()}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
@@ -413,7 +426,13 @@ function ViewMaternityRegisterContent({
                     <TableCell align="center">
                       {row.uploadDate?.toDateString()}
                     </TableCell>
-                    <TableCell align="center">{row.document}</TableCell>
+                    <TableCell align="center">
+                      <FileItemsViewer
+                        label=""
+                        files={row.document as StorageFile[]}
+                        sx={{ marginY: "1rem" }}
+                      />
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (

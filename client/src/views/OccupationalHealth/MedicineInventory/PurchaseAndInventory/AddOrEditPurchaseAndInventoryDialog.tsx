@@ -4,8 +4,10 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import {
+  Alert,
   Autocomplete,
   Box,
+  Chip,
   Divider,
   IconButton,
   Stack,
@@ -17,33 +19,34 @@ import {
 import { Controller, useForm } from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
 import { grey } from "@mui/material/colors";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { HazardAndRiskStatus } from "../../../../api/hazardRiskApi";
-import { sampleDivisions } from "../../../../api/sampleData/documentData";
 import CustomButton from "../../../../components/CustomButton";
 import DatePickerComponent from "../../../../components/DatePickerComponent";
 import RichTextComponent from "../../../../components/RichTextComponent";
 import useIsMobile from "../../../../customHooks/useIsMobile";
 import theme from "../../../../theme";
-import { MedicineInventory } from "../../../../api/OccupationalHealth/medicineInventoryApi";
+import {
+  MedicineInventory,
+  publishMedicineInventory,
+} from "../../../../api/OccupationalHealth/medicineInventoryApi";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import ApartmentIcon from "@mui/icons-material/Apartment";
-import {
-  medicineInventoryForms,
-  medicineTypes,
-  sampleMedicineSuppliers,
-  supplierTypes,
-} from "../../../../api/sampleData/medicineInventorySampleData";
 import { fetchMedicineList } from "../../../../api/OccupationalHealth/medicineNameApi";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../../../api/divisionApi";
 import { fetchAllSupplierName } from "../../../../api/OccupationalHealth/medicineSupplierNameApi";
 import { fetchAllSupplierTypes } from "../../../../api/OccupationalHealth/supplierType";
+import SaveIcon from "@mui/icons-material/Save";
+import PublishIcon from "@mui/icons-material/Publish";
+import ApproveConfirmationModal from "../MedicineRequest/ApproveConfirmationModal";
+import queryClient from "../../../../state/queryClient";
+import { useSnackbar } from "notistack";
 
 type DialogProps = {
   open: boolean;
@@ -88,14 +91,11 @@ export default function AddOrEditPurchaseAndInventoryDialog({
   defaultValues,
   onSubmit,
 }: DialogProps) {
+  const { enqueueSnackbar } = useSnackbar();
   const { isMobile, isTablet } = useIsMobile();
   const [files, setFiles] = useState<File[]>([]);
   const [activeTab, setActiveTab] = useState(0);
-
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    console.log("event", event);
-    setActiveTab(newValue);
-  };
+  const [publishModalOpen, setPublishModalOpen] = useState(false);
 
   const {
     register,
@@ -104,6 +104,8 @@ export default function AddOrEditPurchaseAndInventoryDialog({
     formState: { errors },
     reset,
     watch,
+    getValues,
+    trigger,
   } = useForm<MedicineInventory>({});
 
   const manufacturingDate = watch("manufacturingDate");
@@ -130,7 +132,16 @@ export default function AddOrEditPurchaseAndInventoryDialog({
     resetForm();
   };
 
-  const { data: medicineInventoryData, isFetching: isMedicineInventoryFetching } = useQuery({
+  const handlePublishMedicineInventory = () => {
+    const data = getValues();
+    data.status = HazardAndRiskStatus.PUBLISHED.toLowerCase();
+    publishMedicineInventoryMutation(data);
+  };
+
+  const {
+    data: medicineInventoryData,
+    isFetching: isMedicineInventoryFetching,
+  } = useQuery({
     queryKey: ["medicineInventory"],
     queryFn: fetchMedicineList,
   });
@@ -140,17 +151,132 @@ export default function AddOrEditPurchaseAndInventoryDialog({
     queryFn: fetchDivision,
   });
 
-  const { data: supplierTypeData, isFetching: isSupplierDataFetching } = useQuery({
-    queryKey: ["supplierType"],
-    queryFn: fetchAllSupplierTypes,
+  const { data: supplierTypeData, isFetching: isSupplierDataFetching } =
+    useQuery({
+      queryKey: ["supplierType"],
+      queryFn: fetchAllSupplierTypes,
+    });
+
+  const { data: supplierNameData, isFetching: isSupplierNameDataFetching } =
+    useQuery({
+      queryKey: ["supplierName"],
+      queryFn: fetchAllSupplierName,
+    });
+
+  const { mutate: publishMedicineInventoryMutation } = useMutation({
+    mutationFn: publishMedicineInventory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["medicine-inventory"] });
+      enqueueSnackbar("Medicine Inventory Report Published Successfully!", {
+        variant: "success",
+      });
+    },
+    onError: () => {
+      enqueueSnackbar(`Medicine Inventory Publish Failed`, {
+        variant: "error",
+      });
+    },
   });
 
-  const { data: supplierNameData, isFetching: isSupplierNameDataFetching } = useQuery({
-    queryKey: ["supplierName"],
-    queryFn: fetchAllSupplierName,
-  });
+  const isMedicineDetailsValid = useMemo(() => {
+    return (
+      !errors.medicineName &&
+      !errors.genericName &&
+      !errors.dosageStrength &&
+      !errors.form &&
+      !errors.medicineType
+    );
+  }, [
+    errors.medicineName,
+    errors.genericName,
+    errors.dosageStrength,
+    errors.form,
+    errors.medicineType,
+  ]);
 
+  const isSupplierDetailsValid = useMemo(() => {
+    return (
+      !errors.supplierName &&
+      !errors.supplierContactNumber &&
+      !errors.supplierEmail &&
+      !errors.supplierType &&
+      !errors.location
+    );
+  }, [
+    errors.supplierName,
+    errors.supplierContactNumber,
+    errors.supplierEmail,
+    errors.supplierType,
+    errors.location,
+  ]);
 
+  const isPurchaseDetailsValid = useMemo(() => {
+    return (
+      !errors.deliveryQuantity &&
+      !errors.purchaseAmount &&
+      !errors.thresholdLimit &&
+      !errors.invoiceReference &&
+      !errors.manufacturerName
+    );
+  }, [
+    errors.deliveryQuantity,
+    errors.purchaseAmount,
+    errors.thresholdLimit,
+    errors.invoiceReference,
+    errors.manufacturerName,
+  ]);
+
+  const isStorageUsageValid = useMemo(() => {
+    return !errors.batchNumber;
+  }, [errors.batchNumber]);
+
+  const triggerMedicineDetailsSection = () => {
+    trigger([
+      "medicineName",
+      "genericName",
+      "dosageStrength",
+      "form",
+      "medicineType",
+    ]);
+  };
+
+  const triggerSupplierDetailsSection = () => {
+    trigger([
+      "supplierName",
+      "supplierContactNumber",
+      "supplierEmail",
+      "supplierType",
+      "location",
+    ]);
+  };
+
+  const triggerPurchaseDetailsSection = () => {
+    trigger([
+      "deliveryQuantity",
+      "purchaseAmount",
+      "thresholdLimit",
+      "invoiceReference",
+      "manufacturerName",
+    ]);
+  };
+
+  const triggerStorageUsageSection = () => {
+    trigger(["batchNumber"]);
+  };
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    if (newValue === 1) {
+      triggerMedicineDetailsSection();
+    } else if (newValue === 2) {
+      triggerSupplierDetailsSection();
+    } else if (newValue === 3) {
+      triggerPurchaseDetailsSection();
+    } else if (newValue === 4) {
+      triggerStorageUsageSection();
+    }
+
+    setActiveTab(newValue);
+  };
 
   return (
     <>
@@ -194,6 +320,14 @@ export default function AddOrEditPurchaseAndInventoryDialog({
         </DialogTitle>
         <Divider />
         <DialogContent>
+          {Object.keys(errors).length > 0 && (
+            <Alert
+              severity="error"
+              style={{ marginLeft: "1rem", marginRight: "1rem" }}
+            >
+              Please make sure to fill all the required fields with valid data
+            </Alert>
+          )}
           <Stack
             sx={{
               display: "flex",
@@ -230,11 +364,17 @@ export default function AddOrEditPurchaseAndInventoryDialog({
               </Box>
               <Tabs
                 value={activeTab}
-                onChange={handleChange}
+                onChange={handleTabChange}
                 indicatorColor="secondary"
                 TabIndicatorProps={{
                   style: {
-                    backgroundColor: "var(--pallet-blue)",
+                    backgroundColor:
+                      isMedicineDetailsValid &&
+                      isSupplierDetailsValid &&
+                      isPurchaseDetailsValid &&
+                      isStorageUsageValid
+                        ? "var(--pallet-blue)"
+                        : "var(--pallet-red)",
                     height: "3px",
                   },
                 }}
@@ -251,7 +391,9 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                   label={
                     <Box
                       sx={{
-                        color: "var(--pallet-blue)",
+                        color: isMedicineDetailsValid
+                          ? "var(--pallet-blue)"
+                          : "var(--pallet-red)",
                         display: "flex",
                         alignItems: "center",
                       }}
@@ -260,6 +402,14 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                       <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                         Medicine Details
                       </Typography>
+                      {!isMedicineDetailsValid && (
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ ml: "0.3rem", color: "var(--pallet-red)" }}
+                        >
+                          *
+                        </Typography>
+                      )}
                     </Box>
                   }
                   {...a11yProps(0)}
@@ -268,7 +418,9 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                   label={
                     <Box
                       sx={{
-                        color: "var(--pallet-blue)",
+                        color: isSupplierDetailsValid
+                          ? "var(--pallet-blue)"
+                          : "var(--pallet-red)",
                         display: "flex",
                         alignItems: "center",
                       }}
@@ -277,6 +429,14 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                       <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                         Supplier Details
                       </Typography>
+                      {!isSupplierDetailsValid && (
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ ml: "0.3rem", color: "var(--pallet-red)" }}
+                        >
+                          *
+                        </Typography>
+                      )}
                     </Box>
                   }
                   {...a11yProps(1)}
@@ -285,7 +445,9 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                   label={
                     <Box
                       sx={{
-                        color: "var(--pallet-blue)",
+                        color: isPurchaseDetailsValid
+                          ? "var(--pallet-blue)"
+                          : "var(--pallet-red)",
                         display: "flex",
                         alignItems: "center",
                       }}
@@ -294,6 +456,14 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                       <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                         Purchase Details
                       </Typography>
+                      {!isPurchaseDetailsValid && (
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ ml: "0.3rem", color: "var(--pallet-red)" }}
+                        >
+                          *
+                        </Typography>
+                      )}
                     </Box>
                   }
                   {...a11yProps(2)}
@@ -302,7 +472,9 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                   label={
                     <Box
                       sx={{
-                        color: "var(--pallet-blue)",
+                        color: isStorageUsageValid
+                          ? "var(--pallet-blue)"
+                          : "var(--pallet-red)",
                         display: "flex",
                         alignItems: "center",
                       }}
@@ -311,6 +483,14 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                       <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                         Storage & Usage
                       </Typography>
+                      {!isStorageUsageValid && (
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ ml: "0.3rem", color: "var(--pallet-red)" }}
+                        >
+                          *
+                        </Typography>
+                      )}
                     </Box>
                   }
                   {...a11yProps(3)}
@@ -380,7 +560,13 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                           size="small"
                           options={
                             medicineInventoryData?.length
-                              ? [...new Set(medicineInventoryData.map((inventory) => inventory.form))]
+                              ? [
+                                  ...new Set(
+                                    medicineInventoryData.map(
+                                      (inventory) => inventory.form
+                                    )
+                                  ),
+                                ]
                               : []
                           }
                           sx={{ flex: 1, margin: "0.5rem" }}
@@ -416,7 +602,13 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                           size="small"
                           options={
                             medicineInventoryData?.length
-                              ? [...new Set(medicineInventoryData.map((inventory) => inventory.medicineType))]
+                              ? [
+                                  ...new Set(
+                                    medicineInventoryData.map(
+                                      (inventory) => inventory.medicineType
+                                    )
+                                  ),
+                                ]
                               : []
                           }
                           sx={{ flex: 1, margin: "0.5rem" }}
@@ -448,7 +640,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                       }}
                       size="medium"
                       onClick={() => {
-                        setActiveTab(1);
+                        handleTabChange(null, 1);
                       }}
                       endIcon={<ArrowForwardIcon />}
                     >
@@ -477,7 +669,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                       name="supplierName"
                       control={control}
                       defaultValue={defaultValues?.supplierName}
-                      rules={{ required: true }}
+                      {...register("supplierName", { required: true })}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -486,7 +678,12 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                           }
                           size="small"
                           options={
-                            supplierNameData?.length ? supplierNameData.map((supplier) => supplier.supplierName) : []}
+                            supplierNameData?.length
+                              ? supplierNameData.map(
+                                  (supplier) => supplier.supplierName
+                                )
+                              : []
+                          }
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -533,7 +730,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                       name="supplierType"
                       control={control}
                       defaultValue={defaultValues?.supplierType}
-                      rules={{ required: true }}
+                      {...register("supplierType", { required: true })}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -542,7 +739,12 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                           }
                           size="small"
                           options={
-                            supplierTypeData?.length ? supplierTypeData.map((supplier) => supplier.type) : []}
+                            supplierTypeData?.length
+                              ? supplierTypeData.map(
+                                  (supplier) => supplier.type
+                                )
+                              : []
+                          }
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -587,7 +789,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                       }}
                       size="medium"
                       onClick={() => {
-                        setActiveTab(0);
+                        handleTabChange(null, 0);
                       }}
                       endIcon={<ArrowBackIcon />}
                     >
@@ -601,7 +803,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                       }}
                       size="medium"
                       onClick={() => {
-                        setActiveTab(2);
+                        handleTabChange(null, 2);
                       }}
                       endIcon={<ArrowForwardIcon />}
                     >
@@ -792,7 +994,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                       }}
                       size="medium"
                       onClick={() => {
-                        setActiveTab(1);
+                        handleTabChange(null, 1);
                       }}
                       endIcon={<ArrowBackIcon />}
                     >
@@ -806,7 +1008,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                       }}
                       size="medium"
                       onClick={() => {
-                        setActiveTab(3);
+                        handleTabChange(null, 3);
                       }}
                       endIcon={<ArrowForwardIcon />}
                     >
@@ -874,7 +1076,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                       }}
                       size="medium"
                       onClick={() => {
-                        setActiveTab(2);
+                        handleTabChange(null, 2);
                       }}
                       endIcon={<ArrowBackIcon />}
                     >
@@ -900,30 +1102,50 @@ export default function AddOrEditPurchaseAndInventoryDialog({
             >
               {defaultValues && (
                 <>
+                  <Typography
+                    variant="caption"
+                    sx={{ marginLeft: "0.5rem", color: grey[700] }}
+                  >
+                    Status
+                  </Typography>
+                  <Box>
+                    {defaultValues.status === "approved" ? (
+                      <Chip label="Request Approved" />
+                    ) : defaultValues.status === "published" ? (
+                      <Chip
+                        label="Published"
+                        sx={{
+                          backgroundColor: "var(--pallet-blue)",
+                          color: "white",
+                        }}
+                      />
+                    ) : (
+                      "--"
+                    )}
+                  </Box>
                   <Box sx={{ margin: "0.5rem" }}>
                     <Typography
-                      variant="body2"
+                      variant="caption"
                       sx={{ marginBottom: "0.1rem", color: grey[700] }}
                     >
                       Requested By
                     </Typography>
                     <Typography
-                      variant="caption"
+                      variant="body2"
                       sx={{ marginBottom: "0.1rem", color: grey[700] }}
                     >
                       {defaultValues?.requestedBy ?? "--"}
                     </Typography>
                   </Box>
-
                   <Box sx={{ margin: "0.5rem" }}>
                     <Typography
-                      variant="body2"
+                      variant="caption"
                       sx={{ marginBottom: "0.1rem", color: grey[700] }}
                     >
                       Approved By
                     </Typography>
                     <Typography
-                      variant="caption"
+                      variant="body2"
                       sx={{ marginBottom: "0.1rem", color: grey[700] }}
                     >
                       {defaultValues?.requestedBy ?? "--"}
@@ -932,21 +1154,34 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                 </>
               )}
               <Box sx={{ margin: "0.5rem" }}>
-                <Autocomplete
+                <Controller
+                  name="division"
+                  control={control}
+                  defaultValue={defaultValues?.division ?? ""}
                   {...register("division", { required: true })}
-                  size="small"
-                  options={
-                    divisionData?.length ? divisionData.map((division) => division.divisionName) : []}
-
-                  defaultValue={defaultValues?.division}
-                  sx={{ flex: 1, margin: "0.5rem" }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      required
-                      error={!!errors.division}
-                      label="Division"
-                      name="division"
+                  render={({ field }) => (
+                    <Autocomplete
+                      {...field}
+                      onChange={(event, newValue) => field.onChange(newValue)}
+                      size="small"
+                      options={
+                        divisionData?.length
+                          ? divisionData.map(
+                              (division) => division.divisionName
+                            )
+                          : []
+                      }
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          error={!!errors.division}
+                          helperText={errors.division && "Required"}
+                          label="Division"
+                          name="division"
+                        />
+                      )}
                     />
                   )}
                 />
@@ -968,16 +1203,69 @@ export default function AddOrEditPurchaseAndInventoryDialog({
           <CustomButton
             variant="contained"
             sx={{
-              backgroundColor: "var(--pallet-blue)",
+              backgroundColor: "var(--pallet-grey)",
             }}
+            startIcon={<SaveIcon />}
             size="medium"
             onClick={handleSubmit((data) => {
               handleCreateMedicineInventory(data);
             })}
           >
-            {defaultValues ? "Update Changes" : "Submit Item"}
+            {defaultValues ? "Save Draft" : "Submit Item"}
+          </CustomButton>
+          <CustomButton
+            variant="contained"
+            sx={{
+              backgroundColor: "var(--pallet-blue)",
+            }}
+            size="medium"
+            startIcon={<PublishIcon />}
+            onClick={() =>
+              trigger().then((isValid) => {
+                if (isValid) {
+                  setPublishModalOpen(true);
+                }
+              })
+            }
+          >
+            Publish Inventory Item
           </CustomButton>
         </DialogActions>
+
+        {publishModalOpen && (
+          <ApproveConfirmationModal
+            open={publishModalOpen}
+            title="Publish Medicine Inventory Confirmation"
+            content={
+              <>
+                Are you sure you want to publish this Medicine Inventory Item?
+                <Alert severity="warning" style={{ marginTop: "1rem" }}>
+                  This action is not reversible.
+                </Alert>
+              </>
+            }
+            handleClose={() => setPublishModalOpen(false)}
+            approveFunc={async () => {
+              const isValid = await trigger();
+              if (isValid) {
+                handlePublishMedicineInventory();
+              } else {
+                enqueueSnackbar("Please fill in all required fields.", {
+                  variant: "error",
+                });
+                setPublishModalOpen(false);
+                throw new Error("Form Validation Error");
+              }
+            }}
+            onSuccess={() => {
+              setPublishModalOpen(false);
+              handleClose();
+            }}
+            handleReject={() => {
+              setPublishModalOpen(false);
+            }}
+          />
+        )}
       </Dialog>
     </>
   );

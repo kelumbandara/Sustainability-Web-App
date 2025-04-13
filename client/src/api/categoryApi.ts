@@ -24,3 +24,21 @@ export async function fetchMainCategory() {
   const res = await axios.get("/api/categories");
   return res.data;
 }
+
+export async function createObservation({
+  categoryName,
+  subCategory,
+  observationType,
+}: {
+  categoryName: string;
+  subCategory: string;
+  observationType: string;
+}) {
+  const res = await axios.post(`/api/store-observation`, {
+    categoryName,
+    subCategory,
+    observationType,
+  });
+
+  return res;
+}

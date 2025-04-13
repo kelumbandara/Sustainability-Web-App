@@ -1,26 +1,24 @@
 import { Box, Stack, Typography } from "@mui/material";
-import welcome from "../../assets/welcomeInsight.png";
-import useCurrentUser from "../../hooks/useCurrentUser";
+import welcome from "../assets/permissionDenied.jpg";
 
-function Insight() {
-  const { user } = useCurrentUser();
+function PermissionDenied() {
   return (
     <Stack>
       <Typography
-        variant="h3"
+        variant="h4"
         align="center"
         sx={{ mt: 2, mb: 2, fontWeight: "bold", color: "var(--pallet-orange)" }}
       >
-        {`Welcome ${user?.name}!`}
+        Permission Denied!
       </Typography>
       <Box
         component="img"
         src={welcome}
-        alt="Under Development"
+        alt="Permission Denied"
         sx={{
           height: "auto",
           width: "60vw",
-          maxHeight: "50vh",
+          maxHeight: "55vh",
           objectFit: "contain",
           justifySelf: "center",
           alignSelf: "center",
@@ -29,12 +27,13 @@ function Insight() {
       <Typography
         variant="body1"
         align="center"
-        sx={{ mt: 2, color: "var(--pallet-main-blue)" }}
+        sx={{ mt: 2, color: "var(--pallet-green)" }}
       >
-        We are glad to have you here. Explore the insights and make informed
+        You do not have permission to access this page. Please contact your
+        administrator for more information.
       </Typography>
     </Stack>
   );
 }
 
-export default Insight;
+export default PermissionDenied;

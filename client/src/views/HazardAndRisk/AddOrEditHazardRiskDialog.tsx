@@ -8,7 +8,6 @@ import {
   Box,
   Divider,
   IconButton,
-  LinearProgress,
   Stack,
   TextField,
   ToggleButton,
@@ -18,7 +17,6 @@ import {
 import useIsMobile from "../../customHooks/useIsMobile";
 import { Controller, useForm } from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
-import { sampleDivisions } from "../../api/sampleData/documentData";
 import RichTextComponent from "../../components/RichTextComponent";
 import DropzoneComponent from "../../components/DropzoneComponent";
 import { grey } from "@mui/material/colors";
@@ -34,7 +32,6 @@ import {
   RiskLevel,
   UnsafeActOrCondition,
 } from "../../api/hazardRiskApi";
-import { sampleAssignees } from "../../api/sampleData/usersSampleData";
 import {
   fetchSubCategory,
   fetchObservationType,
@@ -42,9 +39,11 @@ import {
 } from "../../api/categoryApi";
 import { useQuery } from "@tanstack/react-query";
 import useCurrentUser from "../../hooks/useCurrentUser";
-import { fetchAllUsers } from "../../api/userApi";
+import { fetchAllUsers, fetchHazardRiskAssignee } from "../../api/userApi";
 import { fetchDivision } from "../../api/divisionApi";
 import UserAutoComplete from "../../components/UserAutoComplete";
+import { StorageFile } from "../../utils/StorageFiles.util";
+import { ExistingFileItemsEdit } from "../../components/ExistingFileItemsEdit";
 
 type DialogProps = {
   open: boolean;
@@ -61,6 +60,10 @@ export default function AddOrEditHazardRiskDialog({
 }: DialogProps) {
   const { isMobile, isTablet } = useIsMobile();
   const [files, setFiles] = useState<File[]>([]);
+  const [existingFiles, setExistingFiles] = useState<StorageFile[]>(
+    defaultValues?.documents as StorageFile[]
+  );
+  const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
   const [addNewContactDialogOpen, setAddNewContactDialogOpen] = useState(false);
 
   const {
@@ -74,14 +77,17 @@ export default function AddOrEditHazardRiskDialog({
   } = useForm<HazardAndRisk>({
     defaultValues: {
       ...defaultValues,
+      documents: [],
       riskLevel: defaultValues?.riskLevel ?? RiskLevel.LOW,
       unsafeActOrCondition:
         defaultValues?.unsafeActOrCondition ?? UnsafeActOrCondition.UNSAFE_ACT,
     },
+    mode: "onChange",
+    reValidateMode: "onChange",
   });
 
   const assignee = watch("assignee");
-  console.log("assignee", assignee);
+  console.log("filesToRemove", filesToRemove);
 
   useEffect(() => {
     if (defaultValues) {
@@ -108,6 +114,11 @@ export default function AddOrEditHazardRiskDialog({
   const { data: userData, isFetching: isUserDataFetching } = useQuery({
     queryKey: ["users"],
     queryFn: fetchAllUsers,
+  });
+
+  const { data: assigneeData, isFetching: isAssigneeDataFetching } = useQuery({
+    queryKey: ["hr-assignee"],
+    queryFn: fetchHazardRiskAssignee,
   });
 
   const { data: subCategoryData, isFetching: isSubCategoryDataFetching } =
@@ -146,7 +157,7 @@ export default function AddOrEditHazardRiskDialog({
       : [];
   }, [category, subCategory]);
 
-  const handleCreateDocument = (data: HazardAndRisk) => {
+  const handleSubmitHazardAndRisk = (data: HazardAndRisk) => {
     const submitData: Partial<HazardAndRisk> = data;
     submitData.id = defaultValues?.id ?? uuidv4();
     submitData.createdByUser = user.id;
@@ -154,9 +165,8 @@ export default function AddOrEditHazardRiskDialog({
     // submitData.createdDate = new Date();
     // submitData.createdByUser = sampleAssignees[0].name;
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
-    if (files.length > 0) {
-      submitData.documents = files;
-    }
+    if (filesToRemove?.length > 0) submitData.removeDoc = filesToRemove;
+    submitData.documents = files;
     onSubmit(submitData as HazardAndRisk);
     console.log(submitData);
     resetForm();
@@ -392,6 +402,7 @@ export default function AddOrEditHazardRiskDialog({
                     {...params}
                     required
                     error={!!errors.category}
+                    helperText={errors.category ? "Required" : ""}
                     label="Category"
                     name="category"
                   />
@@ -421,6 +432,7 @@ export default function AddOrEditHazardRiskDialog({
                       {...params}
                       required
                       error={!!errors.subCategory}
+                      helperText={errors.subCategory ? "Required" : ""}
                       label="Sub Category"
                       name="subCategory"
                     />
@@ -499,6 +511,7 @@ export default function AddOrEditHazardRiskDialog({
                     {...params}
                     required
                     error={!!errors.division}
+                    helperText={errors.division ? "Required" : ""}
                     label="Division"
                     name="division"
                   />
@@ -509,6 +522,7 @@ export default function AddOrEditHazardRiskDialog({
                 id="locationOrDepartment"
                 label="Location or Department"
                 error={!!errors.locationOrDepartment}
+                helperText={errors.locationOrDepartment ? "Required" : ""}
                 size="small"
                 sx={{ flex: 1, margin: "0.5rem" }}
                 {...register("locationOrDepartment", { required: true })}
@@ -549,6 +563,17 @@ export default function AddOrEditHazardRiskDialog({
                 }}
               />
             </Box>
+            <ExistingFileItemsEdit
+              label="Existing evidence"
+              files={existingFiles}
+              sx={{ marginY: "1rem" }}
+              handleRemoveItem={(file) => {
+                setFilesToRemove([...filesToRemove, file.gsutil_uri]);
+                setExistingFiles(
+                  existingFiles.filter((f) => f.gsutil_uri !== file.gsutil_uri)
+                );
+              }}
+            />
             <Box
               sx={{
                 display: "flex",
@@ -690,14 +715,14 @@ export default function AddOrEditHazardRiskDialog({
                 }}
               />
             </Box>
-            <Box sx={{ margin: "0.5rem" }}>
+            <Box>
               <UserAutoComplete
                 name="assignee"
                 label="Assignee"
                 control={control}
                 register={register}
                 errors={errors}
-                userData={userData}
+                userData={assigneeData}
                 defaultValue={defaultValues?.assignee}
                 required={true}
               />
@@ -723,7 +748,7 @@ export default function AddOrEditHazardRiskDialog({
           }}
           size="medium"
           onClick={handleSubmit((data) => {
-            handleCreateDocument(data);
+            handleSubmitHazardAndRisk(data);
           })}
         >
           {defaultValues ? "Update Changes" : "Submit Report"}

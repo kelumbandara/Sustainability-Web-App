@@ -313,7 +313,7 @@ export const sidebarItems: Array<SidebarItem> = [
     title: "Document",
     href: "/document",
     icon: <FolderIcon fontSize="small" />,
-    accessKey: PermissionKeys.DOCUMENT_REGISTER_EDIT,
+    accessKey: PermissionKeys.DOCUMENT_REGISTER_VIEW,
   },
   {
     title: "Equipment MNG",

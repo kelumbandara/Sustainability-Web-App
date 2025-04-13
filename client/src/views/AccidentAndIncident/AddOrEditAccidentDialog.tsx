@@ -4,6 +4,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import {
+  Alert,
   Autocomplete,
   Box,
   Divider,
@@ -26,19 +27,13 @@ import {
 import useIsMobile from "../../customHooks/useIsMobile";
 import { Controller, useForm } from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
-import {
-  sampleDepartments,
-  sampleDivisions,
-} from "../../api/sampleData/documentData";
 import DropzoneComponent from "../../components/DropzoneComponent";
 import { grey } from "@mui/material/colors";
 import DatePickerComponent from "../../components/DatePickerComponent";
 import CustomButton from "../../components/CustomButton";
-import { useEffect, useMemo, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
+import { useMemo, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { HazardAndRiskStatus } from "../../api/hazardRiskApi";
-import { sampleAssignees } from "../../api/sampleData/usersSampleData";
 import {
   Accident,
   AccidentEffectedIndividual,
@@ -54,10 +49,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import TimePickerComponent from "../../components/TimePickerComponent";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import {
-  accidentCategories,
-  accidentTypesOptions,
-} from "../../constants/accidentConstants";
+import { accidentTypesOptions } from "../../constants/accidentConstants";
 import RichTextComponent from "../../components/RichTextComponent";
 import AddOrEditWitnessDialog from "./AddOrEditWitnessDialog";
 import AddOrEditPersonDialog from "./AddOrEditPersonDialog";
@@ -70,8 +62,10 @@ import {
   fetchMainAccidentCategory,
 } from "../../api/accidentCategory";
 import useCurrentUser from "../../hooks/useCurrentUser";
-import { fetchAllUsers } from "../../api/userApi";
+import { fetchAccidentAssignee, fetchAllUsers } from "../../api/userApi";
 import UserAutoComplete from "../../components/UserAutoComplete";
+import { StorageFile } from "../../utils/StorageFiles.util";
+import { ExistingFileItemsEdit } from "../../components/ExistingFileItemsEdit";
 
 type DialogProps = {
   open: boolean;
@@ -118,6 +112,10 @@ export default function AddOrEditAccidentDialog({
 }: DialogProps) {
   const { isMobile, isTablet } = useIsMobile();
   const [files, setFiles] = useState<File[]>([]);
+  const [existingFiles, setExistingFiles] = useState<StorageFile[]>(
+    defaultValues?.evidence as StorageFile[]
+  );
+  const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState(0);
   const [addWitnessDialogOpen, setAddWitnessDialogOpen] = useState(false);
   const [openAddOrEditPersonDialog, setOpenAddOrEditPersonDialog] =
@@ -125,11 +123,6 @@ export default function AddOrEditAccidentDialog({
   const [selectedWitness, setSelectedWitness] = useState<AccidentWitness>(null);
   const [selectedPerson, setSelectedPerson] =
     useState<AccidentEffectedIndividual>(null);
-
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    console.log("event", event);
-    setActiveTab(newValue);
-  };
 
   const {
     register,
@@ -139,80 +132,138 @@ export default function AddOrEditAccidentDialog({
     formState: { errors },
     reset,
     setValue,
-  } = useForm<Accident>({ defaultValues });
+    trigger,
+  } = useForm<Accident>({
+    defaultValues: {
+      evidence: [],
+      ...defaultValues,
+    },
+    reValidateMode: "onChange",
+    mode: "onChange",
+  });
 
   const witnessesWatch = watch("witnesses");
   const categoryWatch = watch("category");
   const effectedIndividualsWatch = watch("effectedIndividuals");
   const { user } = useCurrentUser();
 
-  const relatedSubCategories = useMemo(() => {
-    return accidentCategories?.find(
-      (division) => division.name === categoryWatch
-    )?.subCategories;
-  }, [categoryWatch]);
-
-  // useEffect(() => {
-  //   if (defaultValues) {
-  //     reset(defaultValues);
-  //   } else {
-  //     reset();
-  //   }
-  // }, [defaultValues, reset]);
-
   const resetForm = () => {
     reset();
     setFiles([]);
   };
 
-  const { data: divisionData, isFetching: isCategoryDataFetching } = useQuery({
+  const { data: divisionData } = useQuery({
     queryKey: ["divisions"],
     queryFn: fetchDivision,
   });
 
-  const { data: departmentData, isFetching: isDepartmentDataFetching } =
-    useQuery({
-      queryKey: ["departments"],
-      queryFn: fetchDepartmentData,
-    });
+  const { data: departmentData } = useQuery({
+    queryKey: ["departments"],
+    queryFn: fetchDepartmentData,
+  });
 
-  const { data: userData, isFetching: isUserDataFetching } = useQuery({
+  const { data: userData } = useQuery({
     queryKey: ["users"],
     queryFn: fetchAllUsers,
   });
 
+  const { data: asigneeData, isFetching: isAssigneeDataFetching } = useQuery({
+    queryKey: ["accident-assignee"],
+    queryFn: fetchAccidentAssignee,
+  });
+
   const category = watch("category");
-  const subCategory = watch("subCategory");
   const assignee = watch("assignee");
 
-  const {
-    data: accidentCategoryData,
-    isFetching: isAccidentCategoryDataFetching,
-  } = useQuery({
+  const { data: accidentCategoryData } = useQuery({
     queryKey: ["accidentCategory"],
     queryFn: fetchMainAccidentCategory,
   });
 
-  const {
-    data: accidentSubCategoryData,
-    isFetching: isAccidentSubCategoryDataFetching,
-  } = useQuery({
+  const { data: accidentSubCategoryData } = useQuery({
     queryKey: ["accidentSubCategory", category],
     queryFn: () => fetchAccidentSubCategory(category),
     enabled: !!category,
   });
 
-  const handleCreateDocument = (data: Accident) => {
+  const handleSubmitAccidentRecord = (data: Accident) => {
     const submitData: Partial<Accident> = data;
-    // submitData.id = defaultValues?.id ?? uuidv4();
-    // submitData.createdDate = new Date();
-    // submitData.createdByUser = sampleAssignees[0].name;
     submitData.assigneeId = assignee?.id;
-    submitData.createdByUser = user.id;
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
+    submitData.evidence = files;
+    if (filesToRemove?.length > 0) submitData.removeDoc = filesToRemove;
     onSubmit(submitData as Accident);
-    // console.log(submitData)
-    // resetForm();
+  };
+
+  const isGeneralDetailsValid = useMemo(() => {
+    return (
+      !errors.division &&
+      !errors.location &&
+      !errors.department &&
+      !errors.supervisorName
+    );
+  }, [
+    errors.division,
+    errors.location,
+    errors.department,
+    errors.supervisorName,
+  ]);
+
+  const isAccidentDetailsValid = useMemo(() => {
+    return (
+      !errors.category &&
+      !errors.subCategory &&
+      !errors.accidentType &&
+      !errors.affectedPrimaryRegion &&
+      !errors.affectedSecondaryRegion &&
+      !errors.affectedTertiaryRegion &&
+      !errors.injuryCause &&
+      !errors.rootCause &&
+      !errors.consultedHospital &&
+      !errors.consultedDoctor &&
+      !errors.description
+    );
+  }, [
+    errors.category,
+    errors.subCategory,
+    errors.accidentType,
+    errors.affectedPrimaryRegion,
+    errors.affectedSecondaryRegion,
+    errors.affectedTertiaryRegion,
+    errors.injuryCause,
+    errors.rootCause,
+    errors.consultedHospital,
+    errors.consultedDoctor,
+    errors.description,
+  ]);
+
+  const triggerGeneralDetailsSection = () => {
+    trigger(["division", "location", "department", "supervisorName"]);
+  };
+
+  const triggerAccidentDetailsSection = () => {
+    trigger([
+      "category",
+      "subCategory",
+      "accidentType",
+      "affectedPrimaryRegion",
+      "affectedSecondaryRegion",
+      "affectedTertiaryRegion",
+      "injuryCause",
+      "rootCause",
+      "consultedHospital",
+      "consultedDoctor",
+      "description",
+    ]);
+  };
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    if (newValue === 1) {
+      triggerGeneralDetailsSection();
+    } else {
+      triggerAccidentDetailsSection();
+    }
+    setActiveTab(newValue);
   };
 
   return (
@@ -255,6 +306,15 @@ export default function AddOrEditAccidentDialog({
         </DialogTitle>
         <Divider />
         <DialogContent>
+          {Object.keys(errors).length > 0 && (
+            <Alert
+              severity="error"
+              style={{ marginLeft: "1rem", marginRight: "1rem" }}
+            >
+              Please make sure to fill all the required fields with valid data
+            </Alert>
+          )}
+
           <Stack
             sx={{
               display: "flex",
@@ -291,11 +351,14 @@ export default function AddOrEditAccidentDialog({
               </Box>
               <Tabs
                 value={activeTab}
-                onChange={handleChange}
+                onChange={handleTabChange}
                 indicatorColor="secondary"
                 TabIndicatorProps={{
                   style: {
-                    backgroundColor: "var(--pallet-blue)",
+                    backgroundColor:
+                      isAccidentDetailsValid && isGeneralDetailsValid
+                        ? "var(--pallet-blue)"
+                        : "var(--pallet-red)",
                     height: "3px",
                   },
                 }}
@@ -310,7 +373,9 @@ export default function AddOrEditAccidentDialog({
                   label={
                     <Box
                       sx={{
-                        color: "var(--pallet-blue)",
+                        color: isGeneralDetailsValid
+                          ? "var(--pallet-blue)"
+                          : "var(--pallet-red)",
                         display: "flex",
                         alignItems: "center",
                       }}
@@ -319,6 +384,14 @@ export default function AddOrEditAccidentDialog({
                       <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                         General Details
                       </Typography>
+                      {!isGeneralDetailsValid && (
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ ml: "0.3rem", color: "var(--pallet-red)" }}
+                        >
+                          *
+                        </Typography>
+                      )}
                     </Box>
                   }
                   {...a11yProps(0)}
@@ -327,7 +400,9 @@ export default function AddOrEditAccidentDialog({
                   label={
                     <Box
                       sx={{
-                        color: "var(--pallet-blue)",
+                        color: isAccidentDetailsValid
+                          ? "var(--pallet-blue)"
+                          : "var(--pallet-red)",
                         display: "flex",
                         alignItems: "center",
                       }}
@@ -335,7 +410,15 @@ export default function AddOrEditAccidentDialog({
                       <WarningIcon fontSize="small" />
                       <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                         Accident Details
-                      </Typography>
+                      </Typography>{" "}
+                      {!isAccidentDetailsValid && (
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ ml: "0.3rem", color: "var(--pallet-red)" }}
+                        >
+                          *
+                        </Typography>
+                      )}
                     </Box>
                   }
                   {...a11yProps(1)}
@@ -361,7 +444,7 @@ export default function AddOrEditAccidentDialog({
                       name="division"
                       control={control}
                       defaultValue={defaultValues?.division ?? ""}
-                      rules={{ required: true }}
+                      {...register("division", { required: true })}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -411,7 +494,7 @@ export default function AddOrEditAccidentDialog({
                       name="department"
                       control={control}
                       defaultValue={defaultValues?.department ?? ""}
-                      rules={{ required: true }}
+                      {...register("department", { required: true })}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -561,7 +644,21 @@ export default function AddOrEditAccidentDialog({
                       </Table>
                     </TableContainer>
                   </Stack>
-
+                  <ExistingFileItemsEdit
+                    label="Existing evidence"
+                    files={existingFiles}
+                    sx={{ marginY: "1rem" }}
+                    handleRemoveItem={(file) => {
+                      if (file.gsutil_uri) {
+                        setFilesToRemove([...filesToRemove, file.gsutil_uri]);
+                        setExistingFiles(
+                          existingFiles.filter(
+                            (f) => f.gsutil_uri !== file.gsutil_uri
+                          )
+                        );
+                      }
+                    }}
+                  />
                   <Box
                     sx={{
                       display: "flex",
@@ -572,7 +669,7 @@ export default function AddOrEditAccidentDialog({
                     <DropzoneComponent
                       files={files}
                       setFiles={setFiles}
-                      dropzoneLabel={"Drop Your Documents Here"}
+                      dropzoneLabel={"Drop Your Evidence Here"}
                     />
                   </Box>
 
@@ -591,7 +688,7 @@ export default function AddOrEditAccidentDialog({
                       }}
                       size="medium"
                       onClick={() => {
-                        setActiveTab(1);
+                        handleTabChange(null, 1);
                       }}
                       endIcon={<ArrowForwardIcon />}
                     >
@@ -738,7 +835,7 @@ export default function AddOrEditAccidentDialog({
                       name="category"
                       control={control}
                       defaultValue={defaultValues?.category ?? ""}
-                      rules={{ required: true }}
+                      {...register("category", { required: true })}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -773,7 +870,9 @@ export default function AddOrEditAccidentDialog({
                         name="subCategory"
                         control={control}
                         defaultValue={defaultValues?.subCategory ?? ""}
-                        rules={{ required: true }}
+                        {...register("subCategory", {
+                          required: true,
+                        })}
                         render={({ field }) => (
                           <Autocomplete
                             {...field}
@@ -815,7 +914,7 @@ export default function AddOrEditAccidentDialog({
                       name="accidentType"
                       control={control}
                       defaultValue={defaultValues?.accidentType ?? ""}
-                      rules={{ required: true }}
+                      {...register("accidentType", { required: true })}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -844,7 +943,7 @@ export default function AddOrEditAccidentDialog({
                       name="affectedPrimaryRegion"
                       control={control}
                       defaultValue={defaultValues?.affectedPrimaryRegion ?? ""}
-                      rules={{ required: true }}
+                      {...register("affectedPrimaryRegion", { required: true })}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -878,7 +977,9 @@ export default function AddOrEditAccidentDialog({
                       defaultValue={
                         defaultValues?.affectedSecondaryRegion ?? ""
                       }
-                      rules={{ required: true }}
+                      {...register("affectedSecondaryRegion", {
+                        required: true,
+                      })}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -909,7 +1010,9 @@ export default function AddOrEditAccidentDialog({
                       name="affectedTertiaryRegion"
                       control={control}
                       defaultValue={defaultValues?.affectedTertiaryRegion ?? ""}
-                      rules={{ required: true }}
+                      {...register("affectedTertiaryRegion", {
+                        required: true,
+                      })}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -940,7 +1043,7 @@ export default function AddOrEditAccidentDialog({
                       name="injuryCause"
                       control={control}
                       defaultValue={defaultValues?.injuryCause ?? ""}
-                      rules={{ required: true }}
+                      {...register("injuryCause", { required: true })}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -1032,7 +1135,7 @@ export default function AddOrEditAccidentDialog({
                     <Controller
                       control={control}
                       name={"description"}
-                      rules={{ required: true }}
+                      {...register("description", { required: true })}
                       render={({ field }) => {
                         return (
                           <RichTextComponent
@@ -1087,7 +1190,7 @@ export default function AddOrEditAccidentDialog({
                       }}
                       size="medium"
                       onClick={() => {
-                        setActiveTab(0);
+                        handleTabChange(null, 0);
                       }}
                       startIcon={<ArrowBackIcon />}
                     >
@@ -1261,7 +1364,7 @@ export default function AddOrEditAccidentDialog({
                   control={control}
                   register={register}
                   errors={errors}
-                  userData={userData}
+                  userData={asigneeData}
                   defaultValue={defaultValues?.assignee}
                   required={true}
                 />
@@ -1287,7 +1390,7 @@ export default function AddOrEditAccidentDialog({
             }}
             size="medium"
             onClick={handleSubmit((data) => {
-              handleCreateDocument(data);
+              handleSubmitAccidentRecord(data);
             })}
           >
             {defaultValues ? "Update Changes" : "Submit Report"}

@@ -7,9 +7,29 @@ export const userRoleSchema = z.object({
   userType: z.string(),
   description: z.string().optional(),
   permissionObject: PermissionKeysObjectSchema,
+  created_at: z.string(),
 });
 
 export type UserRole = z.infer<typeof userRoleSchema>;
+
+export const userTypeSchema = z.object({
+  id: z.string(),
+  userType: z.string(),
+  description: z.string().optional(),
+  permissionObject: PermissionKeysObjectSchema,
+  created_at: z.string(),
+});
+
+export const userLevelSchema = z.object({
+  id: z.string(),
+  levelId: z.string(),
+  levelName: z.string().optional(),
+  created_at: z.string(),
+});
+
+export type UserLevel = z.infer<typeof userLevelSchema>;
+
+export type UserType = z.infer<typeof userTypeSchema>;
 
 export const userSchema = z.object({
   id: z.string(),
@@ -19,6 +39,10 @@ export const userSchema = z.object({
   emailVerifiedAt: z.string().nullable(),
   role: z.string(),
   roleId: z.string(),
+  availability: z.boolean(),
+  responsibleSection: z.array(z.string()),
+  userType: userTypeSchema,
+  userLevel: userLevelSchema,
   profileImage: z.string().nullable(),
   status: z.string(),
   isCompanyEmployee: z.boolean(),
@@ -28,7 +52,7 @@ export const userSchema = z.object({
   assignedFactory: z.array(z.string()),
   employeeNumber: z.string(),
   jobPosition: z.string(),
-  assigneeLevel: z.string(),
+  // assigneeLevel: z.string(),
   permissionObject: PermissionKeysObjectSchema,
 });
 
@@ -92,15 +116,11 @@ export async function validateUser() {
 }
 
 export async function fetchAllUsers() {
-  const res = await axios.get("/api/all-users");
+  const res = await axios.get("/api/users");
   return res.data;
 }
 
-export async function forgotPassword({
-  email,
-}: {
-  email: string;
-}) {
+export async function forgotPassword({ email }: { email: string }) {
   const res = await axios.post("/api/forgot-password", {
     email,
   });
@@ -132,5 +152,68 @@ export async function resetPassword({
     email,
     password,
   });
+  return res.data;
+}
+
+export async function fetchAllAssigneeLevel() {
+  const res = await axios.get("/api/assignee-level");
+  return res.data;
+}
+
+export async function updateUserType({
+  id,
+  userTypeId,
+  assigneeLevel,
+  department,
+  availability,
+  jobPosition,
+  assignedFactory,
+  responsibleSection,
+}: {
+  id: string;
+  userTypeId: string;
+  assigneeLevel: string;
+  department: string;
+  availability: boolean;
+  jobPosition: string;
+  assignedFactory: string[];
+  responsibleSection: string[];
+}) {
+
+  const parsedAssignedFactory = Array.isArray(assignedFactory) ? assignedFactory : JSON.parse(assignedFactory || "[]");
+  const parsedResponsibleSection = Array.isArray(responsibleSection) ? responsibleSection : JSON.parse(responsibleSection || "[]");
+
+  const res = await axios.post(`/api/users/${id}/update`, {
+    userType: userTypeId.toString(),
+    assigneeLevel: assigneeLevel.toString(),
+    department,
+    availability,
+    jobPosition,
+    assignedFactory: parsedAssignedFactory,
+    responsibleSection: parsedResponsibleSection,
+  });
+
+  return res.data;
+}
+
+
+//assignee by the responsible section
+export async function fetchHazardRiskAssignee() {
+  const res = await axios.get("/api/hazard-risks-assignee");
+  return res.data;
+}
+
+export async function fetchAccidentAssignee() {
+  const res = await axios.get("/api/accidents-assignee");
+  return res.data;
+}
+
+export async function fetchIncidentAssignee() {
+  const res = await axios.get("/api/incidents-assignee");
+  return res.data;
+}
+
+export async function fetchMedicineRequestAssignee() {
+  const res = await axios.get("/api/medicine-request-assignee");
   return res.data;
 }

@@ -1,4 +1,4 @@
-import { Box, IconButton, Stack, Typography } from "@mui/material";
+import { Box, Chip, IconButton, Stack, Typography } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
@@ -13,10 +13,13 @@ function DropzoneComponent({
   setFiles: (files: File[]) => void;
   dropzoneLabel?: string;
 }) {
-  const onDrop = useCallback((acceptedFiles) => {
-    // Do something with the files
-    setFiles([...files, ...acceptedFiles]);
-  }, []);
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      // Do something with the files
+      setFiles([...files, ...acceptedFiles]);
+    },
+    [files, setFiles]
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
@@ -25,42 +28,64 @@ function DropzoneComponent({
       <Box sx={{ display: "flex", flexWrap: "wrap", marginY: "0.3rem" }}>
         {files && files?.length > 0 && (
           <>
-            {files?.map((file, index) => (
-              <Box
-                key={index}
-                sx={{
-                  color: grey[600],
-                  display: "inline-block",
-                  backgroundColor: "#fff",
-                  padding: "0.3rem 0.8rem",
-                  borderRadius: "2rem",
-                  border: `1px solid ${grey[500]}`,
-                  marginX: "0.3rem",
-                }}
-              >
+            {files?.map((file, index) => {
+              const isImage = file.type.startsWith("image/");
+              const fileURL = URL.createObjectURL(file);
+
+              return (
                 <Box
+                  key={index}
                   sx={{
                     display: "flex",
-                    alignItems: "center",
+                    alignItems: "flex-end",
                     padding: 0,
                     margin: 0,
                   }}
                 >
-                  <Typography key={index} variant="caption">
-                    {file.name}
-                  </Typography>
-                  <IconButton
-                    onClick={() => {
-                      setFiles(files.filter((f) => f !== file));
-                    }}
-                    size="small"
-                    style={{ margin: "0 0 0 5px", padding: 0 }}
-                  >
-                    <CloseIcon fontSize="small" />
-                  </IconButton>
+                  {isImage ? (
+                    <Box
+                      sx={{
+                        backgroundImage: `url(${fileURL})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        width: "120px",
+                        height: "120px",
+                        marginRight: "0.5rem",
+                        borderRadius: "0.5rem",
+                        border: `1px solid ${grey[500]}`,
+                        position: "relative",
+                      }}
+                    >
+                      <IconButton
+                        onClick={() => {
+                          setFiles(files.filter((f) => f !== file));
+                          URL.revokeObjectURL(fileURL); // Clean up the object URL
+                        }}
+                        size="small"
+                        style={{
+                          position: "absolute",
+                          right: 4,
+                          top: 4,
+                          backgroundColor: grey[100],
+                          fontSize: "0.1rem",
+                        }}
+                      >
+                        <CloseIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  ) : (
+                    <Chip
+                      label={file?.name}
+                      sx={{ marginRight: "0.5rem" }}
+                      onDelete={() => {
+                        setFiles(files.filter((f) => f !== file));
+                        URL.revokeObjectURL(fileURL); // Clean up the object URL
+                      }}
+                    />
+                  )}
                 </Box>
-              </Box>
-            ))}
+              );
+            })}
           </>
         )}
       </Box>

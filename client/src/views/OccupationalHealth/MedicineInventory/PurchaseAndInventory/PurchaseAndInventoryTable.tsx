@@ -8,7 +8,7 @@ import Paper from "@mui/material/Paper";
 import {
   Alert,
   Box,
-  Button,
+  Chip,
   LinearProgress,
   Stack,
   TableFooter,
@@ -18,7 +18,6 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useMemo, useState } from "react";
-import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import { useSnackbar } from "notistack";
 import theme from "../../../../theme";
@@ -165,7 +164,7 @@ function PurchaseAndInventoryTable() {
             maxWidth: isMobile ? "88vw" : "100%",
           }}
         >
-          <Box
+          {/* <Box
             sx={{
               padding: theme.spacing(2),
               display: "flex",
@@ -188,7 +187,7 @@ function PurchaseAndInventoryTable() {
             >
               Add New Medicine Inventory Item
             </Button>
-          </Box>
+          </Box> */}
           {isLoading && <LinearProgress sx={{ width: "100%" }} />}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
@@ -250,7 +249,21 @@ function PurchaseAndInventoryTable() {
                     <TableCell align="right">
                       {row?.balanceQuantity ?? "--"}
                     </TableCell>
-                    <TableCell align="right">{row?.status}</TableCell>
+                    <TableCell align="right">
+                      {row.status === "approved" ? (
+                        <Chip label="Request Approved" />
+                      ) : row.status === "published" ? (
+                        <Chip
+                          label="Published"
+                          sx={{
+                            backgroundColor: "var(--pallet-blue)",
+                            color: "white",
+                          }}
+                        />
+                      ) : (
+                        "--"
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
@@ -297,7 +310,7 @@ function PurchaseAndInventoryTable() {
               disableEdit={
                 !useCurrentUserHaveAccess(
                   PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_PURCHASE_INVENTORY_EDIT
-                )
+                ) || selectedRow?.status === "published"
               }
               onDelete={() => setDeleteDialogOpen(true)}
               disableDelete={

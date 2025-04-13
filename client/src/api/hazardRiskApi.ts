@@ -1,6 +1,7 @@
 import { z } from "zod";
 import axios from "axios";
 import { userSchema } from "./userApi";
+import { StorageFileSchema } from "../utils/StorageFiles.util";
 
 export enum CategoryType {
   HEALTH_AND_HSE_MANAGEMENT = "Health and HSE Management",
@@ -172,6 +173,7 @@ export enum UnsafeActOrCondition {
 export enum HazardAndRiskStatus {
   OPEN = "Open",
   DRAFT = "Draft",
+  PUBLISHED = "Published",
 }
 
 export enum HazardDashboardPeriods {
@@ -199,7 +201,7 @@ export const HazardAndRiskSchema = z.object({
   assignee: userSchema,
   assigneeId: z.string().optional(),
   documents: z
-    .array(z.union([z.string().url(), z.instanceof(File)]))
+    .array(z.union([z.instanceof(File), StorageFileSchema]))
     .optional(),
   createdDate: z.date(),
   createdByUser: z.string(),
@@ -211,6 +213,7 @@ export const HazardAndRiskSchema = z.object({
   created_at: z.string(),
   referenceNumber: z.string(),
   createdByUserName: z.string(),
+  removeDoc: z.array(z.string()).optional(),
 });
 
 export type HazardAndRisk = z.infer<typeof HazardAndRiskSchema>;
@@ -237,7 +240,7 @@ export const createHazardRisk = async (hazardRisk: HazardAndRisk) => {
 
     if (key === "documents" && Array.isArray(value)) {
       value.forEach((file, index) => {
-        formData.append(`documents[${index}]`, file);
+        formData.append(`documents[${index}]`, file as File);
       });
     } else if (Array.isArray(value)) {
       value.forEach((item, index) => {
@@ -268,8 +271,16 @@ export const updateHazardRisk = async (hazardRisk: HazardAndRisk) => {
   Object.keys(hazardRisk).forEach((key) => {
     const value = hazardRisk[key as keyof HazardAndRisk];
 
-    if (value instanceof File) {
-      formData.append(key, value);
+    if (key === "documents" && Array.isArray(value)) {
+      value.forEach((file, index) => {
+        formData.append(`documents[${index}]`, file as File);
+      });
+    } else if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        formData.append(`${key}[${index}]`, JSON.stringify(item));
+      });
+    } else if (value instanceof Date) {
+      formData.append(key, value.toISOString());
     } else if (value !== null && value !== undefined) {
       formData.append(key, value.toString());
     }

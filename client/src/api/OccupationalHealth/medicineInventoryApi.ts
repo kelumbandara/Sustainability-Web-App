@@ -66,6 +66,11 @@ export async function getMedicineInventoriesList() {
   return res.data;
 }
 
+export async function getMedicineInventoriesTransaction() {
+  const res = await axios.get("/api/transaction-published");
+  return res.data;
+}
+
 export const createMedicineInventory = async (
   medicineInventory: MedicineInventory
 ) => {
@@ -115,6 +120,38 @@ export const updateMedicineInventory = async (
 
   const res = await axios.post(
     `/api/medicine-inventory/${medicineInventory.id}/update`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return res.data;
+};
+
+export const publishMedicineInventory = async (
+  medicineInventory: MedicineInventory
+) => {
+  const formData = new FormData();
+
+  // Append each property of the maternity Register object to the form data
+  Object.keys(medicineInventory).forEach((key) => {
+    const value = medicineInventory[key as keyof typeof medicineInventory];
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        formData.append(`${key}[${index}]`, JSON.stringify(item));
+      });
+    } else if (value instanceof Date) {
+      formData.append(key, value.toISOString());
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  const res = await axios.post(
+    `/api/medicine-inventory/${medicineInventory?.id}/publish`,
     formData,
     {
       headers: {

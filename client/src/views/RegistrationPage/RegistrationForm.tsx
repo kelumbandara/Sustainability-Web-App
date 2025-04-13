@@ -142,7 +142,6 @@ function RegistrationForm() {
     <Stack
       spacing={2}
       sx={{
-        height: isMdUp ? "100vh" : "auto",
         justifyContent: "center",
         margin: "2.5rem",
         marginBottom: isMdUp ? "2.5rem" : "22vh",
@@ -387,18 +386,34 @@ function RegistrationForm() {
             )}
 
             {isFactoryFetched && factories && (
-              <AutoCheckBox
-                {...register("assignedFactory", { required: true })}
-                error={!!errors.assignedFactory}
-                control={control}
-                limitTags={1}
-                name="assignedFactory"
-                options={factories}
-                selectedValues={selectedFactories}
-                setSelectedValues={setSelectedFactories}
-                label="Assigned Factories"
-                placeholder="Select factories"
-              />
+              // <AutoCheckBox
+              //   {...register("assignedFactory", { required: true })}
+              //   control={control}
+              //   limitTags={1}
+              //   name="assignedFactory"
+              //   options={factories}
+              //   selectedValues={selectedFactories}
+              //   setSelectedValues={setSelectedFactories}
+              //   label="Assigned Factories"
+              //   placeholder="Select factories"
+              // />
+
+              <Box sx={{ marginTop: "1rem" }}>
+                <AutoCheckBox
+                  {...register("assignedFactory", { required: true })}
+                  control={control}
+                  required={true}
+                  name="assignedFactory"
+                  label="Assigned Factories"
+                  options={factories}
+                  selectedValues={selectedFactories}
+                  setSelectedValues={setSelectedFactories}
+                  getOptionLabel={(option) => option.factoryName}
+                  getOptionValue={(option) => option.factoryName}
+                  placeholder="Choose Factories"
+                  limitTags={2}
+                />
+              </Box>
             )}
 
             <TextField

@@ -5,6 +5,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import {
   Autocomplete,
+  Box,
   Divider,
   IconButton,
   Stack,
@@ -22,7 +23,7 @@ import CustomButton from "../../../../components/CustomButton";
 import { useQuery } from "@tanstack/react-query";
 import { fetchMedicineList } from "../../../../api/OccupationalHealth/medicineNameApi";
 import { fetchDivision } from "../../../../api/divisionApi";
-import { fetchAllUsers } from "../../../../api/userApi";
+import { fetchAllUsers, fetchMedicineRequestAssignee } from "../../../../api/userApi";
 import UserAutoComplete from "../../../../components/UserAutoComplete";
 
 type DialogProps = {
@@ -51,7 +52,7 @@ export default function AddOrEditMedicineRequestDialog({
     defaultValues,
   });
 
-  const assignee = watch("assignee");
+  const approver = watch("approver");
 
   useEffect(() => {
     if (defaultValues) {
@@ -68,7 +69,7 @@ export default function AddOrEditMedicineRequestDialog({
   const handleCreateDocument = (data: MedicineRequest) => {
     const submitData: Partial<MedicineRequest> = data;
     submitData.id = defaultValues?.id ?? uuidv4();
-    submitData.assigneeId = assignee?.id ?? defaultValues?.assigneeId;
+    submitData.approverId = approver?.id ?? defaultValues?.approverId;
     submitData.referenceNumber = defaultValues?.referenceNumber ?? uuidv4();
     submitData.requestDate =
       defaultValues?.requestDate ?? new Date().toDateString();
@@ -93,6 +94,11 @@ export default function AddOrEditMedicineRequestDialog({
   const { data: userData, isFetching: isUserDataFetching } = useQuery({
     queryKey: ["users"],
     queryFn: fetchAllUsers,
+  });
+
+  const { data: asigneeData, isFetching: isAssigneeDataFetching } = useQuery({
+    queryKey: ["medicine-assignee"],
+    queryFn: fetchMedicineRequestAssignee,
   });
 
   return (
@@ -213,16 +219,18 @@ export default function AddOrEditMedicineRequestDialog({
               sx={{ flex: 1, margin: "0.5rem" }}
               {...register("requestQuantity", { required: true })}
             />
-            <UserAutoComplete
-              name="assignee"
-              label="assignee"
-              control={control}
-              register={register}
-              errors={errors}
-              userData={userData}
-              defaultValue={defaultValues?.assignee}
-              required={true}
-            />
+            <Box sx={{ flex: 1 }}>
+              <UserAutoComplete
+                name="approver"
+                label="Approver"
+                control={control}
+                register={register}
+                errors={errors}
+                userData={asigneeData}
+                defaultValue={defaultValues?.approver}
+                required={true}
+              />
+            </Box>
           </Stack>
         </Stack>
       </DialogContent>
