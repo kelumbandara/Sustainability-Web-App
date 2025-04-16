@@ -95,6 +95,12 @@ const SustainabilityTable = React.lazy(
     import("./views/Sustainability/SustainabilityTable")
 );
 
+//Environment
+const EnvironmentTable = React.lazy(
+  () =>
+    import("./views/Environment/Consumption/ConsumptionTable")
+);
+
 function withLayout(Layout: any, Component: any, restrictAccess = false) {
   return (
     <Layout>
@@ -486,6 +492,17 @@ const AppRoutes = () => {
             !userPermissionObject?.[
               PermissionKeys
                 .SUSTAINABILITY_SDG_REPORTING_CREATE
+            ]
+          )}
+        />
+        <Route
+          path="/environment/history/consumption"
+          element={withLayout(
+            MainLayout,
+            EnvironmentTable,
+            !userPermissionObject?.[
+              PermissionKeys
+                .ENVIRONMENT_HISTORY_CONSUMPTION_VIEW
             ]
           )}
         />

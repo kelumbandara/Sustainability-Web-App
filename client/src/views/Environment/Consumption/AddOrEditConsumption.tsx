@@ -1,0 +1,572 @@
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import {
+  Autocomplete,
+  Box,
+  Divider,
+  IconButton,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { Document } from "../../../api/documentApi";
+import useIsMobile from "../../../customHooks/useIsMobile";
+import { Controller, useForm } from "react-hook-form";
+import CloseIcon from "@mui/icons-material/Close";
+import DropzoneComponent from "../../../components/DropzoneComponent";
+import { grey } from "@mui/material/colors";
+import CustomButton from "../../../components/CustomButton";
+import AddOrEditAdditionalDialog from "./AddOrEditAdditionalDialog";
+import { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { useQuery } from "@tanstack/react-query";
+import { fetchDivision } from "../../../api/divisionApi";
+import theme from "../../../theme";
+import { fetchAllDocumentType } from "../../../api/documentType";
+import { Environment } from "../../../api/Environment/environmentApi";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { fetchHazardRiskAssignee } from "../../../api/userApi";
+import UserAutoComplete from "../../../components/UserAutoComplete";
+import WidgetsIcon from "@mui/icons-material/Widgets";
+
+type DialogProps = {
+  open: boolean;
+  handleClose: () => void;
+  defaultValues?: Environment;
+  onSubmit?: (data: Environment) => void;
+};
+
+export default function AddOrEditConsumptionDialog({
+  open,
+  handleClose,
+  defaultValues,
+  onSubmit,
+}: DialogProps) {
+  const { isMobile, isTablet } = useIsMobile();
+  const [files, setFiles] = useState<File[]>([]);
+  const [selectedEnvironment, setSelectedEnvironment] =
+    useState<Environment>(null);
+  const [openAddOrEditAdditionalDialog, setOpenAddOrEditAdditionalDialog] =
+    useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    control,
+    setValue,
+    formState: { errors },
+    reset,
+  } = useForm<Environment>({
+    defaultValues: defaultValues,
+  });
+
+  const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
+
+  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
+    queryKey: ["divisions"],
+    queryFn: fetchDivision,
+  });
+
+  const { data: assigneeData, isFetching: isAssigneeDataFetching } = useQuery({
+    queryKey: ["hr-assignee"],
+    queryFn: fetchHazardRiskAssignee,
+  });
+
+  const { data: documentType, isFetching: isDocumentTypeDataFetching } =
+    useQuery({
+      queryKey: ["documentTypes"],
+      queryFn: fetchAllDocumentType,
+    });
+
+  useEffect(() => {
+    if (defaultValues) {
+      reset(defaultValues);
+    } else {
+      reset();
+    }
+  }, [defaultValues, reset]);
+
+  const resetForm = () => {
+    reset();
+    setFiles([]);
+  };
+  const consumptionWatch = watch("consumption");
+  const selectMonth = watch("month");
+  const selectYear = watch("year");
+  const selectDivision = watch("division");
+
+  const handleCreateDocument = (data: Environment) => {
+    const { ...rest } = data;
+    const submitData: Partial<Environment> = rest;
+    onSubmit(submitData as Environment);
+    resetForm();
+  };
+
+  return (
+    <>
+      <Dialog
+        open={open}
+        onClose={() => {
+          resetForm();
+          handleClose();
+        }}
+        fullScreen={true}
+        PaperProps={{
+          style: {
+            backgroundColor: grey[50],
+          },
+          component: "form",
+        }}
+      >
+        <DialogTitle
+          sx={{
+            paddingY: "1rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Typography variant="h6" component="div">
+            {defaultValues
+              ? "Edit Consumption Details"
+              : "Create a New Consumption"}
+          </Typography>
+          <IconButton
+            aria-label="open drawer"
+            onClick={handleClose}
+            edge="start"
+            sx={{
+              color: "#024271",
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <Divider />
+        <DialogContent>
+          <Stack
+            sx={{
+              display: "flex",
+              flexDirection: isTablet ? "column" : "row",
+              padding: "1rem",
+            }}
+          >
+            <Stack
+              gap={2}
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                backgroundColor: "#fff",
+                flex: { lg: 3, md: 1 },
+                boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+                padding: "0.5rem",
+                borderRadius: "0.3rem",
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "flex-end",
+                  flexDirection: "column",
+                  margin: "0.5rem",
+                }}
+              >
+                <Typography variant="body2" component="div">
+                  <b>Date</b>
+                </Typography>
+                <Typography variant="body2" component="div">
+                  {new Date().toDateString()}
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: isMobile ? "column" : "row",
+                }}
+              >
+                <TextField
+                  required
+                  id="totalWorkForce"
+                  label="Total WorkForce"
+                  error={!!errors.totalWorkForce}
+                  size="small"
+                  sx={{ flex: 1, margin: "0.5rem" }}
+                  {...register("totalWorkForce", { required: true })}
+                />
+                <TextField
+                  required
+                  id="numberOfDaysWorked"
+                  label="Number Of Days Worked"
+                  error={!!errors.numberOfDaysWorked}
+                  size="small"
+                  sx={{ flex: 1, margin: "0.5rem" }}
+                  {...register("numberOfDaysWorked", { required: true })}
+                />
+                <TextField
+                  required
+                  id="areaInSquereMeter"
+                  label="Area In Squre Meter"
+                  error={!!errors.areaInSquereMeter}
+                  size="small"
+                  sx={{ flex: 1, margin: "0.5rem" }}
+                  {...register("areaInSquereMeter", { required: true })}
+                />
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: isMobile ? "column" : "row",
+                }}
+              >
+                <TextField
+                  required
+                  id="totalProuctProducedPcs"
+                  label="Total Product Produced/Shipped (Pcs)"
+                  error={!!errors.totalProuctProducedPcs}
+                  size="small"
+                  sx={{ flex: 1, margin: "0.5rem" }}
+                  {...register("totalProuctProducedPcs", { required: true })}
+                />
+                <TextField
+                  required
+                  id="totalProuctProducedkg"
+                  label="Total Product Produced/Shipped(Kg)"
+                  error={!!errors.totalProuctProducedkg}
+                  size="small"
+                  sx={{ flex: 1, margin: "0.5rem" }}
+                  {...register("totalProuctProducedkg", { required: true })}
+                />
+              </Box>
+
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: "bold", marginBottom: "1rem" }}
+              >
+                Additional Details
+              </Typography>
+              <Stack sx={{ alignItems: "center", m: "0.5rem" }}>
+                <TableContainer
+                  component={Paper}
+                  elevation={2}
+                  sx={{
+                    overflowX: "auto",
+                    maxWidth: isMobile ? "88vw" : "100%",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      padding: theme.spacing(2),
+                      display: "flex",
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <Button
+                      variant="contained"
+                      sx={{ backgroundColor: "var(--pallet-blue)" }}
+                      disabled={!selectMonth || !selectYear || !selectDivision}
+                      startIcon={<AddIcon />}
+                      onClick={() => {
+                        setSelectedEnvironment(null);
+                        setOpenAddOrEditAdditionalDialog(true);
+                      }}
+                    >
+                      {!selectMonth || !selectYear || !selectDivision ? (
+                        <>
+                          Additional Details{" "}
+                          <WidgetsIcon/>
+                          &nbsp;Please select Division, Year, and Month
+                        </>
+                      ) : (
+                        "Additional Details"
+                      )}
+                    </Button>
+                  </Box>
+                  <Table aria-label="simple table">
+                    <TableHead
+                      sx={{
+                        backgroundColor: "var(--pallet-lighter-grey)",
+                      }}
+                    >
+                      <TableRow>
+                        <TableCell align="center">#</TableCell>
+                        <TableCell align="center">Category</TableCell>
+                        <TableCell align="center">Source</TableCell>
+                        <TableCell align="center">Unit</TableCell>
+                        <TableCell align="center">Quantity</TableCell>
+                        <TableCell align="center">Amount</TableCell>
+                        <TableCell align="center">GHG in Tonnes</TableCell>
+                        <TableCell align="center"></TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {consumptionWatch?.length > 0 ? (
+                        consumptionWatch?.map((row) => (
+                          <TableRow
+                            key={`${row.concumptionsId}`}
+                            sx={{
+                              "&:last-child td, &:last-child th": {
+                                border: 0,
+                              },
+                              cursor: "pointer",
+                            }}
+                            onClick={() => {
+                              console.log("row");
+                            }}
+                          >
+                            <TableCell align="center">
+                              {row.concumptionsId}
+                            </TableCell>
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              align="center"
+                            >
+                              {row.category}
+                            </TableCell>
+                            <TableCell align="center">{row.source}</TableCell>
+                            <TableCell align="center">{row.unit}</TableCell>
+                            <TableCell align="center">{row.quentity}</TableCell>
+                            <TableCell align="center">{row.amount}</TableCell>
+                            <TableCell align="center">
+                              {row.ghgInTonnes}
+                            </TableCell>
+                            <TableCell align="center">
+                              <IconButton
+                                onClick={() => {
+                                  setSelectedEnvironment(row);
+                                  setOpenAddOrEditAdditionalDialog(true);
+                                }}
+                              >
+                                <EditIcon />
+                              </IconButton>
+                              <IconButton
+                                onClick={() => {
+                                  setValue(
+                                    "consumption",
+                                    (consumptionWatch ?? []).filter(
+                                      (item) =>
+                                        item.concumptionsId !==
+                                        row.concumptionsId
+                                    )
+                                  );
+                                }}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={11} align="center">
+                            <Typography variant="body2">
+                              No Records found
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Stack>
+            </Stack>
+            <Stack
+              gap={2}
+              sx={{
+                display: "flex",
+                flex: { lg: 1, md: 1 },
+                flexDirection: "column",
+                backgroundColor: "#fff",
+                boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+                padding: "0.5rem",
+                borderRadius: "0.3rem",
+                marginY: isTablet ? "0.5rem" : 0,
+                marginLeft: isTablet ? 0 : "0.5rem",
+                height: "fit-content",
+              }}
+            >
+              <Controller
+                name="division"
+                control={control}
+                defaultValue={defaultValues?.division ?? null}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <Autocomplete
+                    {...field}
+                    onChange={(event, newValue) => field.onChange(newValue)}
+                    size="small"
+                    options={
+                      divisionData?.length
+                        ? divisionData.map((division) => division.divisionName)
+                        : []
+                    }
+                    sx={{ flex: 1, margin: "0.5rem" }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        required
+                        error={!!errors.division}
+                        helperText={errors.division && "Required"}
+                        label="Division"
+                        name="division"
+                      />
+                    )}
+                  />
+                )}
+              />
+
+              <Controller
+                name="year"
+                control={control}
+                defaultValue={defaultValues?.year ?? null}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <Autocomplete
+                    {...field}
+                    onChange={(event, newValue) => field.onChange(newValue)}
+                    size="small"
+                    options={
+                      divisionData?.length
+                        ? divisionData.map((division) => division.divisionName)
+                        : []
+                    }
+                    sx={{ flex: 1, margin: "0.5rem" }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        required
+                        error={!!errors.year}
+                        helperText={errors.year && "Required"}
+                        label="Year"
+                        name="year"
+                      />
+                    )}
+                  />
+                )}
+              />
+
+              <Controller
+                name="month"
+                control={control}
+                defaultValue={defaultValues?.month ?? null}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <Autocomplete
+                    {...field}
+                    onChange={(event, newValue) => field.onChange(newValue)}
+                    size="small"
+                    options={
+                      divisionData?.length
+                        ? divisionData.map((division) => division.divisionName)
+                        : []
+                    }
+                    sx={{ flex: 1, margin: "0.5rem" }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        required
+                        error={!!errors.month}
+                        helperText={errors.month && "Required"}
+                        label="Month"
+                        name="month"
+                      />
+                    )}
+                  />
+                )}
+              />
+
+              <Box>
+                <UserAutoComplete
+                  name="approver"
+                  label="Approver"
+                  control={control}
+                  register={register}
+                  errors={errors}
+                  userData={assigneeData}
+                  defaultValue={defaultValues?.approver}
+                  required={true}
+                />
+              </Box>
+
+              <Box>
+                <UserAutoComplete
+                  name="reviwer"
+                  label="Reviwer"
+                  control={control}
+                  register={register}
+                  errors={errors}
+                  userData={assigneeData}
+                  defaultValue={defaultValues?.reviewer}
+                  required={true}
+                />
+              </Box>
+            </Stack>
+          </Stack>
+        </DialogContent>
+        <Divider />
+        <DialogActions sx={{ padding: "1rem" }}>
+          <Button
+            onClick={() => {
+              resetForm();
+              handleClose();
+            }}
+            sx={{ color: "var(--pallet-blue)" }}
+          >
+            Cancel
+          </Button>
+          <CustomButton
+            variant="contained"
+            sx={{
+              backgroundColor: "var(--pallet-blue)",
+            }}
+            size="medium"
+            onClick={handleSubmit((data) => {
+              handleCreateDocument(data);
+            })}
+          >
+            {defaultValues ? "Update Changes" : "Create Document"}
+          </CustomButton>
+        </DialogActions>
+      </Dialog>
+      {openAddOrEditAdditionalDialog && (
+        <AddOrEditAdditionalDialog
+          open={openAddOrEditAdditionalDialog}
+          handleClose={() => setOpenAddOrEditAdditionalDialog(false)}
+          onSubmit={(data) => {
+            console.log("Adding new Consumption", data);
+            if (selectedEnvironment) {
+              setValue("consumption", [
+                ...(consumptionWatch ?? []).map((item) => {
+                  if (
+                    item.concumptionsId === selectedEnvironment.concumptionsId
+                  ) {
+                    return data;
+                  }
+                  return item;
+                }),
+              ]);
+            } else {
+              setValue("consumption", [...(consumptionWatch ?? []), data]);
+            }
+            setOpenAddOrEditAdditionalDialog(false);
+            setSelectedEnvironment(null);
+          }}
+          defaultValues={selectedEnvironment}
+        />
+      )}
+    </>
+  );
+}
