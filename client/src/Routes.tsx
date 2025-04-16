@@ -91,8 +91,12 @@ const MaternityRegisterTable = React.lazy(
 
 //Sustainability
 const SustainabilityTable = React.lazy(
-  () =>
-    import("./views/Sustainability/SustainabilityTable")
+  () => import("./views/Sustainability/SustainabilityTable")
+);
+
+//Enviorenment
+const TargetSettingsTable = React.lazy(
+  () => import("./views/Environment/TargetSettings/TargetSettingsTable")
 );
 
 function withLayout(Layout: any, Component: any, restrictAccess = false) {
@@ -484,8 +488,18 @@ const AppRoutes = () => {
             MainLayout,
             SustainabilityTable,
             !userPermissionObject?.[
-              PermissionKeys
-                .SUSTAINABILITY_SDG_REPORTING_CREATE
+              PermissionKeys.SUSTAINABILITY_SDG_REPORTING_CREATE
+            ]
+          )}
+        />
+
+        <Route
+          path="/environment/history/target-setting"
+          element={withLayout(
+            MainLayout,
+            TargetSettingsTable,
+            !userPermissionObject?.[
+              PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_TARGET_SETTING_VIEW
             ]
           )}
         />
