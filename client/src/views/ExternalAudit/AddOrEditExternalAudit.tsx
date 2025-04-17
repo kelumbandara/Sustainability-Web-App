@@ -936,7 +936,7 @@ export default function AddOrEditSustainabilityDialog({
 
               <Box sx={{ margin: "0.5rem" }}>
                 <UserAutoComplete
-                  name="representorSchema"
+                  name="representor"
                   label="Management Representative"
                   control={control}
                   register={register}
