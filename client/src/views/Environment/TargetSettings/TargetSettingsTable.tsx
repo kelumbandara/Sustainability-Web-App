@@ -26,24 +26,22 @@ import ViewDataDrawer, {
 } from "../../../components/ViewDataDrawer";
 import AddIcon from "@mui/icons-material/Add";
 import AddOrEditDocumentDialog from "./AddorEditTargetSettings";
-import { differenceInDays, format } from "date-fns";
+import { format } from "date-fns";
 import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
-import {
-  HazardAndRisk,
-  HazardAndRiskStatus,
-  createHazardRisk,
-  getHazardRiskList,
-  updateHazardRisk,
-  deleteHazardRisk,
-  getAssignedHazardRiskList,
-} from "../../../api/hazardRiskApi";
 import ViewHazardOrRiskContent from "./ViewTargetSettings";
 import { PermissionKeys } from "../../Administration/SectionList";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../../state/queryClient";
 import useCurrentUserHaveAccess from "../../../hooks/useCurrentUserHaveAccess";
-import { TargetSettings } from "../../../api/TargetSettings/targetSettingsApi";
+import {
+  TargetSettings,
+  createTargetSettings,
+  deleteTargetSettings,
+  getAssignedTargetSettings,
+  getTargetSettings,
+  updateTargetSettings,
+} from "../../../api/TargetSettings/targetSettingsApi";
 import { targetSettingsData } from "../../../api/sampleData/targetSettingsData";
 
 function TargetSettingsTable({
@@ -55,7 +53,6 @@ function TargetSettingsTable({
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<TargetSettings>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
-  // const [riskData, setRiskData] = useState<HazardAndRisk[]>(sampleHazardRiskData);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -86,16 +83,19 @@ function TargetSettingsTable({
     theme.breakpoints.down("md")
   );
 
-  const { data: riskData, isFetching: isRiskDataFetching } = useQuery({
-    queryKey: ["hazardRisks"],
-    queryFn: getHazardRiskList,
-  }); //need to change
-
-  const { data: assignedRiskData, isFetching: isAssignedRiskDataFetching } =
+  const { data: gettargetSettingsData, isFetching: isRiskDataFetching } =
     useQuery({
-      queryKey: ["assigned-hazardRisks"],
-      queryFn: getAssignedHazardRiskList,
+      queryKey: ["targetSettings"],
+      queryFn: getTargetSettings,
     }); //need to change
+
+  const {
+    data: assignedtargetSettingsData,
+    isFetching: isAssignedRiskDataFetching,
+  } = useQuery({
+    queryKey: ["assigned-targetSettings"],
+    queryFn: getAssignedTargetSettings,
+  }); //need to change
 
   //   const paginatedRiskData = useMemo(() => {
   //     if (isAssignedTasks) {
@@ -113,12 +113,12 @@ function TargetSettingsTable({
   //     }
   //   }, [isAssignedTasks, assignedRiskData, page, rowsPerPage, riskData]);
 
-  const { mutate: createHazardRiskMutation } = useMutation({
-    mutationFn: createHazardRisk,
+  const { mutate: createTargetSettingsMutation } = useMutation({
+    mutationFn: createTargetSettings,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
-      queryClient.invalidateQueries({ queryKey: ["assigned-hazardRisks"] });
-      enqueueSnackbar("Hazard Risk Report Created Successfully!", {
+      queryClient.invalidateQueries({ queryKey: ["targetSettings"] });
+      queryClient.invalidateQueries({ queryKey: ["assigned-targetSettings"] });
+      enqueueSnackbar("Target Settings Created Successfully!", {
         variant: "success",
       });
       setSelectedRow(null);
@@ -126,18 +126,18 @@ function TargetSettingsTable({
       setOpenAddOrEditDialog(false);
     },
     onError: () => {
-      enqueueSnackbar(`Hazard Risk Creation Failed`, {
+      enqueueSnackbar(`Target Settings Creation Failed`, {
         variant: "error",
       });
     },
   }); //need to change
 
-  const { mutate: updateHazardRiskMutation } = useMutation({
-    mutationFn: updateHazardRisk,
+  const { mutate: updateTargetSettingsMutation } = useMutation({
+    mutationFn: updateTargetSettings,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
-      queryClient.invalidateQueries({ queryKey: ["assigned-hazardRisks"] });
-      enqueueSnackbar("Hazard Risk Report Update Successfully!", {
+      queryClient.invalidateQueries({ queryKey: ["targetSettings"] });
+      queryClient.invalidateQueries({ queryKey: ["assigned-targetSettings"] });
+      enqueueSnackbar("Target Settings Update Successfully!", {
         variant: "success",
       });
       setSelectedRow(null);
@@ -145,18 +145,18 @@ function TargetSettingsTable({
       setOpenAddOrEditDialog(false);
     },
     onError: () => {
-      enqueueSnackbar(`Hazard Risk Update Failed`, {
+      enqueueSnackbar(`Target Settings Update Failed`, {
         variant: "error",
       });
     },
   }); //need to change
 
-  const { mutate: deleteHazardRiskMutation } = useMutation({
-    mutationFn: deleteHazardRisk,
+  const { mutate: deleteTargetSettingsMutation } = useMutation({
+    mutationFn: deleteTargetSettings,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
-      queryClient.invalidateQueries({ queryKey: ["assigned-hazardRisks"] });
-      enqueueSnackbar("Hazard Risk Report Deleted Successfully!", {
+      queryClient.invalidateQueries({ queryKey: ["targetSettings"] });
+      queryClient.invalidateQueries({ queryKey: ["assigned-targetSettings"] });
+      enqueueSnackbar("Target Settings Deleted Successfully!", {
         variant: "success",
       });
       setSelectedRow(null);
@@ -164,7 +164,7 @@ function TargetSettingsTable({
       setOpenAddOrEditDialog(false);
     },
     onError: () => {
-      enqueueSnackbar(`Hazard Risk Delete Failed`, {
+      enqueueSnackbar(`Target Settings Delete Failed`, {
         variant: "error",
       });
     },
@@ -363,20 +363,11 @@ function TargetSettingsTable({
           onSubmit={(data) => {
             if (selectedRow) {
               console.log("Updating document", data);
-              updateHazardRiskMutation(data);
-              // setRiskData(
-              //   riskData.map((risk) => (risk.id === data.id ? data : risk))
-              // ); // Update the document in the list if it already exists
-              // enqueueSnackbar("Details Updated Successfully!", {
-              //   variant: "success",
-              // });
+              updateTargetSettingsMutation(data);
             } else {
               console.log("Adding new hazard/risk", data);
-              // setRiskData([...riskData, data]); // Add new document to the list
-              createHazardRiskMutation(data);
-              // enqueueSnackbar("Hazard/Risk Created Successfully!", {
-              //   variant: "success",
-              // });
+
+              createTargetSettingsMutation(data);
             }
             setSelectedRow(null);
             setOpenViewDrawer(false);
@@ -399,16 +390,12 @@ function TargetSettingsTable({
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            // setRiskData(riskData.filter((doc) => doc.id !== selectedRow.id));
-            deleteHazardRiskMutation(selectedRow.id);
+            deleteTargetSettingsMutation(selectedRow.id);
           }}
           onSuccess={() => {
             setOpenViewDrawer(false);
             setSelectedRow(null);
             setDeleteDialogOpen(false);
-            // enqueueSnackbar("Hazard Risk Record Deleted Successfully!", {
-            //   variant: "success",
-            // });
           }}
           handleReject={() => {
             setOpenViewDrawer(false);

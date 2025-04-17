@@ -19,18 +19,16 @@ export const targetSettingsData = [
         implementationTimeline: new Date("2025-05-01"),
         paybackPeriod: "2 years",
         projectLifespan: "5 years",
-        responsible: [
-            {
-                id: 1,
-                name: "Akila Manujith"
-            }
-        ],
-        approver: [
-            {
-                id: 1,
-                name: "Akila Manujith"
-            }
-        ],
+        approver: {
+            id: "user456",
+            name: "John Approver",
+            email: "john.approver@example.com"
+        },
+        responsible: {
+            id: "user456",
+            name: "John Approver",
+            email: "john.approver@example.com"
+        },
         status: "complete",
         document: [
             {
@@ -59,25 +57,16 @@ export const targetSettingsData = [
         implementationTimeline: new Date("2025-06-15"),
         paybackPeriod: "3 years",
         projectLifespan: "6 years",
-        responsible: [
-            {
-                id: 1,
-                name: "Akila Manujith"
-            }
-        ],
-        approver: [
-            {
-                id: 1,
-                name: "Akila Manujith"
-            }
-        ],
-        status: "complete",
-        document: [
-            {
-                fileName: "water_saving_plan.pdf",
-                imageUrl: "https://example.com/water_saving_plan.pdf"
-            }
-        ],
+        approver: {
+            id: "user456",
+            name: "John Approver",
+            email: "john.approver@example.com"
+        },
+        responsible: {
+            id: "user456",
+            name: "John Approver",
+            email: "john.approver@example.com"
+        },
     },
     {
         id: "doc_3",
@@ -99,25 +88,16 @@ export const targetSettingsData = [
         implementationTimeline: new Date("2025-07-01"),
         paybackPeriod: "6 months",
         projectLifespan: "3 years",
-        responsible: [
-            {
-                id: 1,
-                name: "Akila Manujith"
-            }
-        ],
-        approver: [
-            {
-                id: 1,
-                name: "Akila Manujith"
-            }
-        ],
-        status: "complete",
-        document: [
-            {
-                fileName: "water_saving_plan.pdf",
-                imageUrl: "https://example.com/water_saving_plan.pdf"
-            }
-        ],
+        approver: {
+            id: "user456",
+            name: "John Approver",
+            email: "john.approver@example.com"
+        },
+        responsible: {
+            id: "user456",
+            name: "John Approver",
+            email: "john.approver@example.com"
+        },
     },
     {
         id: "doc_4",
@@ -139,25 +119,16 @@ export const targetSettingsData = [
         implementationTimeline: new Date("2025-04-25"),
         paybackPeriod: "1 year",
         projectLifespan: "10 years",
-        responsible: [
-            {
-                id: 1,
-                name: "Akila Manujith"
-            }
-        ],
-        approver: [
-            {
-                id: 1,
-                name: "Akila Manujith"
-            }
-        ],
-        status: "complete",
-        document: [
-            {
-                fileName: "water_saving_plan.pdf",
-                imageUrl: "https://example.com/water_saving_plan.pdf"
-            }
-        ],
+        approver: {
+            id: "user456",
+            name: "John Approver",
+            email: "john.approver@example.com"
+        },
+        responsible: {
+            id: "user456",
+            name: "John Approver",
+            email: "john.approver@example.com"
+        },
     },
     {
         id: "doc_5",
@@ -179,18 +150,16 @@ export const targetSettingsData = [
         implementationTimeline: new Date("2025-05-10"),
         paybackPeriod: "8 months",
         projectLifespan: "7 years",
-        responsible: [
-            {
-                id: 1,
-                name: "Akila Manujith"
-            }
-        ],
-        approver: [
-            {
-                id: 1,
-                name: "Akila Manujith"
-            }
-        ],
+        approver: {
+            id: "user456",
+            name: "John Approver",
+            email: "john.approver@example.com"
+        },
+        responsible: {
+            id: "user456",
+            name: "John Approver",
+            email: "john.approver@example.com"
+        },
         status: "complete",
         document: [
             {

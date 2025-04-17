@@ -276,7 +276,9 @@ export default function AddOrEditTargetSettingsDialog({
           }}
         >
           <Typography variant="h6" component="div">
-            {defaultValues ? "Edit a Target Setting" : "Create a Target Setting"}
+            {defaultValues
+              ? "Edit a Target Setting"
+              : "Create a Target Setting"}
           </Typography>
           <IconButton
             aria-label="open drawer"
@@ -1003,7 +1005,7 @@ export default function AddOrEditTargetSettingsDialog({
             }}
             size="medium"
             onClick={handleSubmit((data) => {
-                handleSubmitTargetSettings(data);
+              handleSubmitTargetSettings(data);
             })}
           >
             {defaultValues ? "Update Changes" : "Submit Report"}
