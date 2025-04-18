@@ -41,3 +41,17 @@ export const environmentData = [
     totalProuctProducedkg: 12000
   }
 ];
+
+const currentYear = new Date().getFullYear();
+export const yearData = Array.from({ length: 5 }, (_, i) => ({
+  year: (currentYear - i).toString(),
+}));
+
+export const monthData = Array.from({ length: 12 }, (_, i) => {
+  const date = new Date(0, i);
+  return {
+    month: date.toLocaleString("default", { month: "long" }),
+    value: (i + 1).toString().padStart(2, "0"),
+  };
+});
+

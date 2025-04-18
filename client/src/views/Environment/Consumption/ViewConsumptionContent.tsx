@@ -91,18 +91,18 @@ function ViewDocumentContent({ consumption }: { consumption: Environment }) {
         >
           <DrawerContentItem
             label="Reference"
-            value={consumption?.id}
+            value={consumption?.referenceNumber}
             sx={{ flex: 1 }}
           />
-          {/* <DrawerContentItem
+          <DrawerContentItem
             label="Reported Date"
             value={
-              document.createdDate
-                ? format(new Date(document.createdDate), "yyyy-MM-dd")
+              consumption.created_at
+                ? format(new Date(consumption.created_at), "yyyy-MM-dd")
                 : "N/A"
             }
             sx={{ flex: 1 }}
-          /> */}
+          />
         </Box>
         <Divider />
         <DrawerContentItem
@@ -117,7 +117,7 @@ function ViewDocumentContent({ consumption }: { consumption: Environment }) {
         />
         <DrawerContentItem
           label="Area in Squre Meter (m2)"
-          value={consumption?.areaInSquereMeter}
+          value={consumption?.area}
           sx={{ flex: 1 }}
         />
         <DrawerContentItem
@@ -189,7 +189,7 @@ function ViewDocumentContent({ consumption }: { consumption: Environment }) {
           height: "fit-content",
         }}
       >
-        <DrawerContentItem label="Reported By" value={consumption.createdBy} />
+        <DrawerContentItem label="Reported By" value={consumption.createdByUserName} />
         <DrawerContentItem
           label="Division"
           value={consumption?.division}

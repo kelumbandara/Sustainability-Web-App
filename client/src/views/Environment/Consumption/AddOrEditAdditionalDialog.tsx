@@ -25,7 +25,7 @@ import {
   personTypes,
   industryExperience,
 } from "../../../constants/accidentConstants";
-import { Consumption } from "../../../api/Environment/environmentApi";
+import { Consumption, fetchConsumptionCategories, fetchConsumptionSource, fetchConsumptionUnits } from "../../../api/Environment/environmentApi";
 import { fetchDivision } from "../../../api/divisionApi";
 import { useQuery } from "@tanstack/react-query";
 import RichTextComponent from "../../../components/RichTextComponent";
@@ -70,9 +70,19 @@ export default function AddOrEditAdditionalDialog({
     reset();
   };
 
-  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
-    queryKey: ["divisions"],
-    queryFn: fetchDivision,
+  const { data: consumptionCategoryData, isFetching: isconsumptionCategoryDataFetching } = useQuery({
+    queryKey: ["cs-category"],
+    queryFn: fetchConsumptionCategories,
+  });
+
+  const { data: consumptionSourceData, isFetching: isconsumptionSourceData } = useQuery({
+    queryKey: ["cs-source"],
+    queryFn: fetchConsumptionSource,
+  });
+
+  const { data: consumptionUnitsData, isFetching: isconsumptionUnitsData } = useQuery({
+    queryKey: ["cs-units"],
+    queryFn: fetchConsumptionUnits,
   });
 
   return (
@@ -144,8 +154,8 @@ export default function AddOrEditAdditionalDialog({
                   onChange={(event, newValue) => field.onChange(newValue)}
                   size="small"
                   options={
-                    divisionData?.length
-                      ? divisionData.map((sdg) => sdg.divisionName)
+                    consumptionCategoryData?.length
+                      ? consumptionCategoryData.map((category) => category.categoryName)
                       : []
                   }
                   sx={{ flex: 1, margin: "0.5rem" }}
@@ -173,8 +183,8 @@ export default function AddOrEditAdditionalDialog({
                   onChange={(event, newValue) => field.onChange(newValue)}
                   size="small"
                   options={
-                    divisionData?.length
-                      ? divisionData.map((sdg) => sdg.divisionName)
+                    consumptionSourceData?.length
+                      ? consumptionSourceData.map((source) => source.sourceName)
                       : []
                   }
                   sx={{ flex: 1, margin: "0.5rem" }}
@@ -202,8 +212,8 @@ export default function AddOrEditAdditionalDialog({
                   onChange={(event, newValue) => field.onChange(newValue)}
                   size="small"
                   options={
-                    divisionData?.length
-                      ? divisionData.map((sdg) => sdg.divisionName)
+                    consumptionUnitsData?.length
+                      ? consumptionUnitsData.map((units) => units.unitName)
                       : []
                   }
                   sx={{ flex: 1, margin: "0.5rem" }}

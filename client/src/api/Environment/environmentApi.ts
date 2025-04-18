@@ -1,6 +1,5 @@
 import axios from "axios";
 import { z } from "zod";
-import { StorageFileSchema } from "../../utils/StorageFiles.util";
 import { userSchema } from "../userApi";
 
 export const ConsumptionSchema = z.object({
@@ -40,6 +39,8 @@ export const EnvironmentSchema = z.object({
   totalProuctProducedPcs: z.number(),
   totalProuctProducedkg: z.number(),
   createdBy: z.string(),
+  created_at: z.date(),
+  createdByUserName: z.string()
 });
 
 export type Environment = z.infer<typeof EnvironmentSchema>;
@@ -104,11 +105,6 @@ export async function getConsumptionAssignedList() {
   return res.data;
 }
 
-// export async function updateConsumption(data: Environment) {
-//   const res = await axios.get("/api/sdg-report");
-//   return res.data;
-// }
-
 export async function updateConsumption(envirement: Environment) {
   const formData = new FormData();
 
@@ -165,5 +161,20 @@ export async function updateConsumption(envirement: Environment) {
 
 export async function deleteConsumption(id: String) {
   const res = await axios.delete(`/api/envirement-recode/${id}/delete`);
+  return res.data;
+}
+
+export async function fetchConsumptionCategories() {
+  const res = await axios.get(`/api/consumption-categories`);
+  return res.data;
+}
+
+export async function fetchConsumptionSource() {
+  const res = await axios.get(`/api/consumption-sources`);
+  return res.data;
+}
+
+export async function fetchConsumptionUnits() {
+  const res = await axios.get(`/api/consumption-units`);
   return res.data;
 }

@@ -43,6 +43,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { fetchHazardRiskAssignee } from "../../../api/userApi";
 import UserAutoComplete from "../../../components/UserAutoComplete";
 import WidgetsIcon from "@mui/icons-material/Widgets";
+import { monthData, yearData } from "../../../api/sampleData/consumptionData";
 
 type DialogProps = {
   open: boolean;
@@ -116,8 +117,8 @@ export default function AddOrEditConsumptionDialog({
 
   const handleCreateDocument = (data: Environment) => {
     const submitData: Partial<Environment> = data;
-    submitData.reviewerId = reviewer.id
-    submitData.approverId = approver.id
+    submitData.reviewerId = reviewer.id;
+    submitData.approverId = approver.id;
     onSubmit(submitData as Environment);
     resetForm();
   };
@@ -274,33 +275,41 @@ export default function AddOrEditConsumptionDialog({
                     maxWidth: isMobile ? "88vw" : "100%",
                   }}
                 >
-                  <Box
-                    sx={{
-                      padding: theme.spacing(2),
-                      display: "flex",
-                      justifyContent: "flex-end",
-                    }}
-                  >
-                    <Button
-                      variant="contained"
-                      sx={{ backgroundColor: "var(--pallet-blue)" }}
-                      disabled={!selectMonth || !selectYear || !selectDivision}
-                      startIcon={<AddIcon />}
-                      onClick={() => {
-                        setSelectedEnvironment(null);
-                        setOpenAddOrEditAdditionalDialog(true);
+                  {selectMonth && selectYear && selectDivision ? (
+                    <Box
+                      sx={{
+                        padding: theme.spacing(2),
+                        display: "flex",
+                        justifyContent: "flex-end",
                       }}
                     >
-                      {!selectMonth || !selectYear || !selectDivision ? (
-                        <>
-                          Additional Details <WidgetsIcon />
-                          &nbsp;Please select Division, Year, and Month
-                        </>
-                      ) : (
-                        "Additional Details"
-                      )}
-                    </Button>
-                  </Box>
+                      <Button
+                        variant="contained"
+                        sx={{ backgroundColor: "var(--pallet-blue)" }}
+                        startIcon={<AddIcon />}
+                        onClick={() => {
+                          setSelectedEnvironment(null);
+                          setOpenAddOrEditAdditionalDialog(true);
+                        }}
+                      >
+                        Add Impact Consumption
+                      </Button>
+                    </Box>
+                  ) : (
+                    <Box
+                      sx={{
+                        padding: theme.spacing(2),
+                        display: "flex",
+                        justifyContent: "flex-end",
+                      }}
+                    >
+                      <Typography variant="body2">
+                        Select Month, Year, and Division to Add Impact
+                        Consumption
+                      </Typography>
+                    </Box>
+                  )}
+
                   <Table aria-label="simple table">
                     <TableHead
                       sx={{
@@ -308,7 +317,6 @@ export default function AddOrEditConsumptionDialog({
                       }}
                     >
                       <TableRow>
-                        <TableCell align="center">#</TableCell>
                         <TableCell align="center">Category</TableCell>
                         <TableCell align="center">Source</TableCell>
                         <TableCell align="center">Unit</TableCell>
@@ -333,9 +341,6 @@ export default function AddOrEditConsumptionDialog({
                               console.log("row");
                             }}
                           >
-                            <TableCell align="center">
-                              {row.consumptionsId}
-                            </TableCell>
                             <TableCell
                               component="th"
                               scope="row"
@@ -446,9 +451,7 @@ export default function AddOrEditConsumptionDialog({
                     onChange={(event, newValue) => field.onChange(newValue)}
                     size="small"
                     options={
-                      divisionData?.length
-                        ? divisionData.map((division) => division.divisionName)
-                        : []
+                      yearData?.length ? yearData.map((year) => year.year) : []
                     }
                     sx={{ flex: 1, margin: "0.5rem" }}
                     renderInput={(params) => (
@@ -476,8 +479,8 @@ export default function AddOrEditConsumptionDialog({
                     onChange={(event, newValue) => field.onChange(newValue)}
                     size="small"
                     options={
-                      divisionData?.length
-                        ? divisionData.map((division) => division.divisionName)
+                      monthData?.length
+                        ? monthData.map((month) => month.month)
                         : []
                     }
                     sx={{ flex: 1, margin: "0.5rem" }}
@@ -566,7 +569,10 @@ export default function AddOrEditConsumptionDialog({
                 }),
               ]);
             } else {
-              setValue("impactConsumption", [...(consumptionWatch ?? []), data]);
+              setValue("impactConsumption", [
+                ...(consumptionWatch ?? []),
+                data,
+              ]);
             }
             setOpenAddOrEditAdditionalDialog(false);
             setSelectedEnvironment(null);
