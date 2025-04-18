@@ -24,13 +24,11 @@ import DatePickerComponent from "../../../components/DatePickerComponent";
 import CustomButton from "../../../components/CustomButton";
 import { useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { HazardAndRiskStatus } from "../../../api/hazardRiskApi";
 import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import theme from "../../../theme";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import RichTextComponent from "../../../components/RichTextComponent";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import useCurrentUser from "../../../hooks/useCurrentUser";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../../api/divisionApi";
 import UserAutoComplete from "../../../components/UserAutoComplete";
@@ -91,14 +89,6 @@ export default function AddOrEditTargetSettingsDialog({
   defaultValues,
   onSubmit,
 }: DialogProps) {
-  const { isMobile, isTablet } = useIsMobile();
-  const [files, setFiles] = useState<File[]>([]);
-  const [activeTab, setActiveTab] = useState(0);
-  const [existingFiles, setExistingFiles] = useState<StorageFile[]>(
-    defaultValues?.documents as StorageFile[]
-  );
-  const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
-
   const {
     register,
     handleSubmit,
@@ -108,14 +98,23 @@ export default function AddOrEditTargetSettingsDialog({
     reset,
     trigger,
   } = useForm<TargetSettings>({
-    defaultValues: {
-      ...defaultValues,
-      documents: [],
-    },
     reValidateMode: "onChange",
     mode: "onChange",
   });
-
+  const { isMobile, isTablet } = useIsMobile();
+  const [files, setFiles] = useState<File[]>([]);
+  const [activeTab, setActiveTab] = useState(0);
+  const [existingFiles, setExistingFiles] = useState<StorageFile[]>(
+    defaultValues?.documents as StorageFile[]
+  );
+  const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
+  useEffect(() => {
+    if (defaultValues) {
+      reset(defaultValues);
+    } else {
+      reset();
+    }
+  }, [defaultValues, reset]);
   const approver = watch("approver");
   const responsible = watch("responsible");
   const category = watch("category");
@@ -177,9 +176,8 @@ export default function AddOrEditTargetSettingsDialog({
     submitData.id = defaultValues?.id ?? uuidv4();
     submitData.approverId = approver?.id;
     submitData.responsibleId = responsible?.id;
-    submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
     submitData.documents = files;
-    if (filesToRemove?.length > 0) submitData.removeDoc = filesToRemove;
+    console.log(data);
     onSubmit(submitData as TargetSettings);
   };
 
@@ -649,21 +647,41 @@ export default function AddOrEditTargetSettingsDialog({
                     />
                   </Box>
                   {defaultValues && (
-                    <ExistingFileItemsEdit
-                      label="Existing evidence"
-                      files={existingFiles}
-                      sx={{ marginY: "1rem" }}
-                      handleRemoveItem={(file) => {
-                        if (file.gsutil_uri) {
-                          setFilesToRemove([...filesToRemove, file.gsutil_uri]);
-                          setExistingFiles(
-                            existingFiles.filter(
-                              (f) => f.gsutil_uri !== file.gsutil_uri
-                            )
-                          );
-                        }
-                      }}
-                    />
+                    <>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "row",
+                          margin: "0.5rem",
+                        }}
+                      >
+                        <Typography variant="body2" component="div">
+                          <b>Evidence</b>
+                        </Typography>
+                        <Typography variant="body2" component="div">
+                          {` ${defaultValues?.documents}`}
+                        </Typography>
+                      </Box>
+
+                      <ExistingFileItemsEdit
+                        label="Existing evidence"
+                        files={existingFiles}
+                        sx={{ marginY: "1rem" }}
+                        handleRemoveItem={(file) => {
+                          if (file.gsutil_uri) {
+                            setFilesToRemove([
+                              ...filesToRemove,
+                              file.gsutil_uri,
+                            ]);
+                            setExistingFiles(
+                              existingFiles.filter(
+                                (f) => f.gsutil_uri !== file.gsutil_uri
+                              )
+                            );
+                          }
+                        }}
+                      />
+                    </>
                   )}
                   <Box
                     sx={{

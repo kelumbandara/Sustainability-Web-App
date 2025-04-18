@@ -25,11 +25,11 @@ import ViewDataDrawer, {
   DrawerHeader,
 } from "../../../components/ViewDataDrawer";
 import AddIcon from "@mui/icons-material/Add";
-import AddOrEditDocumentDialog from "./AddorEditTargetSettings";
+import AddOrEditTargetSettingsDialog from "./AddorEditTargetSettingsDialog";
 import { format } from "date-fns";
 import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
-import ViewHazardOrRiskContent from "./ViewTargetSettings";
+import ViewTargetSettingsContent from "./ViewTargetSettings";
 import { PermissionKeys } from "../../Administration/SectionList";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../../state/queryClient";
@@ -42,7 +42,6 @@ import {
   getTargetSettings,
   updateTargetSettings,
 } from "../../../api/TargetSettings/targetSettingsApi";
-import { targetSettingsData } from "../../../api/sampleData/targetSettingsData";
 
 function TargetSettingsTable({
   isAssignedTasks,
@@ -176,22 +175,22 @@ function TargetSettingsTable({
     },
   });
 
-  const isRiskCreateDisabled = !useCurrentUserHaveAccess(
+  const isTargetSettingsCreateDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_TARGET_SETTING_CREATE
   );
-  const isRiskEditDisabled = !useCurrentUserHaveAccess(
+  const isTargetSettingsEditDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_TARGET_SETTING_EDIT
   );
-  const isRiskDeleteDisabled = !useCurrentUserHaveAccess(
+  const isTargetSettingsDeleteDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_TARGET_SETTING_DELETE
   );
-  const isRiskAssignCreateDisabled = !useCurrentUserHaveAccess(
+  const isTargetSettingsAssignCreateDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_TARGET_SETTING_CREATE
   );
-  const isRiskAssignEditDisabled = !useCurrentUserHaveAccess(
+  const isTargetSettingsAssignEditDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_TARGET_SETTING_EDIT
   );
-  const isRiskAssignDeleteDisabled = !useCurrentUserHaveAccess(
+  const isTargetSettingsAssignDeleteDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_TARGET_SETTING_DELETE
   );
 
@@ -238,8 +237,8 @@ function TargetSettingsTable({
                 }}
                 disabled={
                   isAssignedTasks
-                    ? isRiskAssignCreateDisabled
-                    : isRiskCreateDisabled
+                    ? isTargetSettingsAssignCreateDisabled
+                    : isTargetSettingsCreateDisabled
                 }
               >
                 Create Target Setting
@@ -335,7 +334,7 @@ function TargetSettingsTable({
               title="Hazard or Risk Details"
               handleClose={() => setOpenViewDrawer(false)}
               disableEdit={
-                isAssignedTasks ? isRiskAssignEditDisabled : isRiskEditDisabled
+                isAssignedTasks ? isTargetSettingsAssignEditDisabled : isTargetSettingsEditDisabled
               }
               onEdit={() => {
                 setSelectedRow(selectedRow);
@@ -344,21 +343,21 @@ function TargetSettingsTable({
               onDelete={() => setDeleteDialogOpen(true)}
               disableDelete={
                 isAssignedTasks
-                  ? isRiskAssignDeleteDisabled
-                  : isRiskDeleteDisabled
+                  ? isTargetSettingsAssignDeleteDisabled
+                  : isTargetSettingsDeleteDisabled
               }
             />
 
             {selectedRow && (
               <Stack>
-                <ViewHazardOrRiskContent targetSettings={selectedRow} />
+                <ViewTargetSettingsContent targetSettings={selectedRow} />
               </Stack>
             )}
           </Stack>
         }
       />
       {openAddOrEditDialog && (
-        <AddOrEditDocumentDialog
+        <AddOrEditTargetSettingsDialog
           open={openAddOrEditDialog}
           handleClose={() => {
             setSelectedRow(null);
@@ -387,7 +386,7 @@ function TargetSettingsTable({
           title="Remove Hazard/Risk Confirmation"
           content={
             <>
-              Are you sure you want to remove this hazard or risk?
+              Are you sure you want to remove this Target Settings?
               <Alert severity="warning" style={{ marginTop: "1rem" }}>
                 This action is not reversible.
               </Alert>

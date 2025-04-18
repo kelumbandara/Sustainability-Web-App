@@ -94,6 +94,7 @@ export const updateTargetSettings = async (targetSettings: TargetSettings) => {
       formData.append(key, value.toString());
     }
   });
+  console.log(targetSettings);
 
   try {
     const response = await axios.post(
@@ -104,7 +105,7 @@ export const updateTargetSettings = async (targetSettings: TargetSettings) => {
 
     return response.data;
   } catch (error) {
-    console.error("Error updating hazard risk:", error);
+    console.error("Error updating Target Settings:", error);
     throw error;
   }
 };

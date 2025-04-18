@@ -40,7 +40,7 @@ function a11yProps(index: number) {
   };
 }
 
-function ViewIncidentContent({
+function ViewTargetSettingsContent({
   targetSettings,
 }: {
   targetSettings: TargetSettings;
@@ -328,4 +328,4 @@ function ViewIncidentContent({
   );
 }
 
-export default ViewIncidentContent;
+export default ViewTargetSettingsContent;
