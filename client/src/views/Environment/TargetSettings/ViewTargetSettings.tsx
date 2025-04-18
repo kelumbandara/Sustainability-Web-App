@@ -85,7 +85,7 @@ function ViewIncidentContent({
           />
           <DrawerContentItem
             label="Reported Date"
-            value={format(targetSettings.implementationTimeline, "yyyy-MM-dd")}
+            value={format(targetSettings.created_at, "yyyy-MM-dd")}
             sx={{ flex: 1 }}
           />
         </Box>
@@ -197,12 +197,12 @@ function ViewIncidentContent({
               />
               <DrawerContentItem
                 label="Baseline Consumption"
-                value={targetSettings.baseLineConsumption}
+                value={targetSettings.baselineConsumption}
                 sx={{ flex: 1 }}
               />
               <DrawerContentItem
                 label="GHC Emmision"
-                value={targetSettings.ghcEmmision}
+                value={targetSettings.ghgEmission}
                 sx={{ flex: 1 }}
               />
             </Box>
@@ -215,14 +215,14 @@ function ViewIncidentContent({
             >
               <DrawerContentItem
                 label="Findings or Problems"
-                value={targetSettings.problems}
+                value={targetSettings.problem}
                 sx={{ flex: 1 }}
               />
             </Box>
             <Box>
               <FileItemsViewer
                 label="Evidence"
-                files={targetSettings.document as StorageFile[]}
+                files={targetSettings.documents as StorageFile[]}
                 sx={{ marginY: "1rem" }}
               />
             </Box>
@@ -241,7 +241,7 @@ function ViewIncidentContent({
           />
           <DrawerContentItem
             label="Opportunity"
-            value={targetSettings.opportunity}
+            value={targetSettings.opertunity}
             sx={{ flex: 1 }}
           />
         </TabPanel>
@@ -265,7 +265,7 @@ function ViewIncidentContent({
             />
             <DrawerContentItem
               label="Target GHC Redution"
-              value={targetSettings.targetGhcRedution}
+              value={targetSettings.targetGHGReduction}
               sx={{ flex: 1 }}
             />
           </Box>
@@ -278,7 +278,7 @@ function ViewIncidentContent({
           >
             <DrawerContentItem
               label="Cost Saving"
-              value={targetSettings.costSaving}
+              value={targetSettings.costSavings}
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
@@ -293,8 +293,8 @@ function ViewIncidentContent({
             />
           </Box>
           <DrawerContentItem
-            label="Project Lifespan"
-            value={format(targetSettings.implementationTimeline, "yyyy-MM-dd")}
+            label="Project TimeLine"
+            value={format(targetSettings.implementationTime, "yyyy-MM-dd")}
             sx={{ flex: 1 }}
           />
         </TabPanel>
@@ -315,12 +315,12 @@ function ViewIncidentContent({
       >
         <DrawerContentItem
           label="Responsible"
-          value={targetSettings.responsible.name}
+          value={targetSettings.responsible?.name}
           sx={{ flex: 1 }}
         />
         <DrawerContentItem
           label="Approver"
-          value={targetSettings.approver.name}
+          value={targetSettings.approver?.name}
           sx={{ flex: 1 }}
         />
       </Box>

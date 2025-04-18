@@ -9,19 +9,21 @@ export const targetSettingsSchema = z.object({
   category: z.string(),
   department: z.string(),
   source: z.string(),
-  baseLineConsumption: z.string(),
-  ghcEmmision: z.string(),
-  problems: z.string(),
-  document: z.array(z.union([z.instanceof(File), StorageFileSchema]))
+  referenceNumber: z.string(),
+  baselineConsumption: z.number(),
+  ghgEmission: z.number(),
+  problem: z.string(),
+  documents: z
+    .array(z.union([z.instanceof(File), StorageFileSchema]))
     .optional(),
   action: z.string(),
   possibilityCategory: z.string(),
-  opportunity: z.string(),
+  opertunity: z.string(),
   implementationCost: z.string(),
   expectedSavings: z.string(),
-  targetGhcRedution: z.string(),
-  costSaving: z.string(),
-  implementationTimeline: z.date(),
+  targetGHGReduction: z.string(),
+  costSavings: z.string(),
+  implementationTime: z.date(),
   paybackPeriod: z.string(),
   projectLifespan: z.string(),
   responsible: userSchema.optional(),
@@ -29,8 +31,8 @@ export const targetSettingsSchema = z.object({
   responsibleId: z.string(),
   approverId: z.string(),
   status: z.string(),
+  created_at: z.date(),
   removeDoc: z.array(z.string()).optional(),
-
 });
 
 export type TargetSettings = z.infer<typeof targetSettingsSchema>;
@@ -45,9 +47,9 @@ export const createTargetSettings = async (targetSettings: TargetSettings) => {
   Object.keys(targetSettings).forEach((key) => {
     const value = targetSettings[key as keyof TargetSettings];
 
-    if (key === "document" && Array.isArray(value)) {
+    if (key === "documents" && Array.isArray(value)) {
       value.forEach((file, index) => {
-        formData.append(`document[${index}]`, file as File);
+        formData.append(`documents[${index}]`, file as File);
       });
     } else if (Array.isArray(value)) {
       value.forEach((item, index) => {
@@ -60,7 +62,7 @@ export const createTargetSettings = async (targetSettings: TargetSettings) => {
     }
   });
 
-  const res = await axios.post("/api/aaa", formData, {
+  const res = await axios.post("/api/target-setting", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -78,9 +80,9 @@ export const updateTargetSettings = async (targetSettings: TargetSettings) => {
   Object.keys(targetSettings).forEach((key) => {
     const value = targetSettings[key as keyof TargetSettings];
 
-    if (key === "document" && Array.isArray(value)) {
+    if (key === "documents" && Array.isArray(value)) {
       value.forEach((file, index) => {
-        formData.append(`document[${index}]`, file as File);
+        formData.append(`documents[${index}]`, file as File);
       });
     } else if (Array.isArray(value)) {
       value.forEach((item, index) => {
@@ -95,7 +97,7 @@ export const updateTargetSettings = async (targetSettings: TargetSettings) => {
 
   try {
     const response = await axios.post(
-      `/api/aaa/${targetSettings.id}/update`,
+      `/api/target-setting/${targetSettings.id}/update`,
       formData,
       { headers: { "Content-Type": "multipart/form-data" } }
     );
@@ -108,16 +110,45 @@ export const updateTargetSettings = async (targetSettings: TargetSettings) => {
 };
 
 export const deleteTargetSettings = async (id: string) => {
-  const res = await axios.delete(`/api/aaa/${id}/delete`);
+  const res = await axios.delete(`/api/target-setting/${id}/delete`);
   return res.data;
 };
 
 export async function getTargetSettings() {
-  const res = await axios.get("api/aaa");
+  const res = await axios.get("api/target-setting");
   return res.data;
 }
 
 export async function getAssignedTargetSettings() {
-  const res = await axios.get("api/aaa");
+  const res = await axios.get("api/target-setting-assign-task");
+  return res.data;
+}
+
+export async function getApproverAndAssignee() {
+  const res = await axios.get("api/target-setting-assignee");
+  return res.data;
+}
+
+export async function getSource() {
+  const res = await axios.get("api/ts-sources");
+  return res.data;
+}
+
+export async function fetchMainTsCategory() {
+  const res = await axios.get("api/ts-categories");
+  return res.data;
+}
+
+export async function fetchPossibilityCategory(categoryName: string) {
+  const res = await axios.get(
+    `/api/categories/${categoryName}/possibilityCategory`
+  );
+  return res.data;
+}
+
+export async function fetchOpportunity(subCategoryName: string) {
+  const res = await axios.get(
+    `/api/subcategories/${subCategoryName}/opertunity`
+  );
   return res.data;
 }

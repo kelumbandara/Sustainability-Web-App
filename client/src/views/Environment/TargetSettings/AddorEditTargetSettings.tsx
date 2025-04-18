@@ -31,19 +31,22 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import RichTextComponent from "../../../components/RichTextComponent";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import useCurrentUser from "../../../hooks/useCurrentUser";
-import { fetchAllUsers, fetchIncidentAssignee } from "../../../api/userApi";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../../api/divisionApi";
-import { fetchNearMiss } from "../../../api/nearMissApi";
-import { fetchTypeOfConcerns } from "../../../api/typeOfConcern";
-import { fetchAllFactors } from "../../../api/incidentFactorsApi";
-import { fetchAllCircumstances } from "../../../api/circumstancesApi";
 import UserAutoComplete from "../../../components/UserAutoComplete";
 import { ExistingFileItemsEdit } from "../../../components/ExistingFileItemsEdit";
 import { StorageFile } from "../../../utils/StorageFiles.util";
-import { TargetSettings } from "../../../api/TargetSettings/targetSettingsApi";
+import {
+  TargetSettings,
+  fetchMainTsCategory,
+  fetchOpportunity,
+  fetchPossibilityCategory,
+  getApproverAndAssignee,
+  getSource,
+} from "../../../api/TargetSettings/targetSettingsApi";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import AdsClickIcon from "@mui/icons-material/AdsClick";
+import { fetchDepartmentData } from "../../../api/departmentApi";
 
 type DialogProps = {
   open: boolean;
@@ -92,47 +95,9 @@ export default function AddOrEditTargetSettingsDialog({
   const [files, setFiles] = useState<File[]>([]);
   const [activeTab, setActiveTab] = useState(0);
   const [existingFiles, setExistingFiles] = useState<StorageFile[]>(
-    defaultValues?.document as StorageFile[]
+    defaultValues?.documents as StorageFile[]
   );
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
-
-  const { user } = useCurrentUser();
-
-  const { data: userData } = useQuery({
-    queryKey: ["users"],
-    queryFn: fetchAllUsers,
-  });
-
-  const { data: divisionData } = useQuery({
-    queryKey: ["divisions"],
-    queryFn: fetchDivision,
-  });
-
-  const { data: nearMissData } = useQuery({
-    queryKey: ["nearMissData"],
-    queryFn: fetchNearMiss,
-  });
-
-  const { data: concernData } = useQuery({
-    queryKey: ["concernData"],
-    queryFn: fetchTypeOfConcerns,
-  });
-
-  const { data: factorData } = useQuery({
-    queryKey: ["factorData"],
-    queryFn: fetchAllFactors,
-  });
-
-  const { data: circumstancesData, isFetching: isCircumstancesDataFetching } =
-    useQuery({
-      queryKey: ["circumstancesData"],
-      queryFn: fetchAllCircumstances,
-    });
-
-  const { data: asigneeData, isFetching: isAssigneeDataFetching } = useQuery({
-    queryKey: ["incident-assignee"],
-    queryFn: fetchIncidentAssignee,
-  });
 
   const {
     register,
@@ -141,15 +106,58 @@ export default function AddOrEditTargetSettingsDialog({
     control,
     formState: { errors },
     reset,
-    setValue,
     trigger,
   } = useForm<TargetSettings>({
+    defaultValues: {
+      ...defaultValues,
+      documents: [],
+    },
     reValidateMode: "onChange",
     mode: "onChange",
   });
 
   const approver = watch("approver");
   const responsible = watch("responsible");
+  const category = watch("category");
+  const possibilityCategory = watch("possibilityCategory");
+
+  const { data: divisionData } = useQuery({
+    queryKey: ["divisions"],
+    queryFn: fetchDivision,
+  });
+
+  const { data: asigneeData, isFetching: isAssigneeDataFetching } = useQuery({
+    queryKey: ["ts-assignee"],
+    queryFn: getApproverAndAssignee,
+  });
+
+  const { data: categoryData } = useQuery({
+    queryKey: ["ts-categoryData"],
+    queryFn: fetchMainTsCategory,
+  });
+
+  const { data: possibilityCategoryData } = useQuery({
+    queryKey: ["ts-possibilirtyCategoryData", category],
+    queryFn: () => fetchPossibilityCategory(category),
+    enabled: !!category,
+  });
+
+  const { data: opportunityData } = useQuery({
+    queryKey: ["ts-opportunityData", possibilityCategory],
+    queryFn: () => fetchOpportunity(possibilityCategory),
+    enabled: !!possibilityCategory,
+  });
+
+  const { data: departmentData, isFetching: isDepartmentDataFetching } =
+    useQuery({
+      queryKey: ["departments"],
+      queryFn: fetchDepartmentData,
+    });
+
+  const { data: sourceData } = useQuery({
+    queryKey: ["ts-source"],
+    queryFn: getSource,
+  });
 
   useEffect(() => {
     if (defaultValues) {
@@ -170,7 +178,7 @@ export default function AddOrEditTargetSettingsDialog({
     submitData.approverId = approver?.id;
     submitData.responsibleId = responsible?.id;
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
-    submitData.document = files;
+    submitData.documents = files;
     if (filesToRemove?.length > 0) submitData.removeDoc = filesToRemove;
     onSubmit(submitData as TargetSettings);
   };
@@ -181,16 +189,16 @@ export default function AddOrEditTargetSettingsDialog({
       !errors.department &&
       !errors.category &&
       !errors.source &&
-      !errors.baseLineConsumption &&
-      !errors.ghcEmmision
+      !errors.baselineConsumption &&
+      !errors.ghgEmission
     );
   }, [
     errors.division,
     errors.department,
     errors.category,
     errors.source,
-    errors.baseLineConsumption,
-    errors.ghcEmmision,
+    errors.baselineConsumption,
+    errors.ghgEmission,
   ]);
 
   const isImprovementsDetailsValid = useMemo(() => {
@@ -201,16 +209,16 @@ export default function AddOrEditTargetSettingsDialog({
     return (
       !errors.implementationCost &&
       !errors.expectedSavings &&
-      !errors.targetGhcRedution &&
-      !errors.costSaving &&
+      !errors.targetGHGReduction &&
+      !errors.costSavings &&
       !errors.paybackPeriod &&
       !errors.projectLifespan
     );
   }, [
     errors.implementationCost,
     errors.expectedSavings,
-    errors.targetGhcRedution,
-    errors.costSaving,
+    errors.targetGHGReduction,
+    errors.costSavings,
     errors.paybackPeriod,
     errors.projectLifespan,
   ]);
@@ -219,8 +227,8 @@ export default function AddOrEditTargetSettingsDialog({
     trigger([
       "implementationCost",
       "expectedSavings",
-      "targetGhcRedution",
-      "costSaving",
+      "targetGHGReduction",
+      "costSavings",
       "paybackPeriod",
       "projectLifespan",
     ]);
@@ -232,8 +240,8 @@ export default function AddOrEditTargetSettingsDialog({
       "department",
       "category",
       "source",
-      "baseLineConsumption",
-      "ghcEmmision",
+      "baselineConsumption",
+      "ghgEmission",
     ]);
   };
 
@@ -501,9 +509,9 @@ export default function AddOrEditTargetSettingsDialog({
                           }
                           size="small"
                           options={
-                            divisionData?.length
-                              ? divisionData.map(
-                                  (division) => division.divisionName
+                            departmentData?.length
+                              ? departmentData.map(
+                                  (department) => department.department
                                 )
                               : []
                           }
@@ -530,14 +538,19 @@ export default function AddOrEditTargetSettingsDialog({
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
-                          onChange={(event, newValue) =>
-                            field.onChange(newValue)
-                          }
+                          onChange={(e, value) => {
+                            console.log("e", e);
+                            reset({
+                              category: value,
+                              possibilityCategory: null,
+                              opertunity: null,
+                            });
+                          }}
                           size="small"
                           options={
-                            divisionData?.length
-                              ? divisionData.map(
-                                  (division) => division.divisionName
+                            categoryData?.length
+                              ? categoryData.map(
+                                  (category) => category.categoryName
                                 )
                               : []
                           }
@@ -575,10 +588,8 @@ export default function AddOrEditTargetSettingsDialog({
                           }
                           size="small"
                           options={
-                            divisionData?.length
-                              ? divisionData.map(
-                                  (division) => division.divisionName
-                                )
+                            sourceData?.length
+                              ? sourceData.map((source) => source.sourceName)
                               : []
                           }
                           sx={{ flex: 1, margin: "0.5rem" }}
@@ -598,21 +609,23 @@ export default function AddOrEditTargetSettingsDialog({
 
                     <TextField
                       required
-                      id="baseLineConsumption"
+                      id="baselineConsumption"
+                      type="number"
                       label="Base Line Consumption"
-                      error={!!errors.baseLineConsumption}
+                      error={!!errors.baselineConsumption}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("baseLineConsumption", { required: true })}
+                      {...register("baselineConsumption", { required: true })}
                     />
                     <TextField
                       required
-                      id="ghcEmmision"
-                      label="GHC Emmision"
-                      error={!!errors.ghcEmmision}
+                      id="ghgEmission"
+                      type="number"
+                      label="GHG Emmision"
+                      error={!!errors.ghgEmission}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("ghcEmmision", { required: true })}
+                      {...register("ghgEmission", { required: true })}
                     />
                   </Box>
                   <Box
@@ -624,7 +637,7 @@ export default function AddOrEditTargetSettingsDialog({
                   >
                     <Controller
                       control={control}
-                      name={"problems"}
+                      name={"problem"}
                       render={({ field }) => {
                         return (
                           <RichTextComponent
@@ -720,71 +733,86 @@ export default function AddOrEditTargetSettingsDialog({
                       }}
                     />
                   </Box>
-                  <Controller
-                    name="possibilityCategory"
-                    control={control}
-                    defaultValue={defaultValues?.possibilityCategory ?? ""}
-                    {...register("possibilityCategory", { required: true })}
-                    render={({ field }) => (
-                      <Autocomplete
-                        {...field}
-                        onChange={(event, newValue) => field.onChange(newValue)}
-                        size="small"
-                        options={
-                          divisionData?.length
-                            ? divisionData.map(
-                                (division) => division.divisionName
-                              )
-                            : []
-                        }
-                        sx={{ flex: 1, margin: "0.5rem" }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            required
-                            error={!!errors.possibilityCategory}
-                            helperText={
-                              errors.possibilityCategory && "Required"
-                            }
-                            label="Possibility Category"
-                            name="possibilityCategory"
-                          />
-                        )}
-                      />
-                    )}
-                  />
 
-                  <Controller
-                    name="opportunity"
-                    control={control}
-                    defaultValue={defaultValues?.opportunity ?? ""}
-                    {...register("opportunity", { required: true })}
-                    render={({ field }) => (
-                      <Autocomplete
-                        {...field}
-                        onChange={(event, newValue) => field.onChange(newValue)}
-                        size="small"
-                        options={
-                          divisionData?.length
-                            ? divisionData.map(
-                                (division) => division.divisionName
-                              )
-                            : []
-                        }
-                        sx={{ flex: 1, margin: "0.5rem" }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            required
-                            error={!!errors.opportunity}
-                            helperText={errors.opportunity && "Required"}
-                            label="Opportunity"
-                            name="opportunity"
-                          />
-                        )}
-                      />
-                    )}
-                  />
+                  {category && (
+                    <Controller
+                      name="possibilityCategory"
+                      control={control}
+                      defaultValue={defaultValues?.possibilityCategory ?? ""}
+                      {...register("possibilityCategory", { required: true })}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(e, value) => {
+                            console.log("e", e);
+                            reset({
+                              category: watch("category"),
+                              possibilityCategory: value,
+                              opertunity: null,
+                            });
+                          }}
+                          size="small"
+                          options={
+                            possibilityCategoryData?.length
+                              ? possibilityCategoryData.map(
+                                  (category) => category.possibilityCategory
+                                )
+                              : []
+                          }
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              required
+                              error={!!errors.possibilityCategory}
+                              helperText={
+                                errors.possibilityCategory && "Required"
+                              }
+                              label="Possibility Category"
+                              name="possibilityCategory"
+                            />
+                          )}
+                        />
+                      )}
+                    />
+                  )}
+
+                  {category && possibilityCategory && (
+                    <Controller
+                      name="opertunity"
+                      control={control}
+                      defaultValue={defaultValues?.opertunity ?? ""}
+                      {...register("opertunity")}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(event, newValue) =>
+                            field.onChange(newValue)
+                          }
+                          size="small"
+                          options={
+                            opportunityData?.length
+                              ? opportunityData.map(
+                                  (category) => category.opertunity
+                                )
+                              : []
+                          }
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              required
+                              error={!!errors.opertunity}
+                              // helperText={errors.opertunity && "Required"}
+                              label="Opportunity"
+                              name="opertunity"
+                            />
+                          )}
+                        />
+                      )}
+                    />
+                  )}
+
                   <Box
                     sx={{
                       display: "flex",
@@ -859,12 +887,12 @@ export default function AddOrEditTargetSettingsDialog({
                     />
                     <TextField
                       required
-                      id="targetGhcRedution"
-                      label="Target GHC Redution"
-                      error={!!errors.targetGhcRedution}
+                      id="targetGHGReduction"
+                      label="Target GHG Redution"
+                      error={!!errors.targetGHGReduction}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("targetGhcRedution", { required: true })}
+                      {...register("targetGHGReduction", { required: true })}
                     />
                   </Box>
                   <Box
@@ -875,12 +903,12 @@ export default function AddOrEditTargetSettingsDialog({
                   >
                     <TextField
                       required
-                      id="costSaving"
+                      id="costSavings"
                       label="Cost Saving"
-                      error={!!errors.costSaving}
+                      error={!!errors.costSavings}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("costSaving", { required: true })}
+                      {...register("costSavings", { required: true })}
                     />
                     <TextField
                       required
@@ -904,10 +932,10 @@ export default function AddOrEditTargetSettingsDialog({
                   <Box sx={{ margin: "0.5rem" }}>
                     <Controller
                       control={control}
-                      {...register("implementationTimeline", {
+                      {...register("implementationTime", {
                         required: false,
                       })}
-                      name={"implementationTimeline"}
+                      name={"implementationTime"}
                       render={({ field }) => {
                         return (
                           <DatePickerComponent

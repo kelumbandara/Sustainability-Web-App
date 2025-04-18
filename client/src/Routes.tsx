@@ -499,6 +499,18 @@ const AppRoutes = () => {
             MainLayout,
             TargetSettingsTable,
             !userPermissionObject?.[
+              PermissionKeys.ENVIRONMENT_HISTORY_TARGET_SETTING_VIEW
+            ]
+          )}
+        />
+        <Route
+          path="/environment/assigned-tasks/target-setting"
+          element={withLayout(
+            MainLayout,
+            () => (
+              <TargetSettingsTable isAssignedTasks={true} />
+            ),
+            !userPermissionObject?.[
               PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_TARGET_SETTING_VIEW
             ]
           )}

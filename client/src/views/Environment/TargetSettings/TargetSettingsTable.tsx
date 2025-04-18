@@ -83,35 +83,41 @@ function TargetSettingsTable({
     theme.breakpoints.down("md")
   );
 
-  const { data: gettargetSettingsData, isFetching: isRiskDataFetching } =
+  const { data: targetSettingsData, isFetching: isTargetSettingsData } =
     useQuery({
       queryKey: ["targetSettings"],
       queryFn: getTargetSettings,
-    }); //need to change
+    });
 
   const {
-    data: assignedtargetSettingsData,
+    data: assignedTargetSettingsData,
     isFetching: isAssignedRiskDataFetching,
   } = useQuery({
     queryKey: ["assigned-targetSettings"],
     queryFn: getAssignedTargetSettings,
-  }); //need to change
+  });
 
-  //   const paginatedRiskData = useMemo(() => {
-  //     if (isAssignedTasks) {
-  //       if (!assignedRiskData) return [];
-  //       return assignedRiskData.slice(
-  //         page * rowsPerPage,
-  //         page * rowsPerPage + rowsPerPage
-  //       );
-  //     } else {
-  //       if (!riskData) return [];
-  //       return riskData.slice(
-  //         page * rowsPerPage,
-  //         page * rowsPerPage + rowsPerPage
-  //       );
-  //     }
-  //   }, [isAssignedTasks, assignedRiskData, page, rowsPerPage, riskData]);
+  const paginatedgetTargetSettingsData = useMemo(() => {
+    if (isAssignedTasks) {
+      if (!assignedTargetSettingsData) return [];
+      return assignedTargetSettingsData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
+    } else {
+      if (!targetSettingsData) return [];
+      return targetSettingsData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
+    }
+  }, [
+    isAssignedTasks,
+    assignedTargetSettingsData,
+    page,
+    rowsPerPage,
+    targetSettingsData,
+  ]);
 
   const { mutate: createTargetSettingsMutation } = useMutation({
     mutationFn: createTargetSettings,
@@ -130,7 +136,7 @@ function TargetSettingsTable({
         variant: "error",
       });
     },
-  }); //need to change
+  });
 
   const { mutate: updateTargetSettingsMutation } = useMutation({
     mutationFn: updateTargetSettings,
@@ -149,7 +155,7 @@ function TargetSettingsTable({
         variant: "error",
       });
     },
-  }); //need to change
+  });
 
   const { mutate: deleteTargetSettingsMutation } = useMutation({
     mutationFn: deleteTargetSettings,
@@ -168,7 +174,7 @@ function TargetSettingsTable({
         variant: "error",
       });
     },
-  }); //need to change
+  });
 
   const isRiskCreateDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_TARGET_SETTING_CREATE
@@ -240,7 +246,7 @@ function TargetSettingsTable({
               </Button>
             </Box>
           )}
-          {(isRiskDataFetching || isAssignedRiskDataFetching) && (
+          {(isTargetSettingsData || isAssignedRiskDataFetching) && (
             <LinearProgress sx={{ width: "100%" }} />
           )}
           <Table aria-label="simple table">
@@ -259,8 +265,8 @@ function TargetSettingsTable({
               </TableRow>
             </TableHead>
             <TableBody>
-              {targetSettingsData?.length > 0 ? (
-                targetSettingsData?.map((row) => (
+              {paginatedgetTargetSettingsData?.length > 0 ? (
+                paginatedgetTargetSettingsData?.map((row) => (
                   <TableRow
                     key={`${row.id}`}
                     sx={{
@@ -272,19 +278,18 @@ function TargetSettingsTable({
                       setOpenViewDrawer(true);
                     }}
                   >
-                    <TableCell align="right">{row.id}</TableCell>
+                    <TableCell align="right">{row.referenceNumber}</TableCell>
 
                     <TableCell align="right">{row.division}</TableCell>
                     <TableCell align="right">{row.department}</TableCell>
                     <TableCell align="right">{row.category}</TableCell>
                     <TableCell align="right">{row.source}</TableCell>
-                    <TableCell align="center">{row.responsible.name}</TableCell>
-                    <TableCell align="center">{row.approver.name}</TableCell>
+                    <TableCell align="center">
+                      {row.responsible?.name}
+                    </TableCell>
+                    <TableCell align="center">{row.approver?.name}</TableCell>
                     <TableCell align="right">
-                      {format(
-                        new Date(row.implementationTimeline),
-                        "yyyy-MM-dd"
-                      )}
+                      {format(new Date(row.created_at), "yyyy-MM-dd")}
                     </TableCell>
                     {/* <TableCell align="right">{row.progress}</TableCell> */}
                     <TableCell align="right">{row.status}</TableCell>
@@ -305,7 +310,7 @@ function TargetSettingsTable({
                   colSpan={100}
                   count={
                     isAssignedTasks
-                      ? targetSettingsData?.length
+                      ? assignedTargetSettingsData?.length
                       : targetSettingsData?.length
                   }
                   rowsPerPage={rowsPerPage}
