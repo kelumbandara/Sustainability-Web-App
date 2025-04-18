@@ -25,18 +25,17 @@ import {
   personTypes,
   industryExperience,
 } from "../../../constants/accidentConstants";
-import {
-  ConsumptionSchema,
-  Environment,
-} from "../../../api/Environment/environmentApi";
+import { Consumption } from "../../../api/Environment/environmentApi";
 import { fetchDivision } from "../../../api/divisionApi";
 import { useQuery } from "@tanstack/react-query";
+import RichTextComponent from "../../../components/RichTextComponent";
+import FormDataSwitchButton from "../../../components/FormDataSwitchButton";
 
 type DialogProps = {
   open: boolean;
   handleClose: () => void;
-  defaultValues?: ConsumptionSchema;
-  onSubmit: (data: ConsumptionSchema) => void;
+  defaultValues?: Consumption;
+  onSubmit: (data: Consumption) => void;
 };
 
 export default function AddOrEditAdditionalDialog({
@@ -55,7 +54,7 @@ export default function AddOrEditAdditionalDialog({
     formState: { errors },
     reset,
     setValue,
-  } = useForm<ConsumptionSchema>({
+  } = useForm<Consumption>({
     defaultValues,
   });
 
@@ -85,7 +84,7 @@ export default function AddOrEditAdditionalDialog({
       }}
       fullWidth
       fullScreen={isMobile}
-      maxWidth={"sm"}
+      maxWidth={"lg"}
       PaperProps={{
         style: {
           backgroundColor: grey[50],
@@ -102,7 +101,7 @@ export default function AddOrEditAdditionalDialog({
         }}
       >
         <Typography variant="h6" component="div">
-          {defaultValues ? "Edit Person" : "Add Person"}
+          {defaultValues ? "Edit Consumption" : "Add Consumption"}
         </Typography>
         <IconButton
           aria-label="open drawer"
@@ -120,134 +119,222 @@ export default function AddOrEditAdditionalDialog({
         <Stack
           sx={{
             display: "flex",
-            direction: "row",
+            direction: "column",
             flex: { lg: 3, md: 1 },
             padding: "0.5rem",
             borderRadius: "0.3rem",
           }}
         >
-          <Controller
-            name="category"
-            control={control}
-            defaultValue={defaultValues?.category ?? ""}
-            {...register("category", { required: true })}
-            render={({ field }) => (
-              <Autocomplete
-                {...field}
-                onChange={(event, newValue) => field.onChange(newValue)}
-                size="small"
-                options={
-                  divisionData?.length
-                    ? divisionData.map((sdg) => sdg.divisionName)
-                    : []
-                }
-                sx={{ flex: 1, margin: "0.5rem" }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    error={!!errors.category}
-                    helperText={errors.category && "Required"}
-                    label="Category"
-                    name="category"
+          <Stack
+            sx={{
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              padding: "0.5rem",
+              borderRadius: "0.3rem",
+            }}
+          >
+            <Controller
+              name="category"
+              control={control}
+              defaultValue={defaultValues?.category ?? ""}
+              {...register("category", { required: true })}
+              render={({ field }) => (
+                <Autocomplete
+                  {...field}
+                  onChange={(event, newValue) => field.onChange(newValue)}
+                  size="small"
+                  options={
+                    divisionData?.length
+                      ? divisionData.map((sdg) => sdg.divisionName)
+                      : []
+                  }
+                  sx={{ flex: 1, margin: "0.5rem" }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      required
+                      error={!!errors.category}
+                      helperText={errors.category && "Required"}
+                      label="Category"
+                      name="category"
+                    />
+                  )}
+                />
+              )}
+            />
+            <Controller
+              name="source"
+              control={control}
+              defaultValue={defaultValues?.source ?? ""}
+              {...register("source", { required: true })}
+              render={({ field }) => (
+                <Autocomplete
+                  {...field}
+                  onChange={(event, newValue) => field.onChange(newValue)}
+                  size="small"
+                  options={
+                    divisionData?.length
+                      ? divisionData.map((sdg) => sdg.divisionName)
+                      : []
+                  }
+                  sx={{ flex: 1, margin: "0.5rem" }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      required
+                      error={!!errors.source}
+                      helperText={errors.source && "Required"}
+                      label="Source"
+                      name="source"
+                    />
+                  )}
+                />
+              )}
+            />
+            <Controller
+              name="unit"
+              control={control}
+              defaultValue={defaultValues?.unit ?? ""}
+              {...register("unit", { required: true })}
+              render={({ field }) => (
+                <Autocomplete
+                  {...field}
+                  onChange={(event, newValue) => field.onChange(newValue)}
+                  size="small"
+                  options={
+                    divisionData?.length
+                      ? divisionData.map((sdg) => sdg.divisionName)
+                      : []
+                  }
+                  sx={{ flex: 1, margin: "0.5rem" }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      required
+                      error={!!errors.unit}
+                      helperText={errors.unit && "Required"}
+                      label="Unit"
+                      name="unit"
+                    />
+                  )}
+                />
+              )}
+            />
+          </Stack>
+          <Stack
+            sx={{
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              padding: "0.5rem",
+              borderRadius: "0.3rem",
+            }}
+          >
+            <TextField
+              required
+              id="quentity"
+              type="number"
+              label="Quantity"
+              error={!!errors.quentity}
+              size="small"
+              sx={{ flex: 1, margin: "0.5rem" }}
+              {...register("quentity", { required: true })}
+            />
+            <TextField
+              required
+              id="amount"
+              type="number"
+              label="Amount"
+              error={!!errors.amount}
+              size="small"
+              sx={{ flex: 1, margin: "0.5rem" }}
+              {...register("amount", { required: true })}
+            />
+            <TextField
+              required
+              id="ghgInTonnes"
+              type="number"
+              label="GHG in Tonnes"
+              error={!!errors.ghgInTonnes}
+              size="small"
+              sx={{ flex: 1, margin: "0.5rem" }}
+              {...register("ghgInTonnes", { required: true })}
+            />
+          </Stack>
+          <Stack
+            sx={{
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              padding: "0.5rem",
+              borderRadius: "0.3rem",
+            }}
+          >
+            <TextField
+              required
+              id="scope"
+              label="Scope"
+              error={!!errors.scope}
+              size="small"
+              sx={{ flex: 1, margin: "0.5rem" }}
+              {...register("scope", { required: true })}
+            />
+            <TextField
+              required
+              id="methodeOfTracking"
+              label="Methode Of Tracking"
+              error={!!errors.methodeOfTracking}
+              size="small"
+              sx={{ flex: 1, margin: "0.5rem" }}
+              {...register("methodeOfTracking", { required: true })}
+            />
+            <TextField
+              required
+              id="usageType"
+              label="Usage Type"
+              error={!!errors.usageType}
+              size="small"
+              sx={{ flex: 1, margin: "0.5rem" }}
+              {...register("usageType", { required: true })}
+            />
+          </Stack>
+          <Box
+            sx={{
+              margin: "1rem"
+            }}
+          >
+            <Controller
+              control={control}
+              name={"doYouHaveREC"}
+              render={({ field }) => {
+                return (
+                  <FormDataSwitchButton
+                    label="Do You Have Records"
+                    onChange={field.onChange}
+                    value={field.value}
                   />
-                )}
-              />
-            )}
-          />
-
-          <Controller
-            name="source"
-            control={control}
-            defaultValue={defaultValues?.source ?? ""}
-            {...register("source", { required: true })}
-            render={({ field }) => (
-              <Autocomplete
-                {...field}
-                onChange={(event, newValue) => field.onChange(newValue)}
-                size="small"
-                options={
-                  divisionData?.length
-                    ? divisionData.map((sdg) => sdg.divisionName)
-                    : []
-                }
-                sx={{ flex: 1, margin: "0.5rem" }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    error={!!errors.source}
-                    helperText={errors.source && "Required"}
-                    label="Source"
-                    name="source"
+                );
+              }}
+            />
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              margin: "0.5rem",
+            }}
+          >
+            <Controller
+              control={control}
+              name={"description"}
+              render={({ field }) => {
+                return (
+                  <RichTextComponent
+                    onChange={(e) => field.onChange(e)}
+                    placeholder={field.value ?? "Description"}
                   />
-                )}
-              />
-            )}
-          />
-
-          <Controller
-            name="unit"
-            control={control}
-            defaultValue={defaultValues?.unit ?? ""}
-            {...register("unit", { required: true })}
-            render={({ field }) => (
-              <Autocomplete
-                {...field}
-                onChange={(event, newValue) => field.onChange(newValue)}
-                size="small"
-                options={
-                  divisionData?.length
-                    ? divisionData.map((sdg) => sdg.divisionName)
-                    : []
-                }
-                sx={{ flex: 1, margin: "0.5rem" }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    error={!!errors.unit}
-                    helperText={errors.unit && "Required"}
-                    label="Unit"
-                    name="unit"
-                  />
-                )}
-              />
-            )}
-          />
-
-          <TextField
-            required
-            id="quentity"
-            type="number"
-            label="Quantity"
-            error={!!errors.quentity}
-            size="small"
-            sx={{ flex: 1, margin: "0.5rem" }}
-            {...register("quentity", { required: true })}
-          />
-
-          <TextField
-            required
-            id="amount"
-            type="number"
-            label="Amount"
-            error={!!errors.amount}
-            size="small"
-            sx={{ flex: 1, margin: "0.5rem" }}
-            {...register("amount", { required: true })}
-          />
-
-          <TextField
-            required
-            id="ghgInTonnes"
-            type="number"
-            label="GHG in Tonnes"
-            error={!!errors.ghgInTonnes}
-            size="small"
-            sx={{ flex: 1, margin: "0.5rem" }}
-            {...register("ghgInTonnes", { required: true })}
-          />
+                );
+              }}
+            />
+          </Box>
         </Stack>
       </DialogContent>
       <Divider />
@@ -273,7 +360,7 @@ export default function AddOrEditAdditionalDialog({
             handleClose();
           })}
         >
-          {defaultValues ? "Update Changes" : "Add Person"}
+          {defaultValues ? "Update Changes" : "Add Consumption"}
         </CustomButton>
       </DialogActions>
     </Dialog>

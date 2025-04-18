@@ -32,6 +32,7 @@ import {
   getConsumptionList,
   updateConsumption,
   deleteConsumption,
+  getConsumptionAssignedList,
 } from "../../../api/Environment/environmentApi";
 import ViewDocumentContent from "./ViewConsumptionContent";
 import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
@@ -42,7 +43,7 @@ import useCurrentUserHaveAccess from "../../../hooks/useCurrentUserHaveAccess";
 import { PermissionKeys } from "../../Administration/SectionList";
 import { environmentData } from "../../../api/sampleData/consumptionData";
 
-function ConsumptionTable() {
+function ConsumptionTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<Environment>(null);
@@ -68,7 +69,7 @@ function ConsumptionTable() {
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
-    { title: "Consumption Management" },
+    { title: `${isAssignedTasks ? "Assigned " : ""}Consumption Management` },
   ];
 
   const isMobile = useMediaQuery((theme: Theme) =>
@@ -80,6 +81,14 @@ function ConsumptionTable() {
       queryKey: ["consumptionRecords"],
       queryFn: getConsumptionList,
     });
+
+  const {
+    data: assignedConsumptionData,
+    isFetching: isConsumptionAssignedDataFetching,
+  } = useQuery({
+    queryKey: ["assigned-consumptionRecords"],
+    queryFn: getConsumptionAssignedList,
+  });
 
   const { mutate: createConsumptionMutation } = useMutation({
     mutationFn: createConsumption,
@@ -135,13 +144,46 @@ function ConsumptionTable() {
     },
   });
 
-  //   const paginatedDocumentData = useMemo(() => {
-  //     if (!documents) return [];
-  //     return documents.slice(
-  //       page * rowsPerPage,
-  //       page * rowsPerPage + rowsPerPage
-  //     );
-  //   }, [documents, page, rowsPerPage]);
+  const paginatedConsumptionData = useMemo(() => {
+    if (isAssignedTasks) {
+      if (!assignedConsumptionData) return [];
+      return assignedConsumptionData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
+    } else {
+      if (!consumptionData) return [];
+      return consumptionData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
+    }
+  }, [
+    isAssignedTasks,
+    assignedConsumptionData,
+    page,
+    rowsPerPage,
+    consumptionData,
+  ]);
+
+  const isConsumptionCreateDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.ENVIRONMENT_HISTORY_CONSUMPTION_CREATE
+  );
+  const isConsumptionEditDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.ENVIRONMENT_HISTORY_CONSUMPTION_EDIT
+  );
+  const isConsumptionDeleteDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.ENVIRONMENT_HISTORY_CONSUMPTION_DELETE
+  );
+  const isConsumptionAssignCreateDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_CONSUMPTION_CREATE
+  );
+  const isConsumptionAssignEditDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_CONSUMPTION_EDIT
+  );
+  const isConsumptionAssignDeleteDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_CONSUMPTION_DELETE
+  );
 
   return (
     <Stack>
@@ -154,7 +196,7 @@ function ConsumptionTable() {
           overflowX: "hidden",
         }}
       >
-        <PageTitle title="Consumption Management" />
+        <PageTitle title="Environment Management" />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
       <Stack sx={{ alignItems: "center" }}>
@@ -166,31 +208,33 @@ function ConsumptionTable() {
             maxWidth: isMobile ? "88vw" : "100%",
           }}
         >
-          <Box
-            sx={{
-              padding: theme.spacing(2),
-              display: "flex",
-              justifyContent: "flex-end",
-            }}
-          >
-            <Button
-              variant="contained"
-              sx={{ backgroundColor: "var(--pallet-blue)" }}
-              startIcon={<AddIcon />}
-              onClick={() => {
-                setSelectedRow(null);
-                setOpenAddOrEditDialog(true);
+          {!isAssignedTasks && (
+            <Box
+              sx={{
+                padding: theme.spacing(2),
+                display: "flex",
+                justifyContent: "flex-end",
               }}
-              disabled={
-                !useCurrentUserHaveAccess(
-                  PermissionKeys.ENVIRONMENT_HISTORY_CONSUMPTION_VIEW
-                )
-              }
             >
-              Add New Consumption
-            </Button>
-          </Box>
-          {isConsumptionDataFetching && (
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: "var(--pallet-blue)" }}
+                startIcon={<AddIcon />}
+                onClick={() => {
+                  setSelectedRow(null);
+                  setOpenAddOrEditDialog(true);
+                }}
+                disabled={
+                  isAssignedTasks
+                    ? isConsumptionAssignCreateDisabled
+                    : isConsumptionCreateDisabled
+                }
+              >
+                Report a Consumption
+              </Button>
+            </Box>
+          )}
+          {(isConsumptionAssignedDataFetching || isConsumptionDataFetching) && (
             <LinearProgress sx={{ width: "100%" }} />
           )}
           <Table aria-label="simple table">
@@ -210,8 +254,8 @@ function ConsumptionTable() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {environmentData?.length > 0 ? (
-                environmentData.map((row) => (
+              {paginatedConsumptionData?.length > 0 ? (
+                paginatedConsumptionData.map((row) => (
                   <TableRow
                     key={`${row.referenceNumber}`}
                     sx={{
@@ -230,25 +274,23 @@ function ConsumptionTable() {
                     <TableCell align="right">{row.month}</TableCell>
                     <TableCell align="right">{row.division}</TableCell>
                     <TableCell align="right">{row.totalWorkForce}</TableCell>
-                    <TableCell align="right">{row.numberOfDaysWorked}</TableCell>
+                    <TableCell align="right">
+                      {row.numberOfDaysWorked}
+                    </TableCell>
                     <TableCell align="right">
                       {row.totalProuctProducedkg}
                     </TableCell>
-                    <TableCell align="right">
-                      {row.areaInSquereMeter}
-                    </TableCell>
-                    <TableCell align="right">
-                      {row.reviewer.name}
-                    </TableCell>
-                    <TableCell align="right">
-                      {row.approver.name}
-                    </TableCell>
+                    <TableCell align="right">{row.areaInSquereMeter}</TableCell>
+                    <TableCell align="right">{row.reviewer?.name}</TableCell>
+                    <TableCell align="right">{row.approver?.name}</TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
                   <TableCell colSpan={11} align="center">
-                    <Typography variant="body2">No Consumptions found</Typography>
+                    <Typography variant="body2">
+                      No Consumptions found
+                    </Typography>
                   </TableCell>
                 </TableRow>
               )}
@@ -258,7 +300,11 @@ function ConsumptionTable() {
                 <TablePagination
                   rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
                   colSpan={100}
-                  count={environmentData?.length ?? 0}
+                  count={
+                    isAssignedTasks
+                      ? assignedConsumptionData?.length
+                      : consumptionData?.length
+                  }
                   rowsPerPage={rowsPerPage}
                   page={page}
                   showFirstButton={true}
@@ -285,13 +331,15 @@ function ConsumptionTable() {
                 setOpenAddOrEditDialog(true);
               }}
               disableEdit={
-                !useCurrentUserHaveAccess(PermissionKeys.ENVIRONMENT_HISTORY_CONSUMPTION_EDIT)
+                isAssignedTasks
+                  ? isConsumptionAssignEditDisabled
+                  : isConsumptionEditDisabled
               }
               onDelete={() => setDeleteDialogOpen(true)}
               disableDelete={
-                !useCurrentUserHaveAccess(
-                  PermissionKeys.ENVIRONMENT_HISTORY_CONSUMPTION_DELETE
-                )
+                isAssignedTasks
+                  ? isConsumptionAssignDeleteDisabled
+                  : isConsumptionDeleteDisabled
               }
             />
 

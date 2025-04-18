@@ -34,7 +34,7 @@ export const environmentData = [
       email: "john.approver@example.com"
     },
     status: "Approved",
-    area: "Western Zone",
+    area: 5,
     year: "2025",
     month: "March",
     totalProuctProducedPcs: 50000,

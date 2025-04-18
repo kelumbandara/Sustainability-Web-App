@@ -506,6 +506,19 @@ const AppRoutes = () => {
             ]
           )}
         />
+        <Route
+          path="/environment/assigned-tasks/consumption"
+          element={withLayout(
+            MainLayout,
+            () => (
+              <EnvironmentTable isAssignedTasks={true} />
+            ),
+            !userPermissionObject?.[
+              PermissionKeys
+                .ENVIRONMENT_ASSIGNED_TASKS_CONSUMPTION_VIEW
+            ]
+          )}
+        />
       </Route>
     </Routes>
   );

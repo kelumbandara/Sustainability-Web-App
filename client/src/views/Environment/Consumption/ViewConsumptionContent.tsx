@@ -146,10 +146,10 @@ function ViewDocumentContent({ consumption }: { consumption: Environment }) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {consumption?.consumption?.length > 0 ? (
-              consumption?.consumption?.map((row) => (
+            {consumption?.impactConsumption?.length > 0 ? (
+              consumption?.impactConsumption?.map((row) => (
                 <TableRow
-                  key={`${row.concumptionsId}`}
+                  key={`${row.consumptionsId}`}
                   sx={{
                     "&:last-child td, &:last-child th": { border: 0 },
                     cursor: "pointer",

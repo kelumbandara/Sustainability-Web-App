@@ -33,7 +33,10 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../../api/divisionApi";
 import theme from "../../../theme";
 import { fetchAllDocumentType } from "../../../api/documentType";
-import { Environment } from "../../../api/Environment/environmentApi";
+import {
+  Consumption,
+  Environment,
+} from "../../../api/Environment/environmentApi";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -60,7 +63,8 @@ export default function AddOrEditConsumptionDialog({
     useState<Environment>(null);
   const [openAddOrEditAdditionalDialog, setOpenAddOrEditAdditionalDialog] =
     useState(false);
-
+  const [selectedConsumption, setSelectedConsumption] =
+    useState<Consumption>(null);
   const {
     register,
     handleSubmit,
@@ -103,14 +107,17 @@ export default function AddOrEditConsumptionDialog({
     reset();
     setFiles([]);
   };
-  const consumptionWatch = watch("consumption");
+  const consumptionWatch = watch("impactConsumption");
   const selectMonth = watch("month");
   const selectYear = watch("year");
   const selectDivision = watch("division");
+  const reviewer = watch("reviewer");
+  const approver = watch("approver");
 
   const handleCreateDocument = (data: Environment) => {
-    const { ...rest } = data;
-    const submitData: Partial<Environment> = rest;
+    const submitData: Partial<Environment> = data;
+    submitData.reviewerId = reviewer.id
+    submitData.approverId = approver.id
     onSubmit(submitData as Environment);
     resetForm();
   };
@@ -199,6 +206,7 @@ export default function AddOrEditConsumptionDialog({
               >
                 <TextField
                   required
+                  type="number"
                   id="totalWorkForce"
                   label="Total WorkForce"
                   error={!!errors.totalWorkForce}
@@ -217,12 +225,12 @@ export default function AddOrEditConsumptionDialog({
                 />
                 <TextField
                   required
-                  id="areaInSquereMeter"
+                  id="area"
                   label="Area In Squre Meter"
-                  error={!!errors.areaInSquereMeter}
+                  error={!!errors.area}
                   size="small"
                   sx={{ flex: 1, margin: "0.5rem" }}
-                  {...register("areaInSquereMeter", { required: true })}
+                  {...register("area", { required: true })}
                 />
               </Box>
               <Box
@@ -285,8 +293,7 @@ export default function AddOrEditConsumptionDialog({
                     >
                       {!selectMonth || !selectYear || !selectDivision ? (
                         <>
-                          Additional Details{" "}
-                          <WidgetsIcon/>
+                          Additional Details <WidgetsIcon />
                           &nbsp;Please select Division, Year, and Month
                         </>
                       ) : (
@@ -315,7 +322,7 @@ export default function AddOrEditConsumptionDialog({
                       {consumptionWatch?.length > 0 ? (
                         consumptionWatch?.map((row) => (
                           <TableRow
-                            key={`${row.concumptionsId}`}
+                            // key={`${row.concumptionsId}`}
                             sx={{
                               "&:last-child td, &:last-child th": {
                                 border: 0,
@@ -327,7 +334,7 @@ export default function AddOrEditConsumptionDialog({
                             }}
                           >
                             <TableCell align="center">
-                              {row.concumptionsId}
+                              {row.consumptionsId}
                             </TableCell>
                             <TableCell
                               component="th"
@@ -346,7 +353,7 @@ export default function AddOrEditConsumptionDialog({
                             <TableCell align="center">
                               <IconButton
                                 onClick={() => {
-                                  setSelectedEnvironment(row);
+                                  setSelectedConsumption(row);
                                   setOpenAddOrEditAdditionalDialog(true);
                                 }}
                               >
@@ -355,11 +362,11 @@ export default function AddOrEditConsumptionDialog({
                               <IconButton
                                 onClick={() => {
                                   setValue(
-                                    "consumption",
+                                    "impactConsumption",
                                     (consumptionWatch ?? []).filter(
                                       (item) =>
-                                        item.concumptionsId !==
-                                        row.concumptionsId
+                                        item.consumptionsId !==
+                                        row.consumptionsId
                                     )
                                   );
                                 }}
@@ -503,8 +510,8 @@ export default function AddOrEditConsumptionDialog({
 
               <Box>
                 <UserAutoComplete
-                  name="reviwer"
-                  label="Reviwer"
+                  name="reviewer"
+                  label="Reviewer"
                   control={control}
                   register={register}
                   errors={errors}
@@ -547,11 +554,11 @@ export default function AddOrEditConsumptionDialog({
           handleClose={() => setOpenAddOrEditAdditionalDialog(false)}
           onSubmit={(data) => {
             console.log("Adding new Consumption", data);
-            if (selectedEnvironment) {
-              setValue("consumption", [
+            if (selectedConsumption) {
+              setValue("impactConsumption", [
                 ...(consumptionWatch ?? []).map((item) => {
                   if (
-                    item.concumptionsId === selectedEnvironment.concumptionsId
+                    item.consumptionsId === selectedConsumption.consumptionsId
                   ) {
                     return data;
                   }
@@ -559,12 +566,12 @@ export default function AddOrEditConsumptionDialog({
                 }),
               ]);
             } else {
-              setValue("consumption", [...(consumptionWatch ?? []), data]);
+              setValue("impactConsumption", [...(consumptionWatch ?? []), data]);
             }
             setOpenAddOrEditAdditionalDialog(false);
             setSelectedEnvironment(null);
           }}
-          defaultValues={selectedEnvironment}
+          defaultValues={selectedConsumption}
         />
       )}
     </>
