@@ -492,7 +492,12 @@ const AppRoutes = () => {
             ]
           )}
         />
-
+        <Route
+          path="/environment/dashboard"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Environment > Dashboard" />
+          ))}
+        />
         <Route
           path="/environment/history/target-setting"
           element={withLayout(
@@ -514,6 +519,18 @@ const AppRoutes = () => {
               PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_TARGET_SETTING_VIEW
             ]
           )}
+        />
+        <Route
+          path="/environment/history/consumption"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Environment > History > Consumption" />
+          ))}
+        />
+        <Route
+          path="/environment/assigned-tasks/consumption"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Environment > Assign Tasks > Consumption" />
+          ))}
         />
       </Route>
     </Routes>
