@@ -658,7 +658,7 @@ export default function AddOrEditChemicalRequestDialog({
             handleCreateRequest(data);
           })}
         >
-          {defaultValues ? "Update Changes" : "Save Patient"}
+          {defaultValues ? "Update Changes" : "Save Chemical Request"}
         </CustomButton>
       </DialogActions>
     </Dialog>

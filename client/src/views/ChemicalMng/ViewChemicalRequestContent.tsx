@@ -1,15 +1,24 @@
-import { Box, Divider, Stack } from "@mui/material";
+import { Alert, Box, Chip, Divider, Stack, Typography } from "@mui/material";
 import { format } from "date-fns";
 import useIsMobile from "../../customHooks/useIsMobile";
-import { ChemicalRequest } from "../../api/ChemicalManagement/ChemicalRequestApi";
+import {
+  ChemicalRequest,
+  ChemicalRequestStatus,
+} from "../../api/ChemicalManagement/ChemicalRequestApi";
 import { DrawerContentItem } from "../../components/ViewDataDrawer";
+import CustomButton from "../../components/CustomButton";
+import { useState } from "react";
+import ApproveConfirmationModal from "../OccupationalHealth/MedicineInventory/MedicineRequest/ApproveConfirmationModal";
 
 function ViewChemicalRequestContent({
   chemicalRequest,
+  handleCloseViewDrawer,
 }: {
   chemicalRequest: ChemicalRequest;
+  handleCloseViewDrawer: () => void;
 }) {
   const { isTablet } = useIsMobile();
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false);
 
   return (
     <Stack
@@ -68,7 +77,7 @@ function ViewChemicalRequestContent({
           />
           <DrawerContentItem
             label="Molecular Formula"
-            value={chemicalRequest.formula}
+            value={chemicalRequest.molecular_formula}
             sx={{ flex: 1 }}
           />
         </Box>
@@ -117,7 +126,7 @@ function ViewChemicalRequestContent({
         >
           <DrawerContentItem
             label="ZDHC Use Category"
-            value={chemicalRequest.ZDHC_use_category}
+            value={chemicalRequest.zdhc_use_category}
             sx={{ flex: 1 }}
           />
           <DrawerContentItem
@@ -128,7 +137,7 @@ function ViewChemicalRequestContent({
         </Box>
         <DrawerContentItem
           label="Where and Why it is used"
-          value={chemicalRequest.usage}
+          value={chemicalRequest.where_and_why_it_is_used}
           sx={{ flex: 1 }}
         />
         <DrawerContentItem
@@ -176,8 +185,46 @@ function ViewChemicalRequestContent({
           height: "fit-content",
         }}
       >
-        <DrawerContentItem label="Reviewer" value={chemicalRequest.reviewer} />
-        <DrawerContentItem label="Approver" value={chemicalRequest.approver} />
+        <Typography
+          variant="caption"
+          sx={{
+            marginBottom: "0.5rem",
+            color: "var(--pallet-grey)",
+            marginLeft: "0.5rem",
+          }}
+        >
+          Approval Information
+        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            objectFit: "contain",
+            marginBottom: "0.5rem",
+            marginLeft: "0.5rem",
+          }}
+        >
+          {chemicalRequest.status === ChemicalRequestStatus.PENDING ? (
+            <Chip label="Pending" />
+          ) : (
+            <Chip
+              label="Approved"
+              sx={{
+                backgroundColor: "var(--pallet-blue)",
+                color: "white",
+              }}
+            />
+          )}
+        </Box>
+        <DrawerContentItem
+          label="Reviewer"
+          value={chemicalRequest.reviewer?.name}
+        />
+        <DrawerContentItem
+          label="Approver"
+          value={chemicalRequest.approver?.name}
+        />
         <DrawerContentItem
           label="Requested Date"
           value={
@@ -203,7 +250,58 @@ function ViewChemicalRequestContent({
           label="Requested Merchandiser"
           value={chemicalRequest.requested_merchandiser}
         />
+        {chemicalRequest.status === ChemicalRequestStatus.PENDING && (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center",
+              marginTop: "1rem",
+              objectFit: "contain",
+            }}
+          >
+            <CustomButton
+              variant="contained"
+              sx={{
+                backgroundColor: "var(--pallet-blue)",
+                marginTop: "1rem",
+                marginX: "0.5rem",
+              }}
+              size="medium"
+              onClick={() => setApproveDialogOpen(true)}
+            >
+              Approve Medicine Request
+            </CustomButton>
+          </Box>
+        )}
       </Box>
+      {approveDialogOpen && (
+        <ApproveConfirmationModal
+          open={approveDialogOpen}
+          title="Approve Chemical Request Confirmation"
+          content={
+            <>
+              Are you sure you want to approve this chemical request?
+              <Alert severity="warning" style={{ marginTop: "1rem" }}>
+                This action is not reversible.
+              </Alert>
+            </>
+          }
+          handleClose={() => setApproveDialogOpen(false)}
+          approveFunc={async () => {
+            // approveMedicineRequestMutation({ id: selectedRow.id });
+            console.log("Approving chemical request", chemicalRequest.id);
+          }}
+          onSuccess={() => {
+            setApproveDialogOpen(false);
+            handleCloseViewDrawer();
+          }}
+          handleReject={() => {
+            setApproveDialogOpen(false);
+            handleCloseViewDrawer();
+          }}
+        />
+      )}
     </Stack>
   );
 }

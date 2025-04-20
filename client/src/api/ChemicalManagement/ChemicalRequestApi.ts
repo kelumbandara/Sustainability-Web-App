@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { userSchema } from "../userApi";
+import { StorageFileSchema } from "../../utils/StorageFiles.util";
 
 export enum ZdhcUseCategory {
   OTHERS = "Others",
@@ -118,6 +119,12 @@ export enum HazardType {
   HEALTH_HAZARD = "Health Hazard",
 }
 
+export enum ChemicalRequestStatus {
+  PENDING = "Pending",
+  APPROVED = "Approved",
+  PUBLISHED = "Published",
+}
+
 export const ProductStandardSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -144,6 +151,36 @@ export const ChemicalSchema = z.object({
 
 export type Chemical = z.infer<typeof ChemicalSchema>;
 
+export const ChemicalTestLabSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+});
+
+export type ChemicalTestLab = z.infer<typeof ChemicalTestLabSchema>;
+
+export const ChemicalTestPositiveListSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+});
+
+export type ChemicalTestPositiveList = z.infer<
+  typeof ChemicalTestPositiveListSchema
+>;
+
+export const chemicalTestSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  test_date: z.date(),
+  testing_lab: ChemicalTestLabSchema,
+  issued_date: z.date(),
+  expiry_date: z.date(),
+  positive_list: ChemicalTestPositiveListSchema,
+  description: z.string(),
+  documents: z
+    .array(z.union([z.instanceof(File), StorageFileSchema]))
+    .optional(),
+});
+
 export const ChemicalRequestSchema = z.object({
   id: z.string(),
   request_date: z.date(),
@@ -157,7 +194,7 @@ export const ChemicalRequestSchema = z.object({
   division: z.string(),
   requested_customer: z.string(),
   requested_merchandiser: z.string().optional(),
-  status: z.string(),
+  status: z.nativeEnum(ChemicalRequestStatus),
   modified_date: z.string().nullable(),
   chemical_uuid: z.string(),
   reviewer_remarks: z.string().nullable(),
@@ -186,7 +223,25 @@ export const ChemicalRequestSchema = z.object({
   approval_valid_date: z.date().nullable(),
   category: z.string().nullable(),
   reviewer: userSchema,
-  approver: z.string(),
+  approver: userSchema,
+  compliant_with_latest_zdhc: z.boolean().optional(),
+  apeo_npe_free_compliance_statement: z.boolean().optional(),
+  purchase_manufacturing_date: z.date().nullable().optional(),
+  purchase_expiry_date: z.date().nullable().optional(),
+  purchase_delivery_date: z.date().nullable().optional(),
+  purchase_delivered_quantity: z.number().nullable().optional(),
+  purchase_delivered_unit: z.string().nullable().optional(),
+  purchase_amount: z.number().nullable().optional(),
+  purchase_threshold_limit: z.number().nullable().optional(),
+  purchase_invoice_date: z.date().nullable().optional(),
+  purchase_invoice_reference: z.string().nullable().optional(),
+  storage_use_of_ppe: z.string().nullable().optional(),
+  storage_hazard_type: z.string().nullable().optional(),
+  storage_ghs_classification: z.string().nullable().optional(),
+  storage_hazard_statement_codes: z.string().nullable().optional(),
+  storage_condition_requirement: z.string().nullable().optional(),
+  storage_place: z.string().nullable().optional(),
+  storage_lot_number: z.string().nullable().optional(),
 });
 
 export type ChemicalRequest = z.infer<typeof ChemicalRequestSchema>;

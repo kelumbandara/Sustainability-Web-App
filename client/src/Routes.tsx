@@ -27,6 +27,9 @@ const UnderDevelopment = React.lazy(
 const ChemicalRequestTable = React.lazy(
   () => import("./views/ChemicalMng/ChemicalRequestTable")
 );
+const ChemicalPurchaseInventoryTable = React.lazy(
+  () => import("./views/ChemicalMng/ChemicalPurchaseInventoryTable")
+);
 
 //health and safety apps
 //document
@@ -248,9 +251,7 @@ const AppRoutes = () => {
         />
         <Route
           path="/chemical-mng/purchase-inventory"
-          element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="Chemical Management > Purchase & Inventory" />
-          ))}
+          element={withLayout(MainLayout, ChemicalPurchaseInventoryTable)}
         />
         <Route
           path="/chemical-mng/transaction"

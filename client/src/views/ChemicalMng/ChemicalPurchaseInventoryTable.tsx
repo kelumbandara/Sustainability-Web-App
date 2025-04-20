@@ -34,7 +34,7 @@ import AddOrEditChemicalRequestDialog from "./AddOrEditChemicalRequestDialog";
 import CustomButton from "../../components/CustomButton";
 import ApproveConfirmationModal from "../OccupationalHealth/MedicineInventory/MedicineRequest/ApproveConfirmationModal";
 
-function ChemicalRequestTable() {
+function ChemicalPurchaseInventoryTable() {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<ChemicalRequest>(null);
@@ -46,7 +46,7 @@ function ChemicalRequestTable() {
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
-    { title: "Chemical Management" },
+    { title: "Chemical Purchase & Inventory" },
   ];
 
   const isMobile = useMediaQuery((theme: Theme) =>
@@ -64,7 +64,7 @@ function ChemicalRequestTable() {
           overflowX: "hidden",
         }}
       >
-        <PageTitle title="Chemical Management" />
+        <PageTitle title="Chemical Purchase & Inventory" />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
       <Stack sx={{ alignItems: "center" }}>
@@ -76,37 +76,22 @@ function ChemicalRequestTable() {
             maxWidth: isMobile ? "88vw" : "100%",
           }}
         >
-          <Box
-            sx={{
-              padding: theme.spacing(2),
-              display: "flex",
-              justifyContent: "flex-end",
-            }}
-          >
-            <Button
-              variant="contained"
-              sx={{ backgroundColor: "var(--pallet-blue)" }}
-              startIcon={<AddIcon />}
-              onClick={() => {
-                setSelectedRow(null);
-                setOpenAddOrEditDialog(true);
-              }}
-            >
-              Add New Chemical Request
-            </Button>
-          </Box>
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
                 <TableCell>Reference Number</TableCell>
                 <TableCell align="right">Request Date</TableCell>
+                <TableCell align="right">Expiry Date</TableCell>
                 <TableCell align="right">Commercial Name</TableCell>
-                <TableCell align="right">Substance Name</TableCell>
-                <TableCell align="right">Division</TableCell>
                 <TableCell align="right">Customer</TableCell>
-                <TableCell align="right">Merchandiser</TableCell>
                 <TableCell align="right">Reviewer</TableCell>
                 <TableCell align="right">Approver</TableCell>
+                <TableCell align="right">Customer</TableCell>
+                <TableCell align="right">Delivered Quantity</TableCell>
+                <TableCell align="right">Storage Place</TableCell>
+                <TableCell align="right">Issued</TableCell>
+                <TableCell align="right">Disposed</TableCell>
+                <TableCell align="right">Balance</TableCell>
                 <TableCell align="right">Status</TableCell>
               </TableRow>
             </TableHead>
@@ -275,4 +260,4 @@ function ChemicalRequestTable() {
   );
 }
 
-export default ChemicalRequestTable;
+export default ChemicalPurchaseInventoryTable;
