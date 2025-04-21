@@ -59,9 +59,8 @@ export default function AddOrEditConsumptionDialog({
   onSubmit,
 }: DialogProps) {
   const { isMobile, isTablet } = useIsMobile();
-  const [files, setFiles] = useState<File[]>([]);
-  const [selectedEnvironment, setSelectedEnvironment] =
-    useState<Environment>(null);
+  // const [selectedEnvironment, setSelectedEnvironment] =
+  //   useState<Environment>(null);
   const [openAddOrEditAdditionalDialog, setOpenAddOrEditAdditionalDialog] =
     useState(false);
   const [selectedConsumption, setSelectedConsumption] =
@@ -77,8 +76,6 @@ export default function AddOrEditConsumptionDialog({
   } = useForm<Environment>({
     defaultValues: defaultValues,
   });
-
-  const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
 
   const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
     queryKey: ["divisions"],
@@ -106,7 +103,6 @@ export default function AddOrEditConsumptionDialog({
 
   const resetForm = () => {
     reset();
-    setFiles([]);
   };
   const consumptionWatch = watch("impactConsumption");
   const selectMonth = watch("month");
@@ -115,7 +111,7 @@ export default function AddOrEditConsumptionDialog({
   const reviewer = watch("reviewer");
   const approver = watch("approver");
 
-  const handleCreateDocument = (data: Environment) => {
+  const handleCreateConsumption = (data: Environment) => {
     const submitData: Partial<Environment> = data;
     submitData.reviewerId = reviewer.id;
     submitData.approverId = approver.id;
@@ -288,7 +284,7 @@ export default function AddOrEditConsumptionDialog({
                         sx={{ backgroundColor: "var(--pallet-blue)" }}
                         startIcon={<AddIcon />}
                         onClick={() => {
-                          setSelectedEnvironment(null);
+                          // setSelectedEnvironment(null);
                           setOpenAddOrEditAdditionalDialog(true);
                         }}
                       >
@@ -544,10 +540,10 @@ export default function AddOrEditConsumptionDialog({
             }}
             size="medium"
             onClick={handleSubmit((data) => {
-              handleCreateDocument(data);
+              handleCreateConsumption(data);
             })}
           >
-            {defaultValues ? "Update Changes" : "Create Document"}
+            {defaultValues ? "Update Changes" : "Create Consumption"}
           </CustomButton>
         </DialogActions>
       </Dialog>
@@ -575,7 +571,7 @@ export default function AddOrEditConsumptionDialog({
               ]);
             }
             setOpenAddOrEditAdditionalDialog(false);
-            setSelectedEnvironment(null);
+            setSelectedConsumption(null);
           }}
           defaultValues={selectedConsumption}
         />

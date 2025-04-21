@@ -1,23 +1,31 @@
 import { Box, styled, Switch, SwitchProps, Typography } from "@mui/material";
 
+type FormDataSwitchButtonProps = {
+  label: string;
+  value: 0 | 1;
+  onChange: (val: 0 | 1) => void;
+  disabled?: boolean;
+  ariaLabel?: string;
+};
+
 const CustomSwitch = styled((props: SwitchProps) => (
   <Switch focusVisibleClassName=".Mui-focusVisible" disableRipple {...props} />
 ))(({ theme }) => ({
-  width: 52, // Increased width for better visibility
-  height: 32, // Increased height for better visibility
+  width: 52,
+  height: 32,
   padding: 0,
   "& .MuiSwitch-switchBase": {
     padding: 0,
     margin: 4,
     transitionDuration: "300ms",
     "&.Mui-checked": {
-      transform: "translateX(20px)", // Adjusted for new width
+      transform: "translateX(20px)",
       color: "#fff",
       "& + .MuiSwitch-track": {
-        backgroundColor: theme.palette.primary.main, // Use primary color from theme
+        backgroundColor: theme.palette.primary.main,
         opacity: 1,
         border: 0,
-        ...theme.applyStyles("dark", {
+        ...theme.applyStyles?.("dark", {
           backgroundColor: "#2ECA45",
         }),
       },
@@ -28,67 +36,55 @@ const CustomSwitch = styled((props: SwitchProps) => (
     "&.Mui-focusVisible .MuiSwitch-thumb": {
       color: "#33cf4d",
       border: "6px solid #fff",
-      boxShadow: `0 0 0 4px ${theme.palette.primary.light}`, // Add focus ring
+      boxShadow: `0 0 0 4px ${theme.palette.primary.light}`,
     },
     "&.Mui-disabled .MuiSwitch-thumb": {
       color: theme.palette.grey[100],
-      ...theme.applyStyles("dark", {
+      ...theme.applyStyles?.("dark", {
         color: theme.palette.grey[600],
       }),
     },
     "&.Mui-disabled + .MuiSwitch-track": {
       opacity: 0.7,
-      ...theme.applyStyles("dark", {
+      ...theme.applyStyles?.("dark", {
         opacity: 0.3,
       }),
     },
   },
   "& .MuiSwitch-thumb": {
     boxSizing: "border-box",
-    width: 24, // Slightly larger thumb
-    height: 24, // Slightly larger thumb
-    boxShadow: "0 2px 4px 0 rgba(0, 0, 0, 0.2)", // Add shadow for depth
+    width: 24,
+    height: 24,
+    boxShadow: "0 2px 4px 0 rgba(0, 0, 0, 0.2)",
   },
   "& .MuiSwitch-track": {
     borderRadius: 32 / 2,
-    backgroundColor: "#A0A0A0", // Darker track color for better contrast
+    backgroundColor: "#A0A0A0",
     opacity: 1,
     transition: theme.transitions.create(["background-color"], {
       duration: 500,
     }),
-    ...theme.applyStyles("dark", {
+    ...theme.applyStyles?.("dark", {
       backgroundColor: "#39393D",
     }),
   },
 }));
 
-function SwitchButton({
+const FormDataSwitchButton = ({
   value,
   onChange,
   label,
   disabled = false,
   ariaLabel,
-}: {
-  value: boolean;
-  onChange: (value: 0 | 1) => void; // Updated type
-  label: string;
-  disabled?: boolean;
-  ariaLabel?: string;
-}) {
+}: FormDataSwitchButtonProps) => {
   const switchId = `switch-${label.replace(/\s+/g, "-").toLowerCase()}`;
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        marginY: "0.75rem",
-      }}
-    >
+    <Box sx={{ display: "flex", alignItems: "center", marginY: "0.75rem" }}>
       <CustomSwitch
         id={switchId}
-        checked={value}
-        onChange={(e) => onChange(e.target.checked ? 1 : 0)} // Convert boolean to 1/0
+        checked={value === 1} // convert 1 -> true
+        onChange={(e) => onChange(e.target.checked ? 1 : 0)} // convert back to 0/1
         disabled={disabled}
         aria-label={ariaLabel || label}
         inputProps={{ "aria-labelledby": `${switchId}-label` }}
@@ -107,6 +103,6 @@ function SwitchButton({
       </Typography>
     </Box>
   );
-}
+};
 
-export default SwitchButton;
+export default FormDataSwitchButton;

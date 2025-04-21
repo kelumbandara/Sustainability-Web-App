@@ -12,7 +12,7 @@ export const ConsumptionSchema = z.object({
   ghgInTonnes: z.string(),
   methodeOfTracking: z.string(),
   usageType: z.string(),
-  doYouHaveREC: z.boolean(),
+  doYouHaveREC: z.number(),
   scope: z.string(),
   description: z.string(),
 });
@@ -40,7 +40,7 @@ export const EnvironmentSchema = z.object({
   totalProuctProducedkg: z.number(),
   createdBy: z.string(),
   created_at: z.date(),
-  createdByUserName: z.string()
+  createdByUserName: z.string(),
 });
 
 export type Environment = z.infer<typeof EnvironmentSchema>;

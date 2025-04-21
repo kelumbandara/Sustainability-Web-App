@@ -25,7 +25,12 @@ import {
   personTypes,
   industryExperience,
 } from "../../../constants/accidentConstants";
-import { Consumption, fetchConsumptionCategories, fetchConsumptionSource, fetchConsumptionUnits } from "../../../api/Environment/environmentApi";
+import {
+  Consumption,
+  fetchConsumptionCategories,
+  fetchConsumptionSource,
+  fetchConsumptionUnits,
+} from "../../../api/Environment/environmentApi";
 import { fetchDivision } from "../../../api/divisionApi";
 import { useQuery } from "@tanstack/react-query";
 import RichTextComponent from "../../../components/RichTextComponent";
@@ -70,20 +75,25 @@ export default function AddOrEditAdditionalDialog({
     reset();
   };
 
-  const { data: consumptionCategoryData, isFetching: isconsumptionCategoryDataFetching } = useQuery({
+  const {
+    data: consumptionCategoryData,
+    isFetching: isconsumptionCategoryDataFetching,
+  } = useQuery({
     queryKey: ["cs-category"],
     queryFn: fetchConsumptionCategories,
   });
 
-  const { data: consumptionSourceData, isFetching: isconsumptionSourceData } = useQuery({
-    queryKey: ["cs-source"],
-    queryFn: fetchConsumptionSource,
-  });
+  const { data: consumptionSourceData, isFetching: isconsumptionSourceData } =
+    useQuery({
+      queryKey: ["cs-source"],
+      queryFn: fetchConsumptionSource,
+    });
 
-  const { data: consumptionUnitsData, isFetching: isconsumptionUnitsData } = useQuery({
-    queryKey: ["cs-units"],
-    queryFn: fetchConsumptionUnits,
-  });
+  const { data: consumptionUnitsData, isFetching: isconsumptionUnitsData } =
+    useQuery({
+      queryKey: ["cs-units"],
+      queryFn: fetchConsumptionUnits,
+    });
 
   return (
     <Dialog
@@ -155,7 +165,9 @@ export default function AddOrEditAdditionalDialog({
                   size="small"
                   options={
                     consumptionCategoryData?.length
-                      ? consumptionCategoryData.map((category) => category.categoryName)
+                      ? consumptionCategoryData.map(
+                          (category) => category.categoryName
+                        )
                       : []
                   }
                   sx={{ flex: 1, margin: "0.5rem" }}
@@ -308,21 +320,20 @@ export default function AddOrEditAdditionalDialog({
           </Stack>
           <Box
             sx={{
-              margin: "1rem"
+              margin: "1rem",
             }}
           >
             <Controller
               control={control}
-              name={"doYouHaveREC"}
-              render={({ field }) => {
-                return (
-                  <FormDataSwitchButton
-                    label="Do You Have Records"
-                    onChange={field.onChange}
-                    value={field.value}
-                  />
-                );
-              }}
+              name="doYouHaveREC"
+              defaultValue={0 as 0 | 1}
+              render={({ field }) => (
+                <FormDataSwitchButton
+                  label="Do You Have Records"
+                  onChange={field.onChange}
+                  value={field.value as 0 | 1}
+                />
+              )}
             />
           </Box>
           <Box
