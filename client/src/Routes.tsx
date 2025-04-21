@@ -91,14 +91,12 @@ const MaternityRegisterTable = React.lazy(
 
 //Sustainability
 const SustainabilityTable = React.lazy(
-  () =>
-    import("./views/Sustainability/SustainabilityTable")
+  () => import("./views/Sustainability/SustainabilityTable")
 );
 
 //Environment
 const EnvironmentTable = React.lazy(
-  () =>
-    import("./views/Environment/Consumption/ConsumptionTable")
+  () => import("./views/Environment/Consumption/ConsumptionTable")
 );
 
 function withLayout(Layout: any, Component: any, restrictAccess = false) {
@@ -490,10 +488,27 @@ const AppRoutes = () => {
             MainLayout,
             SustainabilityTable,
             !userPermissionObject?.[
-              PermissionKeys
-                .SUSTAINABILITY_SDG_REPORTING_CREATE
+              PermissionKeys.SUSTAINABILITY_SDG_REPORTING_CREATE
             ]
           )}
+        />
+        <Route
+          path="/environment/dashboard"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Environment > Dashboard" />
+          ))}
+        />
+        <Route
+          path="/environment/history/target-setting"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Environment > History > Target Settings" />
+          ))}
+        />
+        <Route
+          path="/environment/assigned-tasks/target-setting"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Environment > Assign Tasks > Target Settings" />
+          ))}
         />
         <Route
           path="/environment/history/consumption"
@@ -501,8 +516,7 @@ const AppRoutes = () => {
             MainLayout,
             EnvironmentTable,
             !userPermissionObject?.[
-              PermissionKeys
-                .ENVIRONMENT_HISTORY_CONSUMPTION_VIEW
+              PermissionKeys.ENVIRONMENT_HISTORY_CONSUMPTION_VIEW
             ]
           )}
         />
@@ -514,8 +528,7 @@ const AppRoutes = () => {
               <EnvironmentTable isAssignedTasks={true} />
             ),
             !userPermissionObject?.[
-              PermissionKeys
-                .ENVIRONMENT_ASSIGNED_TASKS_CONSUMPTION_VIEW
+              PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_CONSUMPTION_VIEW
             ]
           )}
         />
