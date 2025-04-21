@@ -96,6 +96,7 @@ export default function AddOrEditTargetSettingsDialog({
     control,
     formState: { errors },
     reset,
+    setValue,
     trigger,
   } = useForm<TargetSettings>({
     reValidateMode: "onChange",
@@ -108,13 +109,12 @@ export default function AddOrEditTargetSettingsDialog({
     defaultValues?.documents as StorageFile[]
   );
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
-  useEffect(() => {
-    if (defaultValues) {
-      reset(defaultValues);
-    } else {
-      reset();
-    }
-  }, [defaultValues, reset]);
+
+  const resetForm = () => {
+    reset();
+    setFiles([]);
+  };
+
   const approver = watch("approver");
   const responsible = watch("responsible");
   const category = watch("category");
@@ -165,11 +165,6 @@ export default function AddOrEditTargetSettingsDialog({
       reset();
     }
   }, [defaultValues, reset]);
-
-  const resetForm = () => {
-    reset();
-    setFiles([]);
-  };
 
   const handleSubmitTargetSettings = (data: TargetSettings) => {
     const submitData: Partial<TargetSettings> = data;
@@ -536,13 +531,9 @@ export default function AddOrEditTargetSettingsDialog({
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
-                          onChange={(e, value) => {
-                            console.log("e", e);
-                            reset({
-                              category: value,
-                              possibilityCategory: null,
-                              opertunity: null,
-                            });
+                          onChange={(event, newValue) => {
+                            field.onChange(newValue);
+                            setValue("possibilityCategory", "");
                           }}
                           size="small"
                           options={
@@ -761,13 +752,9 @@ export default function AddOrEditTargetSettingsDialog({
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
-                          onChange={(e, value) => {
-                            console.log("e", e);
-                            reset({
-                              category: watch("category"),
-                              possibilityCategory: value,
-                              opertunity: null,
-                            });
+                          onChange={(event, newValue) => {
+                            field.onChange(newValue);
+                            setValue("opertunity", "");
                           }}
                           size="small"
                           options={
