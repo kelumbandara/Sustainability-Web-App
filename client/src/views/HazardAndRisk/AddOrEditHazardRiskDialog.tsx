@@ -237,6 +237,7 @@ export default function AddOrEditHazardRiskDialog({
       };
       console.log(submitData)
       createObservationTypeMutation(submitData);
+      setAddNewContactDialogOpen(false);
     };
 
     return (
