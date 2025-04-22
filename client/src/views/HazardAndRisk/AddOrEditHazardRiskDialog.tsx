@@ -202,10 +202,10 @@ export default function AddOrEditHazardRiskDialog({
   );
 
   const AddNewObservationTypeDialog = ({
-    category,
+    categoryName,
     subCategory,
   }: {
-    category: string;
+    categoryName: string;
     subCategory: string;
   }) => {
     const { register, handleSubmit } = useForm({
@@ -232,7 +232,7 @@ export default function AddOrEditHazardRiskDialog({
     const handleCreateObservationType = (data: { observationType: string }) => {
       const submitData = {
         ...data,
-        category,
+        categoryName,
         subCategory,
       };
       console.log(submitData)
@@ -333,7 +333,7 @@ export default function AddOrEditHazardRiskDialog({
     >
       {/* {addNewContactDialogOpen &&  */}
       <AddNewObservationTypeDialog
-        category={category}
+        categoryName={category}
         subCategory={subCategory}
       />
       {/* } */}
