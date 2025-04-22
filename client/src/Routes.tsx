@@ -98,6 +98,9 @@ const SustainabilityTable = React.lazy(
 const EnvironmentTable = React.lazy(
   () => import("./views/Environment/Consumption/ConsumptionTable")
 );
+const EnvironmentDashBoard = React.lazy(
+  () => import("./views/Environment/Dashboard")
+);
 
 function withLayout(Layout: any, Component: any, restrictAccess = false) {
   return (
@@ -494,9 +497,11 @@ const AppRoutes = () => {
         />
         <Route
           path="/environment/dashboard"
-          element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="Environment > Dashboard" />
-          ))}
+          element={withLayout(
+            MainLayout,
+            EnvironmentDashBoard,
+            !userPermissionObject?.[PermissionKeys.ENVIRONMENT_DASHBOARD_VIEW]
+          )}
         />
         <Route
           path="/environment/history/target-setting"
