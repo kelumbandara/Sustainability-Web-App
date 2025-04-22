@@ -218,6 +218,14 @@ export const HazardAndRiskSchema = z.object({
 
 export type HazardAndRisk = z.infer<typeof HazardAndRiskSchema>;
 
+export const ObservationTypeSchema = z.object({
+  category: z.string(),
+  subCategory: z.string(),
+  observationType: z.string().optional(),
+});
+
+export type ObservationTypes = z.infer<typeof ObservationTypeSchema>;
+
 export async function getHazardRiskList() {
   const res = await axios.get("/api/hazard-and-risk");
   return res.data;
@@ -302,5 +310,11 @@ export const updateHazardRisk = async (hazardRisk: HazardAndRisk) => {
 
 export const deleteHazardRisk = async (id: string) => {
   const res = await axios.delete(`/api/hazard-risk/${id}/delete`);
+  return res.data;
+};
+
+export const createObservationType = async (data: ObservationTypes) => {
+  const res = await axios.post('/api/store-observation',data);
+  console.log(data);
   return res.data;
 };

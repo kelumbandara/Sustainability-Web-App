@@ -26,6 +26,7 @@ import { useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import AddIcon from "@mui/icons-material/Add";
 import {
+  createObservationType,
   HazardAndRisk,
   HazardAndRiskStatus,
   HazardOrRiskCategories,
@@ -37,13 +38,15 @@ import {
   fetchObservationType,
   fetchMainCategory,
 } from "../../api/categoryApi";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import useCurrentUser from "../../hooks/useCurrentUser";
 import { fetchAllUsers, fetchHazardRiskAssignee } from "../../api/userApi";
 import { fetchDivision } from "../../api/divisionApi";
 import UserAutoComplete from "../../components/UserAutoComplete";
 import { StorageFile } from "../../utils/StorageFiles.util";
 import { ExistingFileItemsEdit } from "../../components/ExistingFileItemsEdit";
+import { enqueueSnackbar } from "notistack";
+import queryClient from "../../state/queryClient";
 
 type DialogProps = {
   open: boolean;
@@ -207,12 +210,33 @@ export default function AddOrEditHazardRiskDialog({
   }) => {
     const { register, handleSubmit } = useForm({
       defaultValues: {
-        observation: "",
+        observationType: "",
       },
     });
 
-    const handleCreateObservationType = (data: { observation: string }) => {
-      console.log("Creating observation type", data, category, subCategory);
+    const { mutate: createObservationTypeMutation } = useMutation({
+      mutationFn: createObservationType,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["observationType"] });
+        enqueueSnackbar("Observation Type Created Successfully!", {
+          variant: "success",
+        });
+      },
+      onError: () => {
+        enqueueSnackbar(`Observation Type Creation Failed`, {
+          variant: "error",
+        });
+      },
+    });
+
+    const handleCreateObservationType = (data: { observationType: string }) => {
+      const submitData = {
+        ...data,
+        category,
+        subCategory,
+      };
+      console.log(submitData)
+      createObservationTypeMutation(submitData);
     };
 
     return (
@@ -260,7 +284,7 @@ export default function AddOrEditHazardRiskDialog({
             }}
           >
             <TextField
-              {...register("observation", { required: true })}
+              {...register("observationType", { required: true })}
               required
               id="observation"
               label="Observation"
