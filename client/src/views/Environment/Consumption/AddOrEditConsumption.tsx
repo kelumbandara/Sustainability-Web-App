@@ -19,30 +19,25 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Document } from "../../../api/documentApi";
 import useIsMobile from "../../../customHooks/useIsMobile";
 import { Controller, useForm } from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
-import DropzoneComponent from "../../../components/DropzoneComponent";
 import { grey } from "@mui/material/colors";
 import CustomButton from "../../../components/CustomButton";
 import AddOrEditAdditionalDialog from "./AddOrEditAdditionalDialog";
 import { useEffect, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../../api/divisionApi";
 import theme from "../../../theme";
-import { fetchAllDocumentType } from "../../../api/documentType";
 import {
   Consumption,
   Environment,
+  fetchConsumptionAssignee,
 } from "../../../api/Environment/environmentApi";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { fetchHazardRiskAssignee } from "../../../api/userApi";
 import UserAutoComplete from "../../../components/UserAutoComplete";
-import WidgetsIcon from "@mui/icons-material/Widgets";
 import { monthData, yearData } from "../../../api/sampleData/consumptionData";
 
 type DialogProps = {
@@ -82,15 +77,12 @@ export default function AddOrEditConsumptionDialog({
     queryFn: fetchDivision,
   });
 
-  const { data: assigneeData, isFetching: isAssigneeDataFetching } = useQuery({
-    queryKey: ["hr-assignee"],
-    queryFn: fetchHazardRiskAssignee,
-  });
-
-  const { data: documentType, isFetching: isDocumentTypeDataFetching } =
-    useQuery({
-      queryKey: ["documentTypes"],
-      queryFn: fetchAllDocumentType,
+    const {
+      data: consumptionAssigneeData,
+      isFetching: isconsumptionAssigneeData,
+    } = useQuery({
+      queryKey: ["cs-assignee"],
+      queryFn: fetchConsumptionAssignee,
     });
 
   useEffect(() => {
@@ -501,7 +493,7 @@ export default function AddOrEditConsumptionDialog({
                   control={control}
                   register={register}
                   errors={errors}
-                  userData={assigneeData}
+                  userData={consumptionAssigneeData}
                   defaultValue={defaultValues?.approver}
                   required={true}
                 />
@@ -514,7 +506,7 @@ export default function AddOrEditConsumptionDialog({
                   control={control}
                   register={register}
                   errors={errors}
-                  userData={assigneeData}
+                  userData={consumptionAssigneeData}
                   defaultValue={defaultValues?.reviewer}
                   required={true}
                 />

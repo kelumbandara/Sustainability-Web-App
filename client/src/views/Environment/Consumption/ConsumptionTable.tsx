@@ -25,7 +25,7 @@ import ViewDataDrawer, {
   DrawerHeader,
 } from "../../../components/ViewDataDrawer";
 import AddIcon from "@mui/icons-material/Add";
-import AddOrEditDocumentDialog from "./AddOrEditConsumption";
+import AddOrEditConsumptionDialog from "./AddOrEditConsumption";
 import {
   Environment,
   createConsumption,
@@ -34,14 +34,13 @@ import {
   deleteConsumption,
   getConsumptionAssignedList,
 } from "../../../api/Environment/environmentApi";
-import ViewDocumentContent from "./ViewConsumptionContent";
+import ViewConsumptionContent from "./ViewConsumptionContent";
 import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../../state/queryClient";
 import useCurrentUserHaveAccess from "../../../hooks/useCurrentUserHaveAccess";
 import { PermissionKeys } from "../../Administration/SectionList";
-import { environmentData } from "../../../api/sampleData/consumptionData";
 
 function ConsumptionTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   const { enqueueSnackbar } = useSnackbar();
@@ -345,14 +344,14 @@ function ConsumptionTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
 
             {selectedRow && (
               <Stack>
-                <ViewDocumentContent consumption={selectedRow} />
+                <ViewConsumptionContent consumption={selectedRow} />
               </Stack>
             )}
           </Stack>
         }
       />
       {openAddOrEditDialog && (
-        <AddOrEditDocumentDialog
+        <AddOrEditConsumptionDialog
           open={openAddOrEditDialog}
           handleClose={() => {
             setSelectedRow(null);
@@ -377,7 +376,7 @@ function ConsumptionTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
       {deleteDialogOpen && (
         <DeleteConfirmationModal
           open={deleteDialogOpen}
-          title="Remove Document Confirmation"
+          title="Remove Consumption Confirmation"
           content={
             <>
               Are you sure you want to remove this consumption record?

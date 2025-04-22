@@ -16,22 +16,14 @@ import useIsMobile from "../../../customHooks/useIsMobile";
 import { Controller, useForm } from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
 import { grey } from "@mui/material/colors";
-import DatePickerComponent from "../../../components/DatePickerComponent";
 import CustomButton from "../../../components/CustomButton";
 import { useEffect } from "react";
-import { AccidentEffectedIndividual } from "../../../api/accidentAndIncidentApi";
-import {
-  genderOptions,
-  personTypes,
-  industryExperience,
-} from "../../../constants/accidentConstants";
 import {
   Consumption,
   fetchConsumptionCategories,
   fetchConsumptionSource,
   fetchConsumptionUnits,
 } from "../../../api/Environment/environmentApi";
-import { fetchDivision } from "../../../api/divisionApi";
 import { useQuery } from "@tanstack/react-query";
 import RichTextComponent from "../../../components/RichTextComponent";
 import FormDataSwitchButton from "../../../components/FormDataSwitchButton";
@@ -54,11 +46,9 @@ export default function AddOrEditAdditionalDialog({
   const {
     register,
     handleSubmit,
-    watch,
     control,
     formState: { errors },
     reset,
-    setValue,
   } = useForm<Consumption>({
     defaultValues,
   });

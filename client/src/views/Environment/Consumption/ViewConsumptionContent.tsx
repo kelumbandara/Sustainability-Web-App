@@ -3,7 +3,6 @@ import {
   Box,
   Divider,
   Stack,
-  Tab,
   Table,
   TableBody,
   TableCell,
@@ -14,55 +13,12 @@ import {
 } from "@mui/material";
 import { DrawerContentItem } from "../../../components/ViewDataDrawer";
 import { format } from "date-fns";
-import { useState } from "react";
-import theme from "../../../theme";
 import useIsMobile from "../../../customHooks/useIsMobile";
-import TextSnippetIcon from "@mui/icons-material/TextSnippet";
-import ListIcon from "@mui/icons-material/List";
-import { Document } from "../../../api/documentApi";
-import HistoryIcon from "@mui/icons-material/History";
-import { FileItemsViewer } from "../../../components/FileItemsViewer";
-import { StorageFile } from "../../../utils/StorageFiles.util";
 import { Environment } from "../../../api/Environment/environmentApi";
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  dir?: string;
-  index: number;
-  value: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`full-width-tabpanel-${index}`}
-      aria-labelledby={`full-width-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-}
-
-function a11yProps(index: number) {
-  return {
-    id: `full-width-tab-${index}`,
-    "aria-controls": `full-width-tabpanel-${index}`,
-  };
-}
-
-function ViewDocumentContent({ consumption }: { consumption: Environment }) {
-  const [activeTab, setActiveTab] = useState(0);
+function ViewConsumptionContent({ consumption }: { consumption: Environment }) {
   const { isTablet } = useIsMobile();
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    console.log("event", event);
-    setActiveTab(newValue);
-  };
   return (
     <Stack
       sx={{
@@ -189,7 +145,10 @@ function ViewDocumentContent({ consumption }: { consumption: Environment }) {
           height: "fit-content",
         }}
       >
-        <DrawerContentItem label="Reported By" value={consumption.createdByUserName} />
+        <DrawerContentItem
+          label="Reported By"
+          value={consumption.createdByUserName}
+        />
         <DrawerContentItem
           label="Division"
           value={consumption?.division}
@@ -215,4 +174,4 @@ function ViewDocumentContent({ consumption }: { consumption: Environment }) {
   );
 }
 
-export default ViewDocumentContent;
+export default ViewConsumptionContent;

@@ -178,3 +178,8 @@ export async function fetchConsumptionUnits() {
   const res = await axios.get(`/api/consumption-units`);
   return res.data;
 }
+
+export async function fetchConsumptionAssignee() {
+  const res = await axios.get(`/api/envirement-recode-assignee`);
+  return res.data;
+}
