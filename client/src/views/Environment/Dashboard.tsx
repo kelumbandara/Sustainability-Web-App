@@ -43,6 +43,7 @@ import {
   PieChart,
   Pie,
   Cell,
+  BarChart,
 } from "recharts";
 import {
   hazardRiskChartData1,
@@ -56,6 +57,7 @@ import ShowerOutlinedIcon from "@mui/icons-material/ShowerOutlined";
 import BatteryChargingFullOutlinedIcon from "@mui/icons-material/BatteryChargingFullOutlined";
 import { useState } from "react";
 import CircularProgressWithLabel from "../../components/CircularProgress";
+import { dataset, valueFormatter } from "../../api/sampleData/environmentData";
 
 const breadcrumbItems = [
   { title: "Home", href: "/home" },
@@ -68,6 +70,16 @@ interface TabPanelProps {
   index: number;
   value: number;
 }
+
+const chartSetting = {
+  yAxis: [
+    {
+      label: "rainfall (mm)",
+      width: 60,
+    },
+  ],
+  height: 300,
+};
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -373,7 +385,6 @@ function HazardAndRiskDashboard() {
           />
         </Box>
       </Box>
-
       <Box
         sx={{
           display: "flex",
@@ -393,17 +404,68 @@ function HazardAndRiskDashboard() {
             border: "1px solid var(--pallet-border-blue)",
           }}
         >
+          <Box>
+            <Typography
+              variant="h6"
+              sx={{
+                textAlign: "center",
+              }}
+            >
+              Total Hazard Risks For Divisions
+            </Typography>
+          </Box>
           <ResponsiveContainer width="100%" height={500}>
+            <BarChart
+              dataset={dataset}
+              xAxis={[{ scaleType: "band", dataKey: "month" }]}
+              series={[
+                { dataKey: "london", label: "London", valueFormatter },
+                { dataKey: "paris", label: "Paris", valueFormatter },
+                { dataKey: "newYork", label: "New York", valueFormatter },
+                { dataKey: "seoul", label: "Seoul", valueFormatter },
+              ]}
+              {...chartSetting}
+            />
+          </ResponsiveContainer>
+        </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            flex: 1,
+            flexDirection: "column",
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+            borderRadius: "0.3rem",
+            border: "1px solid var(--pallet-border-blue)",
+            padding: "1rem",
+            height: "auto",
+            marginTop: "1rem",
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              textAlign: "center",
+            }}
+          >
+            Status
+          </Typography>
+          <Typography variant="subtitle1">Waste</Typography>
+          <ResponsiveContainer
+            width="100%"
+            height={500}
+            style={{
+              overflowY: "scroll",
+              scrollbarWidth: "none",
+            }}
+          >
             <>
-              <Typography variant="subtitle1">Waste</Typography>
               <AppBar
-                position="static"
+                position="sticky"
                 sx={{
                   display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
                   mt: "1rem",
-                  backgroundColor: "var(--pallet-lighter-grey)",
                 }}
               >
                 <Tabs
@@ -481,100 +543,436 @@ function HazardAndRiskDashboard() {
                 </Tabs>
               </AppBar>
               <TabPanel value={activeTab} index={0} dir={theme.direction}>
-                <Stack>
+                <Box>
                   <Box
                     sx={{
                       display: "flex",
                       direction: "row",
                       justifyContent: "space-between",
+                      m: "1rem",
                     }}
                   >
-                    <Box
-                    width={350}>
+                    <Box flex={2}>
                       <Typography>Fabric Cut Piece</Typography>
                       <Typography>In KG</Typography>
                     </Box>
-                    <Box>
+                    <Box
+                      flex={1}
+                      sx={{
+                        display: "flex",
+                        direction: "row",
+                        gap: "3rem",
+                      }}
+                    >
                       <CircularProgressWithLabel size={60} value={10} />
-                    </Box>
-                    <Box>
-                      <Typography>Quantity</Typography>
-                      <Typography>63892 KG</Typography>
+                      <Box>
+                        <Typography>Quantity</Typography>
+                        <Typography>63892 KG</Typography>
+                      </Box>
                     </Box>
                   </Box>
                   <Divider />
-                  <Box>hello</Box>
-                </Stack>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      justifyContent: "space-between",
+                      m: "1rem",
+                    }}
+                  >
+                    <Box flex={2}>
+                      <Typography>Fabric Cut Piece</Typography>
+                      <Typography>In KG</Typography>
+                    </Box>
+                    <Box
+                      flex={1}
+                      sx={{
+                        display: "flex",
+                        direction: "row",
+                        gap: "3rem",
+                      }}
+                    >
+                      <CircularProgressWithLabel size={60} value={10} />
+                      <Box>
+                        <Typography>Quantity</Typography>
+                        <Typography>63892 KG</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Divider />
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      justifyContent: "space-between",
+                      m: "1rem",
+                    }}
+                  >
+                    <Box flex={2}>
+                      <Typography>Fabric Cut Piece</Typography>
+                      <Typography>In KG</Typography>
+                    </Box>
+                    <Box
+                      flex={1}
+                      sx={{
+                        display: "flex",
+                        direction: "row",
+                        gap: "3rem",
+                      }}
+                    >
+                      <CircularProgressWithLabel size={60} value={10} />
+                      <Box>
+                        <Typography>Quantity</Typography>
+                        <Typography>63892 KG</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Divider />
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      justifyContent: "space-between",
+                      m: "1rem",
+                    }}
+                  >
+                    <Box flex={2}>
+                      <Typography>Fabric Cut Piece</Typography>
+                      <Typography>In KG</Typography>
+                    </Box>
+                    <Box
+                      flex={1}
+                      sx={{
+                        display: "flex",
+                        direction: "row",
+                        gap: "3rem",
+                      }}
+                    >
+                      <CircularProgressWithLabel size={60} value={10} />
+                      <Box>
+                        <Typography>Quantity</Typography>
+                        <Typography>63892 KG</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      justifyContent: "space-between",
+                      m: "1rem",
+                    }}
+                  >
+                    <Box flex={2}>
+                      <Typography>Fabric Cut Piece</Typography>
+                      <Typography>In KG</Typography>
+                    </Box>
+                    <Box
+                      flex={1}
+                      sx={{
+                        display: "flex",
+                        direction: "row",
+                        gap: "3rem",
+                      }}
+                    >
+                      <CircularProgressWithLabel size={60} value={10} />
+                      <Box>
+                        <Typography>Quantity</Typography>
+                        <Typography>63892 KG</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Divider />
+                </Box>
               </TabPanel>
               <TabPanel value={activeTab} index={1} dir={theme.direction}>
-                hi2
+                <Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      justifyContent: "space-between",
+                      m: "1rem",
+                    }}
+                  >
+                    <Box flex={2}>
+                      <Typography>Fabric Cut Piece</Typography>
+                      <Typography>In KG</Typography>
+                    </Box>
+                    <Box
+                      flex={1}
+                      sx={{
+                        display: "flex",
+                        direction: "row",
+                        gap: "3rem",
+                      }}
+                    >
+                      <CircularProgressWithLabel size={60} value={10} />
+                      <Box>
+                        <Typography>Quantity</Typography>
+                        <Typography>63892 KG</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Divider />
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      justifyContent: "space-between",
+                      m: "1rem",
+                    }}
+                  >
+                    <Box flex={2}>
+                      <Typography>Fabric Cut Piece</Typography>
+                      <Typography>In KG</Typography>
+                    </Box>
+                    <Box
+                      flex={1}
+                      sx={{
+                        display: "flex",
+                        direction: "row",
+                        gap: "3rem",
+                      }}
+                    >
+                      <CircularProgressWithLabel size={60} value={10} />
+                      <Box>
+                        <Typography>Quantity</Typography>
+                        <Typography>63892 KG</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Divider />
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      justifyContent: "space-between",
+                      m: "1rem",
+                    }}
+                  >
+                    <Box flex={2}>
+                      <Typography>Fabric Cut Piece</Typography>
+                      <Typography>In KG</Typography>
+                    </Box>
+                    <Box
+                      flex={1}
+                      sx={{
+                        display: "flex",
+                        direction: "row",
+                        gap: "3rem",
+                      }}
+                    >
+                      <CircularProgressWithLabel size={60} value={10} />
+                      <Box>
+                        <Typography>Quantity</Typography>
+                        <Typography>63892 KG</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Divider />
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      justifyContent: "space-between",
+                      m: "1rem",
+                    }}
+                  >
+                    <Box flex={2}>
+                      <Typography>Fabric Cut Piece</Typography>
+                      <Typography>In KG</Typography>
+                    </Box>
+                    <Box
+                      flex={1}
+                      sx={{
+                        display: "flex",
+                        direction: "row",
+                        gap: "3rem",
+                      }}
+                    >
+                      <CircularProgressWithLabel size={60} value={10} />
+                      <Box>
+                        <Typography>Quantity</Typography>
+                        <Typography>63892 KG</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      justifyContent: "space-between",
+                      m: "1rem",
+                    }}
+                  >
+                    <Box flex={2}>
+                      <Typography>Fabric Cut Piece</Typography>
+                      <Typography>In KG</Typography>
+                    </Box>
+                    <Box
+                      flex={1}
+                      sx={{
+                        display: "flex",
+                        direction: "row",
+                        gap: "3rem",
+                      }}
+                    >
+                      <CircularProgressWithLabel size={60} value={10} />
+                      <Box>
+                        <Typography>Quantity</Typography>
+                        <Typography>63892 KG</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Divider />
+                </Box>
               </TabPanel>
               <TabPanel value={activeTab} index={2} dir={theme.direction}>
-                hi3
+                <Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      justifyContent: "space-between",
+                      m: "1rem",
+                    }}
+                  >
+                    <Box flex={2}>
+                      <Typography>Fabric Cut Piece</Typography>
+                      <Typography>In KG</Typography>
+                    </Box>
+                    <Box
+                      flex={1}
+                      sx={{
+                        display: "flex",
+                        direction: "row",
+                        gap: "3rem",
+                      }}
+                    >
+                      <CircularProgressWithLabel size={60} value={10} />
+                      <Box>
+                        <Typography>Quantity</Typography>
+                        <Typography>63892 KG</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Divider />
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      justifyContent: "space-between",
+                      m: "1rem",
+                    }}
+                  >
+                    <Box flex={2}>
+                      <Typography>Fabric Cut Piece</Typography>
+                      <Typography>In KG</Typography>
+                    </Box>
+                    <Box
+                      flex={1}
+                      sx={{
+                        display: "flex",
+                        direction: "row",
+                        gap: "3rem",
+                      }}
+                    >
+                      <CircularProgressWithLabel size={60} value={10} />
+                      <Box>
+                        <Typography>Quantity</Typography>
+                        <Typography>63892 KG</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Divider />
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      justifyContent: "space-between",
+                      m: "1rem",
+                    }}
+                  >
+                    <Box flex={2}>
+                      <Typography>Fabric Cut Piece</Typography>
+                      <Typography>In KG</Typography>
+                    </Box>
+                    <Box
+                      flex={1}
+                      sx={{
+                        display: "flex",
+                        direction: "row",
+                        gap: "3rem",
+                      }}
+                    >
+                      <CircularProgressWithLabel size={60} value={10} />
+                      <Box>
+                        <Typography>Quantity</Typography>
+                        <Typography>63892 KG</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Divider />
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      justifyContent: "space-between",
+                      m: "1rem",
+                    }}
+                  >
+                    <Box flex={2}>
+                      <Typography>Fabric Cut Piece</Typography>
+                      <Typography>In KG</Typography>
+                    </Box>
+                    <Box
+                      flex={1}
+                      sx={{
+                        display: "flex",
+                        direction: "row",
+                        gap: "3rem",
+                      }}
+                    >
+                      <CircularProgressWithLabel size={60} value={10} />
+                      <Box>
+                        <Typography>Quantity</Typography>
+                        <Typography>63892 KG</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      justifyContent: "space-between",
+                      m: "1rem",
+                    }}
+                  >
+                    <Box flex={2}>
+                      <Typography>Fabric Cut Piece</Typography>
+                      <Typography>In KG</Typography>
+                    </Box>
+                    <Box
+                      flex={1}
+                      sx={{
+                        display: "flex",
+                        direction: "row",
+                        gap: "3rem",
+                      }}
+                    >
+                      <CircularProgressWithLabel size={60} value={10} />
+                      <Box>
+                        <Typography>Quantity</Typography>
+                        <Typography>63892 KG</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Divider />
+                </Box>
               </TabPanel>
             </>
           </ResponsiveContainer>
-        </Box>
-        <Box
-          sx={{
-            width: "100%",
-            height: "auto",
-            marginTop: "1rem",
-            flex: 2,
-            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-            padding: "1rem",
-            borderRadius: "0.3rem",
-            border: "1px solid var(--pallet-border-blue)",
-          }}
-        >
-          <Typography variant="subtitle1">Status</Typography>
-          <ResponsiveContainer width="100%" height={500}>
-            <PieChart>
-              <Pie
-                data={hazardRiskChartData2}
-                dataKey="value"
-                cx="50%"
-                cy="50%"
-                outerRadius={isMobile ? 60 : isTablet ? 80 : 100}
-                innerRadius={isMobile ? 40 : isTablet ? 60 : 80}
-                fill="#8884d8"
-              >
-                {hazardRiskChartData2.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={
-                      ["var(--pallet-blue)", "var(--pallet-light-grey)"][
-                        index % 2
-                      ]
-                    }
-                  />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <Typography
-              variant="subtitle2"
-              sx={{ color: "var(--pallet-blue)" }}
-            >
-              This Month
-            </Typography>
-            <Typography variant="subtitle1">10 Cases</Typography>
-            <Typography
-              variant="subtitle2"
-              sx={{ color: "var(--pallet-grey)" }}
-            >
-              0 From Previous Period
-            </Typography>
-          </Box>
         </Box>
       </Box>
     </Stack>
