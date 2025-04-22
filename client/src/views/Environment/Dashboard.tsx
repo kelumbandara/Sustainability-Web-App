@@ -2,10 +2,14 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  AppBar,
   Autocomplete,
   Box,
   Button,
+  Divider,
   Stack,
+  Tab,
+  Tabs,
   TextField,
   Typography,
 } from "@mui/material";
@@ -46,11 +50,47 @@ import {
 } from "../../api/sampleData/hazardRiskData";
 
 import NaturePeopleIcon from "@mui/icons-material/NaturePeople";
+import WaterDropOutlinedIcon from "@mui/icons-material/WaterDropOutlined";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import ShowerOutlinedIcon from "@mui/icons-material/ShowerOutlined";
+import BatteryChargingFullOutlinedIcon from "@mui/icons-material/BatteryChargingFullOutlined";
+import { useState } from "react";
+import CircularProgressWithLabel from "../../components/CircularProgress";
 
 const breadcrumbItems = [
   { title: "Home", href: "/home" },
   { title: "Environment Management" },
 ];
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  dir?: string;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`full-width-tabpanel-${index}`}
+      aria-labelledby={`full-width-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
+  );
+}
+
+function a11yProps(index: number) {
+  return {
+    id: `full-width-tab-${index}`,
+    "aria-controls": `full-width-tabpanel-${index}`,
+  };
+}
 
 function HazardAndRiskDashboard() {
   const { isMobile, isTablet } = useIsMobile();
@@ -65,6 +105,11 @@ function HazardAndRiskDashboard() {
   } = useForm();
 
   const watchPeriod = watch("period");
+  const [activeTab, setActiveTab] = useState(0);
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    console.log("event", event);
+    setActiveTab(newValue);
+  };
 
   return (
     <Stack>
@@ -247,7 +292,7 @@ function HazardAndRiskDashboard() {
         >
           <DashboardCard
             title="Total GHC Emission"
-            titleIcon={<NaturePeopleIcon fontSize="small" />}
+            titleIcon={<NaturePeopleIcon fontSize="large" />}
             value={1493}
             subDescription="tCo2e"
           />
@@ -261,9 +306,9 @@ function HazardAndRiskDashboard() {
           }}
         >
           <DashboardCard
-            title="Completed"
-            titleIcon={<CheckCircleOutlineIcon fontSize="small" />}
-            value={5}
+            title="Water"
+            titleIcon={<WaterDropOutlinedIcon fontSize="large" />}
+            value={442750}
             subDescription="5% From previous period"
           />
         </Box>
@@ -276,9 +321,9 @@ function HazardAndRiskDashboard() {
           }}
         >
           <DashboardCard
-            title="Pending"
-            titleIcon={<PendingIcon fontSize="small" />}
-            value={8}
+            title="Waste"
+            titleIcon={<DeleteOutlineOutlinedIcon fontSize="large" />}
+            value={11247}
             subDescription="8% From previous period"
           />
         </Box>
@@ -291,10 +336,25 @@ function HazardAndRiskDashboard() {
           }}
         >
           <DashboardCard
-            title="Amount"
-            titleIcon={<CreditCardIcon fontSize="small" />}
-            value={5}
-            subDescription="5% From previous period"
+            title="Waste Water"
+            titleIcon={<ShowerOutlinedIcon fontSize="large" />}
+            value={48791}
+            subDescription="2% From previous period"
+          />
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            flex: 1,
+            margin: "0.5rem",
+            minWidth: "150px",
+          }}
+        >
+          <DashboardCard
+            title="Total Energy"
+            titleIcon={<BatteryChargingFullOutlinedIcon fontSize="large" />}
+            value={492558}
+            subDescription="0% From previous period"
           />
         </Box>
         <Box
@@ -307,22 +367,7 @@ function HazardAndRiskDashboard() {
         >
           <DashboardCard
             title="Amount"
-            titleIcon={<CreditCardIcon fontSize="small" />}
-            value={5}
-            subDescription="5% From previous period"
-          />
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            flex: 1,
-            margin: "0.5rem",
-            minWidth: "150px",
-          }}
-        >
-          <DashboardCard
-            title="Amount"
-            titleIcon={<CreditCardIcon fontSize="small" />}
+            titleIcon={<CreditCardIcon fontSize="large" />}
             value={5}
             subDescription="5% From previous period"
           />
@@ -349,38 +394,125 @@ function HazardAndRiskDashboard() {
           }}
         >
           <ResponsiveContainer width="100%" height={500}>
-            <LineChart
-              data={hazardRiskChartData1}
-              margin={{
-                top: 50,
-                right: 30,
-                left: 20,
-                bottom: 60,
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey="name"
-                angle={-15}
-                textAnchor="end"
-                fontSize={"small"}
-              />
-              <YAxis
-                label={{
-                  value: "Division",
-                  position: "top",
-                  offset: 25,
+            <>
+              <Typography variant="subtitle1">Waste</Typography>
+              <AppBar
+                position="static"
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  mt: "1rem",
+                  backgroundColor: "var(--pallet-lighter-grey)",
                 }}
-                fontSize={"small"}
-              />
-              <Tooltip />
-              <Line
-                type="linear"
-                dataKey="pv"
-                stroke="#8884d8"
-                activeDot={{ r: 8 }}
-              />
-            </LineChart>
+              >
+                <Tabs
+                  value={activeTab}
+                  onChange={handleChange}
+                  indicatorColor="secondary"
+                  TabIndicatorProps={{
+                    style: {
+                      backgroundColor: "var(--pallet-blue)",
+                      height: "3px",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    },
+                  }}
+                  sx={{
+                    backgroundColor: "var(--pallet-lighter-grey)",
+                    color: "var(--pallet-blue)",
+                    display: "flex",
+                  }}
+                  textColor="inherit"
+                  variant="scrollable"
+                  scrollButtons={true}
+                >
+                  <Tab
+                    label={
+                      <Box
+                        sx={{
+                          color: "var(--pallet-blue)",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        {/* <TextSnippetIcon fontSize="small" /> */}
+                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                          Overview
+                        </Typography>
+                      </Box>
+                    }
+                    {...a11yProps(0)}
+                  />
+                  <Tab
+                    label={
+                      <Box
+                        sx={{
+                          color: "var(--pallet-blue)",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        {/* <FireExtinguisherIcon fontSize="small" /> */}
+                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                          Hazardous
+                        </Typography>
+                      </Box>
+                    }
+                    {...a11yProps(1)}
+                  />
+                  <Tab
+                    label={
+                      <Box
+                        sx={{
+                          color: "var(--pallet-blue)",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        {/* <FireExtinguisherIcon fontSize="small" /> */}
+                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                          Non Hazardous
+                        </Typography>
+                      </Box>
+                    }
+                    {...a11yProps(2)}
+                  />
+                </Tabs>
+              </AppBar>
+              <TabPanel value={activeTab} index={0} dir={theme.direction}>
+                <Stack>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Box
+                    width={350}>
+                      <Typography>Fabric Cut Piece</Typography>
+                      <Typography>In KG</Typography>
+                    </Box>
+                    <Box>
+                      <CircularProgressWithLabel size={60} value={10} />
+                    </Box>
+                    <Box>
+                      <Typography>Quantity</Typography>
+                      <Typography>63892 KG</Typography>
+                    </Box>
+                  </Box>
+                  <Divider />
+                  <Box>hello</Box>
+                </Stack>
+              </TabPanel>
+              <TabPanel value={activeTab} index={1} dir={theme.direction}>
+                hi2
+              </TabPanel>
+              <TabPanel value={activeTab} index={2} dir={theme.direction}>
+                hi3
+              </TabPanel>
+            </>
           </ResponsiveContainer>
         </Box>
         <Box
