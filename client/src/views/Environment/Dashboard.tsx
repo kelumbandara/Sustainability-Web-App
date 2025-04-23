@@ -70,11 +70,9 @@ import SummarizeIcon from "@mui/icons-material/Summarize";
 import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
 import AcUnitOutlinedIcon from "@mui/icons-material/AcUnitOutlined";
 import OfflineBoltIcon from "@mui/icons-material/OfflineBolt";
-import WindPowerOutlinedIcon from "@mui/icons-material/WindPowerOutlined";
 import Co2Icon from "@mui/icons-material/Co2";
 import PieArcLabelChart from "../../components/PieChartComponent";
 import PercentagePieChart from "../../components/PercentagePieChart";
-import { title } from "process";
 
 const breadcrumbItems = [
   { title: "Home", href: "/home" },
