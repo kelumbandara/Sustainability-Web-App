@@ -86,7 +86,7 @@ export async function createConsumption(environment: Environment) {
     }
   });
 
-  const res = await axios.post(`/api/environment-recode`, formData, {
+  const res = await axios.post(`/api/environment-record`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -96,12 +96,12 @@ export async function createConsumption(environment: Environment) {
 }
 
 export async function getConsumptionList() {
-  const res = await axios.get("/api/environment-recode");
+  const res = await axios.get("/api/environment-record");
   return res.data;
 }
 
 export async function getConsumptionAssignedList() {
-  const res = await axios.get("/api/environment-recode-assign-task");
+  const res = await axios.get("/api/environment-record-assign-task");
   return res.data;
 }
 
@@ -147,7 +147,7 @@ export async function updateConsumption(environment: Environment) {
   });
 
   const res = await axios.post(
-    `/api/environment-recode/${environment.id}/update`,
+    `/api/environment-record/${environment.id}/update`,
     formData,
     {
       headers: {
@@ -160,7 +160,7 @@ export async function updateConsumption(environment: Environment) {
 }
 
 export async function deleteConsumption(id: String) {
-  const res = await axios.delete(`/api/environment-recode/${id}/delete`);
+  const res = await axios.delete(`/api/environment-record/${id}/delete`);
   return res.data;
 }
 
@@ -180,6 +180,6 @@ export async function fetchConsumptionUnits() {
 }
 
 export async function fetchConsumptionAssignee() {
-  const res = await axios.get(`/api/environment-recode-assignee`);
+  const res = await axios.get(`/api/environment-record-assignee`);
   return res.data;
 }
