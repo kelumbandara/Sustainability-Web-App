@@ -114,3 +114,37 @@ export const pieChartdata = [
 ];
 
 export const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+
+export const fabricCutData = [
+  {
+    label: "Fabric Cut Piece",
+    unit: "In KG",
+    progress: 10,
+    quantity: "63,892 KG",
+  },
+  {
+    label: "Lining Material",
+    unit: "In KG",
+    progress: 25,
+    quantity: "42,376 KG",
+  },
+  {
+    label: "Sleeve Fabric",
+    unit: "In KG",
+    progress: 50,
+    quantity: "89,540 KG",
+  },
+  {
+    label: "Collar Material",
+    unit: "In KG",
+    progress: 75,
+    quantity: "124,010 KG",
+  },
+  {
+    label: "Pocket Cloth",
+    unit: "In KG",
+    progress: 90,
+    quantity: "158,732 KG",
+  },
+];
+
