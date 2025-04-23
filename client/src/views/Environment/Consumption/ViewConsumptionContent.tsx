@@ -1,5 +1,4 @@
 import {
-  AppBar,
   Box,
   Divider,
   Stack,
@@ -8,7 +7,6 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  Tabs,
   Typography,
 } from "@mui/material";
 import { DrawerContentItem } from "../../../components/ViewDataDrawer";
@@ -72,18 +70,18 @@ function ViewConsumptionContent({ consumption }: { consumption: Environment }) {
           sx={{ flex: 1 }}
         />
         <DrawerContentItem
-          label="Area in Squre Meter (m2)"
+          label="Area in Square Meter (m2)"
           value={consumption?.area}
           sx={{ flex: 1 }}
         />
         <DrawerContentItem
           label="Total product produced/shipped (Pcs)"
-          value={consumption?.totalProuctProducedPcs}
+          value={consumption?.totalProductProducedPcs}
           sx={{ flex: 1 }}
         />
         <DrawerContentItem
           label="Total product produced/shipped (Kg)"
-          value={consumption?.totalProuctProducedkg}
+          value={consumption?.totalProductProducedKg}
           sx={{ flex: 1 }}
         />
         <Table aria-label="activity stream table">
@@ -116,7 +114,7 @@ function ViewConsumptionContent({ consumption }: { consumption: Environment }) {
                   </TableCell>
                   <TableCell align="center">{row.source}</TableCell>
                   <TableCell align="center">{row.unit}</TableCell>
-                  <TableCell align="center">{row.quentity}</TableCell>
+                  <TableCell align="center">{row.quantity}</TableCell>
                   <TableCell align="center">{row.amount}</TableCell>
                   <TableCell align="center">{row.ghgInTonnes}</TableCell>
                 </TableRow>
@@ -165,7 +163,7 @@ function ViewConsumptionContent({ consumption }: { consumption: Environment }) {
           sx={{ flex: 1 }}
         />
         <DrawerContentItem
-          label="Reviwer"
+          label="Reviewer"
           value={consumption?.reviewer.name}
           sx={{ flex: 1 }}
         />

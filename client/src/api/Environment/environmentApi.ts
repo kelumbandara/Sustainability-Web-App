@@ -7,10 +7,10 @@ export const ConsumptionSchema = z.object({
   category: z.string(),
   source: z.string(),
   unit: z.string(),
-  quentity: z.number(),
+  quantity: z.number(),
   amount: z.number(),
   ghgInTonnes: z.string(),
-  methodeOfTracking: z.string(),
+  methodOfTracking: z.string(),
   usageType: z.string(),
   doYouHaveREC: z.number(),
   scope: z.string(),
@@ -21,13 +21,13 @@ export type Consumption = z.infer<typeof ConsumptionSchema>;
 
 export const EnvironmentSchema = z.object({
   id: z.string(),
-  concumptionsId: z.string(),
+  consumptionsId: z.string(),
   referenceNumber: z.string(),
   division: z.string(),
   totalWorkForce: z.number(),
   numberOfDaysWorked: z.number(),
   impactConsumption: z.array(ConsumptionSchema),
-  areaInSquereMeter: z.number(),
+  areaInSquareMeter: z.number(),
   reviewerId: z.string(),
   reviewer: userSchema,
   approverId: z.string(),
@@ -36,8 +36,8 @@ export const EnvironmentSchema = z.object({
   area: z.number(),
   year: z.string(),
   month: z.string(),
-  totalProuctProducedPcs: z.number(),
-  totalProuctProducedkg: z.number(),
+  totalProductProducedPcs: z.number(),
+  totalProductProducedKg: z.number(),
   createdBy: z.string(),
   created_at: z.date(),
   createdByUserName: z.string(),
@@ -45,11 +45,11 @@ export const EnvironmentSchema = z.object({
 
 export type Environment = z.infer<typeof EnvironmentSchema>;
 
-export async function createConsumption(envirement: Environment) {
+export async function createConsumption(environment: Environment) {
   const formData = new FormData();
 
-  Object.keys(envirement).forEach((key) => {
-    const value = envirement[key];
+  Object.keys(environment).forEach((key) => {
+    const value = environment[key];
 
     if (value === null || value === undefined) {
       return;
@@ -86,7 +86,7 @@ export async function createConsumption(envirement: Environment) {
     }
   });
 
-  const res = await axios.post(`/api/envirement-recode`, formData, {
+  const res = await axios.post(`/api/environment-recode`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -96,20 +96,20 @@ export async function createConsumption(envirement: Environment) {
 }
 
 export async function getConsumptionList() {
-  const res = await axios.get("/api/envirement-recode");
+  const res = await axios.get("/api/environment-recode");
   return res.data;
 }
 
 export async function getConsumptionAssignedList() {
-  const res = await axios.get("/api/envirement-recode-assign-task");
+  const res = await axios.get("/api/environment-recode-assign-task");
   return res.data;
 }
 
-export async function updateConsumption(envirement: Environment) {
+export async function updateConsumption(environment: Environment) {
   const formData = new FormData();
 
-  Object.keys(envirement).forEach((key) => {
-    const value = envirement[key];
+  Object.keys(environment).forEach((key) => {
+    const value = environment[key];
 
     if (value === null || value === undefined) {
       return;
@@ -147,7 +147,7 @@ export async function updateConsumption(envirement: Environment) {
   });
 
   const res = await axios.post(
-    `/api/envirement-recode/${envirement.id}/update`,
+    `/api/environment-recode/${environment.id}/update`,
     formData,
     {
       headers: {
@@ -160,7 +160,7 @@ export async function updateConsumption(envirement: Environment) {
 }
 
 export async function deleteConsumption(id: String) {
-  const res = await axios.delete(`/api/envirement-recode/${id}/delete`);
+  const res = await axios.delete(`/api/environment-recode/${id}/delete`);
   return res.data;
 }
 
@@ -180,6 +180,6 @@ export async function fetchConsumptionUnits() {
 }
 
 export async function fetchConsumptionAssignee() {
-  const res = await axios.get(`/api/envirement-recode-assignee`);
+  const res = await axios.get(`/api/environment-recode-assignee`);
   return res.data;
 }
