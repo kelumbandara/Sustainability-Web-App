@@ -17,21 +17,23 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import theme from "../../theme";
-import PageTitle from "../../components/PageTitle";
-import Breadcrumb from "../../components/BreadCrumb";
+import theme from "../../../theme";
+import PageTitle from "../../../components/PageTitle";
+import Breadcrumb from "../../../components/BreadCrumb";
 import { useMemo, useState } from "react";
-import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
+import ViewDataDrawer, {
+  DrawerHeader,
+} from "../../../components/ViewDataDrawer";
 import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
-import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
 import ViewExternalAuditContent from "./ViewExternalAuditContent";
 import AddOrEditExternalAudit from "./AddOrEditExternalAudit";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import queryClient from "../../state/queryClient";
-import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
-import { PermissionKeys } from "../Administration/SectionList";
+import queryClient from "../../../state/queryClient";
+import useCurrentUserHaveAccess from "../../../hooks/useCurrentUserHaveAccess";
+import { PermissionKeys } from "../../Administration/SectionList";
 import {
   ExternalAudit,
   createExternalAudit,
@@ -39,10 +41,17 @@ import {
   getExternalAssignedAudit,
   getExternalAuditData,
   updateExternalAudit,
-} from "../../api/ExternalAudit/externalAuditApi";
-import { sampleAuditData } from "../../api/sampleData/auditData";
+} from "../../../api/ExternalAudit/externalAuditApi";
 
-function ExternalAuditTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
+function ExternalAuditTable({
+  isAssignedTasks,
+  isCorrectiveAction,
+  isAuditQueue,
+}: {
+  isAssignedTasks: boolean;
+  isCorrectiveAction: boolean;
+  isAuditQueue: boolean;
+}) {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<ExternalAudit>(null);
@@ -69,7 +78,12 @@ function ExternalAuditTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
-    { title: `${isAssignedTasks ? "Assigned " : ""}Audit Management` },
+    {
+      title:
+        `${isAssignedTasks ? "Assigned " : ""}Audit Management` ||
+        `${isCorrectiveAction ? "Corrective Action " : ""}Audit Management` ||
+        `${isAuditQueue ? "Queue " : ""}Audit Management`,
+    },
   ];
 
   const { data: externalAuditData, isFetching: isExternalAuditDataFetching } =
@@ -83,6 +97,22 @@ function ExternalAuditTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
     isFetching: isExternalAudiAssignedTaskData,
   } = useQuery({
     queryKey: ["external-assigned-audit"],
+    queryFn: getExternalAssignedAudit,
+  });
+
+  const {
+    data: externalAuditCorrectiveData,
+    isFetching: isExternalAudiAssignedCorrectiveData,
+  } = useQuery({
+    queryKey: ["external-corrective-audit"],
+    queryFn: getExternalAssignedAudit,
+  });
+
+  const {
+    data: externalAuditQueueData,
+    isFetching: isExternalAudiAssignedQueueData,
+  } = useQuery({
+    queryKey: ["external-queue-audit"],
     queryFn: getExternalAssignedAudit,
   });
 
@@ -155,6 +185,18 @@ function ExternalAuditTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
+    } else if (isCorrectiveAction) {
+      if (!externalAuditCorrectiveData) return [];
+      return externalAuditCorrectiveData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
+    } else if (isAuditQueue) {
+      if (!externalAuditQueueData) return [];
+      return externalAuditQueueData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
     } else {
       if (!externalAuditData) return [];
       return externalAuditData.slice(
@@ -163,11 +205,17 @@ function ExternalAuditTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
       );
     }
   }, [
-    externalAuditData,
     page,
     rowsPerPage,
+
+    externalAuditData,
     externalAuditTaskData,
+    externalAuditCorrectiveData,
+    externalAuditQueueData,
+
     isAssignedTasks,
+    isCorrectiveAction,
+    isAuditQueue,
   ]);
 
   const isExternalAuditCreateDisabled = !useCurrentUserHaveAccess(
@@ -179,6 +227,7 @@ function ExternalAuditTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   const isExternalAuditDeleteDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_REGISTER_DELETE
   );
+
   const isExternalAuditTaskListDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_TASK_CREATE
   );
@@ -187,6 +236,26 @@ function ExternalAuditTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   );
   const isExternalAuditTaskDeleteDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_TASK_DELETE
+  );
+
+  const isExternalAuditCorrectiveCreateDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_CORRECTIVE_ACTION_CREATE
+  );
+  const isExternalAuditCorrectiveEditDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_CORRECTIVE_ACTION_EDIT
+  );
+  const isExternalAuditCorrectiveDeleteDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_CORRECTIVE_ACTION_DELETE
+  );
+
+  const isExternalAuditQueueCreateDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_CREATE
+  );
+  const isExternalAuditQueueEditDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_EDIT
+  );
+  const isExternalAuditQueueDeleteDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_DELETE
   );
 
   return (
@@ -201,9 +270,11 @@ function ExternalAuditTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
         }}
       >
         <PageTitle
-          title={`${
-            isAssignedTasks ? "Assigned " : ""
-          }External Audit Management`}
+          title={
+            `${isAssignedTasks ? "Assigned " : ""}External Audit Management` ||
+            `${isAuditQueue ? "Queued " : ""}External Audit Management` ||
+            `${isCorrectiveAction ? "Corrective Actioned " : ""}External Audit Management`
+          }
         />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
@@ -233,14 +304,19 @@ function ExternalAuditTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
               }}
               disabled={
                 isAssignedTasks
-                  ? isExternalAuditTaskListDisabled
+                  ? isExternalAuditTaskListDisabled ||
+                    isExternalAuditCorrectiveCreateDisabled ||
+                    isExternalAuditQueueCreateDisabled
                   : isExternalAuditCreateDisabled
               }
             >
               Report External Audit
             </Button>
           </Box>
-          {(isExternalAuditDataFetching || isExternalAudiAssignedTaskData) && (
+          {(isExternalAuditDataFetching ||
+            isExternalAudiAssignedTaskData ||
+            isExternalAudiAssignedCorrectiveData ||
+            isExternalAudiAssignedQueueData) && (
             <LinearProgress sx={{ width: "100%" }} />
           )}
           <Table aria-label="simple table">
@@ -308,9 +384,11 @@ function ExternalAuditTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
                   rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
                   colSpan={100}
                   count={
-                    isAssignedTasks
-                      ? paginatedExternalAuditData?.length
-                      : paginatedExternalAuditData?.length
+                    isAssignedTasks || isAuditQueue || isCorrectiveAction
+                      ? externalAuditTaskData?.length ||
+                        externalAuditQueueData?.length ||
+                        externalAuditCorrectiveData?.length
+                      : externalAuditData?.length
                   }
                   rowsPerPage={rowsPerPage}
                   page={page}
@@ -339,13 +417,17 @@ function ExternalAuditTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
               }}
               disableEdit={
                 isAssignedTasks
-                  ? isExternalAuditTaskEditDisabled
+                  ? isExternalAuditTaskEditDisabled ||
+                    isExternalAuditCorrectiveEditDisabled ||
+                    isExternalAuditQueueEditDisabled
                   : isExternalAuditEditDisabled
               }
               onDelete={() => setDeleteDialogOpen(true)}
               disableDelete={
                 isAssignedTasks
-                  ? isExternalAuditTaskDeleteDisabled
+                  ? isExternalAuditTaskDeleteDisabled ||
+                    isExternalAuditCorrectiveDeleteDisabled ||
+                    isExternalAuditQueueDeleteDisabled
                   : isExternalAuditDeleteDisabled
               }
             />

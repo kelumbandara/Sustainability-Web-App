@@ -105,19 +105,19 @@ export const sidebarItems: Array<SidebarItem> = [
         title: "External Audit",
         href: "/audit-inspection/external-audit",
         icon: <TravelExploreIcon fontSize="small" />,
-        accessKey: PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_VIEW,
+        accessKey: PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_REGISTER_VIEW,
         nestedItems: [
           {
             title: "External Audit Register",
             href: "/audit-inspection/external-audit/register",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-            accessKey: PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_VIEW,
+            accessKey: PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_REGISTER_VIEW,
           },
           {
             title: "Assigned Audit",
             href: "/audit-inspection/external-audit/assigned-tasks",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-            accessKey: PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_VIEW,
+            accessKey: PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_TASK_VIEW,
           },
           {
             title: "External Audit Queue",
@@ -129,7 +129,7 @@ export const sidebarItems: Array<SidebarItem> = [
             title: "Corrective Action",
             href: "/audit-inspection/external-audit/corrective-action",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-            accessKey: PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_VIEW,
+            accessKey: PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_CORRECTIVE_ACTION_VIEW,
           },
         ],
       },

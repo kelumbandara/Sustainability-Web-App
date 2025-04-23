@@ -10,17 +10,17 @@ import {
   Tabs,
   Typography,
 } from "@mui/material";
-import { DrawerContentItem } from "../../components/ViewDataDrawer";
+import { DrawerContentItem } from "../../../components/ViewDataDrawer";
 import { format } from "date-fns";
 import { useState } from "react";
-import theme from "../../theme";
-import useIsMobile from "../../customHooks/useIsMobile";
+import theme from "../../../theme";
+import useIsMobile from "../../../customHooks/useIsMobile";
 import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import ListIcon from "@mui/icons-material/List";
 import Diversity3Icon from "@mui/icons-material/Diversity3";
-import { ExternalAudit } from "../../api/ExternalAudit/externalAuditApi";
-import { FileItemsViewer } from "../../components/FileItemsViewer";
-import { StorageFile } from "../../utils/StorageFiles.util";
+import { ExternalAudit } from "../../../api/ExternalAudit/externalAuditApi";
+import { FileItemsViewer } from "../../../components/FileItemsViewer";
+import { StorageFile } from "../../../utils/StorageFiles.util";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -315,7 +315,7 @@ function ViewExternalAuditContent({ audit }: { audit: ExternalAudit }) {
           height: "fit-content",
         }}
       >
-        <DrawerContentItem label="Reported By" value={audit.createdBy} />
+        <DrawerContentItem label="Reported By" value={audit.createdByUserName} />
         <DrawerContentItem
           label="Issued Date"
           value={

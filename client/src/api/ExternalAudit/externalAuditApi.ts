@@ -43,6 +43,7 @@ export const ExternalAuditSchema = z.object({
   auditExpiryDate: z.date(),
   representorId: z.string(),
   assesmentDate: z.date(),
+  createdByUserName: z.string(),
   auditorName: z.string(),
   removeDoc: z.array(z.string()).optional(),
 });
@@ -95,7 +96,7 @@ export async function getExternalAuditData() {
   return res.data;
 }
 export async function getExternalAssignedAudit() {
-  const res = await axios.get("/api/external-audit-assigned-audit");
+  const res = await axios.get("/api/external-audit-assign-task");
   return res.data;
 }
 

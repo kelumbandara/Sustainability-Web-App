@@ -35,19 +35,19 @@ import {
   fetchAuditFirm,
   fetchAuditStandard,
   fetchAuditType,
-} from "../../api/ExternalAudit/externalAuditApi";
-import useIsMobile from "../../customHooks/useIsMobile";
-import theme from "../../theme";
-import CustomButton from "../../components/CustomButton";
-import { fetchDivision } from "../../api/divisionApi";
+} from "../../../api/ExternalAudit/externalAuditApi";
+import useIsMobile from "../../../customHooks/useIsMobile";
+import theme from "../../../theme";
+import CustomButton from "../../../components/CustomButton";
+import { fetchDivision } from "../../../api/divisionApi";
 import { useQuery } from "@tanstack/react-query";
-import RichTextComponent from "../../components/RichTextComponent";
-import { ExistingFileItemsEdit } from "../../components/ExistingFileItemsEdit";
-import DropzoneComponent from "../../components/DropzoneComponent";
-import { StorageFile } from "../../utils/StorageFiles.util";
-import DatePickerComponent from "../../components/DatePickerComponent";
-import UserAutoComplete from "../../components/UserAutoComplete";
-import { fetchHazardRiskAssignee } from "../../api/userApi";
+import RichTextComponent from "../../../components/RichTextComponent";
+import { ExistingFileItemsEdit } from "../../../components/ExistingFileItemsEdit";
+import DropzoneComponent from "../../../components/DropzoneComponent";
+import { StorageFile } from "../../../utils/StorageFiles.util";
+import DatePickerComponent from "../../../components/DatePickerComponent";
+import UserAutoComplete from "../../../components/UserAutoComplete";
+import { fetchHazardRiskAssignee } from "../../../api/userApi";
 import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import ListIcon from "@mui/icons-material/List";
 import Diversity3Icon from "@mui/icons-material/Diversity3";
@@ -674,10 +674,10 @@ export default function AddOrEditSustainabilityDialog({
                       type="text"
                       label="Audit Status"
                       error={!!errors.auditStatus}
-                      required
+                      // required
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("auditStatus", { required: true })}
+                      {...register("auditStatus",)}
                     />
 
                     <TextField
@@ -686,9 +686,9 @@ export default function AddOrEditSustainabilityDialog({
                       label="Audit Score"
                       error={!!errors.auditScore}
                       size="small"
-                      required
+                      // required
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("auditScore", { required: true })}
+                      {...register("auditScore")}
                     />
 
                     <TextField
@@ -696,10 +696,10 @@ export default function AddOrEditSustainabilityDialog({
                       type="text"
                       label="Grade Period"
                       error={!!errors.gradePeriod}
-                      required
+                      // required
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("gradePeriod", { required: true })}
+                      {...register("gradePeriod")}
                     />
                   </Stack>
 
@@ -717,11 +717,11 @@ export default function AddOrEditSustainabilityDialog({
                       id="numberOfNonCom"
                       type="number"
                       label="Number Of Non Com"
-                      required
+                      // required
                       error={!!errors.numberOfNonCom}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("numberOfNonCom", { required: true })}
+                      {...register("numberOfNonCom")}
                     />
 
                     <TextField
@@ -730,20 +730,20 @@ export default function AddOrEditSustainabilityDialog({
                       label="Audit Fee"
                       error={!!errors.auditFee}
                       size="small"
-                      required
+                      // required
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("auditFee", { required: true })}
+                      {...register("auditFee")}
                     />
 
                     <TextField
                       id="auditGrade"
                       type="text"
                       label="Audit Grade"
-                      required
+                      // required
                       error={!!errors.auditGrade}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("auditGrade", { required: true })}
+                      {...register("auditGrade")}
                     />
                   </Stack>
 
