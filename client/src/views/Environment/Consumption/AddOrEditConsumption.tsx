@@ -19,30 +19,25 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Document } from "../../../api/documentApi";
 import useIsMobile from "../../../customHooks/useIsMobile";
 import { Controller, useForm } from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
-import DropzoneComponent from "../../../components/DropzoneComponent";
 import { grey } from "@mui/material/colors";
 import CustomButton from "../../../components/CustomButton";
 import AddOrEditAdditionalDialog from "./AddOrEditAdditionalDialog";
 import { useEffect, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../../api/divisionApi";
 import theme from "../../../theme";
-import { fetchAllDocumentType } from "../../../api/documentType";
 import {
   Consumption,
   Environment,
+  fetchConsumptionAssignee,
 } from "../../../api/Environment/environmentApi";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { fetchHazardRiskAssignee } from "../../../api/userApi";
 import UserAutoComplete from "../../../components/UserAutoComplete";
-import WidgetsIcon from "@mui/icons-material/Widgets";
 import { monthData, yearData } from "../../../api/sampleData/consumptionData";
 
 type DialogProps = {
@@ -82,16 +77,13 @@ export default function AddOrEditConsumptionDialog({
     queryFn: fetchDivision,
   });
 
-  const { data: assigneeData, isFetching: isAssigneeDataFetching } = useQuery({
-    queryKey: ["hr-assignee"],
-    queryFn: fetchHazardRiskAssignee,
+  const {
+    data: consumptionAssigneeData,
+    isFetching: isconsumptionAssigneeData,
+  } = useQuery({
+    queryKey: ["cs-assignee"],
+    queryFn: fetchConsumptionAssignee,
   });
-
-  const { data: documentType, isFetching: isDocumentTypeDataFetching } =
-    useQuery({
-      queryKey: ["documentTypes"],
-      queryFn: fetchAllDocumentType,
-    });
 
   useEffect(() => {
     if (defaultValues) {
@@ -207,6 +199,7 @@ export default function AddOrEditConsumptionDialog({
                   id="totalWorkForce"
                   label="Total WorkForce"
                   error={!!errors.totalWorkForce}
+                  helperText={errors.totalWorkForce && "Required"}
                   size="small"
                   sx={{ flex: 1, margin: "0.5rem" }}
                   {...register("totalWorkForce", { required: true })}
@@ -215,6 +208,7 @@ export default function AddOrEditConsumptionDialog({
                   required
                   id="numberOfDaysWorked"
                   label="Number Of Days Worked"
+                  helperText={errors.numberOfDaysWorked && "Required"}
                   error={!!errors.numberOfDaysWorked}
                   size="small"
                   sx={{ flex: 1, margin: "0.5rem" }}
@@ -225,6 +219,7 @@ export default function AddOrEditConsumptionDialog({
                   id="area"
                   label="Area In Squre Meter"
                   error={!!errors.area}
+                  helperText={errors.area && "Required"}
                   size="small"
                   sx={{ flex: 1, margin: "0.5rem" }}
                   {...register("area", { required: true })}
@@ -241,6 +236,7 @@ export default function AddOrEditConsumptionDialog({
                   id="totalProuctProducedPcs"
                   label="Total Product Produced/Shipped (Pcs)"
                   error={!!errors.totalProuctProducedPcs}
+                  helperText={errors.totalProuctProducedPcs && "Required"}
                   size="small"
                   sx={{ flex: 1, margin: "0.5rem" }}
                   {...register("totalProuctProducedPcs", { required: true })}
@@ -250,6 +246,7 @@ export default function AddOrEditConsumptionDialog({
                   id="totalProuctProducedkg"
                   label="Total Product Produced/Shipped(Kg)"
                   error={!!errors.totalProuctProducedkg}
+                  helperText={errors.totalProuctProducedkg && "Required"}
                   size="small"
                   sx={{ flex: 1, margin: "0.5rem" }}
                   {...register("totalProuctProducedkg", { required: true })}
@@ -501,7 +498,7 @@ export default function AddOrEditConsumptionDialog({
                   control={control}
                   register={register}
                   errors={errors}
-                  userData={assigneeData}
+                  userData={consumptionAssigneeData}
                   defaultValue={defaultValues?.approver}
                   required={true}
                 />
@@ -514,7 +511,7 @@ export default function AddOrEditConsumptionDialog({
                   control={control}
                   register={register}
                   errors={errors}
-                  userData={assigneeData}
+                  userData={consumptionAssigneeData}
                   defaultValue={defaultValues?.reviewer}
                   required={true}
                 />
