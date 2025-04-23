@@ -361,6 +361,9 @@ const DrawerContent = ({
         }}
       >
         {sidebarItems.map((item, i) => {
+          if (item?.accessKey && !userPermissionObject[`${item?.accessKey}`])
+            return null;
+
           if (item?.headline) {
             return (
               <Typography
@@ -381,9 +384,11 @@ const DrawerContent = ({
 
           if (item.nestedItems) {
             return (
-              <Box sx={{ marginLeft: "1rem" }} key={item.accessKey}>
+              <Box
+                sx={{ marginLeft: "1rem" }}
+                key={`${item.href} +${item.title}`}
+              >
                 <NestedItem
-                  key={item.accessKey}
                   item={item}
                   handleDrawerClose={handleDrawerClose}
                   userPermissionObject={userPermissionObject}
@@ -475,6 +480,23 @@ const NestedItem = React.memo(
     userPermissionObject: PermissionKeysObject;
   }) => {
     const [open, setOpen] = React.useState(item.open);
+    const isAllItemsHidden = useMemo(() => {
+      const checkNestedItems = (nestedItems: SidebarItem[]) => {
+        return nestedItems.every((nestedItem) => {
+          if (nestedItem.nestedItems) {
+            return checkNestedItems(nestedItem.nestedItems);
+          }
+          return (
+            nestedItem?.accessKey && !userPermissionObject[nestedItem.accessKey]
+          );
+        });
+      };
+
+      return checkNestedItems(item.nestedItems);
+    }, [item.nestedItems, userPermissionObject]);
+
+    if (isAllItemsHidden) return null;
+
     return (
       <React.Fragment key={item.accessKey}>
         <Button
@@ -510,6 +532,12 @@ const NestedItem = React.memo(
         <Collapse in={open} unmountOnExit>
           <List>
             {item.nestedItems.map((item) => {
+              if (
+                item?.accessKey &&
+                !userPermissionObject[`${item?.accessKey}`]
+              )
+                return null;
+
               if (item.nestedItems) {
                 return (
                   <Box key={item.accessKey} sx={{ marginLeft: "0.5rem" }}>
