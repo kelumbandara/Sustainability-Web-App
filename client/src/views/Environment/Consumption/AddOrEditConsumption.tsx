@@ -77,13 +77,13 @@ export default function AddOrEditConsumptionDialog({
     queryFn: fetchDivision,
   });
 
-    const {
-      data: consumptionAssigneeData,
-      isFetching: isconsumptionAssigneeData,
-    } = useQuery({
-      queryKey: ["cs-assignee"],
-      queryFn: fetchConsumptionAssignee,
-    });
+  const {
+    data: consumptionAssigneeData,
+    isFetching: isconsumptionAssigneeData,
+  } = useQuery({
+    queryKey: ["cs-assignee"],
+    queryFn: fetchConsumptionAssignee,
+  });
 
   useEffect(() => {
     if (defaultValues) {
@@ -199,6 +199,7 @@ export default function AddOrEditConsumptionDialog({
                   id="totalWorkForce"
                   label="Total WorkForce"
                   error={!!errors.totalWorkForce}
+                  helperText={errors.totalWorkForce && "Required"}
                   size="small"
                   sx={{ flex: 1, margin: "0.5rem" }}
                   {...register("totalWorkForce", { required: true })}
@@ -207,6 +208,7 @@ export default function AddOrEditConsumptionDialog({
                   required
                   id="numberOfDaysWorked"
                   label="Number Of Days Worked"
+                  helperText={errors.numberOfDaysWorked && "Required"}
                   error={!!errors.numberOfDaysWorked}
                   size="small"
                   sx={{ flex: 1, margin: "0.5rem" }}
@@ -217,6 +219,7 @@ export default function AddOrEditConsumptionDialog({
                   id="area"
                   label="Area In Squre Meter"
                   error={!!errors.area}
+                  helperText={errors.area && "Required"}
                   size="small"
                   sx={{ flex: 1, margin: "0.5rem" }}
                   {...register("area", { required: true })}
@@ -233,6 +236,7 @@ export default function AddOrEditConsumptionDialog({
                   id="totalProuctProducedPcs"
                   label="Total Product Produced/Shipped (Pcs)"
                   error={!!errors.totalProuctProducedPcs}
+                  helperText={errors.totalProuctProducedPcs && "Required"}
                   size="small"
                   sx={{ flex: 1, margin: "0.5rem" }}
                   {...register("totalProuctProducedPcs", { required: true })}
@@ -242,6 +246,7 @@ export default function AddOrEditConsumptionDialog({
                   id="totalProuctProducedkg"
                   label="Total Product Produced/Shipped(Kg)"
                   error={!!errors.totalProuctProducedkg}
+                  helperText={errors.totalProuctProducedkg && "Required"}
                   size="small"
                   sx={{ flex: 1, margin: "0.5rem" }}
                   {...register("totalProuctProducedkg", { required: true })}

@@ -247,6 +247,7 @@ export default function AddOrEditAdditionalDialog({
               type="number"
               label="Quantity"
               error={!!errors.quentity}
+              helperText={errors.quentity && "Required"}
               size="small"
               sx={{ flex: 1, margin: "0.5rem" }}
               {...register("quentity", { required: true })}
@@ -257,6 +258,7 @@ export default function AddOrEditAdditionalDialog({
               type="number"
               label="Amount"
               error={!!errors.amount}
+              helperText={errors.amount && "Required"}
               size="small"
               sx={{ flex: 1, margin: "0.5rem" }}
               {...register("amount", { required: true })}
@@ -267,6 +269,7 @@ export default function AddOrEditAdditionalDialog({
               type="number"
               label="GHG in Tonnes"
               error={!!errors.ghgInTonnes}
+              helperText={errors.ghgInTonnes && "Required"}
               size="small"
               sx={{ flex: 1, margin: "0.5rem" }}
               {...register("ghgInTonnes", { required: true })}
@@ -285,6 +288,7 @@ export default function AddOrEditAdditionalDialog({
               id="scope"
               label="Scope"
               error={!!errors.scope}
+              helperText={errors.scope && "Required"}
               size="small"
               sx={{ flex: 1, margin: "0.5rem" }}
               {...register("scope", { required: true })}
@@ -294,6 +298,7 @@ export default function AddOrEditAdditionalDialog({
               id="methodeOfTracking"
               label="Methode Of Tracking"
               error={!!errors.methodeOfTracking}
+              helperText={errors.methodeOfTracking && "Required"}
               size="small"
               sx={{ flex: 1, margin: "0.5rem" }}
               {...register("methodeOfTracking", { required: true })}
@@ -303,6 +308,7 @@ export default function AddOrEditAdditionalDialog({
               id="usageType"
               label="Usage Type"
               error={!!errors.usageType}
+              helperText={errors.usageType && "Required"}
               size="small"
               sx={{ flex: 1, margin: "0.5rem" }}
               {...register("usageType", { required: true })}
