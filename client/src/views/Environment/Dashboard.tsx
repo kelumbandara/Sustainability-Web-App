@@ -27,9 +27,6 @@ import DateRangePicker from "../../components/DateRangePicker";
 import CustomButton from "../../components/CustomButton";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DashboardCard from "../../components/DashboardCard";
-import FunctionsIcon from "@mui/icons-material/Functions";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import PendingIcon from "@mui/icons-material/Pending";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import {
   LineChart,
@@ -40,16 +37,9 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
   BarChart,
   Bar,
 } from "recharts";
-import {
-  hazardRiskChartData1,
-  hazardRiskChartData2,
-} from "../../api/sampleData/hazardRiskData";
 
 import NaturePeopleIcon from "@mui/icons-material/NaturePeople";
 import WaterDropOutlinedIcon from "@mui/icons-material/WaterDropOutlined";
@@ -59,11 +49,20 @@ import BatteryChargingFullOutlinedIcon from "@mui/icons-material/BatteryCharging
 import { useState } from "react";
 import CircularProgressWithLabel from "../../components/CircularProgress";
 import {
-  COLORS,
+  airEmissionData,
   dataset,
+  energyConsumptionData,
   fabricCutData,
+  ghgDataset,
   lineData,
-  pieChartdata,
+  pieChartData,
+  pieChartDataWaterTreatment,
+  pieChartEmissionBreakDownData,
+  pieChartRecycledWaterDownData,
+  scopeColors,
+  wasteWaterData,
+  waterUsageData,
+  waterWasteData,
 } from "../../api/sampleData/environmentData";
 import CustomPieChart from "../../components/CustomPieChart";
 
@@ -72,6 +71,10 @@ import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
 import AcUnitOutlinedIcon from "@mui/icons-material/AcUnitOutlined";
 import OfflineBoltIcon from "@mui/icons-material/OfflineBolt";
 import WindPowerOutlinedIcon from "@mui/icons-material/WindPowerOutlined";
+import Co2Icon from "@mui/icons-material/Co2";
+import PieArcLabelChart from "../../components/PieChartComponenet";
+import PercentagePieChart from "../../components/PercentagePieChart";
+import { title } from "process";
 
 const breadcrumbItems = [
   { title: "Home", href: "/home" },
@@ -82,6 +85,13 @@ interface TabPanelProps {
   children?: React.ReactNode;
   dir?: string;
   index: number;
+  value: number;
+}
+
+interface TabPanelPropsTwo {
+  children?: React.ReactNode;
+  dir?: string;
+  indexTwo: number;
   value: number;
 }
 
@@ -111,10 +121,33 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
+function TabPanelTwo(props: TabPanelPropsTwo) {
+  const { children, value, indexTwo, ...other } = props;
+
+  return (
+    <div
+      role="TabPanelTwo"
+      hidden={value !== indexTwo}
+      id={`full-width-TabPanelTwo-${indexTwo}`}
+      aria-labelledby={`full-width-tab-${indexTwo}`}
+      {...other}
+    >
+      {value === indexTwo && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
+  );
+}
+
 function a11yProps(index: number) {
   return {
     id: `full-width-tab-${index}`,
     "aria-controls": `full-width-tabpanel-${index}`,
+  };
+}
+
+function a11yProps2(indexTwo: number) {
+  return {
+    id: `full-width-tab-${indexTwo}`,
+    "aria-controls": `full-width-TabPanelTwo-${indexTwo}`,
   };
 }
 
@@ -132,9 +165,18 @@ function HazardAndRiskDashboard() {
 
   const watchPeriod = watch("period");
   const [activeTab, setActiveTab] = useState(0);
+  const [activeTabTwo, setActiveTabTwo] = useState(0);
+
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     console.log("event", event);
     setActiveTab(newValue);
+  };
+  const handleChangeTabTwo = (
+    eventTwo: React.SyntheticEvent,
+    newValueTwo: number
+  ) => {
+    console.log("event", eventTwo);
+    setActiveTabTwo(newValueTwo);
   };
 
   return (
@@ -148,7 +190,7 @@ function HazardAndRiskDashboard() {
           overflowX: "hidden",
         }}
       >
-        <PageTitle title="Envionment Management Dashboard" />
+        <PageTitle title="Environment Management Dashboard" />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
 
@@ -463,7 +505,7 @@ function HazardAndRiskDashboard() {
                 barSize={10}
               />
               <Bar
-                dataKey="ghgEmmision"
+                dataKey="ghgEmission"
                 name="GHG Emission"
                 stackId="a"
                 fill="#ef4444"
@@ -592,43 +634,47 @@ function HazardAndRiskDashboard() {
                     sx={{
                       display: "flex",
                       direction: "row",
-                      justifyContent: "space-between",
                       m: "1rem",
                     }}
                   >
-                    <Box display="flex" flexDirection="column" gap={4}>
+                    <Box
+                      display="flex"
+                      flexDirection="column"
+                      gap={4}
+                      width={"100%"}
+                    >
                       {fabricCutData.map((item, index) => (
-                        <Box
-                          key={index}
-                          display="flex"
-                          justifyContent="space-between"
-                          alignItems="center"
-                        >
-                          <Box flex={2}>
-                            <Typography>{item.label}</Typography>
-                            <Typography>{item.unit}</Typography>
-                          </Box>
+                        <>
                           <Box
-                            flex={1}
-                            sx={{
-                              display: "flex",
-                              flexDirection: "row",
-                              gap: "3rem",
-                              alignItems: "center",
-                            }}
+                            key={index}
+                            display="flex"
+                            justifyContent="space-between"
                           >
-                            <CircularProgressWithLabel
-                              size={60}
-                              value={item.progress}
-                            />
-                            <Box>
-                              <Typography>Quantity</Typography>
-                              <Typography>{item.quantity}</Typography>
+                            <Box flex={2}>
+                              <Typography>{item.label}</Typography>
+                              <Typography>{item.unit}</Typography>
                             </Box>
-                            
+                            <Box
+                              flex={1}
+                              sx={{
+                                display: "flex",
+                                flexDirection: "row",
+                                gap: "3rem",
+                                justifyContent: "space-between",
+                              }}
+                            >
+                              <CircularProgressWithLabel
+                                size={60}
+                                value={item.progress}
+                              />
+                              <Box>
+                                <Typography>Quantity</Typography>
+                                <Typography>{item.quantity}</Typography>
+                              </Box>
+                            </Box>
                           </Box>
                           <Divider />
-                        </Box>
+                        </>
                       ))}
                     </Box>
                   </Box>
@@ -640,141 +686,50 @@ function HazardAndRiskDashboard() {
                     sx={{
                       display: "flex",
                       direction: "row",
-                      justifyContent: "space-between",
                       m: "1rem",
                     }}
                   >
-                    <Box flex={2}>
-                      <Typography>Fabric Cut Piece</Typography>
-                      <Typography>In KG</Typography>
-                    </Box>
                     <Box
-                      flex={1}
-                      sx={{
-                        display: "flex",
-                        direction: "row",
-                        gap: "3rem",
-                      }}
+                      display="flex"
+                      flexDirection="column"
+                      gap={4}
+                      width={"100%"}
                     >
-                      <CircularProgressWithLabel size={60} value={10} />
-                      <Box>
-                        <Typography>Quantity</Typography>
-                        <Typography>63892 KG</Typography>
-                      </Box>
+                      {fabricCutData.map((item, index) => (
+                        <>
+                          <Box
+                            key={index}
+                            display="flex"
+                            justifyContent="space-between"
+                          >
+                            <Box flex={2}>
+                              <Typography>{item.label}</Typography>
+                              <Typography>{item.unit}</Typography>
+                            </Box>
+                            <Box
+                              flex={1}
+                              sx={{
+                                display: "flex",
+                                flexDirection: "row",
+                                gap: "3rem",
+                                justifyContent: "space-between",
+                              }}
+                            >
+                              <CircularProgressWithLabel
+                                size={60}
+                                value={item.progress}
+                              />
+                              <Box>
+                                <Typography>Quantity</Typography>
+                                <Typography>{item.quantity}</Typography>
+                              </Box>
+                            </Box>
+                          </Box>
+                          <Divider />
+                        </>
+                      ))}
                     </Box>
                   </Box>
-                  <Divider />
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      justifyContent: "space-between",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box flex={2}>
-                      <Typography>Fabric Cut Piece</Typography>
-                      <Typography>In KG</Typography>
-                    </Box>
-                    <Box
-                      flex={1}
-                      sx={{
-                        display: "flex",
-                        direction: "row",
-                        gap: "3rem",
-                      }}
-                    >
-                      <CircularProgressWithLabel size={60} value={10} />
-                      <Box>
-                        <Typography>Quantity</Typography>
-                        <Typography>63892 KG</Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-                  <Divider />
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      justifyContent: "space-between",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box flex={2}>
-                      <Typography>Fabric Cut Piece</Typography>
-                      <Typography>In KG</Typography>
-                    </Box>
-                    <Box
-                      flex={1}
-                      sx={{
-                        display: "flex",
-                        direction: "row",
-                        gap: "3rem",
-                      }}
-                    >
-                      <CircularProgressWithLabel size={60} value={10} />
-                      <Box>
-                        <Typography>Quantity</Typography>
-                        <Typography>63892 KG</Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-                  <Divider />
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      justifyContent: "space-between",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box flex={2}>
-                      <Typography>Fabric Cut Piece</Typography>
-                      <Typography>In KG</Typography>
-                    </Box>
-                    <Box
-                      flex={1}
-                      sx={{
-                        display: "flex",
-                        direction: "row",
-                        gap: "3rem",
-                      }}
-                    >
-                      <CircularProgressWithLabel size={60} value={10} />
-                      <Box>
-                        <Typography>Quantity</Typography>
-                        <Typography>63892 KG</Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      justifyContent: "space-between",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box flex={2}>
-                      <Typography>Fabric Cut Piece</Typography>
-                      <Typography>In KG</Typography>
-                    </Box>
-                    <Box
-                      flex={1}
-                      sx={{
-                        display: "flex",
-                        direction: "row",
-                        gap: "3rem",
-                      }}
-                    >
-                      <CircularProgressWithLabel size={60} value={10} />
-                      <Box>
-                        <Typography>Quantity</Typography>
-                        <Typography>63892 KG</Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-                  <Divider />
                 </Box>
               </TabPanel>
               <TabPanel value={activeTab} index={2} dir={theme.direction}>
@@ -783,141 +738,50 @@ function HazardAndRiskDashboard() {
                     sx={{
                       display: "flex",
                       direction: "row",
-                      justifyContent: "space-between",
                       m: "1rem",
                     }}
                   >
-                    <Box flex={2}>
-                      <Typography>Fabric Cut Piece</Typography>
-                      <Typography>In KG</Typography>
-                    </Box>
                     <Box
-                      flex={1}
-                      sx={{
-                        display: "flex",
-                        direction: "row",
-                        gap: "3rem",
-                      }}
+                      display="flex"
+                      flexDirection="column"
+                      gap={4}
+                      width={"100%"}
                     >
-                      <CircularProgressWithLabel size={60} value={10} />
-                      <Box>
-                        <Typography>Quantity</Typography>
-                        <Typography>63892 KG</Typography>
-                      </Box>
+                      {fabricCutData.map((item, index) => (
+                        <>
+                          <Box
+                            key={index}
+                            display="flex"
+                            justifyContent="space-between"
+                          >
+                            <Box flex={2}>
+                              <Typography>{item.label}</Typography>
+                              <Typography>{item.unit}</Typography>
+                            </Box>
+                            <Box
+                              flex={1}
+                              sx={{
+                                display: "flex",
+                                flexDirection: "row",
+                                gap: "3rem",
+                                justifyContent: "space-between",
+                              }}
+                            >
+                              <CircularProgressWithLabel
+                                size={60}
+                                value={item.progress}
+                              />
+                              <Box>
+                                <Typography>Quantity</Typography>
+                                <Typography>{item.quantity}</Typography>
+                              </Box>
+                            </Box>
+                          </Box>
+                          <Divider />
+                        </>
+                      ))}
                     </Box>
                   </Box>
-                  <Divider />
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      justifyContent: "space-between",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box flex={2}>
-                      <Typography>Fabric Cut Piece</Typography>
-                      <Typography>In KG</Typography>
-                    </Box>
-                    <Box
-                      flex={1}
-                      sx={{
-                        display: "flex",
-                        direction: "row",
-                        gap: "3rem",
-                      }}
-                    >
-                      <CircularProgressWithLabel size={60} value={10} />
-                      <Box>
-                        <Typography>Quantity</Typography>
-                        <Typography>63892 KG</Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-                  <Divider />
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      justifyContent: "space-between",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box flex={2}>
-                      <Typography>Fabric Cut Piece</Typography>
-                      <Typography>In KG</Typography>
-                    </Box>
-                    <Box
-                      flex={1}
-                      sx={{
-                        display: "flex",
-                        direction: "row",
-                        gap: "3rem",
-                      }}
-                    >
-                      <CircularProgressWithLabel size={60} value={10} />
-                      <Box>
-                        <Typography>Quantity</Typography>
-                        <Typography>63892 KG</Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-                  <Divider />
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      justifyContent: "space-between",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box flex={2}>
-                      <Typography>Fabric Cut Piece</Typography>
-                      <Typography>In KG</Typography>
-                    </Box>
-                    <Box
-                      flex={1}
-                      sx={{
-                        display: "flex",
-                        direction: "row",
-                        gap: "3rem",
-                      }}
-                    >
-                      <CircularProgressWithLabel size={60} value={10} />
-                      <Box>
-                        <Typography>Quantity</Typography>
-                        <Typography>63892 KG</Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      justifyContent: "space-between",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box flex={2}>
-                      <Typography>Fabric Cut Piece</Typography>
-                      <Typography>In KG</Typography>
-                    </Box>
-                    <Box
-                      flex={1}
-                      sx={{
-                        display: "flex",
-                        direction: "row",
-                        gap: "3rem",
-                      }}
-                    >
-                      <CircularProgressWithLabel size={60} value={10} />
-                      <Box>
-                        <Typography>Quantity</Typography>
-                        <Typography>63892 KG</Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-                  <Divider />
                 </Box>
               </TabPanel>
             </>
@@ -969,7 +833,7 @@ function HazardAndRiskDashboard() {
               />
               <Line type="monotone" dataKey="water" stroke="#3b82f6" />
               <Line type="monotone" dataKey="waste" stroke="#f59e0b" />
-              <Line type="monotone" dataKey="ghgEmmision" stroke="#ef4444" />
+              <Line type="monotone" dataKey="ghgEmission" stroke="#ef4444" />
             </LineChart>
           </ResponsiveContainer>
         </Box>
@@ -1005,7 +869,7 @@ function HazardAndRiskDashboard() {
                       size={250}
                       value={70}
                       textSize={25}
-                      textLable="Renewable Energy"
+                      textLabel="Renewable Energy"
                     />
                   </Box>
                 </Box>
@@ -1072,8 +936,8 @@ function HazardAndRiskDashboard() {
                 }}
               >
                 <Tabs
-                  value={activeTab}
-                  onChange={handleChange}
+                  value={activeTabTwo}
+                  onChange={handleChangeTabTwo}
                   indicatorColor="secondary"
                   TabIndicatorProps={{
                     style: {
@@ -1107,7 +971,7 @@ function HazardAndRiskDashboard() {
                         </Typography>
                       </Box>
                     }
-                    {...a11yProps(0)}
+                    {...a11yProps2(0)}
                   />
                   <Tab
                     label={
@@ -1124,7 +988,7 @@ function HazardAndRiskDashboard() {
                         </Typography>
                       </Box>
                     }
-                    {...a11yProps(1)}
+                    {...a11yProps2(1)}
                   />
                   <Tab
                     label={
@@ -1141,7 +1005,7 @@ function HazardAndRiskDashboard() {
                         </Typography>
                       </Box>
                     }
-                    {...a11yProps(2)}
+                    {...a11yProps2(2)}
                   />
                   <Tab
                     label={
@@ -1158,7 +1022,7 @@ function HazardAndRiskDashboard() {
                         </Typography>
                       </Box>
                     }
-                    {...a11yProps(3)}
+                    {...a11yProps2(3)}
                   />
                   <Tab
                     label={
@@ -1169,13 +1033,13 @@ function HazardAndRiskDashboard() {
                           alignItems: "center",
                         }}
                       >
-                        <WindPowerOutlinedIcon fontSize="small" />
+                        <Co2Icon fontSize="large" />
                         <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                           Air Emission
                         </Typography>
                       </Box>
                     }
-                    {...a11yProps(4)}
+                    {...a11yProps2(4)}
                   />
                   <Tab
                     label={
@@ -1192,209 +1056,268 @@ function HazardAndRiskDashboard() {
                         </Typography>
                       </Box>
                     }
-                    {...a11yProps(5)}
+                    {...a11yProps2(5)}
                   />
                 </Tabs>
               </AppBar>
-              <TabPanel value={activeTab} index={0} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      justifyContent: "space-between",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box flex={2}>
-                      <Typography>Air Emission</Typography>
-                      <Typography variant="caption">
-                        In Environment Category
-                      </Typography>
-                    </Box>
-                    <Box
-                      flex={1}
-                      sx={{
-                        display: "flex",
-                        direction: "row",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Box>
-                        <Typography>Quantity</Typography>
-                        <Typography variant="caption">63892 KG</Typography>
+              <TabPanelTwo
+                value={activeTabTwo}
+                indexTwo={0}
+                dir={theme.direction}
+              >
+                <>
+                  {wasteWaterData.map((item, index) => (
+                    <Box key={index}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          direction: "row",
+                          justifyContent: "space-between",
+                          m: "1rem",
+                        }}
+                      >
+                        <Box flex={2}>
+                          <Typography>{item.label}</Typography>
+                          <Typography variant="caption">
+                            {item.description}
+                          </Typography>
+                        </Box>
+                        <Box
+                          flex={1}
+                          sx={{
+                            display: "flex",
+                            direction: "row",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Box>
+                            <Typography>Quantity</Typography>
+                            <Typography variant="caption">
+                              {item.quantity}
+                            </Typography>
+                          </Box>
+                        </Box>
                       </Box>
+                      <Divider />
                     </Box>
-                  </Box>
-
-                  <Divider />
-                </Box>
-              </TabPanel>
-              <TabPanel value={activeTab} index={1} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      justifyContent: "space-between",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box flex={2}>
-                      <Typography>Energy</Typography>
-                      <Typography variant="caption">
-                        In Environment Category
-                      </Typography>
-                    </Box>
-                    <Box
-                      flex={1}
-                      sx={{
-                        display: "flex",
-                        direction: "row",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Box>
-                        <Typography>Quantity</Typography>
-                        <Typography variant="caption">63892 KWH</Typography>
+                  ))}
+                </>
+              </TabPanelTwo>
+              <TabPanelTwo
+                value={activeTabTwo}
+                indexTwo={1}
+                dir={theme.direction}
+              >
+                <>
+                  {energyConsumptionData.map((item, index) => (
+                    <Box key={index}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          direction: "row",
+                          justifyContent: "space-between",
+                          m: "1rem",
+                        }}
+                      >
+                        <Box flex={2}>
+                          <Typography>{item.label}</Typography>
+                          <Typography variant="caption">
+                            {item.description}
+                          </Typography>
+                        </Box>
+                        <Box
+                          flex={1}
+                          sx={{
+                            display: "flex",
+                            direction: "row",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Box>
+                            <Typography>Quantity</Typography>
+                            <Typography variant="caption">
+                              {item.quantity}
+                            </Typography>
+                          </Box>
+                        </Box>
                       </Box>
+                      <Divider />
                     </Box>
-                  </Box>
-                  <Divider />
-                </Box>
-              </TabPanel>
-              <TabPanel value={activeTab} index={2} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      justifyContent: "space-between",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box flex={2}>
-                      <Typography>Water</Typography>
-                      <Typography variant="caption">
-                        In Environment Category
-                      </Typography>
-                    </Box>
-                    <Box
-                      flex={1}
-                      sx={{
-                        display: "flex",
-                        direction: "row",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Box>
-                        <Typography>Quantity</Typography>
-                        <Typography variant="caption">635652 m2</Typography>
+                  ))}
+                </>
+              </TabPanelTwo>
+              <TabPanelTwo
+                value={activeTabTwo}
+                indexTwo={2}
+                dir={theme.direction}
+              >
+                <>
+                  {waterUsageData.map((item, index) => (
+                    <Box key={index}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          direction: "row",
+                          justifyContent: "space-between",
+                          m: "1rem",
+                        }}
+                      >
+                        <Box flex={2}>
+                          <Typography>{item.label}</Typography>
+                          <Typography variant="caption">
+                            {item.description}
+                          </Typography>
+                        </Box>
+                        <Box
+                          flex={1}
+                          sx={{
+                            display: "flex",
+                            direction: "row",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Box>
+                            <Typography>Quantity</Typography>
+                            <Typography variant="caption">
+                              {item.quantity}
+                            </Typography>
+                          </Box>
+                        </Box>
                       </Box>
+                      <Divider />
                     </Box>
-                  </Box>
-                  <Divider />
-                </Box>
-              </TabPanel>
-              <TabPanel value={activeTab} index={3} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      justifyContent: "space-between",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box flex={2}>
-                      <Typography>Waste</Typography>
-                      <Typography variant="caption">
-                        In Environment Category
-                      </Typography>
-                    </Box>
-                    <Box
-                      flex={1}
-                      sx={{
-                        display: "flex",
-                        direction: "row",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Box>
-                        <Typography>Quantity</Typography>
-                        <Typography variant="caption">982 m2</Typography>
+                  ))}
+                </>
+              </TabPanelTwo>
+              <TabPanelTwo
+                value={activeTabTwo}
+                indexTwo={3}
+                dir={theme.direction}
+              >
+                <>
+                  {waterWasteData.map((item, index) => (
+                    <Box key={index}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          direction: "row",
+                          justifyContent: "space-between",
+                          m: "1rem",
+                        }}
+                      >
+                        <Box flex={2}>
+                          <Typography>{item.label}</Typography>
+                          <Typography variant="caption">
+                            {item.description}
+                          </Typography>
+                        </Box>
+                        <Box
+                          flex={1}
+                          sx={{
+                            display: "flex",
+                            direction: "row",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Box>
+                            <Typography>Quantity</Typography>
+                            <Typography variant="caption">
+                              {item.quantity}
+                            </Typography>
+                          </Box>
+                        </Box>
                       </Box>
+                      <Divider />
                     </Box>
-                  </Box>
-                  <Divider />
-                </Box>
-              </TabPanel>
-              <TabPanel value={activeTab} index={4} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      justifyContent: "space-between",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box flex={2}>
-                      <Typography>Air Emission</Typography>
-                      <Typography variant="caption">
-                        In Environment Category
-                      </Typography>
-                    </Box>
-                    <Box
-                      flex={1}
-                      sx={{
-                        display: "flex",
-                        direction: "row",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Box>
-                        <Typography>Air Emission</Typography>
-                        <Typography variant="caption">63214 m2</Typography>
+                  ))}
+                </>
+              </TabPanelTwo>
+              <TabPanelTwo
+                value={activeTabTwo}
+                indexTwo={4}
+                dir={theme.direction}
+              >
+                <>
+                  {airEmissionData.map((item, index) => (
+                    <Box key={index}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          direction: "row",
+                          justifyContent: "space-between",
+                          m: "1rem",
+                        }}
+                      >
+                        <Box flex={2}>
+                          <Typography>{item.label}</Typography>
+                          <Typography variant="caption">
+                            {item.description}
+                          </Typography>
+                        </Box>
+                        <Box
+                          flex={1}
+                          sx={{
+                            display: "flex",
+                            direction: "row",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Box>
+                            <Typography>Quantity</Typography>
+                            <Typography variant="caption">
+                              {item.quantity}
+                            </Typography>
+                          </Box>
+                        </Box>
                       </Box>
+                      <Divider />
                     </Box>
-                  </Box>
-                  <Divider />
-                </Box>
-              </TabPanel>
-              <TabPanel value={activeTab} index={5} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      justifyContent: "space-between",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box flex={2}>
-                      <Typography>Waste Water</Typography>
-                      <Typography variant="caption">
-                        In Environment Category
-                      </Typography>
-                    </Box>
-                    <Box
-                      flex={1}
-                      sx={{
-                        display: "flex",
-                        direction: "row",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Box>
-                        <Typography>Quantity</Typography>
-                        <Typography variant="caption">9874 m2</Typography>
+                  ))}
+                </>
+              </TabPanelTwo>
+              <TabPanelTwo
+                value={activeTabTwo}
+                indexTwo={5}
+                dir={theme.direction}
+              >
+                <>
+                  {wasteWaterData.map((item, index) => (
+                    <Box key={index}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          direction: "row",
+                          justifyContent: "space-between",
+                          m: "1rem",
+                        }}
+                      >
+                        <Box flex={2}>
+                          <Typography>{item.label}</Typography>
+                          <Typography variant="caption">
+                            {item.description}
+                          </Typography>
+                        </Box>
+                        <Box
+                          flex={1}
+                          sx={{
+                            display: "flex",
+                            direction: "row",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Box>
+                            <Typography>Quantity</Typography>
+                            <Typography variant="caption">
+                              {item.quantity}
+                            </Typography>
+                          </Box>
+                        </Box>
                       </Box>
+                      <Divider />
                     </Box>
-                  </Box>
-                  <Divider />
-                </Box>
-              </TabPanel>
+                  ))}
+                </>
+              </TabPanelTwo>
             </>
           </ResponsiveContainer>
         </Box>
@@ -1418,8 +1341,8 @@ function HazardAndRiskDashboard() {
               <Box display={"flex"} justifyContent={"center"}>
                 <Box display={"flex"} justifyContent={"center"}>
                   <CustomPieChart
-                    data={pieChartdata}
-                    title="Hazard And Non-Hazadous Waste"
+                    data={pieChartData}
+                    title="Hazard And Non-Hazardous Waste"
                   />
                 </Box>
               </Box>
@@ -1453,7 +1376,7 @@ function HazardAndRiskDashboard() {
                 textAlign: "center",
               }}
             >
-              Consumption
+              GHG Emission
             </Typography>
           </Box>
           <ResponsiveContainer
@@ -1464,340 +1387,24 @@ function HazardAndRiskDashboard() {
               scrollbarWidth: "none",
             }}
           >
-            <>
-              <AppBar
-                position="sticky"
-                sx={{
-                  display: "flex",
-                  mt: "1rem",
-                  maxWidth: isMobile ? 400 : "auto",
-                }}
-              >
-                <Tabs
-                  value={activeTab}
-                  onChange={handleChange}
-                  indicatorColor="secondary"
-                  TabIndicatorProps={{
-                    style: {
-                      backgroundColor: "var(--pallet-blue)",
-                      height: "3px",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    },
-                  }}
-                  sx={{
-                    backgroundColor: "var(--pallet-lighter-grey)",
-                    color: "var(--pallet-blue)",
-                    display: "flex",
-                  }}
-                  textColor="inherit"
-                  variant="scrollable"
-                  scrollButtons={true}
-                >
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <SummarizeIcon fontSize="small" />
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Overview
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps(0)}
+            <BarChart width={800} height={400} data={ghgDataset}>
+              <XAxis dataKey="month" />
+              <YAxis fontSize={12} fontWeight={"bold"} />
+              <Tooltip />
+              <Legend />
+              {Object.keys(ghgDataset[0])
+                .filter((key) => key.startsWith("scope"))
+                .map((key) => (
+                  <Bar
+                    key={key}
+                    dataKey={key}
+                    name={key.replace("scope", "scope - ")}
+                    stackId="a"
+                    fill={scopeColors[key] || "#8884d8"}
+                    barSize={10}
                   />
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <OfflineBoltIcon fontSize="small" />
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Energy
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps(1)}
-                  />
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <WaterDropOutlinedIcon fontSize="small" />
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Water
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps(2)}
-                  />
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <DeleteOutlineOutlinedIcon fontSize="small" />
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Waste
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps(3)}
-                  />
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <WindPowerOutlinedIcon fontSize="small" />
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Air Emission
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps(4)}
-                  />
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <ShowerOutlinedIcon fontSize="small" />
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Waste Water
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps(5)}
-                  />
-                </Tabs>
-              </AppBar>
-              <TabPanel value={activeTab} index={0} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      justifyContent: "space-between",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box flex={2}>
-                      <Typography>Air Emission</Typography>
-                      <Typography variant="caption">
-                        In Environment Category
-                      </Typography>
-                    </Box>
-                    <Box
-                      flex={1}
-                      sx={{
-                        display: "flex",
-                        direction: "row",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Box>
-                        <Typography>Quantity</Typography>
-                        <Typography variant="caption">63892 KG</Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-
-                  <Divider />
-                </Box>
-              </TabPanel>
-              <TabPanel value={activeTab} index={1} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      justifyContent: "space-between",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box flex={2}>
-                      <Typography>Energy</Typography>
-                      <Typography variant="caption">
-                        In Environment Category
-                      </Typography>
-                    </Box>
-                    <Box
-                      flex={1}
-                      sx={{
-                        display: "flex",
-                        direction: "row",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Box>
-                        <Typography>Quantity</Typography>
-                        <Typography variant="caption">63892 KWH</Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-                  <Divider />
-                </Box>
-              </TabPanel>
-              <TabPanel value={activeTab} index={2} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      justifyContent: "space-between",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box flex={2}>
-                      <Typography>Water</Typography>
-                      <Typography variant="caption">
-                        In Environment Category
-                      </Typography>
-                    </Box>
-                    <Box
-                      flex={1}
-                      sx={{
-                        display: "flex",
-                        direction: "row",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Box>
-                        <Typography>Quantity</Typography>
-                        <Typography variant="caption">635652 m2</Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-                  <Divider />
-                </Box>
-              </TabPanel>
-              <TabPanel value={activeTab} index={3} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      justifyContent: "space-between",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box flex={2}>
-                      <Typography>Waste</Typography>
-                      <Typography variant="caption">
-                        In Environment Category
-                      </Typography>
-                    </Box>
-                    <Box
-                      flex={1}
-                      sx={{
-                        display: "flex",
-                        direction: "row",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Box>
-                        <Typography>Quantity</Typography>
-                        <Typography variant="caption">982 m2</Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-                  <Divider />
-                </Box>
-              </TabPanel>
-              <TabPanel value={activeTab} index={4} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      justifyContent: "space-between",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box flex={2}>
-                      <Typography>Air Emission</Typography>
-                      <Typography variant="caption">
-                        In Environment Category
-                      </Typography>
-                    </Box>
-                    <Box
-                      flex={1}
-                      sx={{
-                        display: "flex",
-                        direction: "row",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Box>
-                        <Typography>Air Emission</Typography>
-                        <Typography variant="caption">63214 m2</Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-                  <Divider />
-                </Box>
-              </TabPanel>
-              <TabPanel value={activeTab} index={5} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      justifyContent: "space-between",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box flex={2}>
-                      <Typography>Waste Water</Typography>
-                      <Typography variant="caption">
-                        In Environment Category
-                      </Typography>
-                    </Box>
-                    <Box
-                      flex={1}
-                      sx={{
-                        display: "flex",
-                        direction: "row",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Box>
-                        <Typography>Quantity</Typography>
-                        <Typography variant="caption">9874 m2</Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-                  <Divider />
-                </Box>
-              </TabPanel>
-            </>
+                ))}
+            </BarChart>
           </ResponsiveContainer>
         </Box>
 
@@ -1820,8 +1427,102 @@ function HazardAndRiskDashboard() {
               <Box display={"flex"} justifyContent={"center"}>
                 <Box display={"flex"} justifyContent={"center"}>
                   <CustomPieChart
-                    data={pieChartdata}
-                    title="Hazard And Non-Hazadous Waste"
+                    data={pieChartDataWaterTreatment}
+                    title="Waste Water Treatment"
+                  />
+                </Box>
+              </Box>
+            </>
+          </ResponsiveContainer>
+        </Box>
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+          gap: "1rem",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            flex: 1,
+            flexDirection: "column",
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+            borderRadius: "0.3rem",
+            border: "1px solid var(--pallet-border-blue)",
+            padding: "1rem",
+            height: "auto",
+            marginTop: "1rem",
+          }}
+        >
+          <ResponsiveContainer width="100%" height={500}>
+            <>
+              <Box display={"flex"} justifyContent={"center"}>
+                <Box display={"flex"} justifyContent={"center"}>
+                  <PieArcLabelChart
+                    data={pieChartEmissionBreakDownData}
+                    width={400}
+                    height={400}
+                    title="Emission Breakdown"
+                  />
+                </Box>
+              </Box>
+            </>
+          </ResponsiveContainer>
+        </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            flex: 1,
+            flexDirection: "column",
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+            borderRadius: "0.3rem",
+            border: "1px solid var(--pallet-border-blue)",
+            padding: "1rem",
+            height: "auto",
+            marginTop: "1rem",
+          }}
+        >
+          <ResponsiveContainer width="100%" height={500}>
+            <>
+              <Box display={"flex"} justifyContent={"center"}>
+                <Box display={"flex"} justifyContent={"center"}>
+                  <PercentagePieChart
+                    data={pieChartRecycledWaterDownData}
+                    title={"Waste Water Reused Or Recycled"}
+                    width={350}
+                    height={350}
+                  />
+                </Box>
+              </Box>
+            </>
+          </ResponsiveContainer>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            flex: 1,
+            flexDirection: "column",
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+            borderRadius: "0.3rem",
+            border: "1px solid var(--pallet-border-blue)",
+            padding: "1rem",
+            height: "auto",
+            marginTop: "1rem",
+          }}
+        >
+          <ResponsiveContainer width="100%" height={500}>
+            <>
+              <Box display={"flex"} justifyContent={"center"}>
+                <Box display={"flex"} justifyContent={"center"}>
+                  <CustomPieChart
+                    data={pieChartDataWaterTreatment}
+                    title="Waste Water Treatment"
                   />
                 </Box>
               </Box>

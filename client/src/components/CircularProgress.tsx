@@ -10,10 +10,10 @@ function CircularProgressWithLabel(
     value: number;
     size?: number;
     textSize?: number;
-    textLable?: string;
+    textLabel?: string;
   }
 ) {
-  const { value, size = 40, textSize = 12, textLable } = props;
+  const { value, size = 40, textSize = 12, textLabel } = props;
 
   return (
     <Box sx={{ position: "relative", display: "inline-flex" }}>
@@ -61,7 +61,7 @@ function CircularProgressWithLabel(
           {`${Math.round(value)}%`}
         </Typography>
         <Typography>
-          {textLable}
+          {textLabel}
         </Typography>
       </Box>
     </Box>
