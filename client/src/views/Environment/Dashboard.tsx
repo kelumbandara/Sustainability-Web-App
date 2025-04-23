@@ -72,7 +72,7 @@ import AcUnitOutlinedIcon from "@mui/icons-material/AcUnitOutlined";
 import OfflineBoltIcon from "@mui/icons-material/OfflineBolt";
 import WindPowerOutlinedIcon from "@mui/icons-material/WindPowerOutlined";
 import Co2Icon from "@mui/icons-material/Co2";
-import PieArcLabelChart from "../../components/PieChartComponenet";
+import PieArcLabelChart from "../../components/PieChartComponent";
 import PercentagePieChart from "../../components/PercentagePieChart";
 import { title } from "process";
 
@@ -1516,15 +1516,29 @@ function HazardAndRiskDashboard() {
             marginTop: "1rem",
           }}
         >
+          <Typography
+            variant="h6"
+            sx={{
+              textAlign: "center",
+            }}
+          >
+            Total Water Vs Waste Water
+          </Typography>
           <ResponsiveContainer width="100%" height={500}>
             <>
-              <Box display={"flex"} justifyContent={"center"}>
-                <Box display={"flex"} justifyContent={"center"}>
-                  <CustomPieChart
-                    data={pieChartDataWaterTreatment}
-                    title="Waste Water Treatment"
-                  />
-                </Box>
+              <Box
+                width="100%"
+                height="100%"
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+              >
+                <CircularProgressWithLabel
+                  size={300}
+                  value={135}
+                  textSize={25}
+                  textLabel="Waste Water"
+                />
               </Box>
             </>
           </ResponsiveContainer>

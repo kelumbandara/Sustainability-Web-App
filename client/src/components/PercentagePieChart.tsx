@@ -50,6 +50,9 @@ export default function PercentagePieChart({
     { label: "Others", value: others, color: "#f59e0b" },
   ];
 
+  // Custom label function to show percentage
+  const renderLabel = ({ percent }: { percent: number }) => `${(percent * 100).toFixed(0)}%`;
+
   return (
     <Box>
       {title && (
@@ -66,7 +69,7 @@ export default function PercentagePieChart({
               dataKey="value"
               nameKey="name"
               outerRadius="80%"
-              label
+              label={renderLabel}
               labelLine={false}
             >
               {chartData.map((entry, index) => (
