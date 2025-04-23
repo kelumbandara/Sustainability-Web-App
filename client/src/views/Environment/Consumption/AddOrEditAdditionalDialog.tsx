@@ -67,19 +67,19 @@ export default function AddOrEditAdditionalDialog({
 
   const {
     data: consumptionCategoryData,
-    isFetching: isconsumptionCategoryDataFetching,
+    isFetching: isConsumptionCategoryDataFetching,
   } = useQuery({
     queryKey: ["cs-category"],
     queryFn: fetchConsumptionCategories,
   });
 
-  const { data: consumptionSourceData, isFetching: isconsumptionSourceData } =
+  const { data: consumptionSourceData, isFetching: isConsumptionSourceData } =
     useQuery({
       queryKey: ["cs-source"],
       queryFn: fetchConsumptionSource,
     });
 
-  const { data: consumptionUnitsData, isFetching: isconsumptionUnitsData } =
+  const { data: consumptionUnitsData, isFetching: isConsumptionUnitsData } =
     useQuery({
       queryKey: ["cs-units"],
       queryFn: fetchConsumptionUnits,
@@ -243,14 +243,14 @@ export default function AddOrEditAdditionalDialog({
           >
             <TextField
               required
-              id="quentity"
+              id="quantity"
               type="number"
               label="Quantity"
-              error={!!errors.quentity}
-              helperText={errors.quentity && "Required"}
+              error={!!errors.quantity}
+              helperText={errors.quantity && "Required"}
               size="small"
               sx={{ flex: 1, margin: "0.5rem" }}
-              {...register("quentity", { required: true })}
+              {...register("quantity", { required: true })}
             />
             <TextField
               required
@@ -295,13 +295,13 @@ export default function AddOrEditAdditionalDialog({
             />
             <TextField
               required
-              id="methodeOfTracking"
-              label="Methode Of Tracking"
-              error={!!errors.methodeOfTracking}
-              helperText={errors.methodeOfTracking && "Required"}
+              id="methodOfTracking"
+              label="Method Of Tracking"
+              error={!!errors.methodOfTracking}
+              helperText={errors.methodOfTracking && "Required"}
               size="small"
               sx={{ flex: 1, margin: "0.5rem" }}
-              {...register("methodeOfTracking", { required: true })}
+              {...register("methodOfTracking", { required: true })}
             />
             <TextField
               required

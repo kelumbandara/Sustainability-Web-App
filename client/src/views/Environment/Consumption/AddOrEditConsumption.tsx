@@ -79,7 +79,7 @@ export default function AddOrEditConsumptionDialog({
 
   const {
     data: consumptionAssigneeData,
-    isFetching: isconsumptionAssigneeData,
+    isFetching: isConsumptionAssigneeData,
   } = useQuery({
     queryKey: ["cs-assignee"],
     queryFn: fetchConsumptionAssignee,
@@ -217,7 +217,7 @@ export default function AddOrEditConsumptionDialog({
                 <TextField
                   required
                   id="area"
-                  label="Area In Squre Meter"
+                  label="Area In Square Meter"
                   error={!!errors.area}
                   helperText={errors.area && "Required"}
                   size="small"
@@ -233,25 +233,123 @@ export default function AddOrEditConsumptionDialog({
               >
                 <TextField
                   required
-                  id="totalProuctProducedPcs"
+                  id="totalProductProducedPcs"
                   label="Total Product Produced/Shipped (Pcs)"
-                  error={!!errors.totalProuctProducedPcs}
-                  helperText={errors.totalProuctProducedPcs && "Required"}
+                  error={!!errors.totalProductProducedPcs}
+                  helperText={errors.totalProductProducedPcs && "Required"}
                   size="small"
                   sx={{ flex: 1, margin: "0.5rem" }}
-                  {...register("totalProuctProducedPcs", { required: true })}
+                  {...register("totalProductProducedPcs", { required: true })}
                 />
                 <TextField
                   required
-                  id="totalProuctProducedkg"
+                  id="totalProductProducedKg"
                   label="Total Product Produced/Shipped(Kg)"
-                  error={!!errors.totalProuctProducedkg}
-                  helperText={errors.totalProuctProducedkg && "Required"}
+                  error={!!errors.totalProductProducedKg}
+                  helperText={errors.totalProductProducedKg && "Required"}
                   size="small"
                   sx={{ flex: 1, margin: "0.5rem" }}
-                  {...register("totalProuctProducedkg", { required: true })}
+                  {...register("totalProductProducedKg", { required: true })}
                 />
               </Box>
+
+              <Stack
+                sx={{
+                  flexDirection: isMobile ? "column" : "row",
+                }}
+              >
+                <Controller
+                  name="division"
+                  control={control}
+                  defaultValue={defaultValues?.division ?? null}
+                  rules={{ required: true }}
+                  render={({ field }) => (
+                    <Autocomplete
+                      {...field}
+                      onChange={(event, newValue) => field.onChange(newValue)}
+                      size="small"
+                      options={
+                        divisionData?.length
+                          ? divisionData.map(
+                              (division) => division.divisionName
+                            )
+                          : []
+                      }
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          error={!!errors.division}
+                          helperText={errors.division && "Required"}
+                          label="Division"
+                          name="division"
+                        />
+                      )}
+                    />
+                  )}
+                />
+
+                <Controller
+                  name="year"
+                  control={control}
+                  defaultValue={defaultValues?.year ?? null}
+                  rules={{ required: true }}
+                  render={({ field }) => (
+                    <Autocomplete
+                      {...field}
+                      onChange={(event, newValue) => field.onChange(newValue)}
+                      size="small"
+                      options={
+                        yearData?.length
+                          ? yearData.map((year) => year.year)
+                          : []
+                      }
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          error={!!errors.year}
+                          helperText={errors.year && "Required"}
+                          label="Year"
+                          name="year"
+                        />
+                      )}
+                    />
+                  )}
+                />
+
+                <Controller
+                  name="month"
+                  control={control}
+                  defaultValue={defaultValues?.month ?? null}
+                  rules={{ required: true }}
+                  render={({ field }) => (
+                    <Autocomplete
+                      {...field}
+                      onChange={(event, newValue) => field.onChange(newValue)}
+                      size="small"
+                      options={
+                        monthData?.length
+                          ? monthData.map((month) => month.month)
+                          : []
+                      }
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          error={!!errors.month}
+                          helperText={errors.month && "Required"}
+                          label="Month"
+                          name="month"
+                        />
+                      )}
+                    />
+                  )}
+                />
+              </Stack>
 
               <Typography
                 variant="body2"
@@ -323,7 +421,7 @@ export default function AddOrEditConsumptionDialog({
                       {consumptionWatch?.length > 0 ? (
                         consumptionWatch?.map((row) => (
                           <TableRow
-                            // key={`${row.concumptionsId}`}
+                            // key={`${row.consumptionsId}`}
                             sx={{
                               "&:last-child td, &:last-child th": {
                                 border: 0,
@@ -343,7 +441,7 @@ export default function AddOrEditConsumptionDialog({
                             </TableCell>
                             <TableCell align="center">{row.source}</TableCell>
                             <TableCell align="center">{row.unit}</TableCell>
-                            <TableCell align="center">{row.quentity}</TableCell>
+                            <TableCell align="center">{row.quantity}</TableCell>
                             <TableCell align="center">{row.amount}</TableCell>
                             <TableCell align="center">
                               {row.ghgInTonnes}
@@ -403,94 +501,6 @@ export default function AddOrEditConsumptionDialog({
                 height: "fit-content",
               }}
             >
-              <Controller
-                name="division"
-                control={control}
-                defaultValue={defaultValues?.division ?? null}
-                rules={{ required: true }}
-                render={({ field }) => (
-                  <Autocomplete
-                    {...field}
-                    onChange={(event, newValue) => field.onChange(newValue)}
-                    size="small"
-                    options={
-                      divisionData?.length
-                        ? divisionData.map((division) => division.divisionName)
-                        : []
-                    }
-                    sx={{ flex: 1, margin: "0.5rem" }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        required
-                        error={!!errors.division}
-                        helperText={errors.division && "Required"}
-                        label="Division"
-                        name="division"
-                      />
-                    )}
-                  />
-                )}
-              />
-
-              <Controller
-                name="year"
-                control={control}
-                defaultValue={defaultValues?.year ?? null}
-                rules={{ required: true }}
-                render={({ field }) => (
-                  <Autocomplete
-                    {...field}
-                    onChange={(event, newValue) => field.onChange(newValue)}
-                    size="small"
-                    options={
-                      yearData?.length ? yearData.map((year) => year.year) : []
-                    }
-                    sx={{ flex: 1, margin: "0.5rem" }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        required
-                        error={!!errors.year}
-                        helperText={errors.year && "Required"}
-                        label="Year"
-                        name="year"
-                      />
-                    )}
-                  />
-                )}
-              />
-
-              <Controller
-                name="month"
-                control={control}
-                defaultValue={defaultValues?.month ?? null}
-                rules={{ required: true }}
-                render={({ field }) => (
-                  <Autocomplete
-                    {...field}
-                    onChange={(event, newValue) => field.onChange(newValue)}
-                    size="small"
-                    options={
-                      monthData?.length
-                        ? monthData.map((month) => month.month)
-                        : []
-                    }
-                    sx={{ flex: 1, margin: "0.5rem" }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        required
-                        error={!!errors.month}
-                        helperText={errors.month && "Required"}
-                        label="Month"
-                        name="month"
-                      />
-                    )}
-                  />
-                )}
-              />
-
               <Box>
                 <UserAutoComplete
                   name="approver"

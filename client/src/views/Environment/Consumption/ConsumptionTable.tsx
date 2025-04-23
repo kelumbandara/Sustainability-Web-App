@@ -119,7 +119,7 @@ function ConsumptionTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
       setOpenAddOrEditDialog(false);
     },
     onError: () => {
-      enqueueSnackbar(`Consumption Record Updation Failed`, {
+      enqueueSnackbar(`Consumption Record Update Failed`, {
         variant: "error",
       });
     },
@@ -277,9 +277,9 @@ function ConsumptionTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
                       {row.numberOfDaysWorked}
                     </TableCell>
                     <TableCell align="right">
-                      {row.totalProuctProducedkg}
+                      {row.totalProductProducedKg}
                     </TableCell>
-                    <TableCell align="right">{row.areaInSquereMeter}</TableCell>
+                    <TableCell align="right">{row.areaInSquareMeter}</TableCell>
                     <TableCell align="right">{row.reviewer?.name}</TableCell>
                     <TableCell align="right">{row.approver?.name}</TableCell>
                   </TableRow>
