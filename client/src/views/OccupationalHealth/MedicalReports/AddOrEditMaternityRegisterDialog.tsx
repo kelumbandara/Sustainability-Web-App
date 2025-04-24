@@ -882,9 +882,6 @@ export default function AddOrEditMaternityRegisterDialog({
                                 },
                                 cursor: "pointer",
                               }}
-                              onClick={() => {
-                                console.log("row");
-                              }}
                             >
                               <TableCell
                                 component="th"
@@ -1164,9 +1161,6 @@ export default function AddOrEditMaternityRegisterDialog({
                                   border: 0,
                                 },
                                 cursor: "pointer",
-                              }}
-                              onClick={() => {
-                                console.log("row");
                               }}
                             >
                               <TableCell

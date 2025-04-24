@@ -82,7 +82,6 @@ function AddOrEditInternalAuditFormDialog({
     useState(false);
 
   const handleSubmitInternalAudit = (data: Partial<InternalAudit>) => {
-    console.log("data", data);
     onSubmit(data);
     handleClose();
   };
@@ -301,12 +300,6 @@ function AddOrEditInternalAuditFormDialog({
           }}
           onSubmit={(data) => {
             if (data.queGroupId) {
-              console.log(
-                "data",
-                data,
-                selectedQuestionGroup.queGroupId,
-                questionGroups
-              );
               setValue(
                 "questionGroups",
                 questionGroups.map((group) =>
@@ -666,7 +659,6 @@ const AddOrEditQuestionDialog = ({
     register,
     handleSubmit,
     formState: { errors },
-    watch,
     control,
   } = useForm<InternalAuditQuestion>({
     defaultValues: {
@@ -676,8 +668,6 @@ const AddOrEditQuestionDialog = ({
       allocatedScore: defaultValues?.allocatedScore,
     },
   });
-  const colorCode = watch("colorCode");
-  console.log("colorCode", colorCode);
 
   const colorCodeData = Object.values(QuestionColorCodes);
 

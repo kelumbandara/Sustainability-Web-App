@@ -103,13 +103,11 @@ function RegistrationForm() {
 
   const onRegistrationSubmit = (data) => {
     if (data.isCompanyEmployee && data.assignedFactory.length === 0) {
-      console.log(data);
       enqueueSnackbar("Please select at least one factory.", {
         variant: "error",
       });
       return;
     }
-    console.log(data);
     registrationMutation(data);
   };
 

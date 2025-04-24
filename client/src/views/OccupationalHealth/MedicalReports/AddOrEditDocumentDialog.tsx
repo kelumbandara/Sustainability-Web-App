@@ -50,16 +50,6 @@ const AddOrEditDocumentDialog = ({
   } = useForm<MedicalDocument>({
     defaultValues: defaultDocument,
   });
-  console.log("defaultValues", defaultDocument);
-
-  // useEffect(() => {
-  //   if (defaultValues) {
-  //     reset(defaultValues);
-  //   } else {
-  //     reset();
-  //   }
-  // }, [reset, defaultValues]);
-  // console.log("def", defaultValues);
 
   const {
     data: medicalReportTypeData,

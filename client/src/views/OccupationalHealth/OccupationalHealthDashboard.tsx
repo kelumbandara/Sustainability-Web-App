@@ -350,7 +350,6 @@ function OccupationalHealthDashboard() {
                 )}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 onChange={(e, value) => {
-                  console.log("e", e);
                   setValue("category", value);
                 }}
                 renderInput={(params) => (
@@ -389,7 +388,6 @@ function OccupationalHealthDashboard() {
               size="medium"
               onClick={handleSubmit((data) => {
                 // handleCreateDocument(data);
-                console.log("data", data);
               })}
             >
               Add Filter

@@ -6,6 +6,7 @@ import DialogActions from "@mui/material/DialogActions";
 import {
   Autocomplete,
   Box,
+  CircularProgress,
   Divider,
   IconButton,
   Stack,
@@ -16,13 +17,12 @@ import { Controller, useForm } from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
 import { grey } from "@mui/material/colors";
 import { useState } from "react";
-import { v4 as uuidv4 } from "uuid";
 import AddIcon from "@mui/icons-material/Add";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../../api/divisionApi";
 import {
   fetchAllUsers,
-  fetchMedicineRequestAssignee,
+  fetchInternalAuditAssignee,
 } from "../../../api/userApi";
 import CustomButton from "../../../components/CustomButton";
 import DatePickerComponent from "../../../components/DatePickerComponent";
@@ -31,34 +31,47 @@ import UserAutoComplete from "../../../components/UserAutoComplete";
 import useIsMobile from "../../../customHooks/useIsMobile";
 import AutoCheckBox from "../../../components/AutoCheckbox";
 import {
+  createContactPerson,
+  createDraftScheduledInternalAudit,
+  createFactory,
+  createProcessType,
+  createScheduledInternalAudit,
   Factory,
+  getContactPersonList,
+  getFactoryList,
+  getInternalAuditFormsList,
+  getProcessTypeList,
   InternalAuditType,
   ScheduledInternalAudit,
   SupplierType,
 } from "../../../api/AuditAndInspection/internalAudit";
 import { fetchDepartmentData } from "../../../api/departmentApi";
-import {
-  sampleFactories,
-  sampleInternalAudits,
-  sampleProcessData,
-} from "../../../api/sampleData/sampleInternalAuditData";
 import SwitchButton from "../../../components/SwitchButton";
+import queryClient from "../../../state/queryClient";
+import { useSnackbar } from "notistack";
 
 type DialogProps = {
   open: boolean;
   handleClose: () => void;
-  onSubmit?: (data: ScheduledInternalAudit) => void;
 };
 
 export default function AddScheduledInternalAudit({
   open,
   handleClose,
-  onSubmit,
 }: DialogProps) {
   const { isMobile, isTablet } = useIsMobile();
+  const { enqueueSnackbar } = useSnackbar();
   const [openAddNewFactoryDialog, setOpenAddNewFactoryDialog] = useState(false);
   const [openAddNewProcessTypeDialog, setOpenAddNewProcessTypeDialog] =
     useState(false);
+
+  const {
+    data: internalAuditFormsData,
+    isFetching: isInternalAuditFormsFetching,
+  } = useQuery({
+    queryKey: ["internal-audit-forms"],
+    queryFn: getInternalAuditFormsList,
+  });
 
   const {
     register,
@@ -83,6 +96,17 @@ export default function AddScheduledInternalAudit({
     queryFn: fetchAllUsers,
   });
 
+  const { data: factoryData, isFetching: isFactoryDataFetching } = useQuery({
+    queryKey: ["factories"],
+    queryFn: getFactoryList,
+  });
+
+  const { data: processTypesData, isFetching: isProcessTypesDataFetching } =
+    useQuery({
+      queryKey: ["process-types"],
+      queryFn: getProcessTypeList,
+    });
+
   const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
     queryKey: ["divisions"],
     queryFn: fetchDivision,
@@ -94,24 +118,88 @@ export default function AddScheduledInternalAudit({
       queryFn: fetchDepartmentData,
     });
 
-  const { data: assigneeData, isFetching: isAssigneeDataFetching } = useQuery({
-    queryKey: ["medicine-assignee"],
-    queryFn: fetchMedicineRequestAssignee,
+  const { data: contactPeopleData } = useQuery({
+    queryKey: ["contact-people"],
+    queryFn: getContactPersonList,
   });
 
-  const handleSubmitScheduledInternalAudit = (data: ScheduledInternalAudit) => {
-    const submitData: Partial<ScheduledInternalAudit> = data;
-    submitData.id = uuidv4();
-    // submitData.assigneeId = assignee.id;
-    // submitData.createdDate = new Date();
-    // submitData.createdByUser = sampleAssignees[0].name;
-    // submitData.status = HazardAndRiskStatus.DRAFT;
-    // if (filesToRemove?.length > 0) submitData.removeDoc = filesToRemove;
-    // submitData.documents = files;
-    onSubmit(submitData as ScheduledInternalAudit);
-    console.log(submitData);
-    resetForm();
+  const { data: assigneeData, isFetching: isAssigneeDataFetching } = useQuery({
+    queryKey: ["internal-audit-assignee"],
+    queryFn: fetchInternalAuditAssignee,
+  });
+
+  const handleSubmitInternalAudit = (
+    data: ScheduledInternalAudit,
+    isDraft: boolean
+  ) => {
+    const submitData: Partial<ScheduledInternalAudit> = {
+      division: data.division,
+      auditId: data.audit?.id,
+      auditType: data.auditType,
+      department: data.department,
+      isAuditScheduledForSupplier: data.isAuditScheduledForSupplier ?? false,
+      supplierType: data.supplierType,
+      factoryLicenseNo: data.factoryLicenseNo,
+      higgId: data.higgId,
+      zdhcId: data.zdhcId,
+      processType: data.processType,
+      factoryName: data.factoryName,
+      factoryAddress: data.factoryAddress,
+      factoryEmail: data.factoryEmail,
+      factoryContactPersonId: data.factoryContactPersonId,
+      factoryContactNumber: data.factoryContactNumber,
+      designation: data.designation,
+      description: data.description,
+      auditeeId: data.auditee?.id,
+      approverId: data.approver?.id,
+      auditDate: data.auditDate,
+      dateForApproval: data.dateForApproval,
+    };
+
+    if (isDraft) {
+      createDraftInternalScheduleAuditMutation(
+        submitData as ScheduledInternalAudit
+      );
+    } else {
+      createInternalScheduleAuditMutation(submitData as ScheduledInternalAudit);
+    }
   };
+
+  const { mutate: createInternalScheduleAuditMutation } = useMutation({
+    mutationFn: createScheduledInternalAudit,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["scheduled-internal-audit"] });
+      enqueueSnackbar("Internal Audit Scheduled Successfully!", {
+        variant: "success",
+      });
+      resetForm();
+      handleClose();
+    },
+    onError: () => {
+      enqueueSnackbar(`Internal Audit Schedule Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { mutate: createDraftInternalScheduleAuditMutation } = useMutation({
+    mutationFn: createDraftScheduledInternalAudit,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["scheduled-internal-audit"],
+      });
+      enqueueSnackbar("Internal Audit Drafted Successfully!", {
+        variant: "success",
+      });
+      resetForm();
+      handleClose();
+    },
+    onError: () => {
+      enqueueSnackbar(`Internal Audit Draft Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   const AddNewFactoryButton = (props) => (
     <li
@@ -288,8 +376,9 @@ export default function AddScheduledInternalAudit({
                   <Autocomplete
                     size="small"
                     options={
-                      userData && Array.isArray(sampleInternalAudits)
-                        ? sampleInternalAudits
+                      internalAuditFormsData &&
+                      Array.isArray(internalAuditFormsData)
+                        ? internalAuditFormsData
                         : []
                     }
                     sx={{ flex: 1, margin: "0.5rem" }}
@@ -304,9 +393,7 @@ export default function AddScheduledInternalAudit({
                         {...params}
                         required
                         error={!!errors["audit"]}
-                        helperText={
-                          errors["audit"] ? "This field is required" : ""
-                        }
+                        helperText={errors["audit"] ? "Required" : ""}
                         label={"Audit Title"}
                         name={"audit"}
                       />
@@ -391,6 +478,7 @@ export default function AddScheduledInternalAudit({
                       id="higgId"
                       label="Higg Id"
                       error={!!errors.higgId}
+                      helperText={errors.higgId ? "Required" : ""}
                       sx={{ width: "100%" }}
                       size="small"
                       {...register("higgId")}
@@ -406,7 +494,7 @@ export default function AddScheduledInternalAudit({
                   <Box sx={{ flex: 1, margin: "0.5rem" }}>
                     <TextField
                       id="zdhcId"
-                      label="Factory License No"
+                      label="ZDHC Id"
                       error={!!errors.zdhcId}
                       size="small"
                       sx={{ width: "100%" }}
@@ -429,8 +517,10 @@ export default function AddScheduledInternalAudit({
                         </>
                       }
                       options={[
-                        ...(sampleProcessData?.length
-                          ? sampleProcessData.map((category) => category.name)
+                        ...(processTypesData?.length
+                          ? processTypesData.map(
+                              (category) => category.processType
+                            )
                           : []),
                         "$ADD_NEW_PROCESS_TYPE",
                       ]}
@@ -450,6 +540,7 @@ export default function AddScheduledInternalAudit({
                         <TextField
                           {...params}
                           error={!!errors.processType}
+                          helperText={errors.processType ? "Required" : ""}
                           label="Process Type"
                           name="processType"
                           slotProps={{ inputLabel: { shrink: true } }}
@@ -479,8 +570,8 @@ export default function AddScheduledInternalAudit({
                   </>
                 }
                 options={[
-                  ...(sampleFactories?.length
-                    ? sampleFactories.map((category) => category.name)
+                  ...(factoryData?.length
+                    ? factoryData.map((fac) => fac.factoryName)
                     : []),
                   "$ADD_NEW_FACTORY",
                 ]}
@@ -497,36 +588,37 @@ export default function AddScheduledInternalAudit({
                 )}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 onChange={async (_, data) => {
-                  const selectedFactory = sampleFactories?.find(
-                    (factory) => factory.name === data
+                  const selectedFactory = factoryData?.find(
+                    (factory) => factory.factoryName === data
                   );
-                  console.log("yoo", selectedFactory);
                   await setValue("factory", selectedFactory);
+                  await setValue("factoryName", selectedFactory?.factoryName);
                   await setValue("factoryId", selectedFactory?.id);
-                  await setValue("factoryEmail", selectedFactory?.email);
-                  await setValue(
-                    "factoryContactNumber",
-                    selectedFactory?.contactNumber
-                  );
+
                   await setValue(
                     "factoryAddress",
                     selectedFactory?.factoryAddress
                   );
                   await setValue(
                     "factoryContactPerson",
-                    selectedFactory?.factoryContactPerson?.name
+                    selectedFactory?.factoryContactPerson
+                  );
+                  await setValue(
+                    "factoryContactPersonId",
+                    selectedFactory?.factoryContactPersonId
                   );
                   await setValue("designation", selectedFactory?.designation);
-                  await setValue("factoryEmail", selectedFactory?.email);
+                  await setValue("factoryEmail", selectedFactory?.factoryEmail);
                   await setValue(
                     "factoryContactNumber",
-                    selectedFactory?.contactNumber
+                    selectedFactory?.factoryContactNumber
                   );
                 }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
                     error={!!errors.factoryName}
+                    helperText={errors.factoryName ? "Required" : ""}
                     label="Factory Name"
                     name="factoryName"
                     slotProps={{ inputLabel: { shrink: true } }}
@@ -540,21 +632,47 @@ export default function AddScheduledInternalAudit({
                   required
                   sx={{ width: "100%" }}
                   error={!!errors.factoryAddress}
+                  helperText={errors.factoryAddress ? "Required" : ""}
                   size="small"
                   {...register("factoryAddress", { required: true })}
                   slotProps={{ inputLabel: { shrink: true } }}
                 />
               </Box>
               <Box sx={{ flex: 1, margin: "0.5rem" }}>
-                <TextField
-                  id="factoryContactPerson"
-                  label="Factory Contact Person"
-                  required
-                  error={!!errors.factoryContactPerson}
-                  sx={{ width: "100%" }}
-                  size="small"
+                <Autocomplete
                   {...register("factoryContactPerson", { required: true })}
-                  slotProps={{ inputLabel: { shrink: true } }}
+                  size="small"
+                  noOptionsText={
+                    <>
+                      <Typography variant="body2" color="inherit" gutterBottom>
+                        No matching Items
+                      </Typography>
+                    </>
+                  }
+                  options={[
+                    ...(contactPeopleData?.length ? contactPeopleData : []),
+                  ]}
+                  getOptionLabel={(option) => option.name || ""}
+                  onChange={(_, data) => {
+                    setValue("factoryContactPersonId", data.id);
+                    setValue("factoryContactPerson", data);
+                  }}
+                  renderOption={(props, option) => (
+                    <li {...props} key={option}>
+                      {option.name}
+                    </li>
+                  )}
+                  sx={{ flex: 1 }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      error={!!errors.factoryContactPerson}
+                      helperText={errors.factoryContactPerson ? "Required" : ""}
+                      label="Factory Contact Person"
+                      name="factoryContactPerson"
+                      slotProps={{ inputLabel: { shrink: true } }}
+                    />
+                  )}
                 />
               </Box>
             </Box>
@@ -573,6 +691,7 @@ export default function AddScheduledInternalAudit({
                   required
                   sx={{ width: "100%" }}
                   error={!!errors.designation}
+                  helperText={errors.designation ? "Required" : ""}
                   size="small"
                   {...register("designation", { required: true })}
                   slotProps={{ inputLabel: { shrink: true } }}
@@ -587,6 +706,7 @@ export default function AddScheduledInternalAudit({
                   required
                   sx={{ width: "100%" }}
                   error={!!errors.factoryEmail}
+                  helperText={errors.factoryEmail ? "Required" : ""}
                   size="small"
                   {...register("factoryEmail", { required: true })}
                   slotProps={{ inputLabel: { shrink: true } }}
@@ -598,6 +718,7 @@ export default function AddScheduledInternalAudit({
                   label="Contact Number"
                   required
                   error={!!errors.factoryContactNumber}
+                  helperText={errors.factoryContactNumber ? "Required" : ""}
                   sx={{ width: "100%" }}
                   size="small"
                   {...register("factoryContactNumber", { required: true })}
@@ -722,7 +843,7 @@ export default function AddScheduledInternalAudit({
           }}
           size="medium"
           onClick={handleSubmit((data) => {
-            handleSubmitScheduledInternalAudit(data);
+            handleSubmitInternalAudit(data, true);
           })}
         >
           Save Draft
@@ -734,7 +855,7 @@ export default function AddScheduledInternalAudit({
           }}
           size="medium"
           onClick={handleSubmit((data) => {
-            handleSubmitScheduledInternalAudit(data);
+            handleSubmitInternalAudit(data, false);
           })}
         >
           Schedule Internal Audit
@@ -751,24 +872,41 @@ const AddNewFactoryDialog = ({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
+  const { enqueueSnackbar } = useSnackbar();
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<Factory>();
+    setValue,
+  } = useForm<Factory>({
+    mode: "onChange",
+    reValidateMode: "onChange",
+  });
   const [openAddNewContactPersonDialog, setOpenAddNewContactPersonDialog] =
     useState(false);
 
-  const { data: assigneeData, isFetching: isAssigneeDataFetching } = useQuery({
-    queryKey: ["medicine-assignee"],
-    queryFn: fetchMedicineRequestAssignee,
+  const { data: contactPeopleData } = useQuery({
+    queryKey: ["contact-people"],
+    queryFn: getContactPersonList,
   });
 
   const { isMobile } = useIsMobile();
 
-  const handleCreateFactory = (data: Partial<Factory>) => {
-    setOpen(false);
-  };
+  const { mutate: createFactoryMutation, isPending } = useMutation({
+    mutationFn: createFactory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["factories"] });
+      enqueueSnackbar("Factory Created Successfully!", {
+        variant: "success",
+      });
+      setOpen(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Factory Create Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   const AddNewContactPersonButton = (props) => (
     <li
@@ -798,10 +936,23 @@ const AddNewFactoryDialog = ({
 
   const AddNewContactPersonDialog = () => {
     const { register, handleSubmit } = useForm();
+    const { enqueueSnackbar } = useSnackbar();
 
-    const handleCreateContactPerson = (data) => {
-      console.log("Creating contact person", data);
-    };
+    const { mutate: createContactPersonMutation, isPending } = useMutation({
+      mutationFn: createContactPerson,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["contact-people"] });
+        enqueueSnackbar("Contact Person Created Successfully!", {
+          variant: "success",
+        });
+        setOpenAddNewContactPersonDialog(false);
+      },
+      onError: () => {
+        enqueueSnackbar(`Contact Person Create Failed`, {
+          variant: "error",
+        });
+      },
+    });
 
     return (
       <Dialog
@@ -809,7 +960,7 @@ const AddNewFactoryDialog = ({
         onClose={() => setOpenAddNewContactPersonDialog(false)}
         fullScreen={isMobile}
         fullWidth
-        maxWidth="sm"
+        maxWidth="xs"
         PaperProps={{
           style: {
             backgroundColor: grey[50],
@@ -871,7 +1022,9 @@ const AddNewFactoryDialog = ({
               backgroundColor: "var(--pallet-blue)",
             }}
             size="medium"
-            onClick={handleSubmit(handleCreateContactPerson)}
+            disabled={isPending}
+            endIcon={isPending ? <CircularProgress size={20} /> : null}
+            onClick={handleSubmit((data) => createContactPersonMutation(data))}
           >
             Add Contact Person
           </CustomButton>
@@ -924,56 +1077,73 @@ const AddNewFactoryDialog = ({
             flexDirection: "column",
           }}
         >
-          <TextField
-            {...register("name", { required: true })}
-            required
-            id="name"
-            label="Factory Name"
-            size="small"
-            fullWidth
-            sx={{ marginBottom: "0.5rem" }}
-            error={!!errors.name}
-            helperText={errors.name ? "This field is required" : ""}
-          />
-          <TextField
-            {...register("email", { required: true })}
-            required
-            id="email"
-            label="Factory Email"
-            size="small"
-            fullWidth
-            sx={{ marginBottom: "0.5rem" }}
-            error={!!errors.email}
-            helperText={errors.email ? "This field is required" : ""}
-            type="email"
-          />
-          <TextField
-            {...register("factoryAddress", { required: true })}
-            required
-            id="factoryAddress"
-            label="Factory Address"
-            size="small"
-            fullWidth
-            sx={{ marginBottom: "0.5rem" }}
-            error={!!errors.factoryAddress}
-            helperText={errors.factoryAddress ? "This field is required" : ""}
-          />
-
+          <Box
+            sx={{
+              margin: "0.5rem",
+            }}
+          >
+            <TextField
+              {...register("factoryName", { required: true })}
+              required
+              id="factoryName"
+              label="Factory Name"
+              size="small"
+              fullWidth
+              error={!!errors.factoryName}
+              helperText={errors.factoryName ? "Required" : ""}
+            />
+          </Box>
+          <Box
+            sx={{
+              margin: "0.5rem",
+            }}
+          >
+            <TextField
+              {...register("factoryEmail", { required: true })}
+              required
+              id="factoryEmail"
+              label="Factory Email"
+              size="small"
+              fullWidth
+              error={!!errors.factoryEmail}
+              helperText={errors.factoryEmail ? "Required" : ""}
+              type="email"
+            />
+          </Box>
+          <Box
+            sx={{
+              margin: "0.5rem",
+            }}
+          >
+            <TextField
+              {...register("factoryAddress", { required: true })}
+              required
+              id="factoryAddress"
+              label="Factory Address"
+              size="small"
+              fullWidth
+              error={!!errors.factoryAddress}
+              helperText={errors.factoryAddress ? "Required" : ""}
+            />
+          </Box>
           <Box
             sx={{
               display: "flex",
             }}
           >
             <TextField
-              {...register("contactNumber", { required: true })}
+              {...register("factoryContactNumber", { required: true })}
               required
-              id="contactNumber"
+              id="factoryContactNumber"
               label="Contact Number"
               type="number"
               size="small"
               fullWidth
-              error={!!errors.contactNumber}
-              helperText={errors.contactNumber ? "This field is required" : ""}
+              sx={{
+                margin: "0.5rem",
+              }}
+              error={!!errors.factoryContactNumber}
+              helperText={errors.factoryContactNumber ? "Required" : ""}
             />
             <TextField
               {...register("designation", { required: true })}
@@ -982,12 +1152,12 @@ const AddNewFactoryDialog = ({
               label="Designation"
               size="small"
               fullWidth
-              sx={{ marginLeft: "0.5rem" }}
+              sx={{ margin: "0.5rem" }}
               error={!!errors.designation}
-              helperText={errors.designation ? "This field is required" : ""}
+              helperText={errors.designation ? "Required" : ""}
             />
           </Box>
-          <Box sx={{ flex: 1 }}>
+          <Box sx={{ flex: 1, margin: "0.5rem" }}>
             <Autocomplete
               {...register("factoryContactPerson", { required: true })}
               size="small"
@@ -999,30 +1169,32 @@ const AddNewFactoryDialog = ({
                 </>
               }
               options={[
-                ...(assigneeData?.length
-                  ? assigneeData.map((category) => category.name)
-                  : []),
+                ...(contactPeopleData?.length ? contactPeopleData : []),
                 "$ADD_NEW_CONTACT_PERSON",
               ]}
+              getOptionLabel={(option) => option.name || ""}
+              onChange={(_, data) => {
+                setValue("factoryContactPersonId", data.id);
+                setValue("factoryContactPerson", data);
+              }}
               renderOption={(props, option) => (
                 <>
                   {option === "$ADD_NEW_CONTACT_PERSON" ? (
                     <AddNewContactPersonButton {...props} />
                   ) : (
                     <li {...props} key={option}>
-                      {option}
+                      {option.name}
                     </li>
                   )}
                 </>
               )}
-              sx={{ flex: 1, marginY: "1rem" }}
+              sx={{ flex: 1 }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   error={!!errors.factoryContactPerson}
                   label="Factory Contact Person"
                   name="factoryContactPerson"
-                  slotProps={{ inputLabel: { shrink: true } }}
                 />
               )}
             />
@@ -1042,7 +1214,9 @@ const AddNewFactoryDialog = ({
             backgroundColor: "var(--pallet-blue)",
           }}
           size="medium"
-          onClick={handleSubmit(handleCreateFactory)}
+          onClick={handleSubmit((data) => createFactoryMutation(data))}
+          disabled={isPending}
+          endIcon={isPending ? <CircularProgress size={20} /> : null}
         >
           Add Factory
         </CustomButton>
@@ -1061,10 +1235,23 @@ const AddNewProcessTypeDialog = ({
 }) => {
   const { register, handleSubmit } = useForm();
   const { isMobile } = useIsMobile();
+  const { enqueueSnackbar } = useSnackbar();
 
-  const handleCreateProcessType = (data) => {
-    console.log("Creating process type", data);
-  };
+  const { mutate: createProcessTypeMutation, isPending } = useMutation({
+    mutationFn: createProcessType,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["process-types"] });
+      enqueueSnackbar("Process Type Created Successfully!", {
+        variant: "success",
+      });
+      setOpen(false);
+    },
+    onError: () => {
+      enqueueSnackbar(`Process Type Create Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   return (
     <Dialog
@@ -1111,10 +1298,10 @@ const AddNewProcessTypeDialog = ({
           }}
         >
           <TextField
-            {...register("name", { required: true })}
+            {...register("processType", { required: true })}
             required
-            id="name"
-            label="name"
+            id="processType"
+            label="processType"
             size="small"
             fullWidth
             sx={{ marginBottom: "0.5rem" }}
@@ -1134,9 +1321,11 @@ const AddNewProcessTypeDialog = ({
             backgroundColor: "var(--pallet-blue)",
           }}
           size="medium"
-          onClick={handleSubmit(handleCreateProcessType)}
+          disabled={isPending}
+          endIcon={isPending ? <CircularProgress size={20} /> : null}
+          onClick={handleSubmit((data) => createProcessTypeMutation(data))}
         >
-          Add New Process Type
+          Add Process Type
         </CustomButton>
       </DialogActions>
     </Dialog>

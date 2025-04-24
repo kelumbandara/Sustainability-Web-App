@@ -19,7 +19,7 @@ const AutocompleteCheckbox = ({
     <Controller
       control={control}
       name={name}
-      rules={required ? { required: "This field is required" } : {}}
+      rules={required ? { required: "Required" } : {}}
       render={({ field: { onChange, value }, fieldState: { error } }) => (
         <Autocomplete
           multiple

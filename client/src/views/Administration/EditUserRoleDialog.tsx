@@ -372,7 +372,6 @@ export default function EditUserRoleDialog({
           disabled={isPending}
           size="medium"
           onClick={handleSubmit((data) => {
-            console.log(data);
             updateUserRoleMutation({
               id: defaultValues?.id,
               userTypeId: data.userType?.id,

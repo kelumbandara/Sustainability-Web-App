@@ -23,7 +23,7 @@ import { useMemo, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import { useSnackbar } from "notistack";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import Breadcrumb from "../../../components/BreadCrumb";
 import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
 import PageTitle from "../../../components/PageTitle";
@@ -39,8 +39,8 @@ import {
   ScheduledInternalAudit,
   updateInternalAudit,
   deleteInternalAudit,
+  getScheduledInternalAuditList,
 } from "../../../api/AuditAndInspection/internalAudit";
-import { sampleScheduledInternalAudits } from "../../../api/sampleData/sampleInternalAuditData";
 import ViewInternalAuditContent from "./ViewInternalAuditContent";
 import AddScheduledInternalAudit from "./AddScheduledInternalAudit";
 import EditScheduledInternalAudit from "./EditScheduledInternalAudit";
@@ -51,9 +51,6 @@ function InternalAuditTable() {
   const [selectedRow, setSelectedRow] = useState<ScheduledInternalAudit>(null);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
-  const [internalAuditData, setInternalAuditData] = useState<
-    ScheduledInternalAudit[]
-  >(sampleScheduledInternalAudits);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -82,41 +79,26 @@ function InternalAuditTable() {
     theme.breakpoints.down("md")
   );
 
-  //   const { data: internalAuditData, isFetching: isInternalAuditDataFetching } = useQuery({
-  //     queryKey: ["internal-audit"],
-  //     queryFn: getInternalAuditList,
-  //   });
+  const {
+    data: scheduledInternalAuditData,
+    isFetching: isScheduledInternalAuditDataFetching,
+  } = useQuery({
+    queryKey: ["scheduled-internal-audit"],
+    queryFn: getScheduledInternalAuditList,
+  });
 
   const paginatedInternalAuditData = useMemo(() => {
-    if (!internalAuditData) return [];
-    return internalAuditData.slice(
+    if (!scheduledInternalAuditData) return [];
+    return scheduledInternalAuditData?.slice(
       page * rowsPerPage,
       page * rowsPerPage + rowsPerPage
     );
-  }, [page, rowsPerPage, internalAuditData]);
-
-  // const { mutate: createInternalAuditMutation } = useMutation({
-  //   mutationFn: createInternalAudit,
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ["internal-audit"] });
-  //     enqueueSnackbar("Internal Audit Scheduled Successfully!", {
-  //       variant: "success",
-  //     });
-  //     setSelectedRow(null);
-  //     setOpenViewDrawer(false);
-  //     setOpenAddDialog(false);
-  //   },
-  //   onError: () => {
-  //     enqueueSnackbar(`Internal Audit Schedule Failed`, {
-  //       variant: "error",
-  //     });
-  //   },
-  // });
+  }, [page, rowsPerPage]);
 
   const { mutate: updateInternalAuditMutation } = useMutation({
     mutationFn: updateInternalAudit,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["internal-audit"] });
+      queryClient.invalidateQueries({ queryKey: ["scheduled-internal-audit"] });
       enqueueSnackbar("Scheduled Internal Audit Updated Successfully!", {
         variant: "success",
       });
@@ -202,9 +184,9 @@ function InternalAuditTable() {
               Schedule Internal Audit
             </Button>
           </Box>
-          {/* {isInternalAuditDataFetching && (
+          {isScheduledInternalAuditDataFetching && (
             <LinearProgress sx={{ width: "100%" }} />
-          )} */}
+          )}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -215,13 +197,12 @@ function InternalAuditTable() {
                 <TableCell align="right">Audit Type</TableCell>
                 <TableCell align="right">Auditee</TableCell>
                 <TableCell align="right">Approver</TableCell>
-                <TableCell align="right">Audit Status</TableCell>
                 <TableCell align="right">Status</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {paginatedInternalAuditData?.length > 0 ? (
-                paginatedInternalAuditData?.map((row) => (
+              {scheduledInternalAuditData?.length > 0 ? (
+                scheduledInternalAuditData?.map((row) => (
                   <TableRow
                     key={`${row.id}`}
                     sx={{
@@ -240,11 +221,10 @@ function InternalAuditTable() {
                         : "N/A"}
                     </TableCell>
                     <TableCell align="right">{row.division}</TableCell>
-                    <TableCell align="right">{row.audit.name}</TableCell>
+                    <TableCell align="right">{row.audit?.name}</TableCell>
                     <TableCell align="right">{row.auditType}</TableCell>
                     <TableCell align="right">{row.auditee?.name}</TableCell>
                     <TableCell align="right">{row.approver?.name}</TableCell>
-                    <TableCell align="right">{row.auditStatus}</TableCell>
                     <TableCell align="right">
                       {RenderInternalAuditStatusChip(row.status)}
                     </TableCell>
@@ -263,7 +243,7 @@ function InternalAuditTable() {
                 <TablePagination
                   rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
                   colSpan={100}
-                  count={internalAuditData?.length}
+                  count={scheduledInternalAuditData?.length}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   showFirstButton={true}
@@ -309,12 +289,6 @@ function InternalAuditTable() {
         <AddScheduledInternalAudit
           open={openAddDialog}
           handleClose={() => {
-            setSelectedRow(null);
-            setOpenViewDrawer(false);
-            setOpenAddDialog(false);
-          }}
-          onSubmit={(data) => {
-            // createInternalAuditMutation(data);
             setSelectedRow(null);
             setOpenViewDrawer(false);
             setOpenAddDialog(false);

@@ -130,7 +130,6 @@ export default function AddOrEditPersonDialog({
               sx={{ flex: 1, margin: "0.5rem" }}
               defaultValue={defaultValues?.personType}
               onChange={(e, value) => {
-                console.log("e", e);
                 setValue("personType", value);
               }}
               renderInput={(params) => (
@@ -183,7 +182,6 @@ export default function AddOrEditPersonDialog({
               sx={{ flex: 1, margin: "0.5rem" }}
               defaultValue={defaultValues?.gender}
               onChange={(e, value) => {
-                console.log("e", e);
                 setValue("gender", value);
               }}
               renderInput={(params) => (
@@ -255,7 +253,6 @@ export default function AddOrEditPersonDialog({
               sx={{ flex: 1, margin: "0.5rem" }}
               defaultValue={defaultValues?.industryExperience}
               onChange={(e, value) => {
-                console.log("e", e);
                 setValue("industryExperience", value);
               }}
               renderInput={(params) => (

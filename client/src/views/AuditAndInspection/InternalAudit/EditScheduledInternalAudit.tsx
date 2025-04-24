@@ -52,15 +52,12 @@ import {
   SupplierType,
   InternalAuditQuestion,
   InternalAuditQuestionAnswersStatus,
-  InternalAuditRating,
   InternalAuditQuestionAnswerRating,
+  getInternalAuditFormsList,
+  getFactoryList,
+  getProcessTypeList,
 } from "../../../api/AuditAndInspection/internalAudit";
 import { fetchDepartmentData } from "../../../api/departmentApi";
-import {
-  sampleFactories,
-  sampleInternalAudits,
-  sampleProcessData,
-} from "../../../api/sampleData/sampleInternalAuditData";
 import SwitchButton from "../../../components/SwitchButton";
 import ArticleIcon from "@mui/icons-material/Article";
 import ContentPasteSearchIcon from "@mui/icons-material/ContentPasteSearch";
@@ -128,6 +125,20 @@ export default function EditScheduledInternalAudit({
   };
 
   const {
+    data: internalAuditFormsData,
+    isFetching: isInternalAuditFormsFetching,
+  } = useQuery({
+    queryKey: ["internal-audit-forms"],
+    queryFn: getInternalAuditFormsList,
+  });
+
+  const { data: processTypesData, isFetching: isProcessTypesDataFetching } =
+    useQuery({
+      queryKey: ["process-types"],
+      queryFn: getProcessTypeList,
+    });
+
+  const {
     register,
     handleSubmit,
     watch,
@@ -167,6 +178,11 @@ export default function EditScheduledInternalAudit({
     queryFn: fetchMedicineRequestAssignee,
   });
 
+  const { data: factoryData, isFetching: isFactoryDataFetching } = useQuery({
+    queryKey: ["factories"],
+    queryFn: getFactoryList,
+  });
+
   const handleSubmitScheduledInternalAudit = (data: ScheduledInternalAudit) => {
     const submitData: Partial<ScheduledInternalAudit> = data;
     submitData.id = uuidv4();
@@ -177,7 +193,6 @@ export default function EditScheduledInternalAudit({
     // if (filesToRemove?.length > 0) submitData.removeDoc = filesToRemove;
     // submitData.documents = files;
     onSubmit(submitData as ScheduledInternalAudit);
-    console.log(submitData);
     resetForm();
   };
 
@@ -537,8 +552,9 @@ export default function EditScheduledInternalAudit({
                   <Autocomplete
                     size="small"
                     options={
-                      userData && Array.isArray(sampleInternalAudits)
-                        ? sampleInternalAudits
+                      internalAuditFormsData &&
+                      Array.isArray(internalAuditFormsData)
+                        ? internalAuditFormsData
                         : []
                     }
                     sx={{ flex: 1, margin: "0.5rem" }}
@@ -553,9 +569,7 @@ export default function EditScheduledInternalAudit({
                         {...params}
                         required
                         error={!!errors["audit"]}
-                        helperText={
-                          errors["audit"] ? "This field is required" : ""
-                        }
+                        helperText={errors["audit"] ? "Required" : ""}
                         label={"Audit Title"}
                         name={"audit"}
                       />
@@ -678,8 +692,8 @@ export default function EditScheduledInternalAudit({
                         </>
                       }
                       options={[
-                        ...(sampleProcessData?.length
-                          ? sampleProcessData.map((category) => category.name)
+                        ...(processTypesData?.length
+                          ? processTypesData.map((category) => category.name)
                           : []),
                         "$ADD_NEW_PROCESS_TYPE",
                       ]}
@@ -728,8 +742,8 @@ export default function EditScheduledInternalAudit({
                   </>
                 }
                 options={[
-                  ...(sampleFactories?.length
-                    ? sampleFactories.map((category) => category.name)
+                  ...(factoryData?.length
+                    ? factoryData.map((category) => category.factoryName)
                     : []),
                   "$ADD_NEW_FACTORY",
                 ]}
@@ -746,16 +760,15 @@ export default function EditScheduledInternalAudit({
                 )}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 onChange={async (_, data) => {
-                  const selectedFactory = sampleFactories?.find(
-                    (factory) => factory.name === data
+                  const selectedFactory = factoryData?.find(
+                    (factory) => factory.factoryName === data
                   );
-                  console.log("yoo", selectedFactory);
                   await setValue("factory", selectedFactory);
                   await setValue("factoryId", selectedFactory?.id);
-                  await setValue("factoryEmail", selectedFactory?.email);
+                  await setValue("factoryEmail", selectedFactory?.factoryEmail);
                   await setValue(
                     "factoryContactNumber",
-                    selectedFactory?.contactNumber
+                    selectedFactory?.factoryContactNumber
                   );
                   await setValue(
                     "factoryAddress",
@@ -763,14 +776,9 @@ export default function EditScheduledInternalAudit({
                   );
                   await setValue(
                     "factoryContactPerson",
-                    selectedFactory?.factoryContactPerson?.name
+                    selectedFactory?.factoryContactPerson
                   );
                   await setValue("designation", selectedFactory?.designation);
-                  await setValue("factoryEmail", selectedFactory?.email);
-                  await setValue(
-                    "factoryContactNumber",
-                    selectedFactory?.contactNumber
-                  );
                 }}
                 renderInput={(params) => (
                   <TextField
@@ -1152,26 +1160,26 @@ const AddNewFactoryDialog = ({
           }}
         >
           <TextField
-            {...register("name", { required: true })}
+            {...register("factoryName", { required: true })}
             required
-            id="name"
+            id="factoryName"
             label="Factory Name"
             size="small"
             fullWidth
             sx={{ marginBottom: "0.5rem" }}
-            error={!!errors.name}
-            helperText={errors.name ? "This field is required" : ""}
+            error={!!errors.factoryName}
+            helperText={errors.factoryName ? "Required" : ""}
           />
           <TextField
-            {...register("email", { required: true })}
+            {...register("factoryEmail", { required: true })}
             required
-            id="email"
+            id="factoryEmail"
             label="Factory Email"
             size="small"
             fullWidth
             sx={{ marginBottom: "0.5rem" }}
-            error={!!errors.email}
-            helperText={errors.email ? "This field is required" : ""}
+            error={!!errors.factoryEmail}
+            helperText={errors.factoryEmail ? "Required" : ""}
             type="email"
           />
           <TextField
@@ -1183,7 +1191,7 @@ const AddNewFactoryDialog = ({
             fullWidth
             sx={{ marginBottom: "0.5rem" }}
             error={!!errors.factoryAddress}
-            helperText={errors.factoryAddress ? "This field is required" : ""}
+            helperText={errors.factoryAddress ? "Required" : ""}
           />
 
           <Box
@@ -1192,15 +1200,15 @@ const AddNewFactoryDialog = ({
             }}
           >
             <TextField
-              {...register("contactNumber", { required: true })}
+              {...register("factoryContactNumber", { required: true })}
               required
-              id="contactNumber"
+              id="factoryContactNumber"
               label="Contact Number"
               type="number"
               size="small"
               fullWidth
-              error={!!errors.contactNumber}
-              helperText={errors.contactNumber ? "This field is required" : ""}
+              error={!!errors.factoryContactNumber}
+              helperText={errors.factoryContactNumber ? "Required" : ""}
             />
             <TextField
               {...register("designation", { required: true })}
@@ -1211,7 +1219,7 @@ const AddNewFactoryDialog = ({
               fullWidth
               sx={{ marginLeft: "0.5rem" }}
               error={!!errors.designation}
-              helperText={errors.designation ? "This field is required" : ""}
+              helperText={errors.designation ? "Required" : ""}
             />
           </Box>
           <Box sx={{ flex: 1 }}>

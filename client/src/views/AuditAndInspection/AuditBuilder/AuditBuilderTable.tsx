@@ -39,7 +39,6 @@ import {
   updateInternalAuditForm,
   deleteInternalAuditForm,
 } from "../../../api/AuditAndInspection/internalAudit";
-import { sampleInternalAudits } from "../../../api/sampleData/sampleInternalAuditData";
 import InternalAuditFormDrawerContent from "./InternalAuditFormDrawerContent";
 import AddOrEditInternalAuditFormDialog from "./AddOrEditInternalAuditFormDialog";
 
@@ -83,8 +82,6 @@ function AuditBuilderTable() {
       queryKey: ["internal-audit-forms"],
       queryFn: getInternalAuditFormsList,
     });
-
-  console.log("internalAuditFormsData", internalAuditData);
 
   const paginatedInternalAuditData = useMemo(() => {
     if (!internalAuditData) return [];
@@ -315,7 +312,6 @@ function AuditBuilderTable() {
           }}
           onSubmit={(data) => {
             if (selectedRow) {
-              console.log("Updating document", data);
               updateInternalAuditFormMutation({
                 id: selectedRow.id,
                 data,
@@ -324,7 +320,6 @@ function AuditBuilderTable() {
               //   variant: "success",
               // });
             } else {
-              console.log("Adding new hazard/risk", data);
               createInternalAuditFormMutation(data);
               // enqueueSnackbar("Hazard/Risk Created Successfully!", {
               //   variant: "success",

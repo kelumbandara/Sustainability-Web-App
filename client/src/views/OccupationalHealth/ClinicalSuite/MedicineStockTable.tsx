@@ -91,10 +91,11 @@ function MedicineStockTable() {
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
-                <TableCell>Medicine Name</TableCell>
-                <TableCell align="right">Division</TableCell>
-                <TableCell align="right">In Stock</TableCell>
-                <TableCell align="right">Status</TableCell>
+                <TableCell>Reference Id</TableCell>
+                <TableCell align="left">Medicine Name</TableCell>
+                <TableCell align="left">Division</TableCell>
+                <TableCell align="left">Delivery Quantity</TableCell>
+                <TableCell align="left">Status</TableCell>
                 <TableCell align="right">Last Updated</TableCell>
               </TableRow>
             </TableHead>
@@ -109,19 +110,24 @@ function MedicineStockTable() {
                     }}
                   >
                     <TableCell component="th" scope="row">
-                      {row.id}
-                    </TableCell>
-                    <TableCell component="th" scope="row">
                       {row.referenceNumber}
+                    </TableCell>
+                    <TableCell component="th" scope="row" align="left">
+                      {row.medicineName}
+                    </TableCell>
+                    <TableCell component="th" scope="row" align="left">
+                      {row.division}
+                    </TableCell>
+                    <TableCell component="th" scope="row" align="left">
+                      {row.deliveryQuantity || "--"}
+                    </TableCell>
+                    <TableCell component="th" scope="row" align="left">
+                      {row.status}
                     </TableCell>
                     <TableCell align="right">
                       {row?.publishedAt
                         ? format(new Date(row?.publishedAt), "yyyy-MM-dd")
                         : "--"}
-                    </TableCell>
-                    <TableCell align="right">{row?.division}</TableCell>
-                    <TableCell align="right">
-                      {row?.approver?.name ?? "--"}
                     </TableCell>
                   </TableRow>
                 ))

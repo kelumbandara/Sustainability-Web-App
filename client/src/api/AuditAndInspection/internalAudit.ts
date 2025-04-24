@@ -94,18 +94,37 @@ export const InternalAuditSchema = z.object({
 
 export type InternalAudit = z.infer<typeof InternalAuditSchema>;
 
-export const FactorySchema = z.object({
+export const ContactPersonSchema = z.object({
   id: z.string().optional(),
   name: z.string(),
-  email: z.string(),
+  updatedAt: z.date(),
+  createdAt: z.date(),
+});
+
+export type ContactPerson = z.infer<typeof ContactPersonSchema>;
+
+export const FactorySchema = z.object({
+  id: z.string().optional(),
+  factoryName: z.string(),
+  factoryEmail: z.string(),
   factoryAddress: z.string(),
-  contactNumber: z.string(),
+  factoryContactNumber: z.string(),
   designation: z.string(),
-  factoryContactPerson: userSchema,
+  factoryContactPerson: ContactPersonSchema,
+  factoryContactPersonName: z.string(),
   factoryContactPersonId: z.string(),
 });
 
 export type Factory = z.infer<typeof FactorySchema>;
+
+export const ProcessTypeSchema = z.object({
+  id: z.string().optional(),
+  processType: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type ProcessType = z.infer<typeof ProcessTypeSchema>;
 
 export const auditeeSchema = z.object({
   id: z.string().optional(),
@@ -142,9 +161,9 @@ export const ScheduledInternalAuditActionPlanSchema = z.object({
   id: z.string().optional(),
   scheduledAuditId: z.string(),
   correctiveOrPreventiveAction: z.string(),
-  date: z.date(),
   priority: z.nativeEnum(ScheduledTaskActionPlanPriority).optional(),
   dueDate: z.date(),
+  createdAt: z.date(),
   targetCompletionDate: z.date(),
   approver: userSchema.optional(),
 });
@@ -174,13 +193,15 @@ export const ScheduledInternalAuditSchema = z.object({
   factoryId: z.string(),
   factoryAddress: z.string(),
   factoryEmail: z.string(),
-  factoryContactPerson: z.string(),
+  factoryContactPerson: ContactPersonSchema,
+  factoryContactPersonId: z.string(),
   factoryContactNumber: z.string(),
   supplierType: z.nativeEnum(SupplierType).optional(),
   factoryLicenseNo: z.string().optional(),
   higgId: z.string().optional(),
   zdhcId: z.string().optional(),
   processType: z.string().optional(),
+  processTypeId: z.string().optional(),
   description: z.string().optional(),
   designation: z.string().optional(),
   auditee: auditeeSchema.optional(),
@@ -262,5 +283,58 @@ export async function updateInternalAuditForm({
 
 export async function deleteInternalAuditForm({ id }: { id: string }) {
   const res = await axios.delete(`/api/question-reports/${id}/delete`);
+  return res.data;
+}
+
+export async function getScheduledInternalAuditList() {
+  const res = await axios.get("/api/internal-audit");
+  return res.data;
+}
+
+export async function getFactoryList() {
+  const res = await axios.get("/api/audit-factory");
+  return res.data;
+}
+
+export async function createFactory(data: Partial<Factory>) {
+  const res = await axios.post("/api/audit-factory", data);
+  return res.data;
+}
+
+export async function getProcessTypeList() {
+  const res = await axios.get("/api/process-types");
+  return res.data;
+}
+
+export async function createProcessType(data: Partial<ContactPerson>) {
+  const res = await axios.post("/api/process-types", data);
+  return res.data;
+}
+
+export async function getContactPersonList() {
+  const res = await axios.get("/api/contact-people");
+  return res.data;
+}
+
+export async function createContactPerson(data: Partial<ContactPerson>) {
+  const res = await axios.post("/api/contact-people", data);
+  return res.data;
+}
+
+export async function createDraftScheduledInternalAudit(
+  data: Partial<InternalAudit>
+) {
+  const res = await axios.post("/api/internal-audit-draft", {
+    ...data,
+  });
+  return res.data;
+}
+
+export async function createScheduledInternalAudit(
+  data: Partial<InternalAudit>
+) {
+  const res = await axios.post("/api/internal-audit-scheduled", {
+    ...data,
+  });
   return res.data;
 }

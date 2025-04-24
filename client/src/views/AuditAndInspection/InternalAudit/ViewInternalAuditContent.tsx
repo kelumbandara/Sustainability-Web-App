@@ -38,6 +38,8 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import EditIcon from "@mui/icons-material/Edit";
 import { RenderAuditQuestionColorTag } from "../AuditBuilder/InternalAuditFormDrawerContent";
 import { CircularProgressWithLabel } from "../../../components/CircularProgressWithLabel";
+import CustomButton from "../../../components/CustomButton";
+import { AddOrEditActionPlan } from "./AddOrEditActionPlan";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -75,6 +77,9 @@ function ViewInternalAuditContent({
   internalAudit: ScheduledInternalAudit;
 }) {
   const [activeTab, setActiveTab] = useState(0);
+  const [openActionItemDialog, setOpenActionItemDialog] = useState(false);
+  const [selectedActionItem, setSelectedActionItem] =
+    useState<ScheduledInternalAuditActionPlan | null>(null);
   const { isTablet } = useIsMobile();
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -188,7 +193,8 @@ function ViewInternalAuditContent({
               }
               {...a11yProps(1)}
             />
-            {internalAudit.status !== ScheduledInternalAuditStatus.DRAFT && (
+            {internalAudit.status ===
+              ScheduledInternalAuditStatus.COMPLETED && (
               <Tab
                 label={
                   <Box
@@ -325,7 +331,7 @@ function ViewInternalAuditContent({
             ))}
           </Stack>
         </TabPanel>
-        {internalAudit.status !== ScheduledInternalAuditStatus.DRAFT && (
+        {internalAudit.status === ScheduledInternalAuditStatus.COMPLETED && (
           <TabPanel value={activeTab} index={2} dir={theme.direction}>
             {internalAudit?.actionPlan?.length === 0 && (
               <Box sx={{ padding: "1rem" }}>
@@ -336,12 +342,52 @@ function ViewInternalAuditContent({
             )}
             <Stack spacing={1}>
               {internalAudit?.actionPlan?.map((actionPlan) => (
-                <ActionPlanItem key={actionPlan.id} actionPlan={actionPlan} />
+                <ActionPlanItem
+                  key={actionPlan.id}
+                  actionPlan={actionPlan}
+                  onClickEdit={() => {
+                    setSelectedActionItem(actionPlan);
+                    setOpenActionItemDialog(true);
+                  }}
+                />
               ))}
+              <Box
+                sx={{
+                  flex: 1,
+                  display: "flex",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <CustomButton
+                  variant="contained"
+                  sx={{
+                    backgroundColor: "var(--pallet-blue)",
+                    objectFit: "contain",
+                    marginTop: "1rem",
+                  }}
+                  size="medium"
+                  onClick={() => {
+                    setSelectedActionItem(null);
+                    setOpenActionItemDialog(true);
+                  }}
+                >
+                  Add New Action
+                </CustomButton>
+              </Box>
             </Stack>
           </TabPanel>
         )}
       </Box>
+      <AddOrEditActionPlan
+        open={openActionItemDialog}
+        setOpen={(state) => {
+          if (!state) {
+            setSelectedActionItem(null);
+          }
+          setOpenActionItemDialog(state);
+        }}
+        selectedActionItem={selectedActionItem}
+      />
     </Stack>
   );
 }
@@ -511,8 +557,10 @@ export const AuditQuestionsSectionAccordion = ({
 
 const ActionPlanItem = ({
   actionPlan,
+  onClickEdit,
 }: {
   actionPlan: ScheduledInternalAuditActionPlan;
+  onClickEdit: () => void;
 }) => {
   return (
     <Box
@@ -538,8 +586,7 @@ const ActionPlanItem = ({
             aria-label="edit"
             size="small"
             onClick={() => {
-              // setSelectedQuestion(row);
-              // setOpenEditQuestionDialog(true);
+              onClickEdit();
             }}
           >
             <EditIcon fontSize="inherit" />
@@ -581,7 +628,7 @@ const ActionPlanItem = ({
           }}
         >
           <Typography variant="caption" sx={{ color: "var(--pallet-grey)" }}>
-            {`Created on ${format(actionPlan.date, "dd/MM/yyyy")}`}
+            {`Created on ${format(actionPlan.createdAt, "dd/MM/yyyy")}`}
           </Typography>
         </Box>
       </Box>

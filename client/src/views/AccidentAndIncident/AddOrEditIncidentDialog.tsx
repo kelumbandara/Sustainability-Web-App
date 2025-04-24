@@ -529,9 +529,6 @@ export default function AddOrEditIncidentDialog({
                                   },
                                   cursor: "pointer",
                                 }}
-                                onClick={() => {
-                                  console.log("row");
-                                }}
                               >
                                 <TableCell
                                   component="th"
@@ -842,9 +839,6 @@ export default function AddOrEditIncidentDialog({
                                   },
                                   cursor: "pointer",
                                 }}
-                                onClick={() => {
-                                  console.log("row");
-                                }}
                               >
                                 <TableCell
                                   component="th"
@@ -993,7 +987,6 @@ export default function AddOrEditIncidentDialog({
                         orientation="vertical"
                         fullWidth
                         onChange={(e, value) => {
-                          console.log("e", e);
                           field.onChange(value);
                         }}
                       >
@@ -1091,7 +1084,6 @@ export default function AddOrEditIncidentDialog({
             setSelectedWitness(null);
           }}
           onSubmit={(data) => {
-            console.log("data", data);
             if (selectedWitness) {
               setValue("witnesses", [
                 ...(witnessesWatch ?? []).map((item) => {
@@ -1115,7 +1107,6 @@ export default function AddOrEditIncidentDialog({
           open={openAddOrEditPersonDialog}
           handleClose={() => setOpenAddOrEditPersonDialog(false)}
           onSubmit={(data) => {
-            console.log("Adding new person", data);
             if (selectedPerson) {
               setValue("effectedIndividuals", [
                 ...(effectedIndividualsWatch ?? []).map((item) => {

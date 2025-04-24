@@ -130,7 +130,6 @@ function withoutLayout(Component: React.LazyExoticComponent<any>) {
 
 const ProtectedRoute = () => {
   const { user, status } = useCurrentUser();
-  console.log(user, status);
 
   if (status === "loading" || status === "idle" || status === "pending") {
     return <PageLoader />;

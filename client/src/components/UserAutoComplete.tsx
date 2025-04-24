@@ -51,7 +51,7 @@ function UserAutoComplete({
               {...params}
               required
               error={!!errors[name]}
-              helperText={errors[name] ? "This field is required" : ""}
+              helperText={errors[name] ? "Required" : ""}
               label={label}
               name={name}
             />
