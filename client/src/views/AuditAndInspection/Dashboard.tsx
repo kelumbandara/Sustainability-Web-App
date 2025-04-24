@@ -63,7 +63,7 @@ import {
   wasteWaterData,
   waterUsageData,
   waterWasteData,
-} from "../../api/sampleData/environmentData";
+} from "../../api/sampleData/sampleAuditDashboardData";
 import CustomPieChart from "../../components/CustomPieChart";
 
 import SummarizeIcon from "@mui/icons-material/Summarize";
