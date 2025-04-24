@@ -46,7 +46,7 @@ import WaterDropOutlinedIcon from "@mui/icons-material/WaterDropOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import ShowerOutlinedIcon from "@mui/icons-material/ShowerOutlined";
 import BatteryChargingFullOutlinedIcon from "@mui/icons-material/BatteryChargingFullOutlined";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import CircularProgressWithLabel from "../../components/CircularProgress";
 import {
   airEmissionData,
@@ -92,16 +92,6 @@ interface TabPanelPropsTwo {
   indexTwo: number;
   value: number;
 }
-
-const chartSetting = {
-  yAxis: [
-    {
-      label: "rainfall (mm)",
-      width: 60,
-    },
-  ],
-  height: 300,
-};
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -149,7 +139,9 @@ function a11yProps2(indexTwo: number) {
   };
 }
 
-function HazardAndRiskDashboard() {
+
+
+function EnvironmentDashboard() {
   const { isMobile, isTablet } = useIsMobile();
   const {
     register,
@@ -157,7 +149,6 @@ function HazardAndRiskDashboard() {
     watch,
     control,
     formState: { errors },
-    reset,
     setValue,
   } = useForm();
 
@@ -176,6 +167,71 @@ function HazardAndRiskDashboard() {
     console.log("event", eventTwo);
     setActiveTabTwo(newValueTwo);
   };
+
+  const pieChartDataMemo = useMemo(() => {
+    if (!pieChartData?.length) return [];
+    return pieChartData;
+  }, [pieChartData]);
+
+  const datasetMemo = useMemo(() => {
+    if (!dataset?.length) return [];
+    return dataset;
+  }, [dataset]);
+
+  const energyConsumptionDataMemo = useMemo(() => {
+    if (!energyConsumptionData?.length) return [];
+    return energyConsumptionData;
+  }, [energyConsumptionData]);
+
+  const fabricCutDataMemo = useMemo(() => {
+    if (!fabricCutData?.length) return [];
+    return fabricCutData;
+  }, [fabricCutData]);
+
+  const ghgDatasetMemo = useMemo(() => {
+    if (!ghgDataset?.length) return [];
+    return ghgDataset;
+  }, [ghgDataset]);
+
+  const lineDataMemo = useMemo(() => {
+    if (!lineData?.length) return [];
+    return lineData;
+  }, [lineData]);
+
+  const pieChartDataWaterTreatmentMemo = useMemo(() => {
+    if (!pieChartDataWaterTreatment?.length) return [];
+    return pieChartDataWaterTreatment;
+  }, [pieChartDataWaterTreatment]);
+
+  const pieChartEmissionBreakDownDataMemo = useMemo(() => {
+    if (!pieChartEmissionBreakDownData?.length) return [];
+    return pieChartEmissionBreakDownData;
+  }, [pieChartEmissionBreakDownData]);
+
+  const pieChartRecycledWaterDownDataMemo = useMemo(() => {
+    if (!pieChartRecycledWaterDownData?.length) return [];
+    return pieChartRecycledWaterDownData;
+  }, [pieChartRecycledWaterDownData]);
+
+  const waterWasteDataMemo = useMemo(() => {
+    if (!waterWasteData?.length) return [];
+    return waterWasteData;
+  }, [waterWasteData]);
+
+  const wasteWaterDataMemo = useMemo(() => {
+    if (!wasteWaterData?.length) return [];
+    return wasteWaterData;
+  }, [wasteWaterData]);
+
+  const waterUsageDataMemo = useMemo(() => {
+    if (!waterUsageData?.length) return [];
+    return waterUsageData;
+  }, [waterUsageData]);
+
+  const airEmissionDataMemo = useMemo(() => {
+    if (!airEmissionData?.length) return [];
+    return airEmissionData;
+  }, [airEmissionData]);
 
   return (
     <Stack>
@@ -469,9 +525,9 @@ function HazardAndRiskDashboard() {
             </Typography>
           </Box>
           <ResponsiveContainer width="100%" height={500}>
-            <BarChart width={800} height={400} data={dataset}>
+            <BarChart width={800} height={400} data={datasetMemo}>
               <XAxis dataKey="month" />
-              <YAxis />
+              <YAxis fontSize={12} />
               <Tooltip />
               <Legend />
               <Bar
@@ -533,9 +589,8 @@ function HazardAndRiskDashboard() {
               textAlign: "center",
             }}
           >
-            Status
+            Waste
           </Typography>
-          <Typography variant="subtitle1">Waste</Typography>
           <ResponsiveContainer
             width="100%"
             height={500}
@@ -641,7 +696,7 @@ function HazardAndRiskDashboard() {
                       gap={4}
                       width={"100%"}
                     >
-                      {fabricCutData.map((item, index) => (
+                      {fabricCutDataMemo.map((item, index) => (
                         <>
                           <Box
                             key={index}
@@ -652,22 +707,24 @@ function HazardAndRiskDashboard() {
                               <Typography>{item.label}</Typography>
                               <Typography>{item.unit}</Typography>
                             </Box>
-                            <Box
-                              flex={1}
-                              sx={{
-                                display: "flex",
-                                flexDirection: "row",
-                                gap: "3rem",
-                                justifyContent: "space-between",
-                              }}
-                            >
-                              <CircularProgressWithLabel
-                                size={60}
-                                value={item.progress}
-                              />
-                              <Box>
-                                <Typography>Quantity</Typography>
-                                <Typography>{item.quantity}</Typography>
+                            <Box>
+                              <Box
+                                flex={1}
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  gap: "3rem",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <CircularProgressWithLabel
+                                  size={60}
+                                  value={item.progress}
+                                />
+                                <Box>
+                                  <Typography>Quantity</Typography>
+                                  <Typography>{item.quantity}</Typography>
+                                </Box>
                               </Box>
                             </Box>
                           </Box>
@@ -693,7 +750,7 @@ function HazardAndRiskDashboard() {
                       gap={4}
                       width={"100%"}
                     >
-                      {fabricCutData.map((item, index) => (
+                      {fabricCutDataMemo.map((item, index) => (
                         <>
                           <Box
                             key={index}
@@ -704,22 +761,24 @@ function HazardAndRiskDashboard() {
                               <Typography>{item.label}</Typography>
                               <Typography>{item.unit}</Typography>
                             </Box>
-                            <Box
-                              flex={1}
-                              sx={{
-                                display: "flex",
-                                flexDirection: "row",
-                                gap: "3rem",
-                                justifyContent: "space-between",
-                              }}
-                            >
-                              <CircularProgressWithLabel
-                                size={60}
-                                value={item.progress}
-                              />
-                              <Box>
-                                <Typography>Quantity</Typography>
-                                <Typography>{item.quantity}</Typography>
+                            <Box>
+                              <Box
+                                flex={1}
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  gap: "3rem",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <CircularProgressWithLabel
+                                  size={60}
+                                  value={item.progress}
+                                />
+                                <Box>
+                                  <Typography>Quantity</Typography>
+                                  <Typography>{item.quantity}</Typography>
+                                </Box>
                               </Box>
                             </Box>
                           </Box>
@@ -745,7 +804,7 @@ function HazardAndRiskDashboard() {
                       gap={4}
                       width={"100%"}
                     >
-                      {fabricCutData.map((item, index) => (
+                      {fabricCutDataMemo.map((item, index) => (
                         <>
                           <Box
                             key={index}
@@ -756,22 +815,24 @@ function HazardAndRiskDashboard() {
                               <Typography>{item.label}</Typography>
                               <Typography>{item.unit}</Typography>
                             </Box>
-                            <Box
-                              flex={1}
-                              sx={{
-                                display: "flex",
-                                flexDirection: "row",
-                                gap: "3rem",
-                                justifyContent: "space-between",
-                              }}
-                            >
-                              <CircularProgressWithLabel
-                                size={60}
-                                value={item.progress}
-                              />
-                              <Box>
-                                <Typography>Quantity</Typography>
-                                <Typography>{item.quantity}</Typography>
+                            <Box>
+                              <Box
+                                flex={1}
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  gap: "3rem",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <CircularProgressWithLabel
+                                  size={60}
+                                  value={item.progress}
+                                />
+                                <Box>
+                                  <Typography>Quantity</Typography>
+                                  <Typography>{item.quantity}</Typography>
+                                </Box>
                               </Box>
                             </Box>
                           </Box>
@@ -812,13 +873,13 @@ function HazardAndRiskDashboard() {
                 textAlign: "center",
               }}
             >
-              Consumption
+              Environment Footprint
             </Typography>
           </Box>
           <ResponsiveContainer width="100%" height={500}>
-            <LineChart width={800} height={400} data={lineData}>
+            <LineChart width={800} height={400} data={lineDataMemo}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" /> <YAxis />
+              <XAxis dataKey="name" /> <YAxis fontSize={12} />
               <Tooltip />
               <Legend />
               <Line
@@ -856,7 +917,7 @@ function HazardAndRiskDashboard() {
               textAlign: "center",
             }}
           >
-            Status
+            Renewable Energy Usage
           </Typography>
           <ResponsiveContainer width="100%" height={500}>
             <>
@@ -913,7 +974,7 @@ function HazardAndRiskDashboard() {
                 textAlign: "center",
               }}
             >
-              Consumption
+              Category And Source
             </Typography>
           </Box>
           <ResponsiveContainer
@@ -1064,7 +1125,7 @@ function HazardAndRiskDashboard() {
                 dir={theme.direction}
               >
                 <>
-                  {wasteWaterData.map((item, index) => (
+                  {wasteWaterDataMemo.map((item, index) => (
                     <Box key={index}>
                       <Box
                         sx={{
@@ -1107,7 +1168,7 @@ function HazardAndRiskDashboard() {
                 dir={theme.direction}
               >
                 <>
-                  {energyConsumptionData.map((item, index) => (
+                  {energyConsumptionDataMemo.map((item, index) => (
                     <Box key={index}>
                       <Box
                         sx={{
@@ -1150,7 +1211,7 @@ function HazardAndRiskDashboard() {
                 dir={theme.direction}
               >
                 <>
-                  {waterUsageData.map((item, index) => (
+                  {waterUsageDataMemo.map((item, index) => (
                     <Box key={index}>
                       <Box
                         sx={{
@@ -1193,7 +1254,7 @@ function HazardAndRiskDashboard() {
                 dir={theme.direction}
               >
                 <>
-                  {waterWasteData.map((item, index) => (
+                  {waterWasteDataMemo.map((item, index) => (
                     <Box key={index}>
                       <Box
                         sx={{
@@ -1236,7 +1297,7 @@ function HazardAndRiskDashboard() {
                 dir={theme.direction}
               >
                 <>
-                  {airEmissionData.map((item, index) => (
+                  {airEmissionDataMemo.map((item, index) => (
                     <Box key={index}>
                       <Box
                         sx={{
@@ -1279,7 +1340,7 @@ function HazardAndRiskDashboard() {
                 dir={theme.direction}
               >
                 <>
-                  {wasteWaterData.map((item, index) => (
+                  {wasteWaterDataMemo.map((item, index) => (
                     <Box key={index}>
                       <Box
                         sx={{
@@ -1339,7 +1400,7 @@ function HazardAndRiskDashboard() {
               <Box display={"flex"} justifyContent={"center"}>
                 <Box display={"flex"} justifyContent={"center"}>
                   <CustomPieChart
-                    data={pieChartData}
+                    data={pieChartDataMemo}
                     title="Hazard And Non-Hazardous Waste"
                   />
                 </Box>
@@ -1385,12 +1446,12 @@ function HazardAndRiskDashboard() {
               scrollbarWidth: "none",
             }}
           >
-            <BarChart width={800} height={400} data={ghgDataset}>
+            <BarChart width={800} height={400} data={ghgDatasetMemo}>
               <XAxis dataKey="month" />
               <YAxis fontSize={12} fontWeight={"bold"} />
               <Tooltip />
               <Legend />
-              {Object.keys(ghgDataset[0])
+              {Object.keys(ghgDatasetMemo[0])
                 .filter((key) => key.startsWith("scope"))
                 .map((key) => (
                   <Bar
@@ -1425,7 +1486,7 @@ function HazardAndRiskDashboard() {
               <Box display={"flex"} justifyContent={"center"}>
                 <Box display={"flex"} justifyContent={"center"}>
                   <CustomPieChart
-                    data={pieChartDataWaterTreatment}
+                    data={pieChartDataWaterTreatmentMemo}
                     title="Waste Water Treatment"
                   />
                 </Box>
@@ -1460,7 +1521,7 @@ function HazardAndRiskDashboard() {
               <Box display={"flex"} justifyContent={"center"}>
                 <Box display={"flex"} justifyContent={"center"}>
                   <PieArcLabelChart
-                    data={pieChartEmissionBreakDownData}
+                    data={pieChartEmissionBreakDownDataMemo}
                     width={400}
                     height={400}
                     title="Emission Breakdown"
@@ -1490,7 +1551,7 @@ function HazardAndRiskDashboard() {
               <Box display={"flex"} justifyContent={"center"}>
                 <Box display={"flex"} justifyContent={"center"}>
                   <PercentagePieChart
-                    data={pieChartRecycledWaterDownData}
+                    data={pieChartRecycledWaterDownDataMemo}
                     title={"Waste Water Reused Or Recycled"}
                     width={350}
                     height={350}
@@ -1546,4 +1607,4 @@ function HazardAndRiskDashboard() {
   );
 }
 
-export default HazardAndRiskDashboard;
+export default EnvironmentDashboard;
