@@ -79,10 +79,15 @@ function ExternalAuditTable({
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
     {
-      title:
-        `${isAssignedTasks ? "Assigned " : ""}Audit Management` ||
-        `${isCorrectiveAction ? "Corrective Action " : ""}Audit Management` ||
-        `${isAuditQueue ? "Queue " : ""}Audit Management`,
+      title: `${
+        isAssignedTasks
+          ? "Assigned "
+          : isCorrectiveAction
+          ? "Corrective Action "
+          : isAuditQueue
+          ? "Queue "
+          : ""
+      }Audit Management`,
     },
   ];
 
@@ -270,11 +275,15 @@ function ExternalAuditTable({
         }}
       >
         <PageTitle
-          title={
-            `${isAssignedTasks ? "Assigned " : ""}External Audit Management` ||
-            `${isAuditQueue ? "Queued " : ""}External Audit Management` ||
-            `${isCorrectiveAction ? "Corrective Actioned " : ""}External Audit Management`
-          }
+          title={`${
+            isAssignedTasks
+              ? "Assigned "
+              : isAuditQueue
+              ? "Queued "
+              : isCorrectiveAction
+              ? "Corrective Actioned "
+              : ""
+          }External Audit Management`}
         />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
