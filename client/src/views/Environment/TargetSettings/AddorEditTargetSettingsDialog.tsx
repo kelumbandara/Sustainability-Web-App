@@ -125,7 +125,7 @@ export default function AddOrEditTargetSettingsDialog({
     queryFn: fetchDivision,
   });
 
-  const { data: asigneeData, isFetching: isAssigneeDataFetching } = useQuery({
+  const { data: assigneeData, isFetching: isAssigneeDataFetching } = useQuery({
     queryKey: ["ts-assignee"],
     queryFn: getApproverAndAssignee,
   });
@@ -136,7 +136,7 @@ export default function AddOrEditTargetSettingsDialog({
   });
 
   const { data: possibilityCategoryData } = useQuery({
-    queryKey: ["ts-possibilirtyCategoryData", category],
+    queryKey: ["ts-possibilityCategoryData", category],
     queryFn: () => fetchPossibilityCategory(category),
     enabled: !!category,
   });
@@ -602,6 +602,7 @@ export default function AddOrEditTargetSettingsDialog({
                       type="number"
                       label="Base Line Consumption"
                       error={!!errors.baselineConsumption}
+                      helperText={errors.baselineConsumption ? "Required" : ""}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("baselineConsumption", { required: true })}
@@ -610,8 +611,9 @@ export default function AddOrEditTargetSettingsDialog({
                       required
                       id="ghgEmission"
                       type="number"
-                      label="GHG Emmision"
+                      label="GHG Emission"
                       error={!!errors.ghgEmission}
+                      helperText={errors.ghgEmission ? "Required" : ""}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("ghgEmission", { required: true })}
@@ -685,6 +687,7 @@ export default function AddOrEditTargetSettingsDialog({
                       files={files}
                       setFiles={setFiles}
                       dropzoneLabel={"Drop Your Images Here"}
+                      
                     />
                   </Box>
 
@@ -754,7 +757,7 @@ export default function AddOrEditTargetSettingsDialog({
                           {...field}
                           onChange={(event, newValue) => {
                             field.onChange(newValue);
-                            setValue("opertunity", "");
+                            setValue("opportunity", "");
                           }}
                           size="small"
                           options={
@@ -784,10 +787,10 @@ export default function AddOrEditTargetSettingsDialog({
 
                   {category && possibilityCategory && (
                     <Controller
-                      name="opertunity"
+                      name="opportunity"
                       control={control}
-                      defaultValue={defaultValues?.opertunity ?? ""}
-                      {...register("opertunity")}
+                      defaultValue={defaultValues?.opportunity ?? ""}
+                      {...register("opportunity")}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -798,7 +801,7 @@ export default function AddOrEditTargetSettingsDialog({
                           options={
                             opportunityData?.length
                               ? opportunityData.map(
-                                  (category) => category.opertunity
+                                  (category) => category.opportunity
                                 )
                               : []
                           }
@@ -807,10 +810,10 @@ export default function AddOrEditTargetSettingsDialog({
                             <TextField
                               {...params}
                               required
-                              error={!!errors.opertunity}
-                              // helperText={errors.opertunity && "Required"}
+                              error={!!errors.opportunity}
+                              // helperText={errors.opportunity && "Required"}
                               label="Opportunity"
-                              name="opertunity"
+                              name="opportunity"
                             />
                           )}
                         />
@@ -877,6 +880,7 @@ export default function AddOrEditTargetSettingsDialog({
                       id="implementationCost"
                       label="Implementation Cost"
                       error={!!errors.implementationCost}
+                      helperText={errors.implementationCost ? "Required" : ""}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("implementationCost", { required: true })}
@@ -886,6 +890,7 @@ export default function AddOrEditTargetSettingsDialog({
                       id="expectedSavings"
                       label="Expected Savings"
                       error={!!errors.expectedSavings}
+                      helperText={errors.expectedSavings ? "Required" : ""}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("expectedSavings", { required: true })}
@@ -893,8 +898,10 @@ export default function AddOrEditTargetSettingsDialog({
                     <TextField
                       required
                       id="targetGHGReduction"
-                      label="Target GHG Redution"
+                      label="Target GHG Reduction"
                       error={!!errors.targetGHGReduction}
+                      helperText={errors.targetGHGReduction ? "Required" : ""}
+
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("targetGHGReduction", { required: true })}
@@ -911,6 +918,8 @@ export default function AddOrEditTargetSettingsDialog({
                       id="costSavings"
                       label="Cost Saving"
                       error={!!errors.costSavings}
+                      helperText={errors.costSavings ? "Required" : ""}
+
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("costSavings", { required: true })}
@@ -920,6 +929,8 @@ export default function AddOrEditTargetSettingsDialog({
                       id="paybackPeriod"
                       label="Payback Period"
                       error={!!errors.paybackPeriod}
+                      helperText={errors.paybackPeriod ? "Required" : ""}
+
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("paybackPeriod", { required: true })}
@@ -929,6 +940,8 @@ export default function AddOrEditTargetSettingsDialog({
                       id="projectLifespan"
                       label="Project Lifespan"
                       error={!!errors.projectLifespan}
+                      helperText={errors.projectLifespan ? "Required" : ""}
+
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("projectLifespan", { required: true })}
@@ -1000,7 +1013,7 @@ export default function AddOrEditTargetSettingsDialog({
                   control={control}
                   register={register}
                   errors={errors}
-                  userData={asigneeData}
+                  userData={assigneeData}
                   defaultValue={defaultValues?.responsible}
                   required={true}
                 />
@@ -1012,7 +1025,7 @@ export default function AddOrEditTargetSettingsDialog({
                   control={control}
                   register={register}
                   errors={errors}
-                  userData={asigneeData}
+                  userData={assigneeData}
                   defaultValue={defaultValues?.approver}
                   required={true}
                 />

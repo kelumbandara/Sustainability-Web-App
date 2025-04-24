@@ -25,7 +25,7 @@ import ViewDataDrawer, {
   DrawerHeader,
 } from "../../../components/ViewDataDrawer";
 import AddIcon from "@mui/icons-material/Add";
-import AddOrEditTargetSettingsDialog from "./AddorEditTargetSettingsDialog";
+import AddOrEditTargetSettingsDialog from "./AddOrEditTargetSettingsDialog";
 import { format } from "date-fns";
 import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
@@ -96,7 +96,7 @@ function TargetSettingsTable({
     queryFn: getAssignedTargetSettings,
   });
 
-  const paginatedgetTargetSettingsData = useMemo(() => {
+  const paginatedGetTargetSettingsData = useMemo(() => {
     if (isAssignedTasks) {
       if (!assignedTargetSettingsData) return [];
       return assignedTargetSettingsData.slice(
@@ -264,8 +264,8 @@ function TargetSettingsTable({
               </TableRow>
             </TableHead>
             <TableBody>
-              {paginatedgetTargetSettingsData?.length > 0 ? (
-                paginatedgetTargetSettingsData?.map((row) => (
+              {paginatedGetTargetSettingsData?.length > 0 ? (
+                paginatedGetTargetSettingsData?.map((row) => (
                   <TableRow
                     key={`${row.id}`}
                     sx={{

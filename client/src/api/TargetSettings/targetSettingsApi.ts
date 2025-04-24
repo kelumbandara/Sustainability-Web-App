@@ -18,7 +18,7 @@ export const targetSettingsSchema = z.object({
     .optional(),
   action: z.string(),
   possibilityCategory: z.string(),
-  opertunity: z.string(),
+  opportunity: z.string(),
   implementationCost: z.string(),
   expectedSavings: z.string(),
   targetGHGReduction: z.string(),
@@ -149,7 +149,7 @@ export async function fetchPossibilityCategory(categoryName: string) {
 
 export async function fetchOpportunity(subCategoryName: string) {
   const res = await axios.get(
-    `/api/subcategories/${subCategoryName}/opertunity`
+    `/api/subcategories/${subCategoryName}/opportunities`
   );
   return res.data;
 }

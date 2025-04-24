@@ -201,7 +201,7 @@ function ViewTargetSettingsContent({
                 sx={{ flex: 1 }}
               />
               <DrawerContentItem
-                label="GHC Emmision"
+                label="GHC Emission"
                 value={targetSettings.ghgEmission}
                 sx={{ flex: 1 }}
               />
@@ -241,7 +241,7 @@ function ViewTargetSettingsContent({
           />
           <DrawerContentItem
             label="Opportunity"
-            value={targetSettings.opertunity}
+            value={targetSettings.opportunity}
             sx={{ flex: 1 }}
           />
         </TabPanel>
@@ -264,7 +264,7 @@ function ViewTargetSettingsContent({
               sx={{ flex: 1 }}
             />
             <DrawerContentItem
-              label="Target GHC Redution"
+              label="Target GHC Reduction"
               value={targetSettings.targetGHGReduction}
               sx={{ flex: 1 }}
             />
