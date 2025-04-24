@@ -208,6 +208,7 @@ export default function AddOrEditConsumptionDialog({
                   required
                   id="numberOfDaysWorked"
                   label="Number Of Days Worked"
+                  type="number"
                   helperText={errors.numberOfDaysWorked && "Required"}
                   error={!!errors.numberOfDaysWorked}
                   size="small"
@@ -218,6 +219,7 @@ export default function AddOrEditConsumptionDialog({
                   required
                   id="area"
                   label="Area In Square Meter"
+                  type="number"
                   error={!!errors.area}
                   helperText={errors.area && "Required"}
                   size="small"
@@ -238,6 +240,7 @@ export default function AddOrEditConsumptionDialog({
                   error={!!errors.totalProductProducedPcs}
                   helperText={errors.totalProductProducedPcs && "Required"}
                   size="small"
+                  type="number"
                   sx={{ flex: 1, margin: "0.5rem" }}
                   {...register("totalProductProducedPcs", { required: true })}
                 />
@@ -245,6 +248,7 @@ export default function AddOrEditConsumptionDialog({
                   required
                   id="totalProductProducedKg"
                   label="Total Product Produced/Shipped(Kg)"
+                  type="number"
                   error={!!errors.totalProductProducedKg}
                   helperText={errors.totalProductProducedKg && "Required"}
                   size="small"
