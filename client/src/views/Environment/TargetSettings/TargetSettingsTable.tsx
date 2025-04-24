@@ -331,7 +331,7 @@ function TargetSettingsTable({
         drawerContent={
           <Stack spacing={1} sx={{ paddingX: theme.spacing(1) }}>
             <DrawerHeader
-              title="Hazard or Risk Details"
+              title="Target Settings Details"
               handleClose={() => setOpenViewDrawer(false)}
               disableEdit={
                 isAssignedTasks ? isTargetSettingsAssignEditDisabled : isTargetSettingsEditDisabled
