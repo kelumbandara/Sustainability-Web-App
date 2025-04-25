@@ -22,7 +22,7 @@ import {
   Consumption,
   fetchConsumptionCategories,
   fetchConsumptionSource,
-  fetchConsumptionUnits,
+  fetchConsumptionUnit,
 } from "../../../api/Environment/environmentApi";
 import { useQuery } from "@tanstack/react-query";
 import RichTextComponent from "../../../components/RichTextComponent";
@@ -49,6 +49,8 @@ export default function AddOrEditAdditionalDialog({
     control,
     formState: { errors },
     reset,
+    setValue,
+    watch
   } = useForm<Consumption>({
     defaultValues,
   });
@@ -65,6 +67,15 @@ export default function AddOrEditAdditionalDialog({
     reset();
   };
 
+  const category =  watch("category");
+  const {
+    data: consumptionUnitData,
+    isFetching: isConsumptionUnitDataFetching,
+  } = useQuery({
+    queryKey: ["cs-unit"],
+    queryFn:() => fetchConsumptionUnit(category),
+  });
+
   const {
     data: consumptionCategoryData,
     isFetching: isConsumptionCategoryDataFetching,
@@ -77,12 +88,6 @@ export default function AddOrEditAdditionalDialog({
     useQuery({
       queryKey: ["cs-source"],
       queryFn: fetchConsumptionSource,
-    });
-
-  const { data: consumptionUnitsData, isFetching: isConsumptionUnitsData } =
-    useQuery({
-      queryKey: ["cs-units"],
-      queryFn: fetchConsumptionUnits,
     });
 
   return (
@@ -214,14 +219,18 @@ export default function AddOrEditAdditionalDialog({
                   onChange={(event, newValue) => field.onChange(newValue)}
                   size="small"
                   options={
-                    consumptionUnitsData?.length
-                      ? consumptionUnitsData.map((units) => units.unitName)
+                    consumptionUnitData?.length
+                      ? consumptionUnitData.map((units) => units.unitName)
                       : []
                   }
                   sx={{ flex: 1, margin: "0.5rem" }}
                   renderInput={(params) => (
                     <TextField
                       {...params}
+                      onChange={(event, newValue) => {
+                        field.onChange(newValue);
+                        setValue("unit", "");
+                      }}
                       required
                       error={!!errors.unit}
                       helperText={errors.unit && "Required"}

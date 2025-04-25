@@ -169,13 +169,13 @@ export async function fetchConsumptionCategories() {
   return res.data;
 }
 
-export async function fetchConsumptionSource() {
-  const res = await axios.get(`/api/consumption-sources`);
+export async function fetchConsumptionUnit(category: String) {
+  const res = await axios.get(`/api/${category}/consumption-units`);
   return res.data;
 }
 
-export async function fetchConsumptionUnits() {
-  const res = await axios.get(`/api/consumption-units`);
+export async function fetchConsumptionSource() {
+  const res = await axios.get(`/api/consumption-sources`);
   return res.data;
 }
 
