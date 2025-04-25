@@ -81,7 +81,7 @@ export const sidebarItems: Array<SidebarItem> = [
     icon: <LayersIcon fontSize="small" />,
     href: "/audit-inspection",
     open: false,
-    disabled: true,
+    disabled: false,
     nestedItems: [
       {
         title: "Dashboard",

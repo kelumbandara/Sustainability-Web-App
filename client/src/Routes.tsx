@@ -91,10 +91,12 @@ const MaternityRegisterTable = React.lazy(
 
 //Sustainability
 const SustainabilityTable = React.lazy(
-  () =>
-    import("./views/Sustainability/SustainabilityTable")
+  () => import("./views/Sustainability/SustainabilityTable")
 );
 
+const AuditAndInspectionDashboard = React.lazy(
+  () => import("./views/AuditAndInspection/Dashboard")
+);
 function withLayout(Layout: any, Component: any, restrictAccess = false) {
   return (
     <Layout>
@@ -181,19 +183,17 @@ const AppRoutes = () => {
           )}
         />
 
-        {/* Audit & Inspection */}
         <Route
           path="/audit-inspection/dashboard"
           element={withLayout(
             MainLayout,
-            () => (
-              <UnderDevelopment pageName="Audit & Inspection > Dashboard" />
-            )
-            // !userPermissionObject?.[
-            //   PermissionKeys.AUDIT_INSPECTION_DASHBOARD_VIEW
-            // ]
+            AuditAndInspectionDashboard,
+            !userPermissionObject?.[
+              PermissionKeys.AUDIT_INSPECTION_DASHBOARD_VIEW
+            ]
           )}
         />
+
         <Route
           path="/audit-inspection/calendar"
           element={withLayout(
@@ -484,8 +484,7 @@ const AppRoutes = () => {
             MainLayout,
             SustainabilityTable,
             !userPermissionObject?.[
-              PermissionKeys
-                .SUSTAINABILITY_SDG_REPORTING_CREATE
+              PermissionKeys.SUSTAINABILITY_SDG_REPORTING_CREATE
             ]
           )}
         />

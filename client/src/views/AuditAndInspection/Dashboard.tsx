@@ -39,6 +39,8 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
+  RadialBarChart,
+  RadialBar,
 } from "recharts";
 
 import NaturePeopleIcon from "@mui/icons-material/NaturePeople";
@@ -55,6 +57,7 @@ import {
   fabricCutData,
   ghgDataset,
   lineData,
+  myData,
   pieChartData,
   pieChartDataWaterTreatment,
   pieChartEmissionBreakDownData,
@@ -73,6 +76,13 @@ import OfflineBoltIcon from "@mui/icons-material/OfflineBolt";
 import Co2Icon from "@mui/icons-material/Co2";
 import PieArcLabelChart from "../../components/PieChartComponent";
 import PercentagePieChart from "../../components/PercentagePieChart";
+
+import EditCalendarIcon from "@mui/icons-material/EditCalendar";
+import CheckBoxOutlinedIcon from "@mui/icons-material/CheckBoxOutlined";
+import RotateRightOutlinedIcon from "@mui/icons-material/RotateRightOutlined";
+import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
+import PaidOutlinedIcon from "@mui/icons-material/PaidOutlined";
+import RadialBarGraph from "../../components/RadialBarChart";
 
 const breadcrumbItems = [
   { title: "Home", href: "/home" },
@@ -411,10 +421,10 @@ function EnvironmentDashboard() {
           }}
         >
           <DashboardCard
-            title="Total GHC Emission"
-            titleIcon={<NaturePeopleIcon fontSize="large" />}
-            value={1493}
-            subDescription="tCo2e"
+            title="Schedule"
+            titleIcon={<EditCalendarIcon fontSize="large" />}
+            value={25}
+            subDescription="0% from previous period"
           />
         </Box>
         <Box
@@ -426,10 +436,10 @@ function EnvironmentDashboard() {
           }}
         >
           <DashboardCard
-            title="Water"
-            titleIcon={<WaterDropOutlinedIcon fontSize="large" />}
-            value={442750}
-            subDescription="5% From previous period"
+            title="Approved"
+            titleIcon={<CheckBoxOutlinedIcon fontSize="large" />}
+            value={10}
+            subDescription="3% From previous period"
           />
         </Box>
         <Box
@@ -441,9 +451,9 @@ function EnvironmentDashboard() {
           }}
         >
           <DashboardCard
-            title="Waste"
-            titleIcon={<DeleteOutlineOutlinedIcon fontSize="large" />}
-            value={11247}
+            title="In-Progress"
+            titleIcon={<RotateRightOutlinedIcon fontSize="large" />}
+            value={10}
             subDescription="8% From previous period"
           />
         </Box>
@@ -456,25 +466,10 @@ function EnvironmentDashboard() {
           }}
         >
           <DashboardCard
-            title="Waste Water"
-            titleIcon={<ShowerOutlinedIcon fontSize="large" />}
-            value={48791}
-            subDescription="2% From previous period"
-          />
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            flex: 1,
-            margin: "0.5rem",
-            minWidth: "150px",
-          }}
-        >
-          <DashboardCard
-            title="Total Energy"
-            titleIcon={<BatteryChargingFullOutlinedIcon fontSize="large" />}
-            value={492558}
-            subDescription="0% From previous period"
+            title="Completed"
+            titleIcon={<VerifiedOutlinedIcon fontSize="large" />}
+            value={3}
+            subDescription="1.5% From previous period"
           />
         </Box>
         <Box
@@ -487,8 +482,8 @@ function EnvironmentDashboard() {
         >
           <DashboardCard
             title="Amount"
-            titleIcon={<CreditCardIcon fontSize="large" />}
-            value={5}
+            titleIcon={<PaidOutlinedIcon fontSize="large" />}
+            value={5254.0}
             subDescription="5% From previous period"
           />
         </Box>
@@ -505,7 +500,7 @@ function EnvironmentDashboard() {
             width: "100%",
             height: "auto",
             marginTop: "1rem",
-            flex: 2,
+            flex: 1,
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
             padding: "1rem",
             borderRadius: "0.3rem",
@@ -523,7 +518,7 @@ function EnvironmentDashboard() {
             </Typography>
           </Box>
           <ResponsiveContainer width="100%" height={500}>
-            <BarChart width={800} height={400} data={datasetMemo}>
+            <BarChart height={400} data={datasetMemo}>
               <XAxis dataKey="month" />
               <YAxis fontSize={12} />
               <Tooltip />
@@ -581,267 +576,58 @@ function EnvironmentDashboard() {
             marginTop: "1rem",
           }}
         >
-          <Typography
-            variant="h6"
-            sx={{
-              textAlign: "center",
-            }}
-          >
-            Waste
-          </Typography>
-          <ResponsiveContainer
-            width="100%"
-            height={500}
-            style={{
-              overflowY: "scroll",
-              scrollbarWidth: "none",
-            }}
-          >
-            <>
-              <AppBar
-                position="sticky"
-                sx={{
-                  display: "flex",
-                  mt: "1rem",
-                }}
-              >
-                <Tabs
-                  value={activeTab}
-                  onChange={handleChange}
-                  indicatorColor="secondary"
-                  TabIndicatorProps={{
-                    style: {
-                      backgroundColor: "var(--pallet-blue)",
-                      height: "3px",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    },
-                  }}
-                  sx={{
-                    backgroundColor: "var(--pallet-lighter-grey)",
-                    color: "var(--pallet-blue)",
-                    display: "flex",
-                  }}
-                  textColor="inherit"
-                  variant="scrollable"
-                  scrollButtons={true}
-                >
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <SummarizeIcon fontSize="small" />
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Overview
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps(0)}
-                  />
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <ScienceOutlinedIcon fontSize="small" />
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Hazardous
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps(1)}
-                  />
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <AcUnitOutlinedIcon fontSize="small" />
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Non Hazardous
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps(2)}
-                  />
-                </Tabs>
-              </AppBar>
-              <TabPanel value={activeTab} index={0} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      gap={4}
-                      width={"100%"}
-                    >
-                      {fabricCutDataMemo.map((item, index) => (
-                        <>
-                          <Box
-                            key={index}
-                            display="flex"
-                            justifyContent="space-between"
-                          >
-                            <Box flex={2}>
-                              <Typography>{item.label}</Typography>
-                              <Typography>{item.unit}</Typography>
-                            </Box>
-                            <Box>
-                              <Box
-                                flex={1}
-                                sx={{
-                                  display: "flex",
-                                  flexDirection: "row",
-                                  gap: "3rem",
-                                  justifyContent: "space-between",
-                                }}
-                              >
-                                <CircularProgressWithLabel
-                                  size={60}
-                                  value={item.progress}
-                                />
-                                <Box>
-                                  <Typography>Quantity</Typography>
-                                  <Typography>{item.quantity}</Typography>
-                                </Box>
-                              </Box>
-                            </Box>
-                          </Box>
-                          <Divider />
-                        </>
-                      ))}
-                    </Box>
-                  </Box>
-                </Box>
-              </TabPanel>
-              <TabPanel value={activeTab} index={1} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      gap={4}
-                      width={"100%"}
-                    >
-                      {fabricCutDataMemo.map((item, index) => (
-                        <>
-                          <Box
-                            key={index}
-                            display="flex"
-                            justifyContent="space-between"
-                          >
-                            <Box flex={2}>
-                              <Typography>{item.label}</Typography>
-                              <Typography>{item.unit}</Typography>
-                            </Box>
-                            <Box>
-                              <Box
-                                flex={1}
-                                sx={{
-                                  display: "flex",
-                                  flexDirection: "row",
-                                  gap: "3rem",
-                                  justifyContent: "space-between",
-                                }}
-                              >
-                                <CircularProgressWithLabel
-                                  size={60}
-                                  value={item.progress}
-                                />
-                                <Box>
-                                  <Typography>Quantity</Typography>
-                                  <Typography>{item.quantity}</Typography>
-                                </Box>
-                              </Box>
-                            </Box>
-                          </Box>
-                          <Divider />
-                        </>
-                      ))}
-                    </Box>
-                  </Box>
-                </Box>
-              </TabPanel>
-              <TabPanel value={activeTab} index={2} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      gap={4}
-                      width={"100%"}
-                    >
-                      {fabricCutDataMemo.map((item, index) => (
-                        <>
-                          <Box
-                            key={index}
-                            display="flex"
-                            justifyContent="space-between"
-                          >
-                            <Box flex={2}>
-                              <Typography>{item.label}</Typography>
-                              <Typography>{item.unit}</Typography>
-                            </Box>
-                            <Box>
-                              <Box
-                                flex={1}
-                                sx={{
-                                  display: "flex",
-                                  flexDirection: "row",
-                                  gap: "3rem",
-                                  justifyContent: "space-between",
-                                }}
-                              >
-                                <CircularProgressWithLabel
-                                  size={60}
-                                  value={item.progress}
-                                />
-                                <Box>
-                                  <Typography>Quantity</Typography>
-                                  <Typography>{item.quantity}</Typography>
-                                </Box>
-                              </Box>
-                            </Box>
-                          </Box>
-                          <Divider />
-                        </>
-                      ))}
-                    </Box>
-                  </Box>
-                </Box>
-              </TabPanel>
-            </>
+          <Box>
+            <Typography
+              variant="h6"
+              sx={{
+                textAlign: "center",
+              }}
+            >
+              Consumption
+            </Typography>
+          </Box>
+          <ResponsiveContainer width={"100%"} height={500}>
+            <BarChart width={800} height={400} data={datasetMemo}>
+              <XAxis dataKey="month" />
+              <YAxis fontSize={12} />
+              <Tooltip />
+              <Legend />
+              <Bar
+                dataKey="totalEnergy"
+                name="Total Energy"
+                stackId="a"
+                fill="#4f46e5"
+                barSize={10}
+              />
+              <Bar
+                dataKey="wasteWater"
+                name="Waste Water"
+                stackId="a"
+                fill="#10b981"
+                barSize={10}
+              />
+              <Bar
+                dataKey="waste"
+                name="Waste"
+                stackId="a"
+                fill="#f59e0b"
+                barSize={10}
+              />
+              <Bar
+                dataKey="water"
+                name="Water Usage"
+                stackId="a"
+                fill="#3b82f6"
+                barSize={10}
+              />
+              <Bar
+                dataKey="ghgEmission"
+                name="GHG Emission"
+                stackId="a"
+                fill="#ef4444"
+                barSize={10}
+              />
+            </BarChart>
           </ResponsiveContainer>
         </Box>
       </Box>
@@ -857,7 +643,7 @@ function EnvironmentDashboard() {
             width: "100%",
             height: "auto",
             marginTop: "1rem",
-            flex: 2,
+            flex: 1,
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
             padding: "1rem",
             borderRadius: "0.3rem",
@@ -875,23 +661,27 @@ function EnvironmentDashboard() {
             </Typography>
           </Box>
           <ResponsiveContainer width="100%" height={500}>
-            <LineChart width={800} height={400} data={lineDataMemo}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" /> <YAxis fontSize={12} />
-              <Tooltip />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="energy"
-                stroke="#4f46e5"
-                dot={({ index }) =>
-                  index % 2 === 0 ? <circle r={5} fill="red" /> : null
-                }
+            <RadialBarChart
+              cx="50%"
+              cy="50%"
+              innerRadius="30%"
+              outerRadius="70%"
+              barSize={12}
+              data={myData}
+            >
+              <RadialBar
+                label={{ position: "insideStart", fill: "#000000" }}
+                background
+                maxBarSize={40}
+                dataKey="uv"
               />
-              <Line type="monotone" dataKey="water" stroke="#3b82f6" />
-              <Line type="monotone" dataKey="waste" stroke="#f59e0b" />
-              <Line type="monotone" dataKey="ghgEmission" stroke="#ef4444" />
-            </LineChart>
+              <Legend
+                iconSize={10}
+                layout="horizontal"
+                verticalAlign="bottom"
+                align="center"
+              />
+            </RadialBarChart>
           </ResponsiveContainer>
         </Box>
 
