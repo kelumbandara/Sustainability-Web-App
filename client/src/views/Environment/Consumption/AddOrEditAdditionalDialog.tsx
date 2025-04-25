@@ -156,7 +156,10 @@ export default function AddOrEditAdditionalDialog({
               render={({ field }) => (
                 <Autocomplete
                   {...field}
-                  onChange={(event, newValue) => field.onChange(newValue)}
+                  onChange={(event, newValue) => {
+                    field.onChange(newValue);
+                    setValue("unit", "");
+                  }}
                   size="small"
                   options={
                     consumptionCategoryData?.length
@@ -227,10 +230,6 @@ export default function AddOrEditAdditionalDialog({
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      onChange={(event, newValue) => {
-                        field.onChange(newValue);
-                        setValue("unit", "");
-                      }}
                       required
                       error={!!errors.unit}
                       helperText={errors.unit && "Required"}
