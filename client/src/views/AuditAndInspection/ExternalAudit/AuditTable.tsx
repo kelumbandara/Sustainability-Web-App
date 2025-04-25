@@ -186,25 +186,25 @@ function ExternalAuditTable({
   const paginatedExternalAuditData = useMemo(() => {
     if (isAssignedTasks) {
       if (!externalAuditData) return [];
-      return externalAuditTaskData.slice(
+      return externalAuditTaskData?.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
     } else if (isCorrectiveAction) {
       if (!externalAuditCorrectiveData) return [];
-      return externalAuditCorrectiveData.slice(
+      return externalAuditCorrectiveData?.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
     } else if (isAuditQueue) {
       if (!externalAuditQueueData) return [];
-      return externalAuditQueueData.slice(
+      return externalAuditQueueData?.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
     } else {
       if (!externalAuditData) return [];
-      return externalAuditData.slice(
+      return externalAuditData?.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );

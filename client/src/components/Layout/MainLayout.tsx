@@ -319,11 +319,13 @@ const DrawerContent = ({
   const { user } = useCurrentUser();
 
   const userPermissionObject = useMemo(() => {
-    if (user.permissionObject) {
+    if (user && user?.permissionObject) {
+      
       return user.permissionObject;
     }
+    
   }, [user]);
-
+  console.log(userPermissionObject)
   return (
     <>
       <DrawerHeader sx={{ justifyContent: "flex-start" }}>

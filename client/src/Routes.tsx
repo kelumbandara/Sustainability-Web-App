@@ -5,6 +5,8 @@ import PageLoader from "./components/PageLoader";
 import useCurrentUser from "./hooks/useCurrentUser";
 import { PermissionKeys } from "./views/Administration/SectionList";
 import PermissionDenied from "./components/PermissionDenied";
+import { useQuery } from "@tanstack/react-query";
+import { User, validateUser } from "./api/userApi";
 
 const LoginPage = React.lazy(() => import("./views/LoginPage/LoginPage"));
 const RegistrationPage = React.lazy(
@@ -140,14 +142,17 @@ const ProtectedRoute = () => {
 };
 
 const AppRoutes = () => {
-  const { user } = useCurrentUser();
+  const { data: user, status } = useQuery<User>({
+    queryKey: ["current-user"],
+    queryFn: validateUser,
+  });
 
   const userPermissionObject = useMemo(() => {
-    if (user?.permissionObject) {
+    if (user && user?.permissionObject) {
       return user?.permissionObject;
     }
   }, [user]);
-
+  console.log("user", user);
   return (
     <Routes>
       <Route path="/" element={withoutLayout(LoginPage)} />
@@ -500,10 +505,10 @@ const AppRoutes = () => {
               isCorrectiveAction={false}
               isAuditQueue={false}
             />
-          ),
-          !userPermissionObject?.[
-            PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_TASK_VIEW
-          ]
+          ),false
+          // !userPermissionObject?.[
+          //   PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_TASK_VIEW
+          // ]
         )}
       />
       <Route
