@@ -25,7 +25,7 @@ import ViewDataDrawer, {
   DrawerHeader,
 } from "../../../components/ViewDataDrawer";
 import AddIcon from "@mui/icons-material/Add";
-import AddOrEditTargetSettingsDialog from "./AddOrEditTargetSettingsDialog";
+import AddOrEditTargetSettingsDialog from "./AddOrEditTargetSettingsDialog";//fix the import
 import { format } from "date-fns";
 import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
