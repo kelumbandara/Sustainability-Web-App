@@ -476,6 +476,7 @@ export default function AddOrEditSustainabilityDialog({
                       label="Customer"
                       required
                       error={!!errors.customer}
+                      helperText={errors.customer ? "Required" : ""}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("customer", { required: true })}
@@ -677,7 +678,7 @@ export default function AddOrEditSustainabilityDialog({
                       // required
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("auditStatus",)}
+                      {...register("auditStatus")}
                     />
 
                     <TextField
