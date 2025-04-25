@@ -25,7 +25,6 @@ import ViewDataDrawer, {
   DrawerHeader,
 } from "../../../components/ViewDataDrawer";
 import AddIcon from "@mui/icons-material/Add";
-import AddOrEditTargetSettingsDialog from "./AddOrEditTargetSettingsDialog";//fix the import
 import { format } from "date-fns";
 import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
@@ -34,6 +33,7 @@ import { PermissionKeys } from "../../Administration/SectionList";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../../state/queryClient";
 import useCurrentUserHaveAccess from "../../../hooks/useCurrentUserHaveAccess";
+import AddOrEditTargetSettingsDialog from "./AddOrEditTargetSettingsDialog";
 import {
   TargetSettings,
   createTargetSettings,
