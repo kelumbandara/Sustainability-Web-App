@@ -50,7 +50,7 @@ export default function AddOrEditAdditionalDialog({
     formState: { errors },
     reset,
     setValue,
-    watch
+    watch,
   } = useForm<Consumption>({
     defaultValues,
   });
@@ -67,14 +67,7 @@ export default function AddOrEditAdditionalDialog({
     reset();
   };
 
-  const category =  watch("category");
-  const {
-    data: consumptionUnitData,
-    isFetching: isConsumptionUnitDataFetching,
-  } = useQuery({
-    queryKey: ["cs-unit"],
-    queryFn:() => fetchConsumptionUnit(category),
-  });
+  const category = watch("category");
 
   const {
     data: consumptionCategoryData,
@@ -82,6 +75,15 @@ export default function AddOrEditAdditionalDialog({
   } = useQuery({
     queryKey: ["cs-category"],
     queryFn: fetchConsumptionCategories,
+  });
+
+  const {
+    data: consumptionUnitData,
+    isFetching: isConsumptionUnitDataFetching,
+  } = useQuery({
+    queryKey: ["cs-unit", category],
+    queryFn: () => fetchConsumptionUnit(category),
+    enabled: !!category,
   });
 
   const { data: consumptionSourceData, isFetching: isConsumptionSourceData } =
@@ -223,7 +225,7 @@ export default function AddOrEditAdditionalDialog({
                   size="small"
                   options={
                     consumptionUnitData?.length
-                      ? consumptionUnitData.map((units) => units.unitName)
+                      ? consumptionUnitData.map((units) => units.unit)
                       : []
                   }
                   sx={{ flex: 1, margin: "0.5rem" }}

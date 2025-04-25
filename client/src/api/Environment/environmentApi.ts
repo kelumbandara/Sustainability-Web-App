@@ -165,12 +165,12 @@ export async function deleteConsumption(id: String) {
 }
 
 export async function fetchConsumptionCategories() {
-  const res = await axios.get(`/api/consumption-categories`);
+  const res = await axios.get(`/api/consumption-get-categories`);
   return res.data;
 }
 
 export async function fetchConsumptionUnit(category: String) {
-  const res = await axios.get(`/api/${category}/consumption-units`);
+  const res = await axios.get(`/api/consumption-get/${category}/units`);
   return res.data;
 }
 
