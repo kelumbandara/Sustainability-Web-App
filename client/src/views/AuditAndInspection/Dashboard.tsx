@@ -63,6 +63,7 @@ import {
   pieChartEmissionBreakDownData,
   pieChartRecycledWaterDownData,
   scopeColors,
+  transformedAuditScores,
   wasteWaterData,
   waterUsageData,
   waterWasteData,
@@ -83,6 +84,12 @@ import RotateRightOutlinedIcon from "@mui/icons-material/RotateRightOutlined";
 import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import PaidOutlinedIcon from "@mui/icons-material/PaidOutlined";
 import RadialBarGraph from "../../components/RadialBarChart";
+
+import ConnectWithoutContactIcon from "@mui/icons-material/ConnectWithoutContact";
+import EmergencyOutlinedIcon from "@mui/icons-material/EmergencyOutlined";
+import ForestOutlinedIcon from "@mui/icons-material/ForestOutlined";
+import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
+import ManageAccountsOutlinedIcon from "@mui/icons-material/ManageAccountsOutlined";
 
 const breadcrumbItems = [
   { title: "Home", href: "/home" },
@@ -587,44 +594,30 @@ function EnvironmentDashboard() {
             </Typography>
           </Box>
           <ResponsiveContainer width={"100%"} height={500}>
-            <BarChart width={800} height={400} data={datasetMemo}>
+            <BarChart width={800} height={400} data={transformedAuditScores}>
               <XAxis dataKey="month" />
               <YAxis fontSize={12} />
               <Tooltip />
               <Legend />
               <Bar
-                dataKey="totalEnergy"
-                name="Total Energy"
+                dataKey="Safety"
+                name="Safety Audit"
                 stackId="a"
                 fill="#4f46e5"
                 barSize={10}
               />
               <Bar
-                dataKey="wasteWater"
-                name="Waste Water"
+                dataKey="Quality"
+                name="Quality Audit"
                 stackId="a"
                 fill="#10b981"
                 barSize={10}
               />
               <Bar
-                dataKey="waste"
-                name="Waste"
+                dataKey="Environmental"
+                name="Environmental Audit"
                 stackId="a"
                 fill="#f59e0b"
-                barSize={10}
-              />
-              <Bar
-                dataKey="water"
-                name="Water Usage"
-                stackId="a"
-                fill="#3b82f6"
-                barSize={10}
-              />
-              <Bar
-                dataKey="ghgEmission"
-                name="GHG Emission"
-                stackId="a"
-                fill="#ef4444"
                 barSize={10}
               />
             </BarChart>
@@ -708,31 +701,7 @@ function EnvironmentDashboard() {
             Renewable Energy Usage
           </Typography>
           <ResponsiveContainer width="100%" height={500}>
-            <>
-              <Box>
-                <Box display={"flex"} justifyContent={"center"} mt={7}>
-                  <Box>
-                    <CircularProgressWithLabel
-                      size={250}
-                      value={70}
-                      textSize={25}
-                      textLabel="Renewable Energy"
-                    />
-                  </Box>
-                </Box>
-                <Box display={"flex"} flexDirection={"column"} gap={2} m={3}>
-                  <Typography display={"flex"} justifyContent={"center"}>
-                    This month
-                  </Typography>
-                  <Typography display={"flex"} justifyContent={"center"}>
-                    0
-                  </Typography>
-                  <Typography display={"flex"} justifyContent={"center"}>
-                    0% From Previous Period
-                  </Typography>
-                </Box>
-              </Box>
-            </>
+            <></>
           </ResponsiveContainer>
         </Box>
       </Box>
@@ -763,6 +732,449 @@ function EnvironmentDashboard() {
               }}
             >
               Category And Source
+            </Typography>
+          </Box>
+          <ResponsiveContainer
+            width="100%"
+            height={500}
+            style={{
+              overflowY: "scroll",
+              scrollbarWidth: "none",
+            }}
+          >
+            <>
+              <AppBar
+                position="sticky"
+                sx={{
+                  display: "flex",
+                  mt: "1rem",
+                  maxWidth: isMobile ? 400 : "auto",
+                }}
+              >
+                <Tabs
+                  value={activeTab}
+                  onChange={handleChange}
+                  indicatorColor="secondary"
+                  TabIndicatorProps={{
+                    style: {
+                      backgroundColor: "var(--pallet-blue)",
+                      height: "3px",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    },
+                  }}
+                  sx={{
+                    backgroundColor: "var(--pallet-lighter-grey)",
+                    color: "var(--pallet-blue)",
+                    display: "flex",
+                  }}
+                  textColor="inherit"
+                  variant="scrollable"
+                  scrollButtons={true}
+                >
+                  <Tab
+                    label={
+                      <Box
+                        sx={{
+                          color: "var(--pallet-blue)",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <SummarizeIcon fontSize="small" />
+                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                          Overview
+                        </Typography>
+                      </Box>
+                    }
+                    {...a11yProps(0)}
+                  />
+                  <Tab
+                    label={
+                      <Box
+                        sx={{
+                          color: "var(--pallet-blue)",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <ConnectWithoutContactIcon fontSize="small" />
+                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                          Social
+                        </Typography>
+                      </Box>
+                    }
+                    {...a11yProps(1)}
+                  />
+                  <Tab
+                    label={
+                      <Box
+                        sx={{
+                          color: "var(--pallet-blue)",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <EmergencyOutlinedIcon fontSize="small" />
+                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                          Health And Safety
+                        </Typography>
+                      </Box>
+                    }
+                    {...a11yProps(2)}
+                  />
+                  <Tab
+                    label={
+                      <Box
+                        sx={{
+                          color: "var(--pallet-blue)",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <ForestOutlinedIcon fontSize="small" />
+                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                          Environmental
+                        </Typography>
+                      </Box>
+                    }
+                    {...a11yProps(3)}
+                  />
+                  <Tab
+                    label={
+                      <Box
+                        sx={{
+                          color: "var(--pallet-blue)",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <SecurityOutlinedIcon fontSize="small" />
+                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                          Security
+                        </Typography>
+                      </Box>
+                    }
+                    {...a11yProps(4)}
+                  />
+                  <Tab
+                    label={
+                      <Box
+                        sx={{
+                          color: "var(--pallet-blue)",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <ManageAccountsOutlinedIcon fontSize="small" />
+                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                          Management System
+                        </Typography>
+                      </Box>
+                    }
+                    {...a11yProps(5)}
+                  />
+                </Tabs>
+              </AppBar>
+              <TabPanel value={activeTab} index={0} dir={theme.direction}>
+                <>
+                  {wasteWaterDataMemo.map((item, index) => (
+                    <Box key={index}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          direction: "row",
+                          justifyContent: "space-between",
+                          m: "1rem",
+                        }}
+                      >
+                        <Box flex={2}>
+                          <Typography>{item.label}</Typography>
+                          <Typography variant="caption">
+                            {item.description}
+                          </Typography>
+                        </Box>
+                        <Box
+                          flex={1}
+                          sx={{
+                            display: "flex",
+                            direction: "row",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Box>
+                            <Typography>Quantity</Typography>
+                            <Typography variant="caption">
+                              {item.quantity}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                      <Divider />
+                    </Box>
+                  ))}
+                </>
+              </TabPanel>
+              <TabPanel value={activeTab} index={1} dir={theme.direction}>
+                <>
+                  {energyConsumptionDataMemo.map((item, index) => (
+                    <Box key={index}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          direction: "row",
+                          justifyContent: "space-between",
+                          m: "1rem",
+                        }}
+                      >
+                        <Box flex={2}>
+                          <Typography>{item.label}</Typography>
+                          <Typography variant="caption">
+                            {item.description}
+                          </Typography>
+                        </Box>
+                        <Box
+                          flex={1}
+                          sx={{
+                            display: "flex",
+                            direction: "row",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Box>
+                            <Typography>Quantity</Typography>
+                            <Typography variant="caption">
+                              {item.quantity}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                      <Divider />
+                    </Box>
+                  ))}
+                </>
+              </TabPanel>
+              <TabPanel value={activeTab} index={2} dir={theme.direction}>
+                <>
+                  {waterUsageDataMemo.map((item, index) => (
+                    <Box key={index}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          direction: "row",
+                          justifyContent: "space-between",
+                          m: "1rem",
+                        }}
+                      >
+                        <Box flex={2}>
+                          <Typography>{item.label}</Typography>
+                          <Typography variant="caption">
+                            {item.description}
+                          </Typography>
+                        </Box>
+                        <Box
+                          flex={1}
+                          sx={{
+                            display: "flex",
+                            direction: "row",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Box>
+                            <Typography>Quantity</Typography>
+                            <Typography variant="caption">
+                              {item.quantity}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                      <Divider />
+                    </Box>
+                  ))}
+                </>
+              </TabPanel>
+              <TabPanel value={activeTab} index={3} dir={theme.direction}>
+                <>
+                  {waterWasteDataMemo.map((item, index) => (
+                    <Box key={index}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          direction: "row",
+                          justifyContent: "space-between",
+                          m: "1rem",
+                        }}
+                      >
+                        <Box flex={2}>
+                          <Typography>{item.label}</Typography>
+                          <Typography variant="caption">
+                            {item.description}
+                          </Typography>
+                        </Box>
+                        <Box
+                          flex={1}
+                          sx={{
+                            display: "flex",
+                            direction: "row",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Box>
+                            <Typography>Quantity</Typography>
+                            <Typography variant="caption">
+                              {item.quantity}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                      <Divider />
+                    </Box>
+                  ))}
+                </>
+              </TabPanel>
+              <TabPanel value={activeTab} index={4} dir={theme.direction}>
+                <>
+                  {airEmissionDataMemo.map((item, index) => (
+                    <Box key={index}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          direction: "row",
+                          justifyContent: "space-between",
+                          m: "1rem",
+                        }}
+                      >
+                        <Box flex={2}>
+                          <Typography>{item.label}</Typography>
+                          <Typography variant="caption">
+                            {item.description}
+                          </Typography>
+                        </Box>
+                        <Box
+                          flex={1}
+                          sx={{
+                            display: "flex",
+                            direction: "row",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Box>
+                            <Typography>Quantity</Typography>
+                            <Typography variant="caption">
+                              {item.quantity}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                      <Divider />
+                    </Box>
+                  ))}
+                </>
+              </TabPanel>
+              <TabPanel value={activeTab} index={5} dir={theme.direction}>
+                <>
+                  {wasteWaterDataMemo.map((item, index) => (
+                    <Box key={index}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          direction: "row",
+                          justifyContent: "space-between",
+                          m: "1rem",
+                        }}
+                      >
+                        <Box flex={2}>
+                          <Typography>{item.label}</Typography>
+                          <Typography variant="caption">
+                            {item.description}
+                          </Typography>
+                        </Box>
+                        <Box
+                          flex={1}
+                          sx={{
+                            display: "flex",
+                            direction: "row",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Box>
+                            <Typography>Quantity</Typography>
+                            <Typography variant="caption">
+                              {item.quantity}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                      <Divider />
+                    </Box>
+                  ))}
+                </>
+              </TabPanel>
+            </>
+          </ResponsiveContainer>
+        </Box>
+
+        <Box
+          sx={{
+            width: "100%",
+            height: "auto",
+            marginTop: "1rem",
+            flex: 1,
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+            padding: "1rem",
+            borderRadius: "0.3rem",
+            border: "1px solid var(--pallet-border-blue)",
+          }}
+        >
+          <Box>
+            <Typography
+              variant="h6"
+              sx={{
+                textAlign: "center",
+              }}
+            >
+              Category And Source
+            </Typography>
+          </Box>
+          <ResponsiveContainer
+            width="100%"
+            height={500}
+            style={{
+              overflowY: "scroll",
+              scrollbarWidth: "none",
+            }}
+          >
+            <></>
+          </ResponsiveContainer>
+        </Box>
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+          gap: "1rem",
+        }}
+      >
+        <Box
+          sx={{
+            width: "100%",
+            height: "auto",
+            marginTop: "1rem",
+            flex: 2,
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+            padding: "1rem",
+            borderRadius: "0.3rem",
+            border: "1px solid var(--pallet-border-blue)",
+          }}
+        >
+          <Box>
+            <Typography
+              variant="h6"
+              sx={{
+                textAlign: "center",
+              }}
+            >
+              GHG Emission
             </Typography>
           </Box>
           <ResponsiveContainer
@@ -829,9 +1241,9 @@ function EnvironmentDashboard() {
                           alignItems: "center",
                         }}
                       >
-                        <OfflineBoltIcon fontSize="small" />
+                        <ConnectWithoutContactIcon fontSize="small" />
                         <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Energy
+                          Social
                         </Typography>
                       </Box>
                     }
@@ -846,9 +1258,9 @@ function EnvironmentDashboard() {
                           alignItems: "center",
                         }}
                       >
-                        <WaterDropOutlinedIcon fontSize="small" />
+                        <EmergencyOutlinedIcon fontSize="small" />
                         <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Water
+                          Health And Safety
                         </Typography>
                       </Box>
                     }
@@ -863,9 +1275,9 @@ function EnvironmentDashboard() {
                           alignItems: "center",
                         }}
                       >
-                        <DeleteOutlineOutlinedIcon fontSize="small" />
+                        <ForestOutlinedIcon fontSize="small" />
                         <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Waste
+                          Environmental
                         </Typography>
                       </Box>
                     }
@@ -880,9 +1292,9 @@ function EnvironmentDashboard() {
                           alignItems: "center",
                         }}
                       >
-                        <Co2Icon fontSize="large" />
+                        <SecurityOutlinedIcon fontSize="small" />
                         <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Air Emission
+                          Security
                         </Typography>
                       </Box>
                     }
@@ -897,9 +1309,9 @@ function EnvironmentDashboard() {
                           alignItems: "center",
                         }}
                       >
-                        <ShowerOutlinedIcon fontSize="small" />
+                        <ManageAccountsOutlinedIcon fontSize="small" />
                         <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Waste Water
+                          Management System
                         </Typography>
                       </Box>
                     }
@@ -1166,92 +1578,6 @@ function EnvironmentDashboard() {
                 </>
               </TabPanelTwo>
             </>
-          </ResponsiveContainer>
-        </Box>
-
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            flex: 1,
-            flexDirection: "column",
-            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-            borderRadius: "0.3rem",
-            border: "1px solid var(--pallet-border-blue)",
-            padding: "1rem",
-            height: "auto",
-            marginTop: "1rem",
-          }}
-        >
-          <ResponsiveContainer width="100%" height={500}>
-            <>
-              <Box display={"flex"} justifyContent={"center"}>
-                <Box display={"flex"} justifyContent={"center"}>
-                  <CustomPieChart
-                    data={pieChartDataMemo}
-                    title="Hazard And Non-Hazardous Waste"
-                  />
-                </Box>
-              </Box>
-            </>
-          </ResponsiveContainer>
-        </Box>
-      </Box>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: isMobile ? "column" : "row",
-          gap: "1rem",
-        }}
-      >
-        <Box
-          sx={{
-            width: "100%",
-            height: "auto",
-            marginTop: "1rem",
-            flex: 2,
-            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-            padding: "1rem",
-            borderRadius: "0.3rem",
-            border: "1px solid var(--pallet-border-blue)",
-          }}
-        >
-          <Box>
-            <Typography
-              variant="h6"
-              sx={{
-                textAlign: "center",
-              }}
-            >
-              GHG Emission
-            </Typography>
-          </Box>
-          <ResponsiveContainer
-            width="100%"
-            height={500}
-            style={{
-              overflowY: "scroll",
-              scrollbarWidth: "none",
-            }}
-          >
-            <BarChart width={800} height={400} data={ghgDatasetMemo}>
-              <XAxis dataKey="month" />
-              <YAxis fontSize={12} fontWeight={"bold"} />
-              <Tooltip />
-              <Legend />
-              {Object.keys(ghgDatasetMemo[0])
-                .filter((key) => key.startsWith("scope"))
-                .map((key) => (
-                  <Bar
-                    key={key}
-                    dataKey={key}
-                    name={key.replace("scope", "scope - ")}
-                    stackId="a"
-                    fill={scopeColors[key] || "#8884d8"}
-                    barSize={10}
-                  />
-                ))}
-            </BarChart>
           </ResponsiveContainer>
         </Box>
 

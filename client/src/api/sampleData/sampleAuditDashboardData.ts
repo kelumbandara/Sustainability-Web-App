@@ -1,100 +1,39 @@
 export const dataset = [
   {
-    totalEnergy: 59,
-    wasteWater: 57,
-    waste: 86,
-    water: 21,
-    ghgEmission: 60,
     month: "Jan",
+    totalEnergy: 59, // MWh
+    wasteWater: 57, // m³
+    waste: 86, // kg
+    water: 21, // m³
+    ghgEmission: 60, // tCO₂e
+    compliant: true,
   },
   {
+    month: "Feb",
     totalEnergy: 62,
     wasteWater: 54,
     waste: 79,
     water: 25,
     ghgEmission: 58,
-    month: "Feb",
+    compliant: true,
   },
   {
+    month: "Mar",
     totalEnergy: 65,
     wasteWater: 60,
     waste: 88,
     water: 23,
     ghgEmission: 62,
-    month: "Mar",
+    compliant: true,
   },
-  {
-    totalEnergy: 68,
-    wasteWater: 63,
-    waste: 82,
-    water: 26,
-    ghgEmission: 65,
-    month: "Apr",
-  },
-  {
-    totalEnergy: 70,
-    wasteWater: 66,
-    waste: 85,
-    water: 28,
-    ghgEmission: 67,
-    month: "May",
-  },
-  {
-    totalEnergy: 74,
-    wasteWater: 69,
-    waste: 90,
-    water: 30,
-    ghgEmission: 70,
-    month: "Jun",
-  },
-  {
-    totalEnergy: 78,
-    wasteWater: 72,
-    waste: 95,
-    water: 32,
-    ghgEmission: 73,
-    month: "Jul",
-  },
-  {
-    totalEnergy: 76,
-    wasteWater: 70,
-    waste: 92,
-    water: 29,
-    ghgEmission: 71,
-    month: "Aug",
-  },
-  {
-    totalEnergy: 73,
-    wasteWater: 68,
-    waste: 89,
-    water: 27,
-    ghgEmission: 69,
-    month: "Sep",
-  },
-  {
-    totalEnergy: 70,
-    wasteWater: 65,
-    waste: 87,
-    water: 26,
-    ghgEmission: 66,
-    month: "Oct",
-  },
-  {
-    totalEnergy: 66,
-    wasteWater: 61,
-    waste: 84,
-    water: 24,
-    ghgEmission: 63,
-    month: "Nov",
-  },
-  {
-    totalEnergy: 61,
-    wasteWater: 58,
-    waste: 81,
-    water: 22,
-    ghgEmission: 61,
-    month: "Dec",
-  },
+  // ... etc. for other months
+];
+
+export const transformedAuditScores = [
+  { month: "Jan", Safety: 85, Quality: 78, Environmental: 91 },
+  { month: "Feb", Safety: 88, Quality: 75, Environmental: 89 },
+  { month: "Mar", Safety: 82, Quality: 80, Environmental: 93 },
+  { month: "Apr", Safety: 87, Quality: 76, Environmental: 88 },
 ];
 
 export const lineData = [
@@ -361,11 +300,8 @@ export const pieChartRecycledWaterDownData = [
 ];
 
 export const myData = [
-  { name: 'Audit Completion Rate', uv: 100, fill: '#4f46e5' }, // DarkRed
-  { name: 'Timely Audit Completion', uv: 125, fill: '#10b981' }, // DarkBlue
-  { name: 'Zero Tolerance Issue Resolution Time', uv: 100, fill: '#f59e0b' }, // DarkGreen
-  { name: 'Medium Resolution Time', uv: 300, fill: '#ef4444' }, // DarkIndigo (bonus)
+  { name: "Audit Completion Rate", uv: 100, fill: "#4f46e5" }, // DarkRed
+  { name: "Timely Audit Completion", uv: 125, fill: "#10b981" }, // DarkBlue
+  { name: "Zero Tolerance Issue Resolution Time", uv: 100, fill: "#f59e0b" }, // DarkGreen
+  { name: "Medium Resolution Time", uv: 300, fill: "#ef4444" }, // DarkIndigo (bonus)
 ];
-
-
-
