@@ -212,20 +212,20 @@ const AppRoutes = () => {
           path="/audit-inspection/internal-audit/form-builder"
           element={withLayout(
             MainLayout,
-            AuditBuilderTable
-            // !userPermissionObject?.[
-            //   PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_QUEUE_VIEW
-            // ]
+            AuditBuilderTable,
+            !userPermissionObject?.[
+              PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_FORM_BUILDER_VIEW
+            ]
           )}
         />
         <Route
           path="/audit-inspection/internal-audit/scheduled-audits"
           element={withLayout(
             MainLayout,
-            InternalAuditTable
-            // !userPermissionObject?.[
-            //   PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_QUEUE_VIEW
-            // ]
+            InternalAuditTable,
+            !userPermissionObject?.[
+              PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_REGISTER_VIEW
+            ]
           )}
         />
         <Route

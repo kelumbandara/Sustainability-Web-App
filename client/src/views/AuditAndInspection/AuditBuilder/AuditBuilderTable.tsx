@@ -146,13 +146,13 @@ function AuditBuilderTable() {
   });
 
   const isInternalAuditCreateDisabled = !useCurrentUserHaveAccess(
-    PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_REGISTER_CREATE
+    PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_FORM_BUILDER_CREATE
   );
   const isInternalAuditEditDisabled = !useCurrentUserHaveAccess(
-    PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_REGISTER_EDIT
+    PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_FORM_BUILDER_EDIT
   );
   const isInternalAuditDeleteDisabled = !useCurrentUserHaveAccess(
-    PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_REGISTER_DELETE
+    PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_FORM_BUILDER_DELETE
   );
 
   return (

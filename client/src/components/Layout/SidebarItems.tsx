@@ -97,21 +97,20 @@ export const sidebarItems: Array<SidebarItem> = [
         title: "Internal Audit",
         href: "/audit-inspection/internal-audit",
         icon: <QueryStatsIcon fontSize="small" />,
-        accessKey: PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_QUEUE_VIEW,
         nestedItems: [
           {
             title: "Audit Form Builder",
             href: "/audit-inspection/internal-audit/form-builder",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
             accessKey:
-              PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_QUEUE_VIEW,
+              PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_FORM_BUILDER_VIEW,
           },
           {
             title: "Scheduled Audits",
             href: "/audit-inspection/internal-audit/scheduled-audits",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
             accessKey:
-              PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_QUEUE_VIEW,
+              PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_REGISTER_VIEW,
           },
         ],
       },
