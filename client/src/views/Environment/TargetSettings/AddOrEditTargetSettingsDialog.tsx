@@ -687,7 +687,6 @@ export default function AddOrEditTargetSettingsDialog({
                       files={files}
                       setFiles={setFiles}
                       dropzoneLabel={"Drop Your Images Here"}
-                      
                     />
                   </Box>
 
@@ -882,6 +881,7 @@ export default function AddOrEditTargetSettingsDialog({
                       error={!!errors.implementationCost}
                       helperText={errors.implementationCost ? "Required" : ""}
                       size="small"
+                      type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("implementationCost", { required: true })}
                     />
@@ -892,6 +892,7 @@ export default function AddOrEditTargetSettingsDialog({
                       error={!!errors.expectedSavings}
                       helperText={errors.expectedSavings ? "Required" : ""}
                       size="small"
+                      type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("expectedSavings", { required: true })}
                     />
@@ -901,8 +902,8 @@ export default function AddOrEditTargetSettingsDialog({
                       label="Target GHG Reduction"
                       error={!!errors.targetGHGReduction}
                       helperText={errors.targetGHGReduction ? "Required" : ""}
-
                       size="small"
+                      type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("targetGHGReduction", { required: true })}
                     />
@@ -919,8 +920,8 @@ export default function AddOrEditTargetSettingsDialog({
                       label="Cost Saving"
                       error={!!errors.costSavings}
                       helperText={errors.costSavings ? "Required" : ""}
-
                       size="small"
+                      type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("costSavings", { required: true })}
                     />
@@ -930,8 +931,8 @@ export default function AddOrEditTargetSettingsDialog({
                       label="Payback Period"
                       error={!!errors.paybackPeriod}
                       helperText={errors.paybackPeriod ? "Required" : ""}
-
                       size="small"
+                      type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("paybackPeriod", { required: true })}
                     />
@@ -941,8 +942,8 @@ export default function AddOrEditTargetSettingsDialog({
                       label="Project Lifespan"
                       error={!!errors.projectLifespan}
                       helperText={errors.projectLifespan ? "Required" : ""}
-
                       size="small"
+                      type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("projectLifespan", { required: true })}
                     />
