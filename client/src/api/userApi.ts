@@ -224,3 +224,8 @@ export async function fetchInternalAuditAssignee() {
   const res = await axios.get("/api/internal-audit-assignee");
   return res.data;
 }
+
+export async function fetchExternalAuditAssignee() {
+  const res = await axios.get("/api/external-audit-assignee");
+  return res.data;
+}
