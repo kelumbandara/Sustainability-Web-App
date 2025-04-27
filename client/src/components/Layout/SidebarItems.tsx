@@ -126,7 +126,7 @@ export const sidebarItems: Array<SidebarItem> = [
     title: "Sustainability",
     href: "/sustainability",
     icon: <SpaIcon fontSize="small" />,
-    disabled: true,
+    disabled: false,
     nestedItems: [
       {
         title: "Register",
@@ -140,7 +140,7 @@ export const sidebarItems: Array<SidebarItem> = [
     title: "Environment",
     href: "/environment",
     icon: <ForestIcon fontSize="small" />,
-    disabled: true,
+    disabled: false,
     nestedItems: [
       {
         title: "Dashboard",
@@ -171,7 +171,7 @@ export const sidebarItems: Array<SidebarItem> = [
         title: "Assigned Tasks",
         href: "/environment/assigned-tasks",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-        disabled: true,
+        disabled: false,
         nestedItems: [
           {
             title: "Consumption",
