@@ -47,25 +47,16 @@ const AddOrEditWitnessDialog = ({
   } = useForm<AccidentWitness>({
     defaultValues: defaultWitness,
   });
-  console.log("defaultValues", defaultWitness);
   const { data: divisionData, isFetching: isCategoryDataFetching } = useQuery({
     queryKey: ["divisions"],
     queryFn: fetchDivision,
   });
 
-  const { data: departmentData, isFetching: isDepartmentDataFetching } = useQuery({
-    queryKey: ["departments"],
-    queryFn: fetchDepartmentData,
-  });
-
-  // useEffect(() => {
-  //   if (defaultValues) {
-  //     reset(defaultValues);
-  //   } else {
-  //     reset();
-  //   }
-  // }, [reset, defaultValues]);
-  // console.log("def", defaultValues);
+  const { data: departmentData, isFetching: isDepartmentDataFetching } =
+    useQuery({
+      queryKey: ["departments"],
+      queryFn: fetchDepartmentData,
+    });
 
   return (
     <Dialog
@@ -142,7 +133,11 @@ const AddOrEditWitnessDialog = ({
             <Autocomplete
               {...register("division", { required: true })}
               size="small"
-              options={divisionData?.length ? divisionData.map((division) => division.divisionName) : []}
+              options={
+                divisionData?.length
+                  ? divisionData.map((division) => division.divisionName)
+                  : []
+              }
               defaultValue={defaultWitness?.division || ""}
               sx={{ flex: 1, margin: "0.5rem" }}
               renderInput={(params) => (
@@ -158,7 +153,11 @@ const AddOrEditWitnessDialog = ({
             <Autocomplete
               {...register("department", { required: true })}
               size="small"
-              options={departmentData?.length ? departmentData.map((department) => department.department) : []}
+              options={
+                departmentData?.length
+                  ? departmentData.map((department) => department.department)
+                  : []
+              }
               defaultValue={defaultWitness?.department || ""}
               sx={{ flex: 1, margin: "0.5rem" }}
               renderInput={(params) => (

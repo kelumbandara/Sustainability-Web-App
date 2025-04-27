@@ -91,11 +91,11 @@ export const createDocumentRecord = async (document: Document) => {
   return res.data;
 };
 
-export const updateDocumentRecord = async (document: Document) => {
+export const updateDocumentRecord = async (documentData: Document) => {
   const formData = new FormData();
 
-  Object.keys(document).forEach((key) => {
-    const value = document[key as keyof Document];
+  Object.keys(documentData).forEach((key) => {
+    const value = documentData[key as keyof Document];
 
     if (key === "document" && Array.isArray(value)) {
       value.forEach((file, index) => {
@@ -113,7 +113,7 @@ export const updateDocumentRecord = async (document: Document) => {
   });
 
   const res = await axios.post(
-    `/api/documents/${document.id}/update`,
+    `/api/documents/${documentData.id}/update`,
     formData,
     {
       headers: {

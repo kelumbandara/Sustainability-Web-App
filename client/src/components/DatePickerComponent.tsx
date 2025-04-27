@@ -27,7 +27,6 @@ function DatePickerComponent({
   disabled?: boolean;
 }) {
   const { isMobile } = useIsMobile();
-  console.log("err", error);
 
   return (
     <Stack>

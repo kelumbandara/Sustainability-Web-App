@@ -62,7 +62,6 @@ function ViewPurchaseAndInventoryContent({
   const { isTablet } = useIsMobile();
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    console.log("event", event);
     setActiveTab(newValue);
   };
   return (

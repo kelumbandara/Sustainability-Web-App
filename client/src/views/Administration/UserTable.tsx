@@ -198,9 +198,7 @@ function UserTable() {
             setOpenViewDrawer(false);
             setOpenEditUserRoleDialog(false);
           }}
-          onSubmit={(data) => {
-            console.log(data);
-          }}
+          onSubmit={(data) => {}}
           defaultValues={selectedRow}
         />
       )}

@@ -17,8 +17,6 @@ function SampleAddition() {
     }
   };
 
-  console.log("result", result);
-
   return (
     <div>
       <h3>sample addition calculator</h3>

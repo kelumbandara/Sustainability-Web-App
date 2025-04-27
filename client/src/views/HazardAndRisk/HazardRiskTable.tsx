@@ -393,7 +393,6 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
           }}
           onSubmit={(data) => {
             if (selectedRow) {
-              console.log("Updating document", data);
               updateHazardRiskMutation(data);
               // setRiskData(
               //   riskData.map((risk) => (risk.id === data.id ? data : risk))
@@ -402,7 +401,6 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
               //   variant: "success",
               // });
             } else {
-              console.log("Adding new hazard/risk", data);
               // setRiskData([...riskData, data]); // Add new document to the list
               createHazardRiskMutation(data);
               // enqueueSnackbar("Hazard/Risk Created Successfully!", {

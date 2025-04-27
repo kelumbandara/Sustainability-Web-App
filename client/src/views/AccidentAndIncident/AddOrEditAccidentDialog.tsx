@@ -588,9 +588,6 @@ export default function AddOrEditAccidentDialog({
                                   },
                                   cursor: "pointer",
                                 }}
-                                onClick={() => {
-                                  console.log("row");
-                                }}
                               >
                                 <TableCell
                                   component="th"
@@ -756,9 +753,6 @@ export default function AddOrEditAccidentDialog({
                                   border: 0,
                                 },
                                 cursor: "pointer",
-                              }}
-                              onClick={() => {
-                                console.log("row");
                               }}
                             >
                               <TableCell
@@ -1271,7 +1265,6 @@ export default function AddOrEditAccidentDialog({
                         orientation="vertical"
                         fullWidth
                         onChange={(e, value) => {
-                          console.log("e", e);
                           field.onChange(value);
                         }}
                       >
@@ -1331,7 +1324,6 @@ export default function AddOrEditAccidentDialog({
                         value={field.value}
                         exclusive
                         onChange={(e, value) => {
-                          console.log("e", e);
                           field.onChange(value);
                         }}
                       >
@@ -1405,7 +1397,6 @@ export default function AddOrEditAccidentDialog({
             setSelectedWitness(null);
           }}
           onSubmit={(data) => {
-            console.log("data", data);
             if (selectedWitness) {
               setValue("witnesses", [
                 ...(witnessesWatch ?? []).map((item) => {
@@ -1429,7 +1420,6 @@ export default function AddOrEditAccidentDialog({
           open={openAddOrEditPersonDialog}
           handleClose={() => setOpenAddOrEditPersonDialog(false)}
           onSubmit={(data) => {
-            console.log("Adding new person", data);
             if (selectedPerson) {
               setValue("effectedIndividuals", [
                 ...(effectedIndividualsWatch ?? []).map((item) => {

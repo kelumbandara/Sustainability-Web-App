@@ -17,7 +17,6 @@ function TimePickerComponent({
   error?: string;
 }) {
   const { isMobile } = useIsMobile();
-  console.log("err", error);
   return (
     <Stack>
       {label && (

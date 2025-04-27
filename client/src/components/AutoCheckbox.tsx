@@ -7,8 +7,8 @@ interface AutocompleteCheckboxProps<T extends Record<string, any>> {
   control: Control<any>;
   name: string;
   options: T[];
-  selectedValues?: (string | number)[];
-  setSelectedValues?: (values: (string | number)[]) => void;
+  selectedValues?: any[];
+  setSelectedValues?: (values: any[]) => void;
   label: string;
   placeholder?: string;
   limitTags?: number;
@@ -39,7 +39,7 @@ const AutocompleteCheckbox = <T extends Record<string, any>>({
     <Controller
       control={control}
       name={name}
-      rules={required ? { required: "This field is required" } : {}}
+      rules={required ? { required: "Required" } : {}}
       render={({ field: { onChange, value }, fieldState: { error } }) => (
         <Autocomplete
           multiple

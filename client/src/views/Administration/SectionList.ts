@@ -69,7 +69,17 @@ export const PermissionSectionsMap: PermissionSection[] = [
         },
       },
       {
-        name: "Internal Audit > Register",
+        name: "Internal Audit > Audit Form Builder",
+        key: "AUDIT_INSPECTION_INTERNAL_AUDIT_FORM_BUILDER",
+        permissionsExists: {
+          VIEW: true,
+          CREATE: true,
+          EDIT: true,
+          DELETE: true,
+        },
+      },
+      {
+        name: "Internal Audit > Scheduled Audit",
         key: "AUDIT_INSPECTION_INTERNAL_AUDIT_REGISTER",
         permissionsExists: {
           VIEW: true,
@@ -78,36 +88,36 @@ export const PermissionSectionsMap: PermissionSection[] = [
           DELETE: true,
         },
       },
-      {
-        name: "Internal Audit > Task",
-        key: "AUDIT_INSPECTION_INTERNAL_AUDIT_TASK",
-        permissionsExists: {
-          VIEW: true,
-          CREATE: true,
-          EDIT: true,
-          DELETE: true,
-        },
-      },
-      {
-        name: "Internal Audit > Queue",
-        key: "AUDIT_INSPECTION_INTERNAL_AUDIT_QUEUE",
-        permissionsExists: {
-          VIEW: true,
-          CREATE: true,
-          EDIT: true,
-          DELETE: true,
-        },
-      },
-      {
-        name: "Internal Audit > Corrective Action",
-        key: "AUDIT_INSPECTION_INTERNAL_AUDIT_CORRECTIVE_ACTION",
-        permissionsExists: {
-          VIEW: true,
-          CREATE: true,
-          EDIT: true,
-          DELETE: true,
-        },
-      },
+      // {
+      //   name: "Internal Audit > Task",
+      //   key: "AUDIT_INSPECTION_INTERNAL_AUDIT_TASK",
+      //   permissionsExists: {
+      //     VIEW: true,
+      //     CREATE: true,
+      //     EDIT: true,
+      //     DELETE: true,
+      //   },
+      // },
+      // {
+      //   name: "Internal Audit > Queue",
+      //   key: "AUDIT_INSPECTION_INTERNAL_AUDIT_QUEUE",
+      //   permissionsExists: {
+      //     VIEW: true,
+      //     CREATE: true,
+      //     EDIT: true,
+      //     DELETE: true,
+      //   },
+      // },
+      // {
+      //   name: "Internal Audit > Corrective Action",
+      //   key: "AUDIT_INSPECTION_INTERNAL_AUDIT_CORRECTIVE_ACTION",
+      //   permissionsExists: {
+      //     VIEW: true,
+      //     CREATE: true,
+      //     EDIT: true,
+      //     DELETE: true,
+      //   },
+      // },
       {
         name: "External Audit > Register",
         key: "AUDIT_INSPECTION_EXTERNAL_AUDIT_REGISTER",
@@ -617,6 +627,10 @@ export enum PermissionKeys {
   AUDIT_INSPECTION_CALENDAR_CREATE = "AUDIT_INSPECTION_CALENDAR_CREATE",
   AUDIT_INSPECTION_CALENDAR_EDIT = "AUDIT_INSPECTION_CALENDAR_EDIT",
   AUDIT_INSPECTION_CALENDAR_DELETE = "AUDIT_INSPECTION_CALENDAR_DELETE",
+  AUDIT_INSPECTION_INTERNAL_AUDIT_FORM_BUILDER_VIEW = "AUDIT_INSPECTION_INTERNAL_AUDIT_FORM_BUILDER_VIEW",
+  AUDIT_INSPECTION_INTERNAL_AUDIT_FORM_BUILDER_CREATE = "AUDIT_INSPECTION_INTERNAL_AUDIT_FORM_BUILDER_CREATE",
+  AUDIT_INSPECTION_INTERNAL_AUDIT_FORM_BUILDER_EDIT = "AUDIT_INSPECTION_INTERNAL_AUDIT_FORM_BUILDER_EDIT",
+  AUDIT_INSPECTION_INTERNAL_AUDIT_FORM_BUILDER_DELETE = "AUDIT_INSPECTION_INTERNAL_AUDIT_FORM_BUILDER_DELETE",
   AUDIT_INSPECTION_INTERNAL_AUDIT_REGISTER_VIEW = "AUDIT_INSPECTION_INTERNAL_AUDIT_REGISTER_VIEW",
   AUDIT_INSPECTION_INTERNAL_AUDIT_REGISTER_CREATE = "AUDIT_INSPECTION_INTERNAL_AUDIT_REGISTER_CREATE",
   AUDIT_INSPECTION_INTERNAL_AUDIT_REGISTER_EDIT = "AUDIT_INSPECTION_INTERNAL_AUDIT_REGISTER_EDIT",
@@ -827,6 +841,10 @@ export const defaultViewerPermissions: PermissionKeysObject = {
   AUDIT_INSPECTION_CALENDAR_CREATE: true,
   AUDIT_INSPECTION_CALENDAR_EDIT: true,
   AUDIT_INSPECTION_CALENDAR_DELETE: true,
+  AUDIT_INSPECTION_INTERNAL_AUDIT_FORM_BUILDER_VIEW: true,
+  AUDIT_INSPECTION_INTERNAL_AUDIT_FORM_BUILDER_CREATE: true,
+  AUDIT_INSPECTION_INTERNAL_AUDIT_FORM_BUILDER_EDIT: true,
+  AUDIT_INSPECTION_INTERNAL_AUDIT_FORM_BUILDER_DELETE: true,
   AUDIT_INSPECTION_INTERNAL_AUDIT_REGISTER_VIEW: true,
   AUDIT_INSPECTION_INTERNAL_AUDIT_REGISTER_CREATE: true,
   AUDIT_INSPECTION_INTERNAL_AUDIT_REGISTER_EDIT: true,
