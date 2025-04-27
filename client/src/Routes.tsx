@@ -94,9 +94,13 @@ const SustainabilityTable = React.lazy(
   () => import("./views/Sustainability/SustainabilityTable")
 );
 
-//Enviorenment
+//Environment
 const TargetSettingsTable = React.lazy(
   () => import("./views/Environment/TargetSettings/TargetSettingsTable")
+);
+
+const EnvironmentTable = React.lazy(
+  () => import("./views/Environment/Consumption/ConsumptionTable")
 );
 
 function withLayout(Layout: any, Component: any, restrictAccess = false) {
@@ -522,15 +526,25 @@ const AppRoutes = () => {
         />
         <Route
           path="/environment/history/consumption"
-          element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="Environment > History > Consumption" />
-          ))}
+          element={withLayout(
+            MainLayout,
+            EnvironmentTable,
+            !userPermissionObject?.[
+              PermissionKeys.ENVIRONMENT_HISTORY_CONSUMPTION_VIEW
+            ]
+          )}
         />
         <Route
           path="/environment/assigned-tasks/consumption"
-          element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="Environment > Assign Tasks > Consumption" />
-          ))}
+          element={withLayout(
+            MainLayout,
+            () => (
+              <EnvironmentTable isAssignedTasks={true} />
+            ),
+            !userPermissionObject?.[
+              PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_CONSUMPTION_VIEW
+            ]
+          )}
         />
       </Route>
     </Routes>
