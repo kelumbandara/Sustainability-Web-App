@@ -365,7 +365,7 @@ export default function AddOrEditSustainabilityDialog({
                   }
                   {...a11yProps(1)}
                 />
-                <Tab
+                {/* <Tab
                   label={
                     <Box
                       sx={{
@@ -382,7 +382,7 @@ export default function AddOrEditSustainabilityDialog({
                     </Box>
                   }
                   {...a11yProps(2)}
-                />
+                /> */}
               </Tabs>
               <TabPanel value={activeTab} index={0} dir={theme.direction}>
                 <Stack
@@ -815,7 +815,7 @@ export default function AddOrEditSustainabilityDialog({
                   </Box>
                 </Stack>
               </TabPanel>
-              <TabPanel value={activeTab} index={2} dir={theme.direction}>
+              {/* <TabPanel value={activeTab} index={2} dir={theme.direction}>
                 <Stack
                   sx={{
                     display: "flex",
@@ -862,7 +862,7 @@ export default function AddOrEditSustainabilityDialog({
                     </CustomButton>
                   </Box>
                 </Stack>
-              </TabPanel>
+              </TabPanel> */}
             </Box>
             <Box
               sx={{
