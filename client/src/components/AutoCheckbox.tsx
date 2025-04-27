@@ -7,8 +7,8 @@ interface AutocompleteCheckboxProps<T extends Record<string, any>> {
   control: Control<any>;
   name: string;
   options: T[];
-  selectedValues?: (string | number)[];
-  setSelectedValues?: (values: (string | number)[]) => void;
+  selectedValues?: any[];
+  setSelectedValues?: (values: any[]) => void;
   label: string;
   placeholder?: string;
   limitTags?: number;
