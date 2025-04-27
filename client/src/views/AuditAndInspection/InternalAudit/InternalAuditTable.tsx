@@ -93,30 +93,12 @@ function InternalAuditTable() {
       page * rowsPerPage,
       page * rowsPerPage + rowsPerPage
     );
-  }, [page, rowsPerPage]);
-
-  const { mutate: updateInternalAuditMutation } = useMutation({
-    mutationFn: updateInternalAudit,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["scheduled-internal-audit"] });
-      enqueueSnackbar("Scheduled Internal Audit Updated Successfully!", {
-        variant: "success",
-      });
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenEditDialog(false);
-    },
-    onError: () => {
-      enqueueSnackbar(`Scheduled Internal Audit Update Failed`, {
-        variant: "error",
-      });
-    },
-  });
+  }, [page, rowsPerPage, scheduledInternalAuditData]);
 
   const { mutate: deleteInternalAuditMutation } = useMutation({
     mutationFn: deleteInternalAudit,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["internal-audit"] });
+      queryClient.invalidateQueries({ queryKey: ["scheduled-internal-audit"] });
       enqueueSnackbar("Scheduled Internal Audit Deleted Successfully!", {
         variant: "success",
       });
@@ -190,19 +172,19 @@ function InternalAuditTable() {
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
-                <TableCell align="right">Reference</TableCell>
-                <TableCell align="right">Audit Date</TableCell>
-                <TableCell align="right">Division</TableCell>
-                <TableCell align="right">Audit Title</TableCell>
-                <TableCell align="right">Audit Type</TableCell>
-                <TableCell align="right">Auditee</TableCell>
-                <TableCell align="right">Approver</TableCell>
+                <TableCell align="left">Reference</TableCell>
+                <TableCell align="left">Audit Date</TableCell>
+                <TableCell align="left">Division</TableCell>
+                <TableCell align="left">Audit Title</TableCell>
+                <TableCell align="left">Audit Type</TableCell>
+                <TableCell align="left">Auditee</TableCell>
+                <TableCell align="left">Approver</TableCell>
                 <TableCell align="right">Status</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {scheduledInternalAuditData?.length > 0 ? (
-                scheduledInternalAuditData?.map((row) => (
+              {paginatedInternalAuditData?.length > 0 ? (
+                paginatedInternalAuditData?.map((row) => (
                   <TableRow
                     key={`${row.id}`}
                     sx={{
@@ -214,17 +196,17 @@ function InternalAuditTable() {
                       setOpenViewDrawer(true);
                     }}
                   >
-                    <TableCell align="right">{row.id}</TableCell>
-                    <TableCell component="th" scope="row">
+                    <TableCell align="left">{row.id}</TableCell>
+                    <TableCell component="th" scope="row" align="left">
                       {row.auditDate
                         ? format(new Date(row.auditDate), "yyyy-MM-dd")
                         : "N/A"}
                     </TableCell>
-                    <TableCell align="right">{row.division}</TableCell>
-                    <TableCell align="right">{row.audit?.name}</TableCell>
-                    <TableCell align="right">{row.auditType}</TableCell>
-                    <TableCell align="right">{row.auditee?.name}</TableCell>
-                    <TableCell align="right">{row.approver?.name}</TableCell>
+                    <TableCell align="left">{row.division}</TableCell>
+                    <TableCell align="left">{row.audit?.name}</TableCell>
+                    <TableCell align="left">{row.auditType}</TableCell>
+                    <TableCell align="left">{row.auditee?.name}</TableCell>
+                    <TableCell align="left">{row.approver?.name}</TableCell>
                     <TableCell align="right">
                       {RenderInternalAuditStatusChip(row.status)}
                     </TableCell>
@@ -279,7 +261,10 @@ function InternalAuditTable() {
 
             {selectedRow && (
               <Stack>
-                <ViewInternalAuditContent internalAudit={selectedRow} />
+                <ViewInternalAuditContent
+                  internalAudit={selectedRow}
+                  handleClose={() => setOpenViewDrawer(false)}
+                />
               </Stack>
             )}
           </Stack>
@@ -299,12 +284,6 @@ function InternalAuditTable() {
         <EditScheduledInternalAudit
           open={openEditDialog}
           handleClose={() => {
-            setSelectedRow(null);
-            setOpenViewDrawer(false);
-            setOpenEditDialog(false);
-          }}
-          onSubmit={(data) => {
-            // createInternalAuditMutation(data);
             setSelectedRow(null);
             setOpenViewDrawer(false);
             setOpenEditDialog(false);
@@ -370,13 +349,13 @@ export function RenderInternalAuditStatusChip(
           }}
         />
       );
-    case ScheduledInternalAuditStatus.IN_PROGRESS:
+    case ScheduledInternalAuditStatus.ONGOING:
       return (
         <Chip
           label={status}
           sx={{
-            color: "var(--pallet-green)",
-            backgroundColor: colors.green[50],
+            color: "var(--pallet-blue)",
+            backgroundColor: colors.purple[50],
           }}
         />
       );

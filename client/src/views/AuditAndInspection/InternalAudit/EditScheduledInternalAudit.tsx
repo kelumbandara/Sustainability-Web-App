@@ -4,23 +4,15 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Alert,
   AppBar,
   Autocomplete,
   Box,
+  CircularProgress,
   Divider,
   IconButton,
   Stack,
   Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Tabs,
   TextField,
   Typography,
@@ -29,52 +21,53 @@ import { Controller, useForm } from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
 import { grey } from "@mui/material/colors";
 import { useState } from "react";
-import { v4 as uuidv4 } from "uuid";
-import AddIcon from "@mui/icons-material/Add";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../../api/divisionApi";
-import {
-  fetchAllUsers,
-  fetchMedicineRequestAssignee,
-} from "../../../api/userApi";
+import { fetchMedicineRequestAssignee } from "../../../api/userApi";
 import CustomButton from "../../../components/CustomButton";
 import DatePickerComponent from "../../../components/DatePickerComponent";
 import RichTextComponent from "../../../components/RichTextComponent";
 import UserAutoComplete from "../../../components/UserAutoComplete";
 import AutoCheckBox from "../../../components/AutoCheckbox";
 import {
-  Factory,
-  InternalAuditAnswerToQuestions,
-  InternalAuditQuestionGroup,
   InternalAuditType,
   ScheduledInternalAudit,
   ScheduledInternalAuditStatus,
   SupplierType,
-  InternalAuditQuestion,
-  InternalAuditQuestionAnswersStatus,
-  InternalAuditQuestionAnswerRating,
   getInternalAuditFormsList,
   getFactoryList,
   getProcessTypeList,
+  getContactPersonList,
+  updateDraftScheduledInternalAudit,
+  updateScheduledInternalAudit,
+  InternalAuditAnswerToQuestions,
+  updateOngoingInternalAudit,
+  completeInternalAudit,
 } from "../../../api/AuditAndInspection/internalAudit";
 import { fetchDepartmentData } from "../../../api/departmentApi";
 import SwitchButton from "../../../components/SwitchButton";
 import ArticleIcon from "@mui/icons-material/Article";
 import ContentPasteSearchIcon from "@mui/icons-material/ContentPasteSearch";
 import Diversity3Icon from "@mui/icons-material/Diversity3";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import theme from "../../../theme";
 import { RenderInternalAuditStatusChip } from "./InternalAuditTable";
-import { CircularProgressWithLabel } from "../../../components/CircularProgressWithLabel";
-import { RenderAuditQuestionColorTag } from "../AuditBuilder/InternalAuditFormDrawerContent";
-import EditIcon from "@mui/icons-material/Edit";
+
 import useIsMobile from "../../../customHooks/useIsMobile";
-import { DrawerContentItem } from "../../../components/ViewDataDrawer";
+import {
+  AddNewFactoryButton,
+  AddNewFactoryDialog,
+} from "./AddNewFactoryDialog";
+import {
+  AddNewProcessTypeButton,
+  AddNewProcessTypeDialog,
+} from "./AddNewProcessTypeDialog";
+import queryClient from "../../../state/queryClient";
+import { useSnackbar } from "notistack";
+import { AuditQuestionsSectionAccordion } from "./AuditQuestionsSectionAccordion";
 
 type DialogProps = {
   open: boolean;
   handleClose: () => void;
-  onSubmit?: (data: ScheduledInternalAudit) => void;
   defaultValues?: ScheduledInternalAudit;
 };
 
@@ -111,10 +104,10 @@ function a11yProps(index: number) {
 export default function EditScheduledInternalAudit({
   open,
   handleClose,
-  onSubmit,
   defaultValues,
 }: DialogProps) {
   const { isTablet } = useIsMobile();
+  const { enqueueSnackbar } = useSnackbar();
   const [openAddNewFactoryDialog, setOpenAddNewFactoryDialog] = useState(false);
   const [openAddNewProcessTypeDialog, setOpenAddNewProcessTypeDialog] =
     useState(false);
@@ -124,19 +117,15 @@ export default function EditScheduledInternalAudit({
     setActiveTab(newValue);
   };
 
-  const {
-    data: internalAuditFormsData,
-    isFetching: isInternalAuditFormsFetching,
-  } = useQuery({
+  const { data: internalAuditFormsData } = useQuery({
     queryKey: ["internal-audit-forms"],
     queryFn: getInternalAuditFormsList,
   });
 
-  const { data: processTypesData, isFetching: isProcessTypesDataFetching } =
-    useQuery({
-      queryKey: ["process-types"],
-      queryFn: getProcessTypeList,
-    });
+  const { data: processTypesData } = useQuery({
+    queryKey: ["process-types"],
+    queryFn: getProcessTypeList,
+  });
 
   const {
     register,
@@ -146,107 +135,191 @@ export default function EditScheduledInternalAudit({
     formState: { errors },
     reset,
     setValue,
-    getValues,
-  } = useForm<ScheduledInternalAudit>({
+  } = useForm({
     mode: "onChange",
     reValidateMode: "onChange",
-    defaultValues,
+    defaultValues: {
+      ...defaultValues,
+      department: defaultValues?.department?.map(
+        (department) => department.department
+      ),
+    },
   });
+
+  const answers = watch("answers");
+  console.log("answers", answers);
 
   const resetForm = () => {
     reset();
   };
 
-  const { data: userData, isFetching: isUserDataFetching } = useQuery({
-    queryKey: ["users"],
-    queryFn: fetchAllUsers,
-  });
-
-  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
+  const { data: divisionData } = useQuery({
     queryKey: ["divisions"],
     queryFn: fetchDivision,
   });
 
-  const { data: departmentData, isFetching: isDepartmentDataFetching } =
-    useQuery({
-      queryKey: ["departments"],
-      queryFn: fetchDepartmentData,
-    });
+  const { data: departmentData } = useQuery({
+    queryKey: ["departments"],
+    queryFn: fetchDepartmentData,
+  });
 
-  const { data: assigneeData, isFetching: isAssigneeDataFetching } = useQuery({
+  const { data: assigneeData } = useQuery({
     queryKey: ["medicine-assignee"],
     queryFn: fetchMedicineRequestAssignee,
   });
 
-  const { data: factoryData, isFetching: isFactoryDataFetching } = useQuery({
+  const { data: factoryData } = useQuery({
     queryKey: ["factories"],
     queryFn: getFactoryList,
   });
 
-  const handleSubmitScheduledInternalAudit = (data: ScheduledInternalAudit) => {
-    const submitData: Partial<ScheduledInternalAudit> = data;
-    submitData.id = uuidv4();
-    // submitData.assigneeId = assignee.id;
-    // submitData.createdDate = new Date();
-    // submitData.createdByUser = sampleAssignees[0].name;
-    // submitData.status = HazardAndRiskStatus.DRAFT;
-    // if (filesToRemove?.length > 0) submitData.removeDoc = filesToRemove;
-    // submitData.documents = files;
-    onSubmit(submitData as ScheduledInternalAudit);
-    resetForm();
+  const handleUpdateInternalAudit = (
+    data: ScheduledInternalAudit,
+    updateTo: "DRAFT" | "SCHEDULED" | "ONGOING" | "COMPLETED"
+  ) => {
+    const modifiedDepartmentData = data.department?.map((department) => {
+      const departmentObj = departmentData?.find(
+        (dept) => dept.department === department
+      );
+      return departmentObj?.id;
+    });
+
+    const submitData: Partial<ScheduledInternalAudit> = {
+      id: defaultValues.id,
+      division: data.division,
+      auditId: data.audit?.id,
+      auditType: data.auditType,
+      department: modifiedDepartmentData,
+      isAuditScheduledForSupplier: data.isAuditScheduledForSupplier ?? false,
+      supplierType: data.supplierType,
+      factoryLicenseNo: data.factoryLicenseNo,
+      higgId: data.higgId,
+      zdhcId: data.zdhcId,
+      processType: data.processType,
+      factoryName: data.factoryName,
+      factoryAddress: data.factoryAddress,
+      factoryEmail: data.factoryEmail,
+      factoryContactPersonId: data.factoryContactPersonId,
+      factoryContactNumber: data.factoryContactNumber,
+      designation: data.designation,
+      description: data.description,
+      auditeeId: data.auditee?.id,
+      approverId: data.approver?.id,
+      auditDate: data.auditDate,
+      dateForApproval: data.dateForApproval,
+    };
+
+    if (updateTo === "DRAFT") {
+      updateDraftInternalScheduleAuditMutation(
+        submitData as ScheduledInternalAudit
+      );
+    } else if (updateTo === "SCHEDULED") {
+      updateInternalScheduleAuditMutation(submitData as ScheduledInternalAudit);
+    } else if (updateTo === "ONGOING") {
+      submitData.answers = answers;
+      updateOngoingInternalScheduleAuditMutation(
+        submitData as ScheduledInternalAudit
+      );
+    } else if (updateTo === "COMPLETED") {
+      submitData.answers = answers;
+      completeInternalScheduleAuditMutation(
+        submitData as ScheduledInternalAudit
+      );
+    }
   };
 
-  const AddNewFactoryButton = (props) => (
-    <li
-      {...props}
-      variant="contained"
-      style={{
-        backgroundColor: "var(--pallet-lighter-blue)",
-        color: "var(--pallet-blue)",
-        textTransform: "none",
-        margin: "0.5rem",
-        borderRadius: "0.3rem",
-        display: "flex",
-        flexDirection: "row",
-      }}
-      size="small"
-      // onClick closes the menu
-      onMouseDown={() => {
-        setOpenAddNewFactoryDialog(true);
-      }}
-    >
-      <AddIcon />
-      <Typography variant="body2" component="div">
-        Add a new factory
-      </Typography>
-    </li>
-  );
+  const {
+    mutate: updateDraftInternalScheduleAuditMutation,
+    isPending: isDraftAuditUpdating,
+  } = useMutation({
+    mutationFn: updateDraftScheduledInternalAudit,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["scheduled-internal-audit"],
+      });
+      enqueueSnackbar("Internal Audit Draft Updated Successfully!", {
+        variant: "success",
+      });
+      resetForm();
+      handleClose();
+    },
+    onError: () => {
+      enqueueSnackbar(`Internal Audit Draft Update Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
-  const AddNewProcessTypeButton = (props) => (
-    <li
-      {...props}
-      variant="contained"
-      style={{
-        backgroundColor: "var(--pallet-lighter-blue)",
-        color: "var(--pallet-blue)",
-        textTransform: "none",
-        margin: "0.5rem",
-        borderRadius: "0.3rem",
-        display: "flex",
-        flexDirection: "row",
-      }}
-      size="small"
-      // onClick closes the menu
-      onMouseDown={() => {
-        setOpenAddNewProcessTypeDialog(true);
-      }}
-    >
-      <AddIcon />
-      <Typography variant="body2" component="div">
-        Add a new process type
-      </Typography>
-    </li>
-  );
+  const {
+    mutate: updateInternalScheduleAuditMutation,
+    isPending: isInternalAuditUpdating,
+  } = useMutation({
+    mutationFn: updateScheduledInternalAudit,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["scheduled-internal-audit"],
+      });
+      enqueueSnackbar("Internal Audit Draft Updated Successfully!", {
+        variant: "success",
+      });
+      resetForm();
+      handleClose();
+    },
+    onError: () => {
+      enqueueSnackbar(`Internal Audit Draft Update Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const {
+    mutate: updateOngoingInternalScheduleAuditMutation,
+    isPending: isOngoingInternalAuditUpdating,
+  } = useMutation({
+    mutationFn: updateOngoingInternalAudit,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["scheduled-internal-audit"],
+      });
+      enqueueSnackbar("Ongoing Internal Audit Updated Successfully!", {
+        variant: "success",
+      });
+      resetForm();
+      handleClose();
+    },
+    onError: () => {
+      enqueueSnackbar(`Ongoing Internal Audit Update Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const {
+    mutate: completeInternalScheduleAuditMutation,
+    isPending: isCompleteInternalAuditUpdating,
+  } = useMutation({
+    mutationFn: completeInternalAudit,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["scheduled-internal-audit"],
+      });
+      enqueueSnackbar("Audit Completed Successfully!", {
+        variant: "success",
+      });
+      resetForm();
+      handleClose();
+    },
+    onError: () => {
+      enqueueSnackbar(`Internal Audit Complete Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const { data: contactPeopleData } = useQuery({
+    queryKey: ["contact-people"],
+    queryFn: getContactPersonList,
+  });
 
   const isAuditScheduledForSupplier = watch("isAuditScheduledForSupplier");
 
@@ -399,22 +472,24 @@ export default function EditScheduledInternalAudit({
               <UserAutoComplete
                 name="auditee"
                 label="Auditee"
-                control={control}
+                control={control as any}
                 register={register}
                 errors={errors}
                 userData={assigneeData}
                 required={true}
+                defaultValue={defaultValues.auditee}
               />
             </Box>
             <Box sx={{ flex: 1 }}>
               <UserAutoComplete
                 name="approver"
                 label="Approver"
-                control={control}
+                control={control as any}
                 register={register}
                 errors={errors}
                 userData={assigneeData}
                 required={true}
+                defaultValue={defaultValues.approver}
               />
             </Box>
           </Box>
@@ -510,6 +585,7 @@ export default function EditScheduledInternalAudit({
                     ? divisionData.map((division) => division.divisionName)
                     : []
                 }
+                defaultValue={defaultValues?.division}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (
                   <TextField
@@ -528,13 +604,13 @@ export default function EditScheduledInternalAudit({
                   required={true}
                   name="department"
                   label="Departments"
-                  options={departmentData || []}
-                  selectedValues={getValues("department")}
+                  options={departmentData}
+                  selectedValues={watch("department")}
                   setSelectedValues={(value) => setValue("department", value)}
                   getOptionLabel={(option) => option.department}
-                  getOptionValue={(option) => option.id}
+                  getOptionValue={(option) => option.department}
                   placeholder="Choose Departments"
-                  limitTags={10}
+                  limitTags={2}
                 />
               </Box>
             </Box>
@@ -559,6 +635,7 @@ export default function EditScheduledInternalAudit({
                     }
                     sx={{ flex: 1, margin: "0.5rem" }}
                     getOptionLabel={(option) => option?.name || ""}
+                    defaultValue={defaultValues.audit}
                     renderOption={(props, option) => (
                       <li {...props} key={option.id}>
                         {option.name}
@@ -583,6 +660,7 @@ export default function EditScheduledInternalAudit({
                 size="small"
                 options={Object.values(InternalAuditType)}
                 sx={{ flex: 1, margin: "0.5rem" }}
+                defaultValue={defaultValues.auditType}
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -627,6 +705,7 @@ export default function EditScheduledInternalAudit({
                     size="small"
                     options={Object.values(SupplierType)}
                     sx={{ flex: 1, margin: "0.5rem" }}
+                    defaultValue={defaultValues.supplierType}
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -680,6 +759,7 @@ export default function EditScheduledInternalAudit({
                     <Autocomplete
                       {...register("processType", { required: true })}
                       size="small"
+                      defaultValue={defaultValues.processType}
                       noOptionsText={
                         <>
                           <Typography
@@ -693,14 +773,21 @@ export default function EditScheduledInternalAudit({
                       }
                       options={[
                         ...(processTypesData?.length
-                          ? processTypesData.map((category) => category.name)
+                          ? processTypesData.map(
+                              (process) => process?.processType
+                            )
                           : []),
                         "$ADD_NEW_PROCESS_TYPE",
                       ]}
                       renderOption={(props, option) => (
                         <>
                           {option === "$ADD_NEW_PROCESS_TYPE" ? (
-                            <AddNewProcessTypeButton {...props} />
+                            <AddNewProcessTypeButton
+                              {...props}
+                              onMouseDown={() =>
+                                setOpenAddNewProcessTypeDialog(true)
+                              }
+                            />
                           ) : (
                             <li {...props} key={option}>
                               {option}
@@ -734,6 +821,7 @@ export default function EditScheduledInternalAudit({
               <Autocomplete
                 {...register("factoryName", { required: true })}
                 size="small"
+                defaultValue={defaultValues.factoryName}
                 noOptionsText={
                   <>
                     <Typography variant="body2" color="inherit" gutterBottom>
@@ -750,7 +838,12 @@ export default function EditScheduledInternalAudit({
                 renderOption={(props, option) => (
                   <>
                     {option === "$ADD_NEW_FACTORY" ? (
-                      <AddNewFactoryButton {...props} />
+                      <AddNewFactoryButton
+                        {...props}
+                        onMouseDown={() => {
+                          setOpenAddNewFactoryDialog(true);
+                        }}
+                      />
                     ) : (
                       <li {...props} key={option}>
                         {option}
@@ -764,12 +857,9 @@ export default function EditScheduledInternalAudit({
                     (factory) => factory.factoryName === data
                   );
                   await setValue("factory", selectedFactory);
+                  await setValue("factoryName", selectedFactory?.factoryName);
                   await setValue("factoryId", selectedFactory?.id);
-                  await setValue("factoryEmail", selectedFactory?.factoryEmail);
-                  await setValue(
-                    "factoryContactNumber",
-                    selectedFactory?.factoryContactNumber
-                  );
+
                   await setValue(
                     "factoryAddress",
                     selectedFactory?.factoryAddress
@@ -778,7 +868,21 @@ export default function EditScheduledInternalAudit({
                     "factoryContactPerson",
                     selectedFactory?.factoryContactPerson
                   );
+                  console.log(selectedFactory?.factoryContactPerson);
+                  await setValue(
+                    "factoryContactPersonName",
+                    selectedFactory?.factoryContactPersonName
+                  );
+                  await setValue(
+                    "factoryContactPersonId",
+                    selectedFactory?.factoryContactPersonId
+                  );
                   await setValue("designation", selectedFactory?.designation);
+                  await setValue("factoryEmail", selectedFactory?.factoryEmail);
+                  await setValue(
+                    "factoryContactNumber",
+                    selectedFactory?.factoryContactNumber
+                  );
                 }}
                 renderInput={(params) => (
                   <TextField
@@ -803,15 +907,42 @@ export default function EditScheduledInternalAudit({
                 />
               </Box>
               <Box sx={{ flex: 1, margin: "0.5rem" }}>
-                <TextField
-                  id="factoryContactPerson"
-                  label="Factory Contact Person"
-                  required
-                  error={!!errors.factoryContactPerson}
-                  sx={{ width: "100%" }}
-                  size="small"
+                <Autocomplete
                   {...register("factoryContactPerson", { required: true })}
-                  slotProps={{ inputLabel: { shrink: true } }}
+                  size="small"
+                  noOptionsText={
+                    <>
+                      <Typography variant="body2" color="inherit" gutterBottom>
+                        No matching Items
+                      </Typography>
+                    </>
+                  }
+                  value={watch("factoryContactPerson")}
+                  options={[
+                    ...(contactPeopleData?.length ? contactPeopleData : []),
+                  ]}
+                  getOptionLabel={(option) => option.name || ""}
+                  onChange={(_, data) => {
+                    setValue("factoryContactPersonId", data.id);
+                    setValue("factoryContactPerson", data);
+                    setValue("factoryContactPersonName", data.name);
+                  }}
+                  renderOption={(props, option) => (
+                    <li {...props} key={option.id || option.name}>
+                      {option.name}
+                    </li>
+                  )}
+                  sx={{ flex: 1 }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      error={!!errors.factoryContactPerson}
+                      helperText={errors.factoryContactPerson ? "Required" : ""}
+                      label="Factory Contact Person"
+                      name="factoryContactPerson"
+                      slotProps={{ inputLabel: { shrink: true } }}
+                    />
+                  )}
                 />
               </Box>
             </Box>
@@ -895,12 +1026,37 @@ export default function EditScheduledInternalAudit({
                 <AuditQuestionsSectionAccordion
                   key={group.queGroupId}
                   questionGroup={group}
-                  auditAnswers={
-                    defaultValues?.auditAnswers?.find(
-                      (answer) => answer.questionGroupId === group.queGroupId
-                    )?.answers ?? []
-                  }
+                  auditAnswers={answers ?? []}
                   auditStatus={defaultValues.status}
+                  submitAnAnswer={(answer) => {
+                    let updatedAnswers: InternalAuditAnswerToQuestions[] =
+                      Array.isArray(answers) ? answers : [];
+                    const isAnswerExist = answers?.find(
+                      (ans) => ans.questionId === answer.questionId
+                    );
+                    if (!isAnswerExist) {
+                      updatedAnswers = [
+                        ...(answers || []),
+                        {
+                          ...answer,
+                          questionRecoId: Number(defaultValues.audit.id),
+                          internalAuditId: defaultValues.id,
+                        },
+                      ];
+                    } else {
+                      updatedAnswers = answers?.map((ans) => {
+                        if (ans.questionId === answer.questionId) {
+                          return {
+                            ...answer,
+                            questionRecoId: Number(defaultValues.audit.id),
+                            internalAuditId: defaultValues.id,
+                          };
+                        }
+                        return ans;
+                      });
+                    }
+                    setValue("answers", updatedAnswers);
+                  }}
                 />
               ))}
             </Stack>
@@ -926,8 +1082,15 @@ export default function EditScheduledInternalAudit({
                 border: "1px solid var(--pallet-blue)",
               }}
               size="medium"
+              disabled={isDraftAuditUpdating}
+              endIcon={
+                isDraftAuditUpdating ? <CircularProgress size={20} /> : ""
+              }
               onClick={handleSubmit((data) => {
-                handleSubmitScheduledInternalAudit(data);
+                handleUpdateInternalAudit(
+                  data as Partial<ScheduledInternalAudit>,
+                  "DRAFT"
+                );
               })}
             >
               Update Draft
@@ -939,8 +1102,15 @@ export default function EditScheduledInternalAudit({
                 backgroundColor: "var(--pallet-blue)",
               }}
               size="medium"
+              disabled={isInternalAuditUpdating}
+              endIcon={
+                isInternalAuditUpdating ? <CircularProgress size={20} /> : ""
+              }
               onClick={handleSubmit((data) => {
-                handleSubmitScheduledInternalAudit(data);
+                handleUpdateInternalAudit(
+                  data as Partial<ScheduledInternalAudit>,
+                  "SCHEDULED"
+                );
               })}
             >
               Schedule Internal Audit
@@ -954,8 +1124,26 @@ export default function EditScheduledInternalAudit({
                 border: "1px solid var(--pallet-blue)",
               }}
               size="medium"
+              disabled={isOngoingInternalAuditUpdating}
+              endIcon={
+                isOngoingInternalAuditUpdating ? (
+                  <CircularProgress size={20} />
+                ) : (
+                  ""
+                )
+              }
               onClick={handleSubmit((data) => {
-                handleSubmitScheduledInternalAudit(data);
+                if (data?.answers?.length > 0) {
+                  handleUpdateInternalAudit(
+                    data as Partial<ScheduledInternalAudit>,
+                    "ONGOING"
+                  );
+                } else {
+                  handleUpdateInternalAudit(
+                    data as Partial<ScheduledInternalAudit>,
+                    "SCHEDULED"
+                  );
+                }
               })}
             >
               Update Internal Audit
@@ -966,8 +1154,19 @@ export default function EditScheduledInternalAudit({
                 backgroundColor: "var(--pallet-blue)",
               }}
               size="medium"
+              disabled={isCompleteInternalAuditUpdating}
+              endIcon={
+                isCompleteInternalAuditUpdating ? (
+                  <CircularProgress size={20} />
+                ) : (
+                  ""
+                )
+              }
               onClick={handleSubmit((data) => {
-                handleSubmitScheduledInternalAudit(data);
+                handleUpdateInternalAudit(
+                  data as Partial<ScheduledInternalAudit>,
+                  "COMPLETED"
+                );
               })}
             >
               Complete Internal Audit
@@ -978,824 +1177,3 @@ export default function EditScheduledInternalAudit({
     </Dialog>
   );
 }
-
-const AddNewFactoryDialog = ({
-  open,
-  setOpen,
-}: {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-}) => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<Factory>();
-  const [openAddNewContactPersonDialog, setOpenAddNewContactPersonDialog] =
-    useState(false);
-
-  const { data: assigneeData, isFetching: isAssigneeDataFetching } = useQuery({
-    queryKey: ["medicine-assignee"],
-    queryFn: fetchMedicineRequestAssignee,
-  });
-
-  const { isTablet } = useIsMobile();
-
-  const handleCreateFactory = (data: Partial<Factory>) => {
-    setOpen(false);
-  };
-
-  const AddNewContactPersonButton = (props) => (
-    <li
-      {...props}
-      variant="contained"
-      style={{
-        backgroundColor: "var(--pallet-lighter-blue)",
-        color: "var(--pallet-blue)",
-        textTransform: "none",
-        margin: "0.5rem",
-        borderRadius: "0.3rem",
-        display: "flex",
-        flexDirection: "row",
-      }}
-      size="small"
-      // onClick closes the menu
-      onMouseDown={() => {
-        setOpenAddNewContactPersonDialog(true);
-      }}
-    >
-      <AddIcon />
-      <Typography variant="body2" component="div">
-        Add a new contact person
-      </Typography>
-    </li>
-  );
-
-  const AddNewContactPersonDialog = () => {
-    const { register, handleSubmit } = useForm();
-
-    const handleCreateContactPerson = (data) => {
-      console.log("Creating contact person", data);
-    };
-
-    return (
-      <Dialog
-        open={openAddNewContactPersonDialog}
-        onClose={() => setOpenAddNewContactPersonDialog(false)}
-        fullScreen={isTablet}
-        fullWidth
-        maxWidth="sm"
-        PaperProps={{
-          style: {
-            backgroundColor: grey[50],
-          },
-          component: "form",
-        }}
-      >
-        <DialogTitle
-          sx={{
-            paddingY: "1rem",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <Typography variant="h6" component="div">
-            Add New Contact Person
-          </Typography>
-          <IconButton
-            aria-label="open drawer"
-            onClick={() => setOpenAddNewContactPersonDialog(false)}
-            edge="start"
-            sx={{
-              color: "#024271",
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <Divider />
-        <DialogContent>
-          <Stack
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <TextField
-              {...register("name", { required: true })}
-              required
-              id="name"
-              label="name"
-              size="small"
-              fullWidth
-              sx={{ marginBottom: "0.5rem" }}
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions sx={{ padding: "1rem" }}>
-          <Button
-            onClick={() => setOpenAddNewContactPersonDialog(false)}
-            sx={{ color: "var(--pallet-blue)" }}
-          >
-            Cancel
-          </Button>
-          <CustomButton
-            variant="contained"
-            sx={{
-              backgroundColor: "var(--pallet-blue)",
-            }}
-            size="medium"
-            onClick={handleSubmit(handleCreateContactPerson)}
-          >
-            Add Contact Person
-          </CustomButton>
-        </DialogActions>
-      </Dialog>
-    );
-  };
-
-  return (
-    <Dialog
-      open={open}
-      onClose={() => setOpen(false)}
-      fullScreen={isTablet}
-      fullWidth
-      maxWidth="sm"
-      PaperProps={{
-        style: {
-          backgroundColor: grey[50],
-        },
-        component: "form",
-      }}
-    >
-      <DialogTitle
-        sx={{
-          paddingY: "1rem",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Typography variant="h6" component="div">
-          Add a new factory
-        </Typography>
-        <IconButton
-          aria-label="open drawer"
-          onClick={() => setOpen(false)}
-          edge="start"
-          sx={{
-            color: "#024271",
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <Divider />
-      <DialogContent>
-        <Stack
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <TextField
-            {...register("factoryName", { required: true })}
-            required
-            id="factoryName"
-            label="Factory Name"
-            size="small"
-            fullWidth
-            sx={{ marginBottom: "0.5rem" }}
-            error={!!errors.factoryName}
-            helperText={errors.factoryName ? "Required" : ""}
-          />
-          <TextField
-            {...register("factoryEmail", { required: true })}
-            required
-            id="factoryEmail"
-            label="Factory Email"
-            size="small"
-            fullWidth
-            sx={{ marginBottom: "0.5rem" }}
-            error={!!errors.factoryEmail}
-            helperText={errors.factoryEmail ? "Required" : ""}
-            type="email"
-          />
-          <TextField
-            {...register("factoryAddress", { required: true })}
-            required
-            id="factoryAddress"
-            label="Factory Address"
-            size="small"
-            fullWidth
-            sx={{ marginBottom: "0.5rem" }}
-            error={!!errors.factoryAddress}
-            helperText={errors.factoryAddress ? "Required" : ""}
-          />
-
-          <Box
-            sx={{
-              display: "flex",
-            }}
-          >
-            <TextField
-              {...register("factoryContactNumber", { required: true })}
-              required
-              id="factoryContactNumber"
-              label="Contact Number"
-              type="number"
-              size="small"
-              fullWidth
-              error={!!errors.factoryContactNumber}
-              helperText={errors.factoryContactNumber ? "Required" : ""}
-            />
-            <TextField
-              {...register("designation", { required: true })}
-              required
-              id="designation"
-              label="Designation"
-              size="small"
-              fullWidth
-              sx={{ marginLeft: "0.5rem" }}
-              error={!!errors.designation}
-              helperText={errors.designation ? "Required" : ""}
-            />
-          </Box>
-          <Box sx={{ flex: 1 }}>
-            <Autocomplete
-              {...register("factoryContactPerson", { required: true })}
-              size="small"
-              noOptionsText={
-                <>
-                  <Typography variant="body2" color="inherit" gutterBottom>
-                    No matching Items
-                  </Typography>
-                </>
-              }
-              options={[
-                ...(assigneeData?.length
-                  ? assigneeData.map((category) => category.name)
-                  : []),
-                "$ADD_NEW_CONTACT_PERSON",
-              ]}
-              renderOption={(props, option) => (
-                <>
-                  {option === "$ADD_NEW_CONTACT_PERSON" ? (
-                    <AddNewContactPersonButton {...props} />
-                  ) : (
-                    <li {...props} key={option}>
-                      {option}
-                    </li>
-                  )}
-                </>
-              )}
-              sx={{ flex: 1, marginY: "1rem" }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  error={!!errors.factoryContactPerson}
-                  label="Factory Contact Person"
-                  name="factoryContactPerson"
-                  slotProps={{ inputLabel: { shrink: true } }}
-                />
-              )}
-            />
-          </Box>
-        </Stack>
-      </DialogContent>
-      <DialogActions sx={{ padding: "1rem" }}>
-        <Button
-          onClick={() => setOpen(false)}
-          sx={{ color: "var(--pallet-blue)" }}
-        >
-          Cancel
-        </Button>
-        <CustomButton
-          variant="contained"
-          sx={{
-            backgroundColor: "var(--pallet-blue)",
-          }}
-          size="medium"
-          onClick={handleSubmit(handleCreateFactory)}
-        >
-          Add Factory
-        </CustomButton>
-      </DialogActions>
-      <AddNewContactPersonDialog />
-    </Dialog>
-  );
-};
-
-const AddNewProcessTypeDialog = ({
-  open,
-  setOpen,
-}: {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-}) => {
-  const { register, handleSubmit } = useForm();
-  const { isTablet } = useIsMobile();
-
-  const handleCreateProcessType = (data) => {
-    console.log("Creating process type", data);
-  };
-
-  return (
-    <Dialog
-      open={open}
-      onClose={() => setOpen(false)}
-      fullScreen={isTablet}
-      fullWidth
-      maxWidth="sm"
-      PaperProps={{
-        style: {
-          backgroundColor: grey[50],
-        },
-        component: "form",
-      }}
-    >
-      <DialogTitle
-        sx={{
-          paddingY: "1rem",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Typography variant="h6" component="div">
-          Add New Process Type
-        </Typography>
-        <IconButton
-          aria-label="open drawer"
-          onClick={() => setOpen(false)}
-          edge="start"
-          sx={{
-            color: "#024271",
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <Divider />
-      <DialogContent>
-        <Stack
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <TextField
-            {...register("name", { required: true })}
-            required
-            id="name"
-            label="name"
-            size="small"
-            fullWidth
-            sx={{ marginBottom: "0.5rem" }}
-          />
-        </Stack>
-      </DialogContent>
-      <DialogActions sx={{ padding: "1rem" }}>
-        <Button
-          onClick={() => setOpen(false)}
-          sx={{ color: "var(--pallet-blue)" }}
-        >
-          Cancel
-        </Button>
-        <CustomButton
-          variant="contained"
-          sx={{
-            backgroundColor: "var(--pallet-blue)",
-          }}
-          size="medium"
-          onClick={handleSubmit(handleCreateProcessType)}
-        >
-          Add New Process Type
-        </CustomButton>
-      </DialogActions>
-    </Dialog>
-  );
-};
-
-export const AuditQuestionsSectionAccordion = ({
-  questionGroup,
-  auditAnswers,
-  auditStatus,
-}: {
-  questionGroup: InternalAuditQuestionGroup;
-  auditAnswers: InternalAuditAnswerToQuestions[];
-  auditStatus: ScheduledInternalAuditStatus;
-}) => {
-  const { isTablet } = useIsMobile();
-  const [selectedQuestion, setSelectedQuestion] =
-    useState<InternalAuditQuestion | null>(null);
-  const [openEditQuestionDialog, setOpenEditQuestionDialog] = useState(false);
-
-  return (
-    <>
-      <Accordion>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="panel1-content"
-          id="panel1-header"
-        >
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            sx={{ width: "100%" }}
-          >
-            <Typography component="span">{questionGroup.groupName}</Typography>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                marginX: "1rem",
-              }}
-            >
-              <Typography variant="body2" sx={{ color: "var(--pallet-grey)" }}>
-                {questionGroup.questions.length} Questions
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{ color: "var(--pallet-grey)", marginLeft: "1rem" }}
-              >
-                {questionGroup.questions
-                  ? questionGroup.questions.reduce(
-                      (acc, question) => acc + question.allocatedScore,
-                      0
-                    )
-                  : 0}{" "}
-                Allocated Score
-              </Typography>
-              {auditStatus !== ScheduledInternalAuditStatus.DRAFT && (
-                <>
-                  <Box
-                    sx={{
-                      marginLeft: "1rem",
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                  >
-                    <CircularProgressWithLabel
-                      value={
-                        (auditAnswers.length /
-                          (questionGroup?.questions?.length || 1)) *
-                        100
-                      }
-                    />
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        marginLeft: "0.5rem",
-                      }}
-                    >
-                      Completed
-                    </Typography>
-                  </Box>
-                </>
-              )}
-            </Box>
-          </Stack>
-        </AccordionSummary>
-        <AccordionDetails>
-          <TableContainer
-            sx={{
-              overflowX: "auto",
-              maxWidth: isTablet ? "88vw" : "100%",
-            }}
-          >
-            <Table aria-label="simple table">
-              <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
-                <TableRow>
-                  <TableCell align="center">Color Code</TableCell>
-                  <TableCell align="left">Question</TableCell>
-                  <TableCell align="center">Allocated Score</TableCell>
-                  <TableCell align="center">Status</TableCell>
-                  <TableCell align="center">Rating</TableCell>
-                  <TableCell align="center">Score</TableCell>
-                  <TableCell align="center"></TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {questionGroup?.questions.length === 0 && (
-                  <TableRow key="no-questions">
-                    <TableCell colSpan={3} align="center">
-                      <Typography variant="body2">
-                        No Questions found
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                )}
-                {questionGroup?.questions.map((row) => {
-                  const questionAnswers = auditAnswers.find(
-                    (answer) => answer.questionId === row.queId
-                  );
-
-                  return (
-                    <TableRow key={row.queId}>
-                      <TableCell align="center">
-                        <Typography variant="body2">
-                          {RenderAuditQuestionColorTag(row.colorCode)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell
-                        align="left"
-                        sx={{
-                          marginTop: "0.5rem",
-                        }}
-                      >
-                        <Typography variant="body2">{row.question}</Typography>
-                      </TableCell>
-                      <TableCell
-                        align="center"
-                        sx={{
-                          marginTop: "0.5rem",
-                        }}
-                      >
-                        <Typography variant="body2">
-                          {row.allocatedScore}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        {questionAnswers?.status ?? "--"}
-                      </TableCell>
-                      <TableCell align="center">
-                        {questionAnswers?.rating ?? "--"}
-                      </TableCell>
-                      <TableCell align="center">
-                        {questionAnswers?.score ?? "--"}
-                      </TableCell>
-                      <TableCell align="center">
-                        <IconButton
-                          aria-label="edit"
-                          size="small"
-                          onClick={() => {
-                            setSelectedQuestion(row);
-                            setOpenEditQuestionDialog(true);
-                          }}
-                        >
-                          <EditIcon fontSize="inherit" />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </AccordionDetails>
-      </Accordion>
-      <EditInternalAuditQuestionDialog
-        open={openEditQuestionDialog}
-        setOpen={setOpenEditQuestionDialog}
-        question={selectedQuestion}
-        answer={auditAnswers.find(
-          (answer) => answer.questionId === selectedQuestion?.queId
-        )}
-      />
-    </>
-  );
-};
-
-const EditInternalAuditQuestionDialog = ({
-  open,
-  setOpen,
-  question,
-  answer,
-  onSubmit,
-}: {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  question: InternalAuditQuestion;
-  answer: InternalAuditAnswerToQuestions | null;
-  onSubmit?: (data: InternalAuditAnswerToQuestions) => void;
-}) => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-    control,
-  } = useForm<InternalAuditAnswerToQuestions>({
-    defaultValues: {
-      score: answer?.score ?? null,
-      status: answer?.status ?? null,
-      rating: answer?.rating ?? null,
-    },
-    mode: "onChange",
-    reValidateMode: "onChange",
-  });
-  const { isTablet } = useIsMobile();
-
-  const handleCreateFactory = (
-    data: Partial<InternalAuditAnswerToQuestions>
-  ) => {
-    console.log("Creating factory", { ...data, questionId: question.queId });
-    reset({
-      score: null,
-      status: null,
-      rating: null,
-    });
-    setOpen(false);
-  };
-
-  return (
-    <Dialog
-      open={open}
-      onClose={() => {
-        reset({
-          score: null,
-          status: null,
-          rating: null,
-        });
-        setOpen(false);
-      }}
-      fullScreen={isTablet}
-      fullWidth
-      maxWidth="md"
-      PaperProps={{
-        style: {
-          backgroundColor: grey[50],
-        },
-        component: "form",
-      }}
-    >
-      <DialogTitle
-        sx={{
-          paddingY: "1rem",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Typography variant="h6" component="div">
-          Answer Question
-        </Typography>
-        <IconButton
-          aria-label="open drawer"
-          onClick={() => setOpen(false)}
-          edge="start"
-          sx={{
-            color: "#024271",
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <Divider />
-      <DialogContent>
-        <Stack
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            paddingX: "0.5rem",
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "row",
-            }}
-          >
-            <Box
-              sx={{
-                backgroundColor: "var(--pallet-lighter-grey)",
-                padding: "0.3rem",
-                borderRadius: "0.3rem",
-                display: "flex",
-                alignItems: "center",
-                marginRight: "0.5rem",
-                marginTop: "0.8rem",
-                objectFit: "contain",
-                width: "fit-content",
-                height: "fit-content",
-              }}
-            >
-              {RenderAuditQuestionColorTag(question?.colorCode, "medium")}
-            </Box>
-            <DrawerContentItem label="Question" value={question?.question} />
-          </Box>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "flex-end",
-              marginBottom: "1rem",
-            }}
-          >
-            <Typography variant="caption" sx={{ color: "var(--pallet-grey)" }}>
-              {`${question?.allocatedScore} Allocated Score`}
-            </Typography>
-          </Box>
-          <Box
-            sx={{
-              display: "flex",
-            }}
-          >
-            <Controller
-              name="status"
-              control={control}
-              {...register("status", {
-                required: true,
-              })}
-              render={({ field }) => (
-                <Autocomplete
-                  {...field}
-                  size="small"
-                  options={Object.values(InternalAuditQuestionAnswersStatus)}
-                  onChange={(_, value) => field.onChange(value)}
-                  sx={{ flex: 1, margin: "0.5rem" }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      required
-                      error={!!errors.status}
-                      helperText={errors.status && "Required"}
-                      label="Status"
-                      name="status"
-                    />
-                  )}
-                />
-              )}
-            />
-            <Controller
-              name="rating"
-              control={control}
-              {...register("rating", {
-                required: true,
-              })}
-              render={({ field }) => (
-                <Autocomplete
-                  {...field}
-                  size="small"
-                  options={Object.values(InternalAuditQuestionAnswerRating)}
-                  onChange={(_, value) => field.onChange(value)}
-                  sx={{ flex: 1, margin: "0.5rem" }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      required
-                      error={!!errors.rating}
-                      helperText={errors.rating && "Required"}
-                      label="Rating"
-                      name="rating"
-                    />
-                  )}
-                />
-              )}
-            />
-            <Controller
-              name="score"
-              control={control}
-              rules={{
-                required: "Score is required",
-                min: {
-                  value: 0,
-                  message: "Score must be greater than 0",
-                },
-                max: {
-                  value: question?.allocatedScore,
-                  message: `Score must be less than ${question?.allocatedScore}`,
-                },
-              }}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  required
-                  id="score"
-                  label="Score"
-                  size="small"
-                  fullWidth
-                  type="number"
-                  sx={{ margin: "0.5rem", flex: 1 }}
-                  error={!!errors.score}
-                  helperText={errors.score ? errors.score.message : ""}
-                />
-              )}
-            />
-          </Box>
-        </Stack>
-      </DialogContent>
-      <DialogActions sx={{ padding: "1rem" }}>
-        <Button
-          onClick={() => setOpen(false)}
-          sx={{ color: "var(--pallet-blue)" }}
-        >
-          Cancel
-        </Button>
-        <CustomButton
-          variant="contained"
-          sx={{
-            backgroundColor: "var(--pallet-blue)",
-          }}
-          size="medium"
-          onClick={handleSubmit(handleCreateFactory)}
-        >
-          Submit Answer
-        </CustomButton>
-      </DialogActions>
-    </Dialog>
-  );
-};

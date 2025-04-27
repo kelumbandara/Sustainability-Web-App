@@ -6,7 +6,6 @@ import {
   Divider,
   DialogContent,
   Stack,
-  TextField,
   DialogActions,
   Button,
   CircularProgress,
@@ -19,8 +18,10 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
 import { Controller, useForm } from "react-hook-form";
 import {
+  createActionPlan,
   ScheduledInternalAuditActionPlan,
   ScheduledTaskActionPlanPriority,
+  updateActionPlan,
 } from "../../../api/AuditAndInspection/internalAudit";
 import CustomButton from "../../../components/CustomButton";
 import useIsMobile from "../../../customHooks/useIsMobile";
@@ -29,63 +30,109 @@ import CloseIcon from "@mui/icons-material/Close";
 import DatePickerComponent from "../../../components/DatePickerComponent";
 import UserAutoComplete from "../../../components/UserAutoComplete";
 import { fetchInternalAuditAssignee } from "../../../api/userApi";
+import RichTextComponent from "../../../components/RichTextComponent";
+import theme from "../../../theme";
+import { useEffect } from "react";
 
 export const AddOrEditActionPlan = ({
   open,
-  setOpen,
+  handleClose,
   selectedActionItem,
+  internalAuditId,
 }: {
   open: boolean;
-  setOpen: (open: boolean) => void;
+  handleClose: () => void;
   selectedActionItem: ScheduledInternalAuditActionPlan;
+  internalAuditId: string;
 }) => {
   const {
     register,
     handleSubmit,
     control,
     formState: { errors },
-    getValues,
+    reset,
   } = useForm({
-    defaultValues: {
-      correctiveOrPreventiveAction:
-        selectedActionItem?.correctiveOrPreventiveAction || "",
-      dueDate: selectedActionItem?.dueDate || null,
-      targetCompletionDate: selectedActionItem?.targetCompletionDate || null,
-      priority:
-        selectedActionItem?.priority ?? ScheduledTaskActionPlanPriority.MEDIUM,
-      approver: selectedActionItem?.approver || null,
-    },
     mode: "onChange",
     reValidateMode: "onChange",
   });
   const { isMobile } = useIsMobile();
   const { enqueueSnackbar } = useSnackbar();
 
-  const { data: assigneeData, isFetching: isAssigneeDataFetching } = useQuery({
+  const { data: assigneeData } = useQuery({
     queryKey: ["internal-audit-assignee"],
     queryFn: fetchInternalAuditAssignee,
   });
 
-  // const { mutate: createProcessTypeMutation, isPending } = useMutation({
-  //   mutationFn: createProcessType,
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ["process-types"] });
-  //     enqueueSnackbar("Process Type Created Successfully!", {
-  //       variant: "success",
-  //     });
-  //     setOpen(false);
-  //   },
-  //   onError: () => {
-  //     enqueueSnackbar(`Process Type Create Failed`, {
-  //       variant: "error",
-  //     });
-  //   },
-  // });
+  useEffect(() => {
+    if (selectedActionItem) {
+      reset(selectedActionItem);
+    } else {
+      reset();
+    }
+  }, [selectedActionItem, reset]);
+
+  const handleSubmitActionPlan = async (data: any) => {
+    const actionPlanData: ScheduledInternalAuditActionPlan = {
+      internalAuditId: Number(internalAuditId),
+      correctiveOrPreventiveAction: data.correctiveOrPreventiveAction,
+      dueDate: data.dueDate,
+      targetCompletionDate: data.targetCompletionDate,
+      priority: data.priority,
+      approverId: data.approver?.id,
+    };
+
+    if (selectedActionItem) {
+      actionPlanData.acctionPlanId = selectedActionItem.acctionPlanId;
+      updateActionPlanMutation(actionPlanData);
+    } else {
+      createActionPlanMutation(actionPlanData);
+    }
+  };
+
+  const { mutate: createActionPlanMutation, isPending: isActionPlanCreating } =
+    useMutation({
+      mutationFn: createActionPlan,
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["scheduled-internal-audit"],
+        });
+        enqueueSnackbar("Action Plan Updated Successfully!", {
+          variant: "success",
+        });
+        reset();
+        handleClose();
+      },
+      onError: () => {
+        enqueueSnackbar(`Action Plan Update Failed`, {
+          variant: "error",
+        });
+      },
+    });
+
+  const { mutate: updateActionPlanMutation, isPending: isActionPlanUpdating } =
+    useMutation({
+      mutationFn: updateActionPlan,
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["scheduled-internal-audit"],
+        });
+        enqueueSnackbar("Action Plan Updated Successfully!", {
+          variant: "success",
+        });
+        reset();
+        handleClose();
+      },
+      onError: () => {
+        enqueueSnackbar(`Action Plan Update Failed`, {
+          variant: "error",
+        });
+      },
+    });
 
   return (
     <Dialog
       open={open}
-      onClose={() => setOpen(false)}
+      onClose={() => handleClose()}
       fullScreen={isMobile}
       fullWidth
       maxWidth="md"
@@ -109,7 +156,7 @@ export const AddOrEditActionPlan = ({
         </Typography>
         <IconButton
           aria-label="open drawer"
-          onClick={() => setOpen(false)}
+          onClick={() => handleClose()}
           edge="start"
           sx={{
             color: "#024271",
@@ -137,27 +184,42 @@ export const AddOrEditActionPlan = ({
             >
               Corrective or Preventive Action
             </Typography>
-            {/* <Controller
-              control={control}
-              name={"correctiveOrPreventiveAction"}
-              render={({ field }) => {
-                return (
-                  <RichTextComponent
-                    onChange={(e) => field.onChange(e)}
-                    placeholder={field.value}
-                  />
-                );
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                padding: "0.3rem",
+                margin: "0.2rem",
+                border: errors.correctiveOrPreventiveAction
+                  ? `1px solid ${theme.palette.error.main}`
+                  : "none",
+                borderRadius: "0.5rem",
               }}
-            /> */}
-            <TextField
-              id="correctiveOrPreventiveAction"
-              required
-              label="Factory License No"
-              sx={{ width: "100%" }}
-              error={!!errors.correctiveOrPreventiveAction}
-              size="small"
-              {...register("correctiveOrPreventiveAction", { required: true })}
-            />
+            >
+              <Controller
+                control={control}
+                name={"correctiveOrPreventiveAction"}
+                {...register("correctiveOrPreventiveAction", {
+                  required: true,
+                })}
+                render={({ field }) => {
+                  return (
+                    <RichTextComponent
+                      onChange={(e) => field.onChange(e)}
+                      placeholder={field.value ?? null}
+                    />
+                  );
+                }}
+              />
+              {errors.correctiveOrPreventiveAction && (
+                <Typography
+                  variant="caption"
+                  sx={{ color: theme.palette.error.main, ml: "0.5rem" }}
+                >
+                  Required
+                </Typography>
+              )}
+            </Box>
           </Box>
           <Box sx={{ display: "flex" }}>
             <Box sx={{ margin: "0.5rem", flex: 1 }}>
@@ -280,7 +342,7 @@ export const AddOrEditActionPlan = ({
       </DialogContent>
       <DialogActions sx={{ padding: "1rem" }}>
         <Button
-          onClick={() => setOpen(false)}
+          onClick={() => handleClose()}
           sx={{ color: "var(--pallet-blue)" }}
         >
           Cancel
@@ -291,9 +353,13 @@ export const AddOrEditActionPlan = ({
             backgroundColor: "var(--pallet-blue)",
           }}
           size="medium"
-          // disabled={isPending}
-          // endIcon={isPending ? <CircularProgress size={20} /> : null}
-          onClick={handleSubmit((data) => console.log("data", data))}
+          disabled={isActionPlanCreating || isActionPlanUpdating}
+          endIcon={
+            isActionPlanUpdating || isActionPlanCreating ? (
+              <CircularProgress size={20} />
+            ) : null
+          }
+          onClick={handleSubmit(handleSubmitActionPlan)}
         >
           {selectedActionItem ? "Update New" : "Add New"}
         </CustomButton>

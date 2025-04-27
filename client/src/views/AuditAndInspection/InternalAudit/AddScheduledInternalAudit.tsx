@@ -17,13 +17,9 @@ import { Controller, useForm } from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
 import { grey } from "@mui/material/colors";
 import { useState } from "react";
-import AddIcon from "@mui/icons-material/Add";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../../api/divisionApi";
-import {
-  fetchAllUsers,
-  fetchInternalAuditAssignee,
-} from "../../../api/userApi";
+import { fetchInternalAuditAssignee } from "../../../api/userApi";
 import CustomButton from "../../../components/CustomButton";
 import DatePickerComponent from "../../../components/DatePickerComponent";
 import RichTextComponent from "../../../components/RichTextComponent";
@@ -31,12 +27,8 @@ import UserAutoComplete from "../../../components/UserAutoComplete";
 import useIsMobile from "../../../customHooks/useIsMobile";
 import AutoCheckBox from "../../../components/AutoCheckbox";
 import {
-  createContactPerson,
   createDraftScheduledInternalAudit,
-  createFactory,
-  createProcessType,
   createScheduledInternalAudit,
-  Factory,
   getContactPersonList,
   getFactoryList,
   getInternalAuditFormsList,
@@ -49,6 +41,14 @@ import { fetchDepartmentData } from "../../../api/departmentApi";
 import SwitchButton from "../../../components/SwitchButton";
 import queryClient from "../../../state/queryClient";
 import { useSnackbar } from "notistack";
+import {
+  AddNewFactoryButton,
+  AddNewFactoryDialog,
+} from "./AddNewFactoryDialog";
+import {
+  AddNewProcessTypeButton,
+  AddNewProcessTypeDialog,
+} from "./AddNewProcessTypeDialog";
 
 type DialogProps = {
   open: boolean;
@@ -65,10 +65,7 @@ export default function AddScheduledInternalAudit({
   const [openAddNewProcessTypeDialog, setOpenAddNewProcessTypeDialog] =
     useState(false);
 
-  const {
-    data: internalAuditFormsData,
-    isFetching: isInternalAuditFormsFetching,
-  } = useQuery({
+  const { data: internalAuditFormsData } = useQuery({
     queryKey: ["internal-audit-forms"],
     queryFn: getInternalAuditFormsList,
   });
@@ -91,39 +88,32 @@ export default function AddScheduledInternalAudit({
     reset();
   };
 
-  const { data: userData, isFetching: isUserDataFetching } = useQuery({
-    queryKey: ["users"],
-    queryFn: fetchAllUsers,
-  });
-
-  const { data: factoryData, isFetching: isFactoryDataFetching } = useQuery({
+  const { data: factoryData } = useQuery({
     queryKey: ["factories"],
     queryFn: getFactoryList,
   });
 
-  const { data: processTypesData, isFetching: isProcessTypesDataFetching } =
-    useQuery({
-      queryKey: ["process-types"],
-      queryFn: getProcessTypeList,
-    });
+  const { data: processTypesData } = useQuery({
+    queryKey: ["process-types"],
+    queryFn: getProcessTypeList,
+  });
 
-  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
+  const { data: divisionData } = useQuery({
     queryKey: ["divisions"],
     queryFn: fetchDivision,
   });
 
-  const { data: departmentData, isFetching: isDepartmentDataFetching } =
-    useQuery({
-      queryKey: ["departments"],
-      queryFn: fetchDepartmentData,
-    });
+  const { data: departmentData } = useQuery({
+    queryKey: ["departments"],
+    queryFn: fetchDepartmentData,
+  });
 
   const { data: contactPeopleData } = useQuery({
     queryKey: ["contact-people"],
     queryFn: getContactPersonList,
   });
 
-  const { data: assigneeData, isFetching: isAssigneeDataFetching } = useQuery({
+  const { data: assigneeData } = useQuery({
     queryKey: ["internal-audit-assignee"],
     queryFn: fetchInternalAuditAssignee,
   });
@@ -165,7 +155,10 @@ export default function AddScheduledInternalAudit({
     }
   };
 
-  const { mutate: createInternalScheduleAuditMutation } = useMutation({
+  const {
+    mutate: createInternalScheduleAuditMutation,
+    isPending: isScheduledAuditPending,
+  } = useMutation({
     mutationFn: createScheduledInternalAudit,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["scheduled-internal-audit"] });
@@ -182,7 +175,10 @@ export default function AddScheduledInternalAudit({
     },
   });
 
-  const { mutate: createDraftInternalScheduleAuditMutation } = useMutation({
+  const {
+    mutate: createDraftInternalScheduleAuditMutation,
+    isPending: isDraftAuditCreating,
+  } = useMutation({
     mutationFn: createDraftScheduledInternalAudit,
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -200,58 +196,6 @@ export default function AddScheduledInternalAudit({
       });
     },
   });
-
-  const AddNewFactoryButton = (props) => (
-    <li
-      {...props}
-      variant="contained"
-      style={{
-        backgroundColor: "var(--pallet-lighter-blue)",
-        color: "var(--pallet-blue)",
-        textTransform: "none",
-        margin: "0.5rem",
-        borderRadius: "0.3rem",
-        display: "flex",
-        flexDirection: "row",
-      }}
-      size="small"
-      // onClick closes the menu
-      onMouseDown={() => {
-        setOpenAddNewFactoryDialog(true);
-      }}
-    >
-      <AddIcon />
-      <Typography variant="body2" component="div">
-        Add a new factory
-      </Typography>
-    </li>
-  );
-
-  const AddNewProcessTypeButton = (props) => (
-    <li
-      {...props}
-      variant="contained"
-      style={{
-        backgroundColor: "var(--pallet-lighter-blue)",
-        color: "var(--pallet-blue)",
-        textTransform: "none",
-        margin: "0.5rem",
-        borderRadius: "0.3rem",
-        display: "flex",
-        flexDirection: "row",
-      }}
-      size="small"
-      // onClick closes the menu
-      onMouseDown={() => {
-        setOpenAddNewProcessTypeDialog(true);
-      }}
-    >
-      <AddIcon />
-      <Typography variant="body2" component="div">
-        Add a new process type
-      </Typography>
-    </li>
-  );
 
   const isAuditScheduledForSupplier = watch("isAuditScheduledForSupplier");
 
@@ -527,7 +471,12 @@ export default function AddScheduledInternalAudit({
                       renderOption={(props, option) => (
                         <>
                           {option === "$ADD_NEW_PROCESS_TYPE" ? (
-                            <AddNewProcessTypeButton {...props} />
+                            <AddNewProcessTypeButton
+                              {...props}
+                              onMouseDown={() => {
+                                setOpenAddNewProcessTypeDialog(true);
+                              }}
+                            />
                           ) : (
                             <li {...props} key={option}>
                               {option}
@@ -571,14 +520,19 @@ export default function AddScheduledInternalAudit({
                 }
                 options={[
                   ...(factoryData?.length
-                    ? factoryData.map((fac) => fac.factoryName)
+                    ? factoryData.map((category) => category.factoryName)
                     : []),
                   "$ADD_NEW_FACTORY",
                 ]}
                 renderOption={(props, option) => (
                   <>
                     {option === "$ADD_NEW_FACTORY" ? (
-                      <AddNewFactoryButton {...props} />
+                      <AddNewFactoryButton
+                        {...props}
+                        onMouseDown={() => {
+                          setOpenAddNewFactoryDialog(true);
+                        }}
+                      />
                     ) : (
                       <li {...props} key={option}>
                         {option}
@@ -604,6 +558,10 @@ export default function AddScheduledInternalAudit({
                     selectedFactory?.factoryContactPerson
                   );
                   await setValue(
+                    "factoryContactPersonName",
+                    selectedFactory?.factoryContactPersonName
+                  );
+                  await setValue(
                     "factoryContactPersonId",
                     selectedFactory?.factoryContactPersonId
                   );
@@ -618,7 +576,6 @@ export default function AddScheduledInternalAudit({
                   <TextField
                     {...params}
                     error={!!errors.factoryName}
-                    helperText={errors.factoryName ? "Required" : ""}
                     label="Factory Name"
                     name="factoryName"
                     slotProps={{ inputLabel: { shrink: true } }}
@@ -649,16 +606,18 @@ export default function AddScheduledInternalAudit({
                       </Typography>
                     </>
                   }
+                  value={watch("factoryContactPerson") || null}
                   options={[
                     ...(contactPeopleData?.length ? contactPeopleData : []),
                   ]}
                   getOptionLabel={(option) => option.name || ""}
                   onChange={(_, data) => {
-                    setValue("factoryContactPersonId", data.id);
-                    setValue("factoryContactPerson", data);
+                    setValue("factoryContactPersonId", data?.id || null); // Handle null case
+                    setValue("factoryContactPerson", data || null);
+                    setValue("factoryContactPersonName", data?.name || "");
                   }}
                   renderOption={(props, option) => (
-                    <li {...props} key={option}>
+                    <li {...props} key={option.id || option.name}>
                       {option.name}
                     </li>
                   )}
@@ -842,6 +801,8 @@ export default function AddScheduledInternalAudit({
             border: "1px solid var(--pallet-blue)",
           }}
           size="medium"
+          disabled={isDraftAuditCreating}
+          endIcon={isDraftAuditCreating ? <CircularProgress size={20} /> : null}
           onClick={handleSubmit((data) => {
             handleSubmitInternalAudit(data, true);
           })}
@@ -854,6 +815,10 @@ export default function AddScheduledInternalAudit({
             backgroundColor: "var(--pallet-blue)",
           }}
           size="medium"
+          disabled={isScheduledAuditPending}
+          endIcon={
+            isScheduledAuditPending ? <CircularProgress size={20} /> : null
+          }
           onClick={handleSubmit((data) => {
             handleSubmitInternalAudit(data, false);
           })}
@@ -864,470 +829,3 @@ export default function AddScheduledInternalAudit({
     </Dialog>
   );
 }
-
-const AddNewFactoryDialog = ({
-  open,
-  setOpen,
-}: {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-}) => {
-  const { enqueueSnackbar } = useSnackbar();
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-  } = useForm<Factory>({
-    mode: "onChange",
-    reValidateMode: "onChange",
-  });
-  const [openAddNewContactPersonDialog, setOpenAddNewContactPersonDialog] =
-    useState(false);
-
-  const { data: contactPeopleData } = useQuery({
-    queryKey: ["contact-people"],
-    queryFn: getContactPersonList,
-  });
-
-  const { isMobile } = useIsMobile();
-
-  const { mutate: createFactoryMutation, isPending } = useMutation({
-    mutationFn: createFactory,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["factories"] });
-      enqueueSnackbar("Factory Created Successfully!", {
-        variant: "success",
-      });
-      setOpen(false);
-    },
-    onError: () => {
-      enqueueSnackbar(`Factory Create Failed`, {
-        variant: "error",
-      });
-    },
-  });
-
-  const AddNewContactPersonButton = (props) => (
-    <li
-      {...props}
-      variant="contained"
-      style={{
-        backgroundColor: "var(--pallet-lighter-blue)",
-        color: "var(--pallet-blue)",
-        textTransform: "none",
-        margin: "0.5rem",
-        borderRadius: "0.3rem",
-        display: "flex",
-        flexDirection: "row",
-      }}
-      size="small"
-      // onClick closes the menu
-      onMouseDown={() => {
-        setOpenAddNewContactPersonDialog(true);
-      }}
-    >
-      <AddIcon />
-      <Typography variant="body2" component="div">
-        Add a new contact person
-      </Typography>
-    </li>
-  );
-
-  const AddNewContactPersonDialog = () => {
-    const { register, handleSubmit } = useForm();
-    const { enqueueSnackbar } = useSnackbar();
-
-    const { mutate: createContactPersonMutation, isPending } = useMutation({
-      mutationFn: createContactPerson,
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["contact-people"] });
-        enqueueSnackbar("Contact Person Created Successfully!", {
-          variant: "success",
-        });
-        setOpenAddNewContactPersonDialog(false);
-      },
-      onError: () => {
-        enqueueSnackbar(`Contact Person Create Failed`, {
-          variant: "error",
-        });
-      },
-    });
-
-    return (
-      <Dialog
-        open={openAddNewContactPersonDialog}
-        onClose={() => setOpenAddNewContactPersonDialog(false)}
-        fullScreen={isMobile}
-        fullWidth
-        maxWidth="xs"
-        PaperProps={{
-          style: {
-            backgroundColor: grey[50],
-          },
-          component: "form",
-        }}
-      >
-        <DialogTitle
-          sx={{
-            paddingY: "1rem",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <Typography variant="h6" component="div">
-            Add New Contact Person
-          </Typography>
-          <IconButton
-            aria-label="open drawer"
-            onClick={() => setOpenAddNewContactPersonDialog(false)}
-            edge="start"
-            sx={{
-              color: "#024271",
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <Divider />
-        <DialogContent>
-          <Stack
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <TextField
-              {...register("name", { required: true })}
-              required
-              id="name"
-              label="name"
-              size="small"
-              fullWidth
-              sx={{ marginBottom: "0.5rem" }}
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions sx={{ padding: "1rem" }}>
-          <Button
-            onClick={() => setOpenAddNewContactPersonDialog(false)}
-            sx={{ color: "var(--pallet-blue)" }}
-          >
-            Cancel
-          </Button>
-          <CustomButton
-            variant="contained"
-            sx={{
-              backgroundColor: "var(--pallet-blue)",
-            }}
-            size="medium"
-            disabled={isPending}
-            endIcon={isPending ? <CircularProgress size={20} /> : null}
-            onClick={handleSubmit((data) => createContactPersonMutation(data))}
-          >
-            Add Contact Person
-          </CustomButton>
-        </DialogActions>
-      </Dialog>
-    );
-  };
-
-  return (
-    <Dialog
-      open={open}
-      onClose={() => setOpen(false)}
-      fullScreen={isMobile}
-      fullWidth
-      maxWidth="sm"
-      PaperProps={{
-        style: {
-          backgroundColor: grey[50],
-        },
-        component: "form",
-      }}
-    >
-      <DialogTitle
-        sx={{
-          paddingY: "1rem",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Typography variant="h6" component="div">
-          Add a new factory
-        </Typography>
-        <IconButton
-          aria-label="open drawer"
-          onClick={() => setOpen(false)}
-          edge="start"
-          sx={{
-            color: "#024271",
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <Divider />
-      <DialogContent>
-        <Stack
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <Box
-            sx={{
-              margin: "0.5rem",
-            }}
-          >
-            <TextField
-              {...register("factoryName", { required: true })}
-              required
-              id="factoryName"
-              label="Factory Name"
-              size="small"
-              fullWidth
-              error={!!errors.factoryName}
-              helperText={errors.factoryName ? "Required" : ""}
-            />
-          </Box>
-          <Box
-            sx={{
-              margin: "0.5rem",
-            }}
-          >
-            <TextField
-              {...register("factoryEmail", { required: true })}
-              required
-              id="factoryEmail"
-              label="Factory Email"
-              size="small"
-              fullWidth
-              error={!!errors.factoryEmail}
-              helperText={errors.factoryEmail ? "Required" : ""}
-              type="email"
-            />
-          </Box>
-          <Box
-            sx={{
-              margin: "0.5rem",
-            }}
-          >
-            <TextField
-              {...register("factoryAddress", { required: true })}
-              required
-              id="factoryAddress"
-              label="Factory Address"
-              size="small"
-              fullWidth
-              error={!!errors.factoryAddress}
-              helperText={errors.factoryAddress ? "Required" : ""}
-            />
-          </Box>
-          <Box
-            sx={{
-              display: "flex",
-            }}
-          >
-            <TextField
-              {...register("factoryContactNumber", { required: true })}
-              required
-              id="factoryContactNumber"
-              label="Contact Number"
-              type="number"
-              size="small"
-              fullWidth
-              sx={{
-                margin: "0.5rem",
-              }}
-              error={!!errors.factoryContactNumber}
-              helperText={errors.factoryContactNumber ? "Required" : ""}
-            />
-            <TextField
-              {...register("designation", { required: true })}
-              required
-              id="designation"
-              label="Designation"
-              size="small"
-              fullWidth
-              sx={{ margin: "0.5rem" }}
-              error={!!errors.designation}
-              helperText={errors.designation ? "Required" : ""}
-            />
-          </Box>
-          <Box sx={{ flex: 1, margin: "0.5rem" }}>
-            <Autocomplete
-              {...register("factoryContactPerson", { required: true })}
-              size="small"
-              noOptionsText={
-                <>
-                  <Typography variant="body2" color="inherit" gutterBottom>
-                    No matching Items
-                  </Typography>
-                </>
-              }
-              options={[
-                ...(contactPeopleData?.length ? contactPeopleData : []),
-                "$ADD_NEW_CONTACT_PERSON",
-              ]}
-              getOptionLabel={(option) => option.name || ""}
-              onChange={(_, data) => {
-                setValue("factoryContactPersonId", data.id);
-                setValue("factoryContactPerson", data);
-              }}
-              renderOption={(props, option) => (
-                <>
-                  {option === "$ADD_NEW_CONTACT_PERSON" ? (
-                    <AddNewContactPersonButton {...props} />
-                  ) : (
-                    <li {...props} key={option}>
-                      {option.name}
-                    </li>
-                  )}
-                </>
-              )}
-              sx={{ flex: 1 }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  error={!!errors.factoryContactPerson}
-                  label="Factory Contact Person"
-                  name="factoryContactPerson"
-                />
-              )}
-            />
-          </Box>
-        </Stack>
-      </DialogContent>
-      <DialogActions sx={{ padding: "1rem" }}>
-        <Button
-          onClick={() => setOpen(false)}
-          sx={{ color: "var(--pallet-blue)" }}
-        >
-          Cancel
-        </Button>
-        <CustomButton
-          variant="contained"
-          sx={{
-            backgroundColor: "var(--pallet-blue)",
-          }}
-          size="medium"
-          onClick={handleSubmit((data) => createFactoryMutation(data))}
-          disabled={isPending}
-          endIcon={isPending ? <CircularProgress size={20} /> : null}
-        >
-          Add Factory
-        </CustomButton>
-      </DialogActions>
-      <AddNewContactPersonDialog />
-    </Dialog>
-  );
-};
-
-const AddNewProcessTypeDialog = ({
-  open,
-  setOpen,
-}: {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-}) => {
-  const { register, handleSubmit } = useForm();
-  const { isMobile } = useIsMobile();
-  const { enqueueSnackbar } = useSnackbar();
-
-  const { mutate: createProcessTypeMutation, isPending } = useMutation({
-    mutationFn: createProcessType,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["process-types"] });
-      enqueueSnackbar("Process Type Created Successfully!", {
-        variant: "success",
-      });
-      setOpen(false);
-    },
-    onError: () => {
-      enqueueSnackbar(`Process Type Create Failed`, {
-        variant: "error",
-      });
-    },
-  });
-
-  return (
-    <Dialog
-      open={open}
-      onClose={() => setOpen(false)}
-      fullScreen={isMobile}
-      fullWidth
-      maxWidth="sm"
-      PaperProps={{
-        style: {
-          backgroundColor: grey[50],
-        },
-        component: "form",
-      }}
-    >
-      <DialogTitle
-        sx={{
-          paddingY: "1rem",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Typography variant="h6" component="div">
-          Add New Process Type
-        </Typography>
-        <IconButton
-          aria-label="open drawer"
-          onClick={() => setOpen(false)}
-          edge="start"
-          sx={{
-            color: "#024271",
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <Divider />
-      <DialogContent>
-        <Stack
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <TextField
-            {...register("processType", { required: true })}
-            required
-            id="processType"
-            label="processType"
-            size="small"
-            fullWidth
-            sx={{ marginBottom: "0.5rem" }}
-          />
-        </Stack>
-      </DialogContent>
-      <DialogActions sx={{ padding: "1rem" }}>
-        <Button
-          onClick={() => setOpen(false)}
-          sx={{ color: "var(--pallet-blue)" }}
-        >
-          Cancel
-        </Button>
-        <CustomButton
-          variant="contained"
-          sx={{
-            backgroundColor: "var(--pallet-blue)",
-          }}
-          size="medium"
-          disabled={isPending}
-          endIcon={isPending ? <CircularProgress size={20} /> : null}
-          onClick={handleSubmit((data) => createProcessTypeMutation(data))}
-        >
-          Add Process Type
-        </CustomButton>
-      </DialogActions>
-    </Dialog>
-  );
-};

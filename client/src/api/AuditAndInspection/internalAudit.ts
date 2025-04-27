@@ -14,10 +14,10 @@ export enum SupplierType {
 }
 
 export enum ScheduledInternalAuditStatus {
-  DRAFT = "Draft",
-  SCHEDULED = "Scheduled",
-  IN_PROGRESS = "In Progress",
-  COMPLETED = "Completed",
+  DRAFT = "draft",
+  SCHEDULED = "scheduled",
+  ONGOING = "ongoing",
+  COMPLETED = "completed",
 }
 
 export enum QuestionColorCodes {
@@ -135,7 +135,10 @@ export const auditeeSchema = z.object({
 export type Auditee = z.infer<typeof auditeeSchema>;
 
 export const InternalAuditAnswerToQuestionsSchema = z.object({
-  id: z.string().optional(),
+  answerId: z.string().optional(),
+  internalAuditId: z.string().optional(),
+  questionRecoId: z.number().optional(),
+  queGroupId: z.number().optional(),
   questionId: z.number().optional(),
   score: z.number(),
   status: z.nativeEnum(InternalAuditQuestionAnswersStatus).optional(),
@@ -146,46 +149,47 @@ export type InternalAuditAnswerToQuestions = z.infer<
   typeof InternalAuditAnswerToQuestionsSchema
 >;
 
-export const ScheduledInternalAuditQuestionGroupAnswersSchema = z.object({
-  id: z.string().optional(),
-  auditId: z.string().optional(),
-  questionGroupId: z.number().optional(),
-  answers: z.array(InternalAuditAnswerToQuestionsSchema).optional(),
-});
-
-export type ScheduledInternalAuditQuestionAnswers = z.infer<
-  typeof ScheduledInternalAuditQuestionGroupAnswersSchema
->;
-
 export const ScheduledInternalAuditActionPlanSchema = z.object({
-  id: z.string().optional(),
-  scheduledAuditId: z.string(),
+  acctionPlanId: z.string().optional(),
+  internalAuditId: z.number(),
   correctiveOrPreventiveAction: z.string(),
   priority: z.nativeEnum(ScheduledTaskActionPlanPriority).optional(),
   dueDate: z.date(),
-  createdAt: z.date(),
+  created_at: z.date(),
+  updated_at: z.date().optional(),
   targetCompletionDate: z.date(),
   approver: userSchema.optional(),
+  approverId: z.string().optional(),
 });
 
 export type ScheduledInternalAuditActionPlan = z.infer<
   typeof ScheduledInternalAuditActionPlanSchema
 >;
 
+export const InternalAuditDepartmentSchema = z.object({
+  id: z.string().optional(),
+  department: z.string(),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
+});
+
+export type InternalAuditDepartment = z.infer<
+  typeof InternalAuditDepartmentSchema
+>;
+
 export const ScheduledInternalAuditSchema = z.object({
   id: z.string().optional(),
+  referenceNumber: z.string(),
   auditDate: z.date(),
   division: z.string(),
-  department: z.array(z.string()),
+  department: z.array(InternalAuditDepartmentSchema),
   audit: InternalAuditSchema,
   auditId: z.string(),
   auditType: z.nativeEnum(InternalAuditType),
   answeredQuestionCount: z.number().optional(),
   earnedScore: z.number().optional(),
   earnedScorePercentage: z.number().optional(),
-  auditAnswers: z
-    .array(ScheduledInternalAuditQuestionGroupAnswersSchema)
-    .optional(),
+  answers: z.array(InternalAuditAnswerToQuestionsSchema).optional(),
   rating: z.nativeEnum(InternalAuditRating).optional(),
   isAuditScheduledForSupplier: z.boolean(),
   factoryName: z.string(),
@@ -194,6 +198,7 @@ export const ScheduledInternalAuditSchema = z.object({
   factoryAddress: z.string(),
   factoryEmail: z.string(),
   factoryContactPerson: ContactPersonSchema,
+  factoryContactPersonName: z.string(),
   factoryContactPersonId: z.string(),
   factoryContactNumber: z.string(),
   supplierType: z.nativeEnum(SupplierType).optional(),
@@ -210,7 +215,8 @@ export const ScheduledInternalAuditSchema = z.object({
   approverId: z.string(),
   dateForApproval: z.date(),
   status: z.nativeEnum(ScheduledInternalAuditStatus).optional(),
-  createdAt: z.date(),
+  created_at: z.date(),
+  updated_at: z.date(),
   createdBy: userSchema,
   auditStatus: z.string().optional(),
   actionPlan: z.array(ScheduledInternalAuditActionPlanSchema).optional(),
@@ -322,7 +328,7 @@ export async function createContactPerson(data: Partial<ContactPerson>) {
 }
 
 export async function createDraftScheduledInternalAudit(
-  data: Partial<InternalAudit>
+  data: Partial<ScheduledInternalAudit>
 ) {
   const res = await axios.post("/api/internal-audit-draft", {
     ...data,
@@ -330,11 +336,77 @@ export async function createDraftScheduledInternalAudit(
   return res.data;
 }
 
+export async function updateDraftScheduledInternalAudit(
+  data: Partial<ScheduledInternalAudit>
+) {
+  const res = await axios.post(`/api/internal-audit-draft/${data.id}/update`, {
+    ...data,
+  });
+  return res.data;
+}
+
 export async function createScheduledInternalAudit(
-  data: Partial<InternalAudit>
+  data: Partial<ScheduledInternalAudit>
 ) {
   const res = await axios.post("/api/internal-audit-scheduled", {
     ...data,
   });
+  return res.data;
+}
+
+export async function updateScheduledInternalAudit(
+  data: Partial<ScheduledInternalAudit>
+) {
+  const res = await axios.post(
+    `/api/internal-audit-scheduled/${data.id}/update`,
+    {
+      ...data,
+    }
+  );
+  return res.data;
+}
+
+export async function updateOngoingInternalAudit(
+  data: Partial<ScheduledInternalAudit>
+) {
+  const res = await axios.post(
+    `/api/internal-audit-ongoing/${data.id}/update`,
+    {
+      ...data,
+    }
+  );
+  return res.data;
+}
+
+export async function completeInternalAudit(
+  data: Partial<ScheduledInternalAudit>
+) {
+  const res = await axios.post(
+    `/api/internal-audit-completed/${data.id}/update`,
+    {
+      ...data,
+    }
+  );
+  return res.data;
+}
+
+export async function createActionPlan(
+  data: Partial<ScheduledInternalAuditActionPlan>
+) {
+  const res = await axios.post(`/api/internal-audit-action-plan`, {
+    ...data,
+  });
+  return res.data;
+}
+
+export async function updateActionPlan(
+  data: Partial<ScheduledInternalAuditActionPlan>
+) {
+  const res = await axios.post(
+    `/api/internal-audit-action-plan/${data.internalAuditId}/update`,
+    {
+      ...data,
+    }
+  );
   return res.data;
 }

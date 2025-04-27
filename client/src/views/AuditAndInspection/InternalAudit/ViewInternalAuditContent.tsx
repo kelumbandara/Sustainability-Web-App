@@ -19,10 +19,11 @@ import {
   Typography,
 } from "@mui/material";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { DrawerContentItem } from "../../../components/ViewDataDrawer";
 import useIsMobile from "../../../customHooks/useIsMobile";
 import {
+  getScheduledInternalAuditList,
   InternalAuditAnswerToQuestions,
   InternalAuditQuestionGroup,
   ScheduledInternalAudit,
@@ -40,6 +41,7 @@ import { RenderAuditQuestionColorTag } from "../AuditBuilder/InternalAuditFormDr
 import { CircularProgressWithLabel } from "../../../components/CircularProgressWithLabel";
 import CustomButton from "../../../components/CustomButton";
 import { AddOrEditActionPlan } from "./AddOrEditActionPlan";
+import { useQuery } from "@tanstack/react-query";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -73,8 +75,10 @@ function a11yProps(index: number) {
 
 function ViewInternalAuditContent({
   internalAudit,
+  handleClose,
 }: {
   internalAudit: ScheduledInternalAudit;
+  handleClose: () => void;
 }) {
   const [activeTab, setActiveTab] = useState(0);
   const [openActionItemDialog, setOpenActionItemDialog] = useState(false);
@@ -85,6 +89,28 @@ function ViewInternalAuditContent({
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
   };
+
+  const { isFetching: isScheduledInternalAuditDataFetching } = useQuery({
+    queryKey: ["scheduled-internal-audit"],
+    queryFn: getScheduledInternalAuditList,
+  });
+
+  const totalAnsweredQuestions = useMemo(
+    () => internalAudit?.answers?.length ?? 0,
+    [internalAudit]
+  );
+
+  const earnedScore = useMemo(() => {
+    const totalScore = internalAudit?.answers?.reduce(
+      (acc, answer) => acc + answer.score,
+      0
+    );
+    return totalScore ?? 0;
+  }, [internalAudit]);
+
+  const percentageAchieved = useMemo(() => {
+    return (earnedScore / internalAudit?.audit?.achievableScore) * 100 || 0;
+  }, [earnedScore, internalAudit]);
 
   return (
     <Stack
@@ -113,7 +139,10 @@ function ViewInternalAuditContent({
           }}
         >
           <Box sx={{ flex: 1 }}>
-            <DrawerContentItem label="Reference" value={internalAudit.id} />
+            <DrawerContentItem
+              label="Reference"
+              value={internalAudit.referenceNumber}
+            />
             <DrawerContentItem
               label="Audit Name"
               value={internalAudit.audit.name}
@@ -121,8 +150,12 @@ function ViewInternalAuditContent({
           </Box>
           <Box sx={{ flex: 1 }}>
             <DrawerContentItem
-              label="Audit Progress"
-              value={internalAudit.auditStatus}
+              label="Audit Date"
+              value={
+                internalAudit?.auditDate
+                  ? format(new Date(internalAudit?.auditDate), "dd/MM/yyyy")
+                  : "--"
+              }
             />
             <Box
               sx={{
@@ -249,10 +282,10 @@ function ViewInternalAuditContent({
                 }
               />
               <DrawerContentItem
-                label="Reported Date"
+                label="Last Updated Date"
                 value={
-                  internalAudit.createdAt
-                    ? format(new Date(internalAudit.createdAt), "yyyy-MM-dd")
+                  internalAudit.updated_at
+                    ? format(new Date(internalAudit.updated_at), "yyyy-MM-dd")
                     : "N/A"
                 }
               />
@@ -275,7 +308,7 @@ function ViewInternalAuditContent({
                   <TableCell align="center">Achievable Score</TableCell>
                   <TableCell align="center">Earned Score</TableCell>
                   <TableCell align="center">% Achieved</TableCell>
-                  <TableCell align="center">Rating</TableCell>
+                  {/* <TableCell align="center">Rating</TableCell> */}
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -289,20 +322,23 @@ function ViewInternalAuditContent({
                     {internalAudit.audit?.totalNumberOfQuestions}
                   </TableCell>
                   <TableCell align="center">
-                    {internalAudit?.answeredQuestionCount ?? "--"}
+                    {/* {internalAudit?.answeredQuestionCount ?? "--"} */}
+                    {totalAnsweredQuestions ?? "--"}
                   </TableCell>
                   <TableCell align="center">
                     {internalAudit.audit.achievableScore}
                   </TableCell>
                   <TableCell align="center">
-                    {internalAudit?.earnedScore ?? "--"}
+                    {/* {internalAudit?.earnedScore ?? "--"} */}
+                    {earnedScore ?? "--"}
                   </TableCell>
                   <TableCell align="center">
-                    {internalAudit?.earnedScorePercentage ?? "--"}
+                    {/* {internalAudit?.earnedScorePercentage ?? "--"} */}
+                    {percentageAchieved.toFixed(2)}%
                   </TableCell>
-                  <TableCell align="center">
+                  {/* <TableCell align="center">
                     {internalAudit?.rating ?? "--"}
-                  </TableCell>
+                  </TableCell> */}
                 </TableRow>
               </TableBody>
             </Table>
@@ -321,11 +357,7 @@ function ViewInternalAuditContent({
               <AuditQuestionsSectionAccordion
                 key={group.queGroupId}
                 questionGroup={group}
-                auditAnswers={
-                  internalAudit?.auditAnswers?.find(
-                    (answer) => answer.questionGroupId === group.queGroupId
-                  )?.answers ?? []
-                }
+                auditAnswers={internalAudit?.answers ?? []}
                 auditStatus={internalAudit.status}
               />
             ))}
@@ -340,53 +372,61 @@ function ViewInternalAuditContent({
                 </Alert>
               </Box>
             )}
-            <Stack spacing={1}>
-              {internalAudit?.actionPlan?.map((actionPlan) => (
-                <ActionPlanItem
-                  key={actionPlan.id}
-                  actionPlan={actionPlan}
-                  onClickEdit={() => {
-                    setSelectedActionItem(actionPlan);
-                    setOpenActionItemDialog(true);
-                  }}
-                />
-              ))}
-              <Box
-                sx={{
-                  flex: 1,
-                  display: "flex",
-                  justifyContent: "flex-end",
-                }}
-              >
-                <CustomButton
-                  variant="contained"
+            {isScheduledInternalAuditDataFetching ? (
+              <Box sx={{ padding: "1rem" }}>
+                <Alert variant="standard" severity="info">
+                  Loading Action Plans...
+                </Alert>
+              </Box>
+            ) : (
+              <Stack spacing={1}>
+                {internalAudit?.actionPlan?.map((actionPlan, index) => (
+                  <ActionPlanItem
+                    key={`${actionPlan.acctionPlanId}${actionPlan.internalAuditId}${index}`}
+                    actionPlan={actionPlan}
+                    onClickEdit={() => {
+                      setSelectedActionItem(actionPlan);
+                      setOpenActionItemDialog(true);
+                    }}
+                  />
+                ))}
+                <Box
                   sx={{
-                    backgroundColor: "var(--pallet-blue)",
-                    objectFit: "contain",
-                    marginTop: "1rem",
-                  }}
-                  size="medium"
-                  onClick={() => {
-                    setSelectedActionItem(null);
-                    setOpenActionItemDialog(true);
+                    flex: 1,
+                    display: "flex",
+                    justifyContent: "flex-end",
                   }}
                 >
-                  Add New Action
-                </CustomButton>
-              </Box>
-            </Stack>
+                  <CustomButton
+                    variant="contained"
+                    sx={{
+                      backgroundColor: "var(--pallet-blue)",
+                      objectFit: "contain",
+                      marginTop: "1rem",
+                    }}
+                    size="medium"
+                    onClick={() => {
+                      setSelectedActionItem(null);
+                      setOpenActionItemDialog(true);
+                    }}
+                  >
+                    Add New Action
+                  </CustomButton>
+                </Box>
+              </Stack>
+            )}
           </TabPanel>
         )}
       </Box>
       <AddOrEditActionPlan
         open={openActionItemDialog}
-        setOpen={(state) => {
-          if (!state) {
-            setSelectedActionItem(null);
-          }
-          setOpenActionItemDialog(state);
+        handleClose={() => {
+          setSelectedActionItem(null);
+          setOpenActionItemDialog(false);
+          handleClose();
         }}
         selectedActionItem={selectedActionItem}
+        internalAuditId={internalAudit.id}
       />
     </Stack>
   );
@@ -404,6 +444,14 @@ export const AuditQuestionsSectionAccordion = ({
   auditStatus: ScheduledInternalAuditStatus;
 }) => {
   const { isMobile } = useIsMobile();
+
+  const groupAnswers = useMemo(
+    () =>
+      auditAnswers.filter(
+        (answer) => answer.queGroupId === questionGroup.queGroupId
+      ),
+    [auditAnswers, questionGroup]
+  );
 
   return (
     <Accordion>
@@ -452,7 +500,7 @@ export const AuditQuestionsSectionAccordion = ({
                 >
                   <CircularProgressWithLabel
                     value={
-                      (auditAnswers.length /
+                      (groupAnswers?.length /
                         (questionGroup?.questions?.length || 1)) *
                       100
                     }
@@ -502,7 +550,7 @@ export const AuditQuestionsSectionAccordion = ({
                 </TableRow>
               )}
               {questionGroup?.questions.map((row) => {
-                const questionAnswers = auditAnswers.find(
+                const questionAnswers = groupAnswers?.find(
                   (answer) => answer.questionId === row.queId
                 );
 
@@ -597,7 +645,7 @@ const ActionPlanItem = ({
             label="Due date"
             value={
               actionPlan?.dueDate
-                ? format(actionPlan?.dueDate, "dd/MM/yyyy")
+                ? format(new Date(actionPlan?.dueDate), "dd/MM/yyyy")
                 : "--"
             }
           />
@@ -611,7 +659,10 @@ const ActionPlanItem = ({
             label="Target Completion date"
             value={
               actionPlan?.targetCompletionDate
-                ? format(actionPlan?.targetCompletionDate, "dd/MM/yyyy")
+                ? format(
+                    new Date(actionPlan?.targetCompletionDate),
+                    "dd/MM/yyyy"
+                  )
                 : "--"
             }
           />
@@ -628,7 +679,10 @@ const ActionPlanItem = ({
           }}
         >
           <Typography variant="caption" sx={{ color: "var(--pallet-grey)" }}>
-            {`Created on ${format(actionPlan.createdAt, "dd/MM/yyyy")}`}
+            {`Last updated on ${format(
+              new Date(actionPlan.updated_at),
+              "dd/MM/yyyy"
+            )}`}
           </Typography>
         </Box>
       </Box>
