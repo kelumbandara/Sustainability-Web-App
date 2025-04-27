@@ -798,7 +798,7 @@ export default function AddOrEditSustainabilityDialog({
                     >
                       Previous
                     </CustomButton>
-                    <CustomButton
+                    {/* <CustomButton
                       variant="contained"
                       sx={{
                         backgroundColor: "var(--pallet-blue)",
@@ -811,7 +811,7 @@ export default function AddOrEditSustainabilityDialog({
                       endIcon={<ArrowForwardIcon />}
                     >
                       Next
-                    </CustomButton>
+                    </CustomButton> */}
                   </Box>
                 </Stack>
               </TabPanel>
