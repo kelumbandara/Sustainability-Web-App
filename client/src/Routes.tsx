@@ -95,6 +95,10 @@ const SustainabilityTable = React.lazy(
 );
 
 //Environment
+const TargetSettingsTable = React.lazy(
+  () => import("./views/Environment/TargetSettings/TargetSettingsTable")
+);
+
 const EnvironmentTable = React.lazy(
   () => import("./views/Environment/Consumption/ConsumptionTable")
 );
@@ -500,15 +504,25 @@ const AppRoutes = () => {
         />
         <Route
           path="/environment/history/target-setting"
-          element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="Environment > History > Target Settings" />
-          ))}
+          element={withLayout(
+            MainLayout,
+            TargetSettingsTable,
+            !userPermissionObject?.[
+              PermissionKeys.ENVIRONMENT_HISTORY_TARGET_SETTING_VIEW
+            ]
+          )}
         />
         <Route
           path="/environment/assigned-tasks/target-setting"
-          element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="Environment > Assign Tasks > Target Settings" />
-          ))}
+          element={withLayout(
+            MainLayout,
+            () => (
+              <TargetSettingsTable isAssignedTasks={true} />
+            ),
+            !userPermissionObject?.[
+              PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_TARGET_SETTING_VIEW
+            ]
+          )}
         />
         <Route
           path="/environment/history/consumption"
