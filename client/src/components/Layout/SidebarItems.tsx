@@ -56,7 +56,6 @@ export const sidebarItems: Array<SidebarItem> = [
     href: "/home",
     icon: <HomeIcon fontSize="small" />,
     accessKey: PermissionKeys.INSIGHT_VIEW,
-    // Add the data-cy attribute here
   },
   {
     headline: "Administration",
@@ -139,7 +138,7 @@ export const sidebarItems: Array<SidebarItem> = [
     title: "Sustainability",
     href: "/sustainability",
     icon: <SpaIcon fontSize="small" />,
-    disabled: true,
+    disabled: false,
     nestedItems: [
       {
         title: "Register",
@@ -153,7 +152,7 @@ export const sidebarItems: Array<SidebarItem> = [
     title: "Environment",
     href: "/environment",
     icon: <ForestIcon fontSize="small" />,
-    disabled: true,
+    disabled: false,
     nestedItems: [
       {
         title: "Dashboard",
@@ -184,7 +183,7 @@ export const sidebarItems: Array<SidebarItem> = [
         title: "Assigned Tasks",
         href: "/environment/assigned-tasks",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-        disabled: true,
+        disabled: false,
         nestedItems: [
           {
             title: "Consumption",
@@ -343,46 +342,46 @@ export const sidebarItems: Array<SidebarItem> = [
     icon: <FolderIcon fontSize="small" />,
     accessKey: PermissionKeys.DOCUMENT_REGISTER_VIEW,
   },
-  {
-    title: "Equipment MNG",
-    href: "/equipment-mng",
-    icon: <ConstructionIcon fontSize="small" />,
-    disabled: true,
-    nestedItems: [
-      {
-        title: "Equipment",
-        href: "/equipment-mng/equipment",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-        nestedItems: [
-          {
-            title: "Register",
-            href: "/equipment-mng/equipment/register",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-          },
-          {
-            title: "Create",
-            href: "/equipment-mng/equipment/create",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-          },
-        ],
-      },
-      {
-        title: "Client",
-        href: "/equipment-mng/client",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-      },
-      {
-        title: "GEO Tag",
-        href: "/equipment-mng/geo-tag",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-      },
-      {
-        title: "Inspection Template",
-        href: "/equipment-mng/inspection-template",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-      },
-    ],
-  },
+  // {
+  //   title: "Equipment MNG",
+  //   href: "/equipment-mng",
+  //   icon: <ConstructionIcon fontSize="small" />,
+  //   disabled: true,
+  //   nestedItems: [
+  //     {
+  //       title: "Equipment",
+  //       href: "/equipment-mng/equipment",
+  //       icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+  //       nestedItems: [
+  //         {
+  //           title: "Register",
+  //           href: "/equipment-mng/equipment/register",
+  //           icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+  //         },
+  //         {
+  //           title: "Create",
+  //           href: "/equipment-mng/equipment/create",
+  //           icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       title: "Client",
+  //       href: "/equipment-mng/client",
+  //       icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+  //     },
+  //     {
+  //       title: "GEO Tag",
+  //       href: "/equipment-mng/geo-tag",
+  //       icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+  //     },
+  //     {
+  //       title: "Inspection Template",
+  //       href: "/equipment-mng/inspection-template",
+  //       icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+  //     },
+  //   ],
+  // },
   {
     title: "Occupational Health",
     href: "/occupational-health",

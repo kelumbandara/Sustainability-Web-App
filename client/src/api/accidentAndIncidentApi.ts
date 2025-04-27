@@ -193,6 +193,7 @@ export const IncidentSchema = z.object({
   factors: z.nativeEnum(IncidentFactors),
   causes: z.string().optional(),
   createdByUser: z.string(),
+  removeDoc: z.array(z.string()).optional(),
 });
 
 export type Incident = z.infer<typeof IncidentSchema>;

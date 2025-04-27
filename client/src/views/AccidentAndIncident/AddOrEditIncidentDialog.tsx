@@ -61,6 +61,8 @@ import { fetchTypeOfConcerns } from "../../api/typeOfConcern";
 import { fetchAllFactors } from "../../api/incidentFactorsApi";
 import { fetchAllCircumstances } from "../../api/circumstancesApi";
 import UserAutoComplete from "../../components/UserAutoComplete";
+import { ExistingFileItemsEdit } from "../../components/ExistingFileItemsEdit";
+import { StorageFile } from "../../utils/StorageFiles.util";
 
 type DialogProps = {
   open: boolean;
@@ -114,6 +116,11 @@ export default function AddOrEditIncidentDialog({
   const [selectedWitness, setSelectedWitness] = useState<AccidentWitness>(null);
   const [selectedPerson, setSelectedPerson] =
     useState<AccidentEffectedIndividual>(null);
+  const [existingFiles, setExistingFiles] = useState<StorageFile[]>(
+    defaultValues?.evidence as StorageFile[]
+  );
+  const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
+
   const { user } = useCurrentUser();
 
   const { data: userData } = useQuery({
@@ -147,10 +154,10 @@ export default function AddOrEditIncidentDialog({
       queryFn: fetchAllCircumstances,
     });
 
-    const { data: asigneeData, isFetching: isAssigneeDataFetching } = useQuery({
-      queryKey: ["incident-assignee"],
-      queryFn: fetchIncidentAssignee,
-    });
+  const { data: asigneeData, isFetching: isAssigneeDataFetching } = useQuery({
+    queryKey: ["incident-assignee"],
+    queryFn: fetchIncidentAssignee,
+  });
 
   const {
     register,
@@ -190,6 +197,7 @@ export default function AddOrEditIncidentDialog({
     submitData.createdByUser = user.id;
     submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
     submitData.evidence = files;
+    if (filesToRemove?.length > 0) submitData.removeDoc = filesToRemove;
     onSubmit(submitData as Incident);
   };
 
@@ -406,8 +414,8 @@ export default function AddOrEditIncidentDialog({
                           options={
                             divisionData?.length
                               ? divisionData.map(
-                                (division) => division.divisionName
-                              )
+                                  (division) => division.divisionName
+                                )
                               : []
                           }
                           sx={{ flex: 1, margin: "0.5rem" }}
@@ -448,8 +456,8 @@ export default function AddOrEditIncidentDialog({
                           options={
                             circumstancesData?.length
                               ? circumstancesData.map(
-                                (circumstance) => circumstance.name
-                              )
+                                  (circumstance) => circumstance.name
+                                )
                               : []
                           }
                           sx={{ flex: 1, margin: "0.5rem" }}
@@ -577,7 +585,23 @@ export default function AddOrEditIncidentDialog({
                       </Table>
                     </TableContainer>
                   </Stack>
-
+                  {defaultValues && (
+                    <ExistingFileItemsEdit
+                      label="Existing evidence"
+                      files={existingFiles}
+                      sx={{ marginY: "1rem" }}
+                      handleRemoveItem={(file) => {
+                        if (file.gsutil_uri) {
+                          setFilesToRemove([...filesToRemove, file.gsutil_uri]);
+                          setExistingFiles(
+                            existingFiles.filter(
+                              (f) => f.gsutil_uri !== file.gsutil_uri
+                            )
+                          );
+                        }
+                      }}
+                    />
+                  )}
                   <Box
                     sx={{
                       display: "flex",
@@ -678,8 +702,8 @@ export default function AddOrEditIncidentDialog({
                           options={
                             concernData?.length
                               ? concernData.map(
-                                (concern) => concern.typeConcerns
-                              )
+                                  (concern) => concern.typeConcerns
+                                )
                               : []
                           }
                           sx={{ flex: 1, margin: "0.5rem" }}

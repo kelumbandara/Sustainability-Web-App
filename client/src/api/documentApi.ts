@@ -49,6 +49,7 @@ export const DocumentSchema = z
     createdBy: z.string().optional(),
     documentHistory: z.array(DocumentHistoryItemSchema).optional(),
     activityStream: z.array(ActivityStreamSchema).optional(),
+    removeDoc: z.array(z.string()).optional(),
   })
   .refine((data) => data.isNoExpiry || (data.expiryDate && data.notifyDate), {
     message: "expiryDate and notifyDate are required when isNoExpiry is false",
@@ -96,7 +97,11 @@ export const updateDocumentRecord = async (document: Document) => {
   Object.keys(document).forEach((key) => {
     const value = document[key as keyof Document];
 
-    if (Array.isArray(value)) {
+    if (key === "document" && Array.isArray(value)) {
+      value.forEach((file, index) => {
+        formData.append(`document[${index}]`, file as File);
+      });
+    } else if (Array.isArray(value)) {
       value.forEach((item, index) => {
         formData.append(`${key}[${index}]`, JSON.stringify(item));
       });

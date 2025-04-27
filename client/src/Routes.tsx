@@ -96,6 +96,20 @@ const ExternalAuditTable = React.lazy(
   () => import("./views/AuditAndInspection/ExternalAudit/AuditTable")
 );
 
+//Sustainability
+const SustainabilityTable = React.lazy(
+  () => import("./views/Sustainability/SustainabilityTable")
+);
+
+//Environment
+const TargetSettingsTable = React.lazy(
+  () => import("./views/Environment/TargetSettings/TargetSettingsTable")
+);
+
+const EnvironmentTable = React.lazy(
+  () => import("./views/Environment/Consumption/ConsumptionTable")
+);
+
 function withLayout(Layout: any, Component: any, restrictAccess = false) {
   return (
     <Layout>
@@ -494,6 +508,66 @@ const AppRoutes = () => {
             ]
           )}
         />
+        <Route
+          path="/sustainability/register"
+          element={withLayout(
+            MainLayout,
+            SustainabilityTable,
+            !userPermissionObject?.[
+              PermissionKeys.SUSTAINABILITY_SDG_REPORTING_CREATE
+            ]
+          )}
+        />
+        <Route
+          path="/environment/dashboard"
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="Environment > Dashboard" />
+          ))}
+        />
+        <Route
+          path="/environment/history/target-setting"
+          element={withLayout(
+            MainLayout,
+            TargetSettingsTable,
+            !userPermissionObject?.[
+              PermissionKeys.ENVIRONMENT_HISTORY_TARGET_SETTING_VIEW
+            ]
+          )}
+        />
+        <Route
+          path="/environment/assigned-tasks/target-setting"
+          element={withLayout(
+            MainLayout,
+            () => (
+              <TargetSettingsTable isAssignedTasks={true} />
+            ),
+            !userPermissionObject?.[
+              PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_TARGET_SETTING_VIEW
+            ]
+          )}
+        />
+        <Route
+          path="/environment/history/consumption"
+          element={withLayout(
+            MainLayout,
+            EnvironmentTable,
+            !userPermissionObject?.[
+              PermissionKeys.ENVIRONMENT_HISTORY_CONSUMPTION_VIEW
+            ]
+          )}
+        />
+        <Route
+          path="/environment/assigned-tasks/consumption"
+          element={withLayout(
+            MainLayout,
+            () => (
+              <EnvironmentTable isAssignedTasks={true} />
+            ),
+            !userPermissionObject?.[
+              PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_CONSUMPTION_VIEW
+            ]
+          )}
+        />
       </Route>
       <Route
         path="/audit-inspection/external-audit/assigned-tasks"
@@ -505,7 +579,8 @@ const AppRoutes = () => {
               isCorrectiveAction={false}
               isAuditQueue={false}
             />
-          ),false
+          ),
+          false
           // !userPermissionObject?.[
           //   PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_TASK_VIEW
           // ]
