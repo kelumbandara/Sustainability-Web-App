@@ -3,6 +3,11 @@ import axios from "axios";
 import { StorageFileSchema } from "../../utils/StorageFiles.util";
 import { userSchema } from "../userApi";
 
+export enum Status {
+  DRAFT = "draft",
+  APPROVED = "approved",
+}
+
 export const targetSettingsSchema = z.object({
   id: z.string(),
   division: z.string(),
@@ -30,7 +35,7 @@ export const targetSettingsSchema = z.object({
   approver: userSchema.optional(),
   responsibleId: z.string(),
   approverId: z.string(),
-  status: z.string(),
+  status: z.nativeEnum(Status),
   created_at: z.date(),
   removeDoc: z.array(z.string()).optional(),
 });
