@@ -22,6 +22,7 @@ import { useSnackbar } from "notistack";
 import {
   ChemicalRequest,
   ChemicalRequestStatus,
+  fetchChemicalRequests,
 } from "../../api/ChemicalManagement/ChemicalRequestApi";
 import { sampleChemicalRequestData } from "../../api/sampleData/chemicalRequestSampleData";
 import theme from "../../theme";
@@ -33,6 +34,7 @@ import ViewChemicalRequestContent from "./ViewChemicalRequestContent";
 import AddOrEditChemicalRequestDialog from "./AddOrEditChemicalRequestDialog";
 import CustomButton from "../../components/CustomButton";
 import ApproveConfirmationModal from "../OccupationalHealth/MedicineInventory/MedicineRequest/ApproveConfirmationModal";
+import { useQuery } from "@tanstack/react-query";
 
 function ChemicalRequestTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -52,6 +54,14 @@ function ChemicalRequestTable() {
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("md")
   );
+
+  const { data: chemicalRequestData, isFetching: isChemicalDataFetching } =
+    useQuery({
+      queryKey: ["chemical-requests"],
+      queryFn: fetchChemicalRequests,
+    });
+
+  console.log("chemicalRequestData", chemicalRequestData);
 
   return (
     <Stack>

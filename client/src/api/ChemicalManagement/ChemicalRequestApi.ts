@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { userSchema } from "../userApi";
 import { StorageFileSchema } from "../../utils/StorageFiles.util";
+import axios from "axios";
 
 export enum ZdhcUseCategory {
   OTHERS = "Others",
@@ -245,3 +246,8 @@ export const ChemicalRequestSchema = z.object({
 });
 
 export type ChemicalRequest = z.infer<typeof ChemicalRequestSchema>;
+
+export async function fetchChemicalRequests() {
+  const res = await axios.get(`/api/chemical-records`);
+  return res.data;
+}

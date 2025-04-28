@@ -889,26 +889,24 @@ const AddNewChemicalDialog = ({
             sx={{ flex: 1, margin: "0.5rem" }}
             {...register("colour_index")}
           />
-          <AutoCheckBox
-            control={control}
-            required={true}
-            name="use_of_ppe"
-            label="Use of PPE"
-            options={Object.keys(UseOfPpe)?.map((key) => ({
-              label: key,
-              value: UseOfPpe[key],
-            }))}
-            selectedValues={useOfPPE}
-            setSelectedValues={(value) => setValue("use_of_ppe", value)}
-            getOptionLabel={(option) => option?.label || ""}
-            getOptionValue={(option) => option?.value || ""}
-            placeholder="Use of PPE"
-            style={{
-              flex: 1,
-              margin: "0.5rem",
-            }}
-            limitTags={1}
-          />
+          <Box sx={{ flex: 1, margin: "0.5rem" }}>
+            <AutoCheckBox
+              control={control}
+              required={true}
+              name="use_of_ppe"
+              label="Use of PPE"
+              options={Object.keys(UseOfPpe)?.map((key) => ({
+                label: key,
+                value: UseOfPpe[key],
+              }))}
+              selectedValues={useOfPPE}
+              setSelectedValues={(value) => setValue("use_of_ppe", value)}
+              getOptionLabel={(option) => option?.label || ""}
+              getOptionValue={(option) => option?.value || ""}
+              placeholder="Use of PPE"
+              limitTags={1}
+            />
+          </Box>
         </Box>
         <Box
           sx={{
@@ -916,26 +914,24 @@ const AddNewChemicalDialog = ({
             flexDirection: isMobile ? "column" : "row",
           }}
         >
-          <AutoCheckBox
-            control={control}
-            required={false}
-            name="hazard_type"
-            label="Hazard Type"
-            options={Object.keys(HazardType)?.map((key) => ({
-              label: key,
-              value: HazardType[key],
-            }))}
-            selectedValues={hazardType}
-            setSelectedValues={(value) => setValue("hazard_type", value)}
-            getOptionLabel={(option) => option?.label || ""}
-            getOptionValue={(option) => option?.value || ""}
-            placeholder="Hazard Type"
-            style={{
-              flex: 1,
-              margin: "0.5rem",
-            }}
-            limitTags={1}
-          />
+          <Box sx={{ flex: 1, margin: "0.5rem" }}>
+            <AutoCheckBox
+              control={control}
+              required={false}
+              name="hazard_type"
+              label="Hazard Type"
+              options={Object.keys(HazardType)?.map((key) => ({
+                label: key,
+                value: HazardType[key],
+              }))}
+              selectedValues={hazardType}
+              setSelectedValues={(value) => setValue("hazard_type", value)}
+              getOptionLabel={(option) => option?.label || ""}
+              getOptionValue={(option) => option?.value || ""}
+              placeholder="Hazard Type"
+              limitTags={1}
+            />
+          </Box>
           <TextField
             id="ghs_classification"
             label="GHS Classification"
