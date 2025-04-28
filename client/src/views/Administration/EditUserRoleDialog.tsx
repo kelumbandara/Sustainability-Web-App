@@ -150,7 +150,7 @@ export default function EditUserRoleDialog({
         }}
       >
         <Typography variant="h6" component="div">
-          {defaultValues.role ? "Edit User Role" : "Add User Role"}
+          {defaultValues ? "Edit User Role" : "Add User Role"}
         </Typography>
         <IconButton
           aria-label="open drawer"
@@ -372,7 +372,6 @@ export default function EditUserRoleDialog({
           disabled={isPending}
           size="medium"
           onClick={handleSubmit((data) => {
-            console.log(data);
             updateUserRoleMutation({
               id: defaultValues?.id,
               userTypeId: data.userType?.id,

@@ -329,7 +329,6 @@ function DocumentTable() {
           }}
           onSubmit={(data) => {
             if (selectedRow) {
-              console.log("Updating document", data);
               updateDocumentMutation(data);
               // setDocuments(
               //   documents.map((doc) => (doc.id === data.id ? data : doc))
@@ -338,7 +337,6 @@ function DocumentTable() {
               //   variant: "success",
               // });
             } else {
-              console.log("Adding new document", data);
               createDocumentMutation(data);
               // setDocuments([...documents, data]); // Add new document to the list
               // enqueueSnackbar("Document Created Successfully!", {

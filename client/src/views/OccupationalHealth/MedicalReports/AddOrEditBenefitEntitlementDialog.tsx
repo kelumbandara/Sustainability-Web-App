@@ -128,11 +128,13 @@ export default function AddOrEditBenefitEntitlementDialog({
               {...register("benefitType", { required: true })}
               size="small"
               options={
-                benefitData?.length ? benefitData.map((benefit) => benefit.benefitType) : []}
+                benefitData?.length
+                  ? benefitData.map((benefit) => benefit.benefitType)
+                  : []
+              }
               sx={{ flex: 1, margin: "0.5rem" }}
               defaultValue={defaultValues?.benefitType}
               onChange={(e, value) => {
-                console.log("e", e);
                 setValue("benefitType", value);
               }}
               renderInput={(params) => (
@@ -194,9 +196,7 @@ export default function AddOrEditBenefitEntitlementDialog({
                       onChange={(e) => field.onChange(e)}
                       value={field.value ? new Date(field.value) : undefined}
                       label="Date of First Installment"
-                      error={
-                        errors?.dateOf1stInstallment ? "Required" : ""
-                      }
+                      error={errors?.dateOf1stInstallment ? "Required" : ""}
                     />
                   </Box>
                 );
@@ -252,7 +252,6 @@ export default function AddOrEditBenefitEntitlementDialog({
               }}
               defaultValue={defaultValues?.ifBenefitReceived}
               onChange={(e, value) => {
-                console.log("e", e);
                 setValue("ifBenefitReceived", value);
               }}
               renderInput={(params) => (

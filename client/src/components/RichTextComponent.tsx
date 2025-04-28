@@ -24,11 +24,12 @@ import { useRef } from "react";
 
 const useStyles = makeStyles(() => ({
   editor: {
-    borderRadius: "4px",
+    borderRadius: "8px",
     backgroundColor: grey[50],
     padding: `0 0.6rem`,
     minHeight: "200px",
     width: "100%",
+    border: `1px solid ${grey[300]}`,
 
     "& .mdxeditor-toolbar": {
       backgroundColor: grey[300],

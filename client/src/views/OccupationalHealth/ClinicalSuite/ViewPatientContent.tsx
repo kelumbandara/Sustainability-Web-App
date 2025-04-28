@@ -43,7 +43,6 @@ function ViewPatientContent({ patient }: { patient: Patient }) {
   const { isTablet } = useIsMobile();
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    console.log("event", event);
     setActiveTab(newValue);
   };
   return (
@@ -97,7 +96,6 @@ function ViewPatientContent({ patient }: { patient: Patient }) {
             }}
             textColor="inherit"
             variant="scrollable"
-            
             scrollButtons={true}
           >
             <Tab

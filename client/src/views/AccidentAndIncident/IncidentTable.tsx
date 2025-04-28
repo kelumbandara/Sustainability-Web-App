@@ -361,7 +361,6 @@ function IncidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
           }}
           onSubmit={(data) => {
             if (selectedRow) {
-              console.log("Updating document", data);
               updateIncidentMutation(data);
               // setIncidentData(
               //   incidentData.map((risk) => (risk.id === data.id ? data : risk))
@@ -370,7 +369,6 @@ function IncidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
               //   variant: "success",
               // });
             } else {
-              console.log("Adding new incident", data);
               createIncidentMutation(data);
               // setIncidentData([...incidentData, data]); // Add new document to the list
               // enqueueSnackbar("Incident Created Successfully!", {

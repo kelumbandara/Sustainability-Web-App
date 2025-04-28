@@ -179,9 +179,12 @@ export async function updateUserType({
   assignedFactory: string[];
   responsibleSection: string[];
 }) {
-
-  const parsedAssignedFactory = Array.isArray(assignedFactory) ? assignedFactory : JSON.parse(assignedFactory || "[]");
-  const parsedResponsibleSection = Array.isArray(responsibleSection) ? responsibleSection : JSON.parse(responsibleSection || "[]");
+  const parsedAssignedFactory = Array.isArray(assignedFactory)
+    ? assignedFactory
+    : JSON.parse(assignedFactory || "[]");
+  const parsedResponsibleSection = Array.isArray(responsibleSection)
+    ? responsibleSection
+    : JSON.parse(responsibleSection || "[]");
 
   const res = await axios.post(`/api/users/${id}/update`, {
     userType: userTypeId.toString(),
@@ -195,7 +198,6 @@ export async function updateUserType({
 
   return res.data;
 }
-
 
 //assignee by the responsible section
 export async function fetchHazardRiskAssignee() {
@@ -215,5 +217,15 @@ export async function fetchIncidentAssignee() {
 
 export async function fetchMedicineRequestAssignee() {
   const res = await axios.get("/api/medicine-request-assignee");
+  return res.data;
+}
+
+export async function fetchInternalAuditAssignee() {
+  const res = await axios.get("/api/internal-audit-assignee");
+  return res.data;
+}
+
+export async function fetchExternalAuditAssignee() {
+  const res = await axios.get("/api/external-audit-assignee");
   return res.data;
 }

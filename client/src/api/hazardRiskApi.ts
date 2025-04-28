@@ -233,7 +233,6 @@ export const createHazardRisk = async (hazardRisk: HazardAndRisk) => {
   const formData = new FormData();
 
   formData.append("token", token);
-  console.log("submit", token);
 
   Object.keys(hazardRisk).forEach((key) => {
     const value = hazardRisk[key as keyof HazardAndRisk];

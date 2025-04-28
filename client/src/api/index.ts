@@ -6,17 +6,14 @@ axios.interceptors.request.use(
 
     try {
       const token = `Bearer ${localStorage.getItem("token") || ""}`;
-      console.log("Token:", token);
 
       if (!config.headers) {
         config.headers = {} as AxiosRequestHeaders;
       }
 
       config.headers.Authorization = token;
-      console.log("Authorization header set");
 
       config.validateStatus = (status: number) => status >= 200 && status < 300;
-      console.log("Validate status set");
     } catch (error) {
       console.error(
         "Error setting Authorization header or validateStatus:",

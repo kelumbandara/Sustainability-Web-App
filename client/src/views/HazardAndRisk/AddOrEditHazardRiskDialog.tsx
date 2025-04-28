@@ -87,7 +87,6 @@ export default function AddOrEditHazardRiskDialog({
   });
 
   const assignee = watch("assignee");
-  console.log("filesToRemove", filesToRemove);
 
   useEffect(() => {
     if (defaultValues) {
@@ -160,7 +159,6 @@ export default function AddOrEditHazardRiskDialog({
   const handleSubmitHazardAndRisk = (data: HazardAndRisk) => {
     const submitData: Partial<HazardAndRisk> = data;
     submitData.id = defaultValues?.id ?? uuidv4();
-    submitData.createdByUser = user.id;
     submitData.assigneeId = assignee.id;
     // submitData.createdDate = new Date();
     // submitData.createdByUser = sampleAssignees[0].name;
@@ -168,7 +166,6 @@ export default function AddOrEditHazardRiskDialog({
     if (filesToRemove?.length > 0) submitData.removeDoc = filesToRemove;
     submitData.documents = files;
     onSubmit(submitData as HazardAndRisk);
-    console.log(submitData);
     resetForm();
   };
 
@@ -390,7 +387,6 @@ export default function AddOrEditHazardRiskDialog({
                 sx={{ flex: 1, margin: "0.5rem" }}
                 defaultValue={defaultValues?.category}
                 onChange={(e, value) => {
-                  console.log("e", e);
                   reset({
                     category: value,
                     subCategory: null, // Reset subCategory
@@ -419,7 +415,6 @@ export default function AddOrEditHazardRiskDialog({
                   }
                   defaultValue={defaultValues?.subCategory}
                   onChange={(e, value) => {
-                    console.log("e", e);
                     reset({
                       category: watch("category"), // Preserve category
                       subCategory: value,
@@ -624,7 +619,6 @@ export default function AddOrEditHazardRiskDialog({
                       value={field.value}
                       exclusive
                       onChange={(e, value) => {
-                        console.log("e", e);
                         field.onChange(value);
                       }}
                     >
@@ -672,7 +666,6 @@ export default function AddOrEditHazardRiskDialog({
                       value={field.value}
                       exclusive
                       onChange={(e, value) => {
-                        console.log("e", e);
                         field.onChange(value);
                       }}
                     >

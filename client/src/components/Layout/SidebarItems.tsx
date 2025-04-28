@@ -56,7 +56,6 @@ export const sidebarItems: Array<SidebarItem> = [
     href: "/home",
     icon: <HomeIcon fontSize="small" />,
     accessKey: PermissionKeys.INSIGHT_VIEW,
-    // Add the data-cy attribute here
   },
   {
     headline: "Administration",
@@ -81,7 +80,6 @@ export const sidebarItems: Array<SidebarItem> = [
     icon: <LayersIcon fontSize="small" />,
     href: "/audit-inspection",
     open: false,
-    disabled: true,
     nestedItems: [
       {
         title: "Dashboard",
@@ -99,13 +97,57 @@ export const sidebarItems: Array<SidebarItem> = [
         title: "Internal Audit",
         href: "/audit-inspection/internal-audit",
         icon: <QueryStatsIcon fontSize="small" />,
-        accessKey: PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_QUEUE_VIEW,
+        nestedItems: [
+          {
+            title: "Audit Form Builder",
+            href: "/audit-inspection/internal-audit/form-builder",
+            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey:
+              PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_FORM_BUILDER_VIEW,
+          },
+          {
+            title: "Scheduled Audits",
+            href: "/audit-inspection/internal-audit/scheduled-audits",
+            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey:
+              PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_REGISTER_VIEW,
+          },
+        ],
       },
       {
         title: "External Audit",
         href: "/audit-inspection/external-audit",
         icon: <TravelExploreIcon fontSize="small" />,
-        accessKey: PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_VIEW,
+        accessKey: PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_REGISTER_VIEW,
+        nestedItems: [
+          {
+            title: "External Audit Register",
+            href: "/audit-inspection/external-audit/register",
+            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey:
+              PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_REGISTER_VIEW,
+          },
+          {
+            title: "Assigned Audit",
+            href: "/audit-inspection/external-audit/assigned-tasks",
+            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey: PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_TASK_VIEW,
+          },
+          {
+            title: "External Audit Queue",
+            href: "/audit-inspection/external-audit/audit-queue",
+            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey:
+              PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_VIEW,
+          },
+          {
+            title: "Corrective Action",
+            href: "/audit-inspection/external-audit/corrective-action",
+            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey:
+              PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_CORRECTIVE_ACTION_VIEW,
+          },
+        ],
       },
     ],
   },
@@ -113,7 +155,7 @@ export const sidebarItems: Array<SidebarItem> = [
     title: "Sustainability",
     href: "/sustainability",
     icon: <SpaIcon fontSize="small" />,
-    disabled: true,
+    disabled: false,
     nestedItems: [
       {
         title: "Register",
@@ -127,7 +169,7 @@ export const sidebarItems: Array<SidebarItem> = [
     title: "Environment",
     href: "/environment",
     icon: <ForestIcon fontSize="small" />,
-    disabled: true,
+    disabled: false,
     nestedItems: [
       {
         title: "Dashboard",
@@ -158,7 +200,7 @@ export const sidebarItems: Array<SidebarItem> = [
         title: "Assigned Tasks",
         href: "/environment/assigned-tasks",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-        disabled: true,
+        disabled: false,
         nestedItems: [
           {
             title: "Consumption",
@@ -315,46 +357,46 @@ export const sidebarItems: Array<SidebarItem> = [
     icon: <FolderIcon fontSize="small" />,
     accessKey: PermissionKeys.DOCUMENT_REGISTER_VIEW,
   },
-  {
-    title: "Equipment MNG",
-    href: "/equipment-mng",
-    icon: <ConstructionIcon fontSize="small" />,
-    disabled: true,
-    nestedItems: [
-      {
-        title: "Equipment",
-        href: "/equipment-mng/equipment",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-        nestedItems: [
-          {
-            title: "Register",
-            href: "/equipment-mng/equipment/register",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-          },
-          {
-            title: "Create",
-            href: "/equipment-mng/equipment/create",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-          },
-        ],
-      },
-      {
-        title: "Client",
-        href: "/equipment-mng/client",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-      },
-      {
-        title: "GEO Tag",
-        href: "/equipment-mng/geo-tag",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-      },
-      {
-        title: "Inspection Template",
-        href: "/equipment-mng/inspection-template",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-      },
-    ],
-  },
+  // {
+  //   title: "Equipment MNG",
+  //   href: "/equipment-mng",
+  //   icon: <ConstructionIcon fontSize="small" />,
+  //   disabled: true,
+  //   nestedItems: [
+  //     {
+  //       title: "Equipment",
+  //       href: "/equipment-mng/equipment",
+  //       icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+  //       nestedItems: [
+  //         {
+  //           title: "Register",
+  //           href: "/equipment-mng/equipment/register",
+  //           icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+  //         },
+  //         {
+  //           title: "Create",
+  //           href: "/equipment-mng/equipment/create",
+  //           icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       title: "Client",
+  //       href: "/equipment-mng/client",
+  //       icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+  //     },
+  //     {
+  //       title: "GEO Tag",
+  //       href: "/equipment-mng/geo-tag",
+  //       icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+  //     },
+  //     {
+  //       title: "Inspection Template",
+  //       href: "/equipment-mng/inspection-template",
+  //       icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+  //     },
+  //   ],
+  // },
   {
     title: "Occupational Health",
     href: "/occupational-health",
