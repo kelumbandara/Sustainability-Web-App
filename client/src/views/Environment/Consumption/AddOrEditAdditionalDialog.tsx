@@ -78,6 +78,13 @@ export default function AddOrEditAdditionalDialog({
     queryFn: fetchConsumptionCategories,
   });
 
+  const { data: consumptionSourceData, isFetching: isConsumptionSourceData } =
+    useQuery({
+      queryKey: ["cs-sources"],
+      queryFn: () => fetchConsumptionSource(category),
+      enabled: !!category,
+    });
+
   const {
     data: consumptionUnitData,
     isFetching: isConsumptionUnitDataFetching,
@@ -86,12 +93,6 @@ export default function AddOrEditAdditionalDialog({
     queryFn: () => fetchConsumptionUnit(category),
     enabled: !!category,
   });
-
-  const { data: consumptionSourceData, isFetching: isConsumptionSourceData } =
-    useQuery({
-      queryKey: ["cs-source"],
-      queryFn: fetchConsumptionSource,
-    });
 
   return (
     <Dialog
@@ -162,6 +163,7 @@ export default function AddOrEditAdditionalDialog({
                   onChange={(event, newValue) => {
                     field.onChange(newValue);
                     setValue("unit", "");
+                    setValue("source", "");
                   }}
                   size="small"
                   options={

@@ -179,8 +179,8 @@ export async function fetchConsumptionUnit(category: String) {
   return res.data;
 }
 
-export async function fetchConsumptionSource() {
-  const res = await axios.get(`/api/consumption-sources`);
+export async function fetchConsumptionSource(category: String) {
+  const res = await axios.get(`/api/consumption-get/${category}/sources`);
   return res.data;
 }
 
