@@ -9,6 +9,11 @@ export enum Announcement {
   UN_ANNOUNCED = "Un Announced",
 }
 
+export enum Status {
+  DRAFT = "draft",
+  APPROVED = "approved",
+}
+
 export const ExternalAuditSchema = z.object({
   id: z.string(),
   referenceNumber: z.string(),
@@ -25,7 +30,7 @@ export const ExternalAuditSchema = z.object({
   representor: userSchema.optional(),
   created_At: z.date(),
   createdBy: z.string(),
-  status: z.string(),
+  status: z.nativeEnum(Status),
   announcement: z.nativeEnum(Announcement),
   remarks: z.string(),
   auditStatus: z.string(),

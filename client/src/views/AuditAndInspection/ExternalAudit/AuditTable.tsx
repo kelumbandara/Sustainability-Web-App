@@ -125,7 +125,10 @@ function ExternalAuditTable({
     theme.breakpoints.down("md")
   );
 
-  const { mutate: createExternalAuditMutation } = useMutation({
+  const {
+    mutate: createExternalAuditMutation,
+    isPending: createExternalAuditMutationIsPending,
+  } = useMutation({
     mutationFn: createExternalAudit,
     onSuccess: () => {
       setSelectedRow(null);
@@ -144,7 +147,10 @@ function ExternalAuditTable({
     },
   });
 
-  const { mutate: updateExternalAuditMutation } = useMutation({
+  const {
+    mutate: updateExternalAuditMutation,
+    isPending: updateExternalAuditMutationIsPending,
+  } = useMutation({
     mutationFn: updateExternalAudit,
     onSuccess: () => {
       setSelectedRow(null);
@@ -163,7 +169,10 @@ function ExternalAuditTable({
     },
   });
 
-  const { mutate: deleteExternalAuditMutation } = useMutation({
+  const {
+    mutate: deleteExternalAuditMutation,
+    isPending: deleteExternalAuditMutationIsPending,
+  } = useMutation({
     mutationFn: deleteExternalAudit,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["external-audit"] });
@@ -312,7 +321,7 @@ function ExternalAuditTable({
                 setOpenAddOrEditDialog(true);
               }}
               disabled={
-                isAssignedTasks
+                isAssignedTasks || isCorrectiveAction || isAuditQueue
                   ? isExternalAuditTaskListDisabled ||
                     isExternalAuditCorrectiveCreateDisabled ||
                     isExternalAuditQueueCreateDisabled
@@ -341,7 +350,6 @@ function ExternalAuditTable({
                 <TableCell align="right">Audit Firm</TableCell>
                 <TableCell align="right">Division</TableCell>
                 <TableCell align="right">Audit Status</TableCell>
-                <TableCell align="right">Lapsed Status</TableCell>
                 <TableCell align="right">Status</TableCell>
               </TableRow>
             </TableHead>
@@ -375,7 +383,6 @@ function ExternalAuditTable({
                     <TableCell align="right">{row.auditFirm}</TableCell>
                     <TableCell align="right">{row.division}</TableCell>
                     <TableCell align="right">{row.auditStatus}</TableCell>
-                    <TableCell align="right">{row.lapsedStatus}</TableCell>
                     <TableCell align="right">{row.status}</TableCell>
                   </TableRow>
                 ))
@@ -425,7 +432,7 @@ function ExternalAuditTable({
                 setOpenAddOrEditDialog(true);
               }}
               disableEdit={
-                isAssignedTasks
+                isAssignedTasks || isCorrectiveAction || isAuditQueue
                   ? isExternalAuditTaskEditDisabled ||
                     isExternalAuditCorrectiveEditDisabled ||
                     isExternalAuditQueueEditDisabled
@@ -433,7 +440,7 @@ function ExternalAuditTable({
               }
               onDelete={() => setDeleteDialogOpen(true)}
               disableDelete={
-                isAssignedTasks
+                isAssignedTasks || isCorrectiveAction || isAuditQueue
                   ? isExternalAuditTaskDeleteDisabled ||
                     isExternalAuditCorrectiveDeleteDisabled ||
                     isExternalAuditQueueDeleteDisabled
@@ -465,6 +472,11 @@ function ExternalAuditTable({
             }
           }}
           defaultValues={selectedRow}
+          isPending={
+            createExternalAuditMutationIsPending ||
+            updateExternalAuditMutationIsPending ||
+            deleteExternalAuditMutationIsPending
+          }
         />
       )}
       {deleteDialogOpen && (

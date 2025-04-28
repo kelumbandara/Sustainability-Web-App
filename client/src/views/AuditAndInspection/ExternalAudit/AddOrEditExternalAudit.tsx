@@ -7,6 +7,7 @@ import {
   Alert,
   Autocomplete,
   Box,
+  CircularProgress,
   Divider,
   IconButton,
   Stack,
@@ -35,6 +36,7 @@ import {
   fetchAuditFirm,
   fetchAuditStandard,
   fetchAuditType,
+  Status,
 } from "../../../api/ExternalAudit/externalAuditApi";
 import useIsMobile from "../../../customHooks/useIsMobile";
 import theme from "../../../theme";
@@ -54,6 +56,7 @@ import Diversity3Icon from "@mui/icons-material/Diversity3";
 
 type DialogProps = {
   open: boolean;
+  isPending: boolean;
   handleClose: () => void;
   defaultValues?: ExternalAudit;
   onSubmit?: (data: ExternalAudit) => void;
@@ -94,6 +97,7 @@ export default function AddOrEditSustainabilityDialog({
   handleClose,
   defaultValues,
   onSubmit,
+  isPending,
 }: DialogProps) {
   const { isMobile, isTablet } = useIsMobile();
   const [files, setFiles] = useState<File[]>([]);
@@ -878,6 +882,52 @@ export default function AddOrEditSustainabilityDialog({
                 height: "fit-content",
               }}
             >
+              {defaultValues && (
+                <Box sx={{ margin: "0.5rem" }}>
+                  <Typography
+                    variant="caption"
+                    sx={{ marginBottom: "0.1rem", color: grey[700] }}
+                  >
+                    Status:
+                  </Typography>
+                  <Controller
+                    control={control}
+                    name={"status"}
+                    render={({ field }) => {
+                      return (
+                        <ToggleButtonGroup
+                          size="small"
+                          {...control}
+                          aria-label="Small sizes"
+                          color="primary"
+                          value={field.value}
+                          exclusive
+                          orientation="vertical"
+                          fullWidth
+                          onChange={(e, value) => {
+                            console.log("e", e);
+                            field.onChange(value);
+                          }}
+                        >
+                          <ToggleButton value={Status.DRAFT} key={Status.DRAFT}>
+                            <Typography variant="caption" component="div">
+                              {Status.DRAFT}
+                            </Typography>
+                          </ToggleButton>
+                          <ToggleButton
+                            value={Status.APPROVED}
+                            key={Status.APPROVED}
+                          >
+                            <Typography variant="caption" component="div">
+                              {Status.APPROVED}
+                            </Typography>
+                          </ToggleButton>
+                        </ToggleButtonGroup>
+                      );
+                    }}
+                  />
+                </Box>
+              )}
               <Box sx={{ margin: "0.5rem" }}>
                 <Controller
                   control={control}
@@ -1080,6 +1130,10 @@ export default function AddOrEditSustainabilityDialog({
               backgroundColor: "var(--pallet-blue)",
             }}
             size="medium"
+            disabled={isPending}
+            startIcon={
+              isPending && <CircularProgress color="inherit" size={"1rem"} />
+            }
             onClick={handleSubmit((data) => {
               handleCreateExternalAudit(data);
             })}
