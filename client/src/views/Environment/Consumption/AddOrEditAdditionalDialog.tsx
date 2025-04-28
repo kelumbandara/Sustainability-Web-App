@@ -80,7 +80,7 @@ export default function AddOrEditAdditionalDialog({
 
   const { data: consumptionSourceData, isFetching: isConsumptionSourceData } =
     useQuery({
-      queryKey: ["cs-sources"],
+      queryKey: ["cs-sources", category],
       queryFn: () => fetchConsumptionSource(category),
       enabled: !!category,
     });
