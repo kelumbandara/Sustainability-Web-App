@@ -283,10 +283,10 @@ function TargetSettingsTable({
                     <TableCell align="right">{row.department}</TableCell>
                     <TableCell align="right">{row.category}</TableCell>
                     <TableCell align="right">{row.source}</TableCell>
-                    <TableCell align="center">
+                    <TableCell align="right">
                       {row.responsible?.name}
                     </TableCell>
-                    <TableCell align="center">{row.approver?.name}</TableCell>
+                    <TableCell align="right">{row.approver?.name}</TableCell>
                     <TableCell align="right">
                       {format(new Date(row.created_at), "yyyy-MM-dd")}
                     </TableCell>

@@ -13,6 +13,8 @@ import {
   Tab,
   Tabs,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
 import useIsMobile from "../../../customHooks/useIsMobile";
@@ -35,6 +37,7 @@ import UserAutoComplete from "../../../components/UserAutoComplete";
 import { ExistingFileItemsEdit } from "../../../components/ExistingFileItemsEdit";
 import { StorageFile } from "../../../utils/StorageFiles.util";
 import {
+  Status,
   TargetSettings,
   fetchMainTsCategory,
   fetchOpportunity,
@@ -641,21 +644,6 @@ export default function AddOrEditTargetSettingsDialog({
                   </Box>
                   {defaultValues && (
                     <>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "row",
-                          margin: "0.5rem",
-                        }}
-                      >
-                        <Typography variant="body2" component="div">
-                          <b>Evidence</b>
-                        </Typography>
-                        <Typography variant="body2" component="div">
-                          {` ${defaultValues?.documents}`}
-                        </Typography>
-                      </Box>
-
                       <ExistingFileItemsEdit
                         label="Existing evidence"
                         files={existingFiles}
@@ -1031,6 +1019,51 @@ export default function AddOrEditTargetSettingsDialog({
                   required={true}
                 />
               </Box>
+
+              {defaultValues && (<Box sx={{ margin: "0.5rem" }}>
+                <Typography
+                  variant="caption"
+                  sx={{ marginBottom: "0.1rem", color: grey[700] }}
+                >
+                  Status:
+                </Typography>
+                <Controller
+                  control={control}
+                  name={"status"}
+                  render={({ field }) => {
+                    return (
+                      <ToggleButtonGroup
+                        size="small"
+                        {...control}
+                        aria-label="Small sizes"
+                        color="primary"
+                        value={field.value}
+                        exclusive
+                        orientation="vertical"
+                        fullWidth
+                        onChange={(e, value) => {
+                          console.log("e", e);
+                          field.onChange(value);
+                        }}
+                      >
+                        <ToggleButton value={Status.DRAFT} key={Status.DRAFT}>
+                          <Typography variant="caption" component="div">
+                            {Status.DRAFT}
+                          </Typography>
+                        </ToggleButton>
+                        <ToggleButton
+                          value={Status.APPROVED}
+                          key={Status.APPROVED}
+                        >
+                          <Typography variant="caption" component="div">
+                            {Status.APPROVED}
+                          </Typography>
+                        </ToggleButton>
+                      </ToggleButtonGroup>
+                    );
+                  }}
+                />
+              </Box>)}
             </Box>
           </Stack>
         </DialogContent>
