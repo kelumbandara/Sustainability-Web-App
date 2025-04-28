@@ -465,8 +465,8 @@ export default function AddOrEditConsumptionDialog({
                                     "impactConsumption",
                                     (consumptionWatch ?? []).filter(
                                       (item) =>
-                                        item.consumptionsId !==
-                                        row.consumptionsId
+                                        item.consumptionId !==
+                                        row.consumptionId
                                     )
                                   );
                                 }}
@@ -568,7 +568,7 @@ export default function AddOrEditConsumptionDialog({
               setValue("impactConsumption", [
                 ...(consumptionWatch ?? []).map((item) => {
                   if (
-                    item.consumptionsId === selectedConsumption.consumptionsId
+                    item.consumptionId === selectedConsumption.consumptionId
                   ) {
                     return data;
                   }

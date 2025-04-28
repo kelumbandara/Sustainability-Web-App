@@ -27,6 +27,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import RichTextComponent from "../../../components/RichTextComponent";
 import FormDataSwitchButton from "../../../components/FormDataSwitchButton";
+import { v4 as uuidv4 } from 'uuid';
 
 type DialogProps = {
   open: boolean;
@@ -382,6 +383,9 @@ export default function AddOrEditAdditionalDialog({
           }}
           size="medium"
           onClick={handleSubmit((data) => {
+            if (!data.consumptionId) {
+              data.consumptionId = uuidv4();
+            }
             onSubmit(data);
             resetForm();
             handleClose();

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { userSchema } from "../userApi";
 
 export const ConsumptionSchema = z.object({
-  consumptionsId: z.string(),
+  consumptionId: z.string(),
   category: z.string(),
   source: z.string(),
   unit: z.string(),
@@ -21,7 +21,7 @@ export type Consumption = z.infer<typeof ConsumptionSchema>;
 
 export const EnvironmentSchema = z.object({
   id: z.string(),
-  consumptionsId: z.string(),
+  consumptionId: z.string(),
   referenceNumber: z.string(),
   division: z.string(),
   totalWorkForce: z.number(),

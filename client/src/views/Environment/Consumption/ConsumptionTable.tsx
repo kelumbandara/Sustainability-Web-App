@@ -279,9 +279,10 @@ function ConsumptionTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
                     <TableCell align="right">
                       {row.totalProductProducedKg}
                     </TableCell>
-                    <TableCell align="right">{row.areaInSquareMeter}</TableCell>
+                    <TableCell align="right">{row.area}</TableCell>
                     <TableCell align="right">{row.reviewer?.name}</TableCell>
                     <TableCell align="right">{row.approver?.name}</TableCell>
+                    <TableCell align="right">{row.status}</TableCell>
                   </TableRow>
                 ))
               ) : (
