@@ -26,7 +26,6 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
 import { grey } from "@mui/material/colors";
 import { Controller, useForm } from "react-hook-form";
-import { v4 as uuid } from "uuid";
 import CustomButton from "../../../components/CustomButton";
 import useIsMobile from "../../../customHooks/useIsMobile";
 import theme from "../../../theme";

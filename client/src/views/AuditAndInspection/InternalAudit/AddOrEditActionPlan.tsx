@@ -82,7 +82,7 @@ export const AddOrEditActionPlan = ({
     };
 
     if (selectedActionItem) {
-      actionPlanData.acctionPlanId = selectedActionItem.acctionPlanId;
+      actionPlanData.actionPlanId = selectedActionItem.actionPlanId;
       updateActionPlanMutation(actionPlanData);
     } else {
       createActionPlanMutation(actionPlanData);

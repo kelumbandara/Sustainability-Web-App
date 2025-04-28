@@ -150,7 +150,7 @@ export type InternalAuditAnswerToQuestions = z.infer<
 >;
 
 export const ScheduledInternalAuditActionPlanSchema = z.object({
-  acctionPlanId: z.string().optional(),
+  actionPlanId: z.string().optional(),
   internalAuditId: z.number(),
   correctiveOrPreventiveAction: z.string(),
   priority: z.nativeEnum(ScheduledTaskActionPlanPriority).optional(),
@@ -407,6 +407,13 @@ export async function updateActionPlan(
     {
       ...data,
     }
+  );
+  return res.data;
+}
+
+export async function deleteActionPlan({ id }: { id: string }) {
+  const res = await axios.delete(
+    `/api/internal-audit-action-plan/${id}/delete`
   );
   return res.data;
 }
