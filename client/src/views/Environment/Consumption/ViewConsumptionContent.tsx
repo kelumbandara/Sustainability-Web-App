@@ -103,7 +103,7 @@ function ViewConsumptionContent({ consumption }: { consumption: Environment }) {
             {consumption?.impactConsumption?.length > 0 ? (
               consumption?.impactConsumption?.map((row) => (
                 <TableRow
-                  key={`${row.consumptionsId}`}
+                  key={`${row.consumptionId}`}
                   sx={{
                     "&:last-child td, &:last-child th": { border: 0 },
                     cursor: "pointer",
