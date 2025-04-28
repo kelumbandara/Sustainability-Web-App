@@ -1,26 +1,8 @@
 import React from "react";
-import { Controller, Control } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import { Autocomplete, Checkbox, TextField } from "@mui/material";
 
-// ✅ Constrain T so `optionValueKey` must be `string | number`
-interface AutocompleteCheckboxProps<T extends Record<string, any>> {
-  control: Control<any>;
-  name: string;
-  options: T[];
-  selectedValues?: (string | number)[];
-  setSelectedValues?: (values: (string | number)[]) => void;
-  label: string;
-  placeholder?: string;
-  limitTags?: number;
-  required?: boolean;
-  optionLabelKey?: keyof T; // ✅ Key for labels (must exist in T)
-  optionValueKey?: keyof T; // ✅ Key for values (must exist in T)
-  getOptionLabel?: (option: T) => string; // ✅ Optional function for labels
-  getOptionValue?: (option: T) => string | number; // ✅ Optional function for values
-}
-
-// ✅ Works with any data type while ensuring `optionValueKey` is `string | number`
-const AutocompleteCheckbox = <T extends Record<string, any>>({
+const AutocompleteCheckbox = ({
   control,
   name,
   options = [],
@@ -30,11 +12,9 @@ const AutocompleteCheckbox = <T extends Record<string, any>>({
   placeholder,
   limitTags,
   required = false,
-  optionLabelKey,
-  optionValueKey,
-  getOptionLabel,
-  getOptionValue,
-}: AutocompleteCheckboxProps<T>) => {
+  getOptionLabel = (option) => option.label,
+  getOptionValue = (option) => option.value,
+}) => {
   return (
     <Controller
       control={control}
@@ -47,45 +27,24 @@ const AutocompleteCheckbox = <T extends Record<string, any>>({
           id={name}
           options={options}
           disableCloseOnSelect
-          getOptionLabel={(option) =>
-            getOptionLabel
-              ? getOptionLabel(option)
-              : optionLabelKey && option[optionLabelKey]
-              ? String(option[optionLabelKey])
-              : ""
-          }
+          getOptionLabel={getOptionLabel}
           value={options.filter((option) =>
-            (value || []).includes(
-              getOptionValue
-                ? getOptionValue(option)
-                : optionValueKey && (option[optionValueKey] as string | number)
-            )
+            (value || []).includes(getOptionValue(option))
           )}
           onChange={(event, newValue) => {
-            const values = newValue.map((option) =>
-              getOptionValue
-                ? getOptionValue(option)
-                : ((optionValueKey ? option[optionValueKey] : "") as
-                    | string
-                    | number)
-            );
+            const values = newValue.map(getOptionValue);
             onChange(values);
             setSelectedValues?.(values);
           }}
           renderOption={(props, option, { selected }) => (
             <li {...props}>
               <Checkbox style={{ marginRight: 8 }} checked={selected} />
-              {getOptionLabel
-                ? getOptionLabel(option)
-                : optionLabelKey && option[optionLabelKey]
-                ? String(option[optionLabelKey])
-                : ""}
+              {getOptionLabel(option)}
             </li>
           )}
           renderInput={(params) => (
             <TextField
               {...params}
-              required={required}
               label={label}
               placeholder={placeholder}
               size="small"
