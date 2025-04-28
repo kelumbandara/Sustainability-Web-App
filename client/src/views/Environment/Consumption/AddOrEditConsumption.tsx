@@ -17,6 +17,8 @@ import {
   TableHead,
   TableRow,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
 import useIsMobile from "../../../customHooks/useIsMobile";
@@ -33,6 +35,7 @@ import {
   Consumption,
   Environment,
   fetchConsumptionAssignee,
+  Status,
 } from "../../../api/Environment/environmentApi";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
@@ -465,8 +468,7 @@ export default function AddOrEditConsumptionDialog({
                                     "impactConsumption",
                                     (consumptionWatch ?? []).filter(
                                       (item) =>
-                                        item.consumptionsId !==
-                                        row.consumptionsId
+                                        item.consumptionId !== row.consumptionId
                                     )
                                   );
                                 }}
@@ -530,6 +532,51 @@ export default function AddOrEditConsumptionDialog({
                   required={true}
                 />
               </Box>
+
+              {defaultValues && (<Box sx={{ margin: "0.5rem" }}>
+                <Typography
+                  variant="caption"
+                  sx={{ marginBottom: "0.1rem", color: grey[700] }}
+                >
+                  Status:
+                </Typography>
+                <Controller
+                  control={control}
+                  name={"status"}
+                  render={({ field }) => {
+                    return (
+                      <ToggleButtonGroup
+                        size="small"
+                        {...control}
+                        aria-label="Small sizes"
+                        color="primary"
+                        value={field.value}
+                        exclusive
+                        orientation="vertical"
+                        fullWidth
+                        onChange={(e, value) => {
+                          console.log("e", e);
+                          field.onChange(value);
+                        }}
+                      >
+                        <ToggleButton value={Status.DRAFT} key={Status.DRAFT}>
+                          <Typography variant="caption" component="div">
+                            {Status.DRAFT}
+                          </Typography>
+                        </ToggleButton>
+                        <ToggleButton
+                          value={Status.APPROVED}
+                          key={Status.APPROVED}
+                        >
+                          <Typography variant="caption" component="div">
+                            {Status.APPROVED}
+                          </Typography>
+                        </ToggleButton>
+                      </ToggleButtonGroup>
+                    );
+                  }}
+                />
+              </Box>)}
             </Stack>
           </Stack>
         </DialogContent>
@@ -568,7 +615,7 @@ export default function AddOrEditConsumptionDialog({
               setValue("impactConsumption", [
                 ...(consumptionWatch ?? []).map((item) => {
                   if (
-                    item.consumptionsId === selectedConsumption.consumptionsId
+                    item.consumptionId === selectedConsumption.consumptionId
                   ) {
                     return data;
                   }

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { userSchema } from "../userApi";
 
 export const ConsumptionSchema = z.object({
-  consumptionsId: z.string(),
+  consumptionId: z.number(),
   category: z.string(),
   source: z.string(),
   unit: z.string(),
@@ -17,11 +17,16 @@ export const ConsumptionSchema = z.object({
   description: z.string(),
 });
 
+export enum Status {
+  DRAFT = "draft",
+  APPROVED = "approved",
+}
+
 export type Consumption = z.infer<typeof ConsumptionSchema>;
 
 export const EnvironmentSchema = z.object({
   id: z.string(),
-  consumptionsId: z.string(),
+  consumptionId: z.number(),
   referenceNumber: z.string(),
   division: z.string(),
   totalWorkForce: z.number(),
@@ -32,7 +37,7 @@ export const EnvironmentSchema = z.object({
   reviewer: userSchema,
   approverId: z.string(),
   approver: userSchema,
-  status: z.string(),
+  status: z.nativeEnum(Status),
   area: z.number(),
   year: z.string(),
   month: z.string(),
@@ -174,8 +179,8 @@ export async function fetchConsumptionUnit(category: String) {
   return res.data;
 }
 
-export async function fetchConsumptionSource() {
-  const res = await axios.get(`/api/consumption-sources`);
+export async function fetchConsumptionSource(category: String) {
+  const res = await axios.get(`/api/consumption-get/${category}/sources`);
   return res.data;
 }
 

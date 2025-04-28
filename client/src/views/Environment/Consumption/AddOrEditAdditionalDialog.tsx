@@ -27,6 +27,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import RichTextComponent from "../../../components/RichTextComponent";
 import FormDataSwitchButton from "../../../components/FormDataSwitchButton";
+import { generateRandomNumberId } from "../../../util/numbers.util";
 
 type DialogProps = {
   open: boolean;
@@ -77,6 +78,13 @@ export default function AddOrEditAdditionalDialog({
     queryFn: fetchConsumptionCategories,
   });
 
+  const { data: consumptionSourceData, isFetching: isConsumptionSourceData } =
+    useQuery({
+      queryKey: ["cs-sources", category],
+      queryFn: () => fetchConsumptionSource(category),
+      enabled: !!category,
+    });
+
   const {
     data: consumptionUnitData,
     isFetching: isConsumptionUnitDataFetching,
@@ -85,12 +93,6 @@ export default function AddOrEditAdditionalDialog({
     queryFn: () => fetchConsumptionUnit(category),
     enabled: !!category,
   });
-
-  const { data: consumptionSourceData, isFetching: isConsumptionSourceData } =
-    useQuery({
-      queryKey: ["cs-source"],
-      queryFn: fetchConsumptionSource,
-    });
 
   return (
     <Dialog
@@ -161,6 +163,7 @@ export default function AddOrEditAdditionalDialog({
                   onChange={(event, newValue) => {
                     field.onChange(newValue);
                     setValue("unit", "");
+                    setValue("source", "");
                   }}
                   size="small"
                   options={
@@ -382,6 +385,9 @@ export default function AddOrEditAdditionalDialog({
           }}
           size="medium"
           onClick={handleSubmit((data) => {
+            if (!data.consumptionId) {
+              data.consumptionId = generateRandomNumberId();
+            }
             onSubmit(data);
             resetForm();
             handleClose();
