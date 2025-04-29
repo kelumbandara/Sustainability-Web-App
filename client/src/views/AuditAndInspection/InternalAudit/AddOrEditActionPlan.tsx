@@ -36,11 +36,13 @@ import { useEffect } from "react";
 
 export const AddOrEditActionPlan = ({
   open,
+  setOpen,
   handleClose,
   selectedActionItem,
   internalAuditId,
 }: {
   open: boolean;
+  setOpen: (open: boolean) => void;
   handleClose: () => void;
   selectedActionItem: ScheduledInternalAuditActionPlan;
   internalAuditId: string;
@@ -333,6 +335,7 @@ export const AddOrEditActionPlan = ({
                 register={register}
                 errors={errors}
                 userData={assigneeData}
+                defaultValue={selectedActionItem?.approver ?? null}
                 required={true}
                 style={{ margin: 0 }}
               />
@@ -342,7 +345,7 @@ export const AddOrEditActionPlan = ({
       </DialogContent>
       <DialogActions sx={{ padding: "1rem" }}>
         <Button
-          onClick={() => handleClose()}
+          onClick={() => setOpen(false)}
           sx={{ color: "var(--pallet-blue)" }}
         >
           Cancel
