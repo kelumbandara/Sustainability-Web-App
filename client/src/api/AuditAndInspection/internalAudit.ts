@@ -403,7 +403,7 @@ export async function updateActionPlan(
   data: Partial<ScheduledInternalAuditActionPlan>
 ) {
   const res = await axios.post(
-    `/api/internal-audit-action-plan/${data.internalAuditId}/update`,
+    `/api/internal-audit-action-plan/${data.actionPlanId}/update`,
     {
       ...data,
     }

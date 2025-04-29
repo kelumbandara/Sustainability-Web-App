@@ -481,6 +481,7 @@ function ViewInternalAuditContent({
       </Box>
       <AddOrEditActionPlan
         open={openActionItemDialog}
+        setOpen={setOpenActionItemDialog}
         handleClose={() => {
           setSelectedActionItem(null);
           setOpenActionItemDialog(false);
