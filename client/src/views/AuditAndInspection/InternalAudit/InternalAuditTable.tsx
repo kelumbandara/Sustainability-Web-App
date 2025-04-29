@@ -196,7 +196,7 @@ function InternalAuditTable() {
                       setOpenViewDrawer(true);
                     }}
                   >
-                    <TableCell align="left">{row.id}</TableCell>
+                    <TableCell align="left">{row.referenceNumber}</TableCell>
                     <TableCell component="th" scope="row" align="left">
                       {row.auditDate
                         ? format(new Date(row.auditDate), "yyyy-MM-dd")
