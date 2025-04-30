@@ -155,9 +155,9 @@ function EnvironmentDashboard() {
   } = useForm();
 
   const watchPeriod = watch("period");
-  const month = watch("month")
-  const year = watch("year")
-  const division = watch("division")
+  const month = watch("month");
+  const year = watch("year");
+  const division = watch("division");
 
   const [activeTab, setActiveTab] = useState(0);
   const [activeTabTwo, setActiveTabTwo] = useState(0);
@@ -191,15 +191,14 @@ function EnvironmentDashboard() {
 
   const pieChartDataMemo = useMemo(() => {
     if (!categorySumData?.categorySum) return [];
-  
+
     return Object.entries(categorySumData.categorySum)
       .map(([key, value]) => ({
         name: key,
         value: value as number,
       }))
-      .filter(item => item.value > 0); // optional: remove zero-value entries
+      .filter((item) => item.value > 0);
   }, [categorySumData]);
-  
 
   const datasetMemo = useMemo(() => {
     if (!dataset?.length) return [];
@@ -260,7 +259,6 @@ function EnvironmentDashboard() {
     if (!airEmissionData?.length) return [];
     return airEmissionData;
   }, [airEmissionData]);
-
 
   return (
     <Stack>
@@ -413,7 +411,7 @@ function EnvironmentDashboard() {
               }}
               size="medium"
               onClick={handleSubmit((data) => {
-                refetchCategorySumData()
+                refetchCategorySumData();
                 console.log("data", data);
               })}
             >
@@ -1424,14 +1422,24 @@ function EnvironmentDashboard() {
         >
           <ResponsiveContainer width="100%" height={500}>
             <>
-              <Box display={"flex"} justifyContent={"center"}>
-                <Box display={"flex"} justifyContent={"center"}>
+              {pieChartDataMemo && pieChartDataMemo.length > 0 ? (
+                <Box display="flex" justifyContent="center">
                   <CustomPieChart
                     data={pieChartDataMemo}
                     title="Hazard And Non-Hazardous Waste"
                   />
                 </Box>
-              </Box>
+              ) : (
+                <Box
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                >
+                  <Box textAlign="center">
+                    Please Enable Filters to Watch Details
+                  </Box>
+                </Box>
+              )}
             </>
           </ResponsiveContainer>
         </Box>
