@@ -16,7 +16,7 @@ import {
 import theme from "../../theme";
 import PageTitle from "../../components/PageTitle";
 import Breadcrumb from "../../components/BreadCrumb";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import {
   HazardDashboardPeriods,
   HazardOrRiskCategories,
@@ -73,6 +73,10 @@ import OfflineBoltIcon from "@mui/icons-material/OfflineBolt";
 import Co2Icon from "@mui/icons-material/Co2";
 import PieArcLabelChart from "../../components/PieChartComponent";
 import PercentagePieChart from "../../components/PercentagePieChart";
+import { useQuery } from "@tanstack/react-query";
+import { fetchDivision } from "../../api/divisionApi";
+import { monthData, yearData } from "../../api/sampleData/consumptionData";
+import { fetchConsumptionCategoriesSum } from "../../api/Environment/envionmentDashboardApi";
 
 const breadcrumbItems = [
   { title: "Home", href: "/home" },
@@ -139,8 +143,6 @@ function a11yProps2(indexTwo: number) {
   };
 }
 
-
-
 function EnvironmentDashboard() {
   const { isMobile, isTablet } = useIsMobile();
   const {
@@ -153,6 +155,10 @@ function EnvironmentDashboard() {
   } = useForm();
 
   const watchPeriod = watch("period");
+  const month = watch("month")
+  const year = watch("year")
+  const division = watch("division")
+
   const [activeTab, setActiveTab] = useState(0);
   const [activeTabTwo, setActiveTabTwo] = useState(0);
 
@@ -168,10 +174,32 @@ function EnvironmentDashboard() {
     setActiveTabTwo(newValueTwo);
   };
 
+  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
+    queryKey: ["divisions"],
+    queryFn: fetchDivision,
+  });
+
+  const {
+    data: categorySumData,
+    isFetching: isCategorySumDataFetching,
+    refetch: refetchCategorySumData,
+  } = useQuery({
+    queryKey: ["divisions", year, month, division],
+    queryFn: () => fetchConsumptionCategoriesSum(year, month, division),
+    enabled: false, // disable automatic fetch
+  });
+
   const pieChartDataMemo = useMemo(() => {
-    if (!pieChartData?.length) return [];
-    return pieChartData;
-  }, [pieChartData]);
+    if (!categorySumData?.categorySum) return [];
+  
+    return Object.entries(categorySumData.categorySum)
+      .map(([key, value]) => ({
+        name: key,
+        value: value as number,
+      }))
+      .filter(item => item.value > 0); // optional: remove zero-value entries
+  }, [categorySumData]);
+  
 
   const datasetMemo = useMemo(() => {
     if (!dataset?.length) return [];
@@ -233,6 +261,7 @@ function EnvironmentDashboard() {
     return airEmissionData;
   }, [airEmissionData]);
 
+
   return (
     <Stack>
       <Box
@@ -275,52 +304,9 @@ function EnvironmentDashboard() {
               }}
             >
               <Autocomplete
-                {...register("period", { required: true })}
-                size="small"
-                options={Object.values(HazardDashboardPeriods)}
-                sx={{ flex: 1, margin: "0.5rem" }}
-                onChange={(e, value) => {
-                  setValue("period", value);
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    error={!!errors.period}
-                    label="Period"
-                    name="period"
-                  />
-                )}
-              />
-            </Box>
-            {watchPeriod === HazardDashboardPeriods.CUSTOM && (
-              <Box
-                sx={{
-                  display: "flex",
-                  flex: 2,
-                  minWidth: "250px",
-                  borderRadius: "0.3rem",
-                }}
-              >
-                <DateRangePicker
-                  control={control}
-                  register={register}
-                  errors={errors}
-                  label="Enter a date Range"
-                />
-              </Box>
-            )}
-            <Box
-              sx={{
-                display: "flex",
-                flex: 1,
-                minWidth: "250px",
-              }}
-            >
-              <Autocomplete
                 {...register("division", { required: true })}
                 size="small"
-                options={sampleDivisions?.map((division) => division.name)}
+                options={divisionData?.map((division) => division.divisionName)}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (
                   <TextField
@@ -340,24 +326,65 @@ function EnvironmentDashboard() {
                 minWidth: "250px",
               }}
             >
-              <Autocomplete
-                {...register("category", { required: true })}
-                size="small"
-                options={HazardOrRiskCategories?.map(
-                  (category) => category.name
+              <Controller
+                name="month"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <Autocomplete
+                    {...field}
+                    onChange={(event, newValue) => field.onChange(newValue)}
+                    size="small"
+                    options={
+                      monthData?.length
+                        ? monthData.map((month) => month.month)
+                        : []
+                    }
+                    sx={{ flex: 1, margin: "0.5rem" }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        required
+                        error={!!errors.month}
+                        helperText={errors.month && "Required"}
+                        label="Month"
+                        name="month"
+                      />
+                    )}
+                  />
                 )}
-                sx={{ flex: 1, margin: "0.5rem" }}
-                onChange={(e, value) => {
-                  console.log("e", e);
-                  setValue("category", value);
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    error={!!errors.category}
-                    label="Category"
-                    name="category"
+              />
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                flex: 1,
+                minWidth: "250px",
+              }}
+            >
+              <Controller
+                name="year"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <Autocomplete
+                    {...field}
+                    onChange={(event, newValue) => field.onChange(newValue)}
+                    size="small"
+                    options={
+                      yearData?.length ? yearData.map((year) => year.year) : []
+                    }
+                    sx={{ flex: 1, margin: "0.5rem" }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        required
+                        error={!!errors.year}
+                        helperText={errors.year && "Required"}
+                        label="Year"
+                        name="year"
+                      />
+                    )}
                   />
                 )}
               />
@@ -386,7 +413,7 @@ function EnvironmentDashboard() {
               }}
               size="medium"
               onClick={handleSubmit((data) => {
-                // handleCreateDocument(data);
+                refetchCategorySumData()
                 console.log("data", data);
               })}
             >

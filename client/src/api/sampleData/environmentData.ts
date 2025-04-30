@@ -299,6 +299,7 @@ export const ghgDataset = [
     scope2: 8715123,
     scope3: 3217002,
     scope4: 588996,
+    scope5: 10000000,
     month: "Jan",
   },
   {
@@ -313,6 +314,7 @@ export const ghgDataset = [
     scope2: 8654120,
     scope3: 3279001,
     scope4: 33845,
+    scope5: 10,
     month: "Mar",
   },
   {
@@ -320,6 +322,7 @@ export const ghgDataset = [
     scope2: 8500732,
     scope3: 3158000,
     scope4: 0,
+    scope5: 10,
     month: "Apr",
   },
   {
@@ -327,6 +330,7 @@ export const ghgDataset = [
     scope2: 8730021,
     scope3: 3380003,
     scope4: 0,
+    scope5: 10,
     month: "May",
   },
   {
@@ -334,6 +338,7 @@ export const ghgDataset = [
     scope2: 8901130,
     scope3: 3421102,
     scope4: 0,
+    scope5: 10,
     month: "Jun",
   },
 ];
