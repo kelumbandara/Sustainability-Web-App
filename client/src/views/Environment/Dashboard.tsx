@@ -76,7 +76,15 @@ import PercentagePieChart from "../../components/PercentagePieChart";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../api/divisionApi";
 import { monthData, yearData } from "../../api/sampleData/consumptionData";
-import { fetchConsumptionCategoriesSum } from "../../api/Environment/envionmentDashboardApi";
+import {
+  fetchConsumptionAllDashboardData,
+  fetchConsumptionCategoriesQuantity,
+  fetchConsumptionCategoriesSum,
+  fetchConsumptionCategoriesWasteWaterPercentage,
+  fetchConsumptionRenewableEnergy,
+  fetchConsumptionScope,
+  fetchConsumptionSourceCounts,
+} from "../../api/Environment/envionmentDashboardApi";
 
 const breadcrumbItems = [
   { title: "Home", href: "/home" },
@@ -149,6 +157,7 @@ function EnvironmentDashboard() {
     register,
     handleSubmit,
     watch,
+    reset,
     control,
     formState: { errors },
     setValue,
@@ -184,12 +193,206 @@ function EnvironmentDashboard() {
     isFetching: isCategorySumDataFetching,
     refetch: refetchCategorySumData,
   } = useQuery({
-    queryKey: ["divisions", year, month, division],
+    queryKey: ["cs-cat-sum-data", year, month, division],
     queryFn: () => fetchConsumptionCategoriesSum(year, month, division),
-    enabled: false, // disable automatic fetch
+    enabled: false,
   });
 
-  const pieChartDataMemo = useMemo(() => {
+  const {
+    data: waterWastePercentageData,
+    isFetching: isWaterWastePercentageDataFetching,
+    refetch: refetchWasteWaterPercentageData,
+  } = useQuery({
+    queryKey: ["cs-cat-waste-water", year, month, division],
+    queryFn: () =>
+      fetchConsumptionCategoriesWasteWaterPercentage(year, month, division),
+    enabled: false,
+  });
+
+  const {
+    data: monthlyQuantityData,
+    isFetching: isMonthlyQuantityDataFetching,
+    refetch: refetchMonthlyQuantityDataData,
+  } = useQuery({
+    queryKey: ["cs-cat-monthly-quantity", year, division],
+    queryFn: () => fetchConsumptionCategoriesQuantity(year, division),
+    enabled: false,
+  });
+
+  const {
+    data: energyRenewablePercentageData,
+    isFetching: isEnergyPercentageDataFetching,
+    refetch: refetchConsumptionRenewableEnergy,
+  } = useQuery({
+    queryKey: ["cs-cat-renewable-energy", year, month, division],
+    queryFn: () => fetchConsumptionRenewableEnergy(year, month, division),
+    enabled: false,
+  });
+
+  const {
+    data: consumptionScopeData,
+    isFetching: isConsumptionScopeDataFetching,
+    refetch: refetchFetchConsumptionScope,
+  } = useQuery({
+    queryKey: ["cs-cat-renewable-energy", year, division],
+    queryFn: () => fetchConsumptionScope(year, division),
+    enabled: false,
+  });
+
+  const {
+    data: consumptionSourceCountsData,
+    isFetching: isFetchConsumptionSourceCountsDataFetching,
+    refetch: refetchFetchConsumptionSourceCounts,
+  } = useQuery({
+    queryKey: ["cs-cat-source", year, division],
+    queryFn: () => fetchConsumptionSourceCounts(year, month, division),
+    enabled: false,
+  });
+
+  const { data: consumptionAllData, isFetching: isConsumptionAllDataFetching } =
+    useQuery({
+      queryKey: ["cs-all-data", year],
+      queryFn: () => fetchConsumptionAllDashboardData(year),
+    });
+
+  //All Data Memo
+  const consumptionYearlyCategorySummaryDataMemo = useMemo(() => {
+    return consumptionAllData?.yearlyCategorySummary ?? [];
+  }, [consumptionAllData]);
+
+  const consumptionScopeAllDataMemo = useMemo(() => {
+    return (consumptionAllData?.yearlyScopeSummary ?? []).map((entry) => {
+      const flattenedScopes =
+        entry.scopeQuantity && typeof entry.scopeQuantity === "object"
+          ? Object.entries(entry.scopeQuantity).reduce(
+              (acc, [scopeKey, value]) => {
+                const formattedKey = scopeKey.toLowerCase().replace(/\s+/g, "");
+                acc[formattedKey] = value;
+                return acc;
+              },
+              {}
+            )
+          : {};
+
+      return {
+        month: entry.month,
+        ...flattenedScopes,
+      };
+    });
+  }, [consumptionAllData]);
+
+  const consumptionCategorySumDataMemo = useMemo(() => {
+    if (!consumptionAllData?.categorySum) return [];
+
+    return Object.entries(consumptionAllData.categorySum)
+      .map(([key, value]) => ({
+        name: key,
+        value: value as number,
+      }))
+      .filter((item) => item.value > 0);
+  }, [consumptionAllData]);
+
+  const renewableAllEnergyPercentageMemo = useMemo(() => {
+    return consumptionAllData?.renewablePercentage ?? 0;
+  }, [consumptionAllData]);
+  const renewableEnergyAllMonthMemo = useMemo(() => {
+    return consumptionAllData?.month ?? "All Months";
+  }, [consumptionAllData]);
+  const renewableEnergyAllTotalRenewMemo = useMemo(() => {
+    return consumptionAllData?.totalRenewableEnergy ?? 0;
+  }, [consumptionAllData]);
+  const renewableEnergyAllTotalEnergyMemo = useMemo(() => {
+    return consumptionAllData?.totalEnergy ?? 0;
+  }, [consumptionAllData]);
+
+  const totalGhgEmission =
+    consumptionCategorySumDataMemo.find((item) => item.name === "ghgEmission")
+      ?.value || 0;
+  const totalWasteWater =
+    consumptionCategorySumDataMemo.find((item) => item.name === "wasteWater")
+      ?.value || 0;
+  const totalEnergy =
+    consumptionCategorySumDataMemo.find((item) => item.name === "energy")
+      ?.value || 0;
+  const totalWater =
+    consumptionCategorySumDataMemo.find((item) => item.name === "water")
+      ?.value || 0;
+  const totalAmount =
+    consumptionCategorySumDataMemo.find((item) => item.name === "amount")
+      ?.value || 0;
+  const totalWaste =
+    consumptionCategorySumDataMemo.find((item) => item.name === "waste")
+      ?.value || 0;
+
+  //Memo Data
+  const renewableEnergyPercentageMemo = useMemo(() => {
+    return energyRenewablePercentageData?.renewablePercentage ?? 0;
+  }, [energyRenewablePercentageData]);
+  const renewableEnergyMonthMemo = useMemo(() => {
+    return energyRenewablePercentageData?.month ?? "";
+  }, [energyRenewablePercentageData]);
+  const renewableEnergyTotalRenewMemo = useMemo(() => {
+    return energyRenewablePercentageData?.totalRenewableEnergy ?? 0;
+  }, [energyRenewablePercentageData]);
+
+  const consumptionSourceCountsDataMemo = useMemo(() => {
+    const rawData = consumptionSourceCountsData?.data ?? {};
+    const flatData = [];
+
+    for (const category in rawData) {
+      const items = rawData[category];
+      for (const label in items) {
+        flatData.push({
+          label,
+          quantity: items[label],
+          category,
+        });
+      }
+    }
+
+    return flatData;
+  }, [consumptionSourceCountsData]);
+
+  const renewableEnergyTotalEnergyMemo = useMemo(() => {
+    return energyRenewablePercentageData?.totalEnergy ?? 0;
+  }, [energyRenewablePercentageData]);
+
+  const consumptionScopeDataMemo = useMemo(() => {
+    return (consumptionScopeData?.monthlyScope ?? []).map((entry) => {
+      const flattenedScopes =
+        entry.scopeQuantity && typeof entry.scopeQuantity === "object"
+          ? Object.entries(entry.scopeQuantity).reduce(
+              (acc, [scopeKey, value]) => {
+                const formattedKey = scopeKey.toLowerCase().replace(/\s+/g, "");
+                acc[formattedKey] = value;
+                return acc;
+              },
+              {}
+            )
+          : {};
+
+      return {
+        month: entry.month,
+        ...flattenedScopes,
+      };
+    });
+  }, [consumptionScopeData]);
+
+  const monthlyQuantityDataMemo = useMemo(() => {
+    if (!monthlyQuantityData?.monthlyData) return [];
+
+    return monthlyQuantityData.monthlyData.map((entry) => ({
+      month: entry.month,
+      wasteWater: entry.wasteWater,
+      energy: entry.energy,
+      water: entry.water,
+      waste: entry.waste,
+      ghgEmission: entry.ghgEmission,
+      amount: entry.amount,
+    }));
+  }, [monthlyQuantityData]);
+
+  const categorySumDataMemo = useMemo(() => {
     if (!categorySumData?.categorySum) return [];
 
     return Object.entries(categorySumData.categorySum)
@@ -199,6 +402,31 @@ function EnvironmentDashboard() {
       }))
       .filter((item) => item.value > 0);
   }, [categorySumData]);
+  const ghgEmission =
+    categorySumDataMemo.find((item) => item.name === "ghgEmission")?.value || 0;
+  const wasteWater =
+    categorySumDataMemo.find((item) => item.name === "wasteWater")?.value || 0;
+  const energy =
+    categorySumDataMemo.find((item) => item.name === "energy")?.value || 0;
+  const water =
+    categorySumDataMemo.find((item) => item.name === "water")?.value || 0;
+  const amount =
+    categorySumDataMemo.find((item) => item.name === "amount")?.value || 0;
+  const waste =
+    categorySumDataMemo.find((item) => item.name === "waste")?.value || 0;
+
+  const waterVsWastePercentage = useMemo(() => {
+    return waterWastePercentageData?.waterToWastePercentage ?? 0;
+  }, [waterWastePercentageData]);
+
+  const handleFetch = () => {
+    refetchCategorySumData();
+    refetchWasteWaterPercentageData();
+    refetchMonthlyQuantityDataData();
+    refetchConsumptionRenewableEnergy();
+    refetchFetchConsumptionScope();
+    refetchFetchConsumptionSourceCounts();
+  };
 
   const datasetMemo = useMemo(() => {
     if (!dataset?.length) return [];
@@ -364,6 +592,7 @@ function EnvironmentDashboard() {
                 name="year"
                 control={control}
                 rules={{ required: true }}
+                defaultValue={new Date().getFullYear()}
                 render={({ field }) => (
                   <Autocomplete
                     {...field}
@@ -398,6 +627,7 @@ function EnvironmentDashboard() {
           >
             <Button
               onClick={() => {
+                reset();
                 console.log("reset");
               }}
               sx={{ color: "var(--pallet-blue)", marginRight: "0.5rem" }}
@@ -411,7 +641,7 @@ function EnvironmentDashboard() {
               }}
               size="medium"
               onClick={handleSubmit((data) => {
-                refetchCategorySumData();
+                handleFetch();
                 console.log("data", data);
               })}
             >
@@ -438,9 +668,9 @@ function EnvironmentDashboard() {
           }}
         >
           <DashboardCard
-            title="Total GHC Emission"
+            title="Total GHG Emission"
             titleIcon={<NaturePeopleIcon fontSize="large" />}
-            value={1493}
+            value={division && month ? ghgEmission : totalGhgEmission}
             subDescription="tCo2e"
           />
         </Box>
@@ -455,7 +685,7 @@ function EnvironmentDashboard() {
           <DashboardCard
             title="Water"
             titleIcon={<WaterDropOutlinedIcon fontSize="large" />}
-            value={442750}
+            value={division && month ? water : totalWater}
             subDescription="5% From previous period"
           />
         </Box>
@@ -470,7 +700,7 @@ function EnvironmentDashboard() {
           <DashboardCard
             title="Waste"
             titleIcon={<DeleteOutlineOutlinedIcon fontSize="large" />}
-            value={11247}
+            value={division && month ? waste : totalWaste}
             subDescription="8% From previous period"
           />
         </Box>
@@ -485,7 +715,7 @@ function EnvironmentDashboard() {
           <DashboardCard
             title="Waste Water"
             titleIcon={<ShowerOutlinedIcon fontSize="large" />}
-            value={48791}
+            value={division && month ? wasteWater : totalWasteWater}
             subDescription="2% From previous period"
           />
         </Box>
@@ -500,7 +730,7 @@ function EnvironmentDashboard() {
           <DashboardCard
             title="Total Energy"
             titleIcon={<BatteryChargingFullOutlinedIcon fontSize="large" />}
-            value={492558}
+            value={division && month ? energy : totalEnergy}
             subDescription="0% From previous period"
           />
         </Box>
@@ -515,7 +745,7 @@ function EnvironmentDashboard() {
           <DashboardCard
             title="Amount"
             titleIcon={<CreditCardIcon fontSize="large" />}
-            value={5}
+            value={division && month ? amount : totalAmount}
             subDescription="5% From previous period"
           />
         </Box>
@@ -550,13 +780,21 @@ function EnvironmentDashboard() {
             </Typography>
           </Box>
           <ResponsiveContainer width="100%" height={500}>
-            <BarChart width={800} height={400} data={datasetMemo}>
+            <BarChart
+              width={800}
+              height={400}
+              data={
+                division && month
+                  ? monthlyQuantityDataMemo
+                  : consumptionYearlyCategorySummaryDataMemo
+              }
+            >
               <XAxis dataKey="month" />
               <YAxis fontSize={12} />
               <Tooltip />
               <Legend />
               <Bar
-                dataKey="totalEnergy"
+                dataKey="energy"
                 name="Total Energy"
                 stackId="a"
                 fill="#4f46e5"
@@ -951,21 +1189,36 @@ function EnvironmentDashboard() {
                   <Box>
                     <CircularProgressWithLabel
                       size={250}
-                      value={70}
+                      value={
+                        division && month
+                          ? renewableEnergyPercentageMemo
+                          : renewableAllEnergyPercentageMemo
+                      }
                       textSize={25}
-                      textLabel="Renewable Energy"
+                      textLabel="Percentage"
                     />
                   </Box>
                 </Box>
                 <Box display={"flex"} flexDirection={"column"} gap={2} m={3}>
                   <Typography display={"flex"} justifyContent={"center"}>
-                    This month
+                    Month:{" "}
+                    {division && month
+                      ? renewableEnergyMonthMemo
+                      : renewableEnergyAllMonthMemo}
                   </Typography>
                   <Typography display={"flex"} justifyContent={"center"}>
-                    0
+                    Total Renewable Energy:{" "}
+                    {division && month
+                      ? renewableEnergyTotalRenewMemo
+                      : renewableEnergyAllTotalRenewMemo}{" "}
+                    kWh
                   </Typography>
                   <Typography display={"flex"} justifyContent={"center"}>
-                    0% From Previous Period
+                    Total Renewable Energy:{" "}
+                    {division && month
+                      ? renewableEnergyTotalEnergyMemo
+                      : renewableEnergyAllTotalEnergyMemo}{" "}
+                    kWh
                   </Typography>
                 </Box>
               </Box>
@@ -1150,12 +1403,12 @@ function EnvironmentDashboard() {
                 dir={theme.direction}
               >
                 <>
-                  {wasteWaterDataMemo.map((item, index) => (
+                  {consumptionSourceCountsDataMemo.map((item, index) => (
                     <Box key={index}>
                       <Box
                         sx={{
                           display: "flex",
-                          direction: "row",
+                          flexDirection: "row",
                           justifyContent: "space-between",
                           m: "1rem",
                         }}
@@ -1163,14 +1416,14 @@ function EnvironmentDashboard() {
                         <Box flex={2}>
                           <Typography>{item.label}</Typography>
                           <Typography variant="caption">
-                            {item.description}
+                            in {item.category} Category
                           </Typography>
                         </Box>
                         <Box
                           flex={1}
                           sx={{
                             display: "flex",
-                            direction: "row",
+                            flexDirection: "row",
                             justifyContent: "space-between",
                           }}
                         >
@@ -1422,24 +1675,16 @@ function EnvironmentDashboard() {
         >
           <ResponsiveContainer width="100%" height={500}>
             <>
-              {pieChartDataMemo && pieChartDataMemo.length > 0 ? (
-                <Box display="flex" justifyContent="center">
-                  <CustomPieChart
-                    data={pieChartDataMemo}
-                    title="Hazard And Non-Hazardous Waste"
-                  />
-                </Box>
-              ) : (
-                <Box
-                  display="flex"
-                  justifyContent="center"
-                  alignItems="center"
-                >
-                  <Box textAlign="center">
-                    Please Enable Filters to Watch Details
-                  </Box>
-                </Box>
-              )}
+              <Box display="flex" justifyContent="center">
+                <CustomPieChart
+                  data={
+                    division && month
+                      ? categorySumDataMemo
+                      : consumptionCategorySumDataMemo
+                  }
+                  title="Total Category Data"
+                />
+              </Box>
             </>
           </ResponsiveContainer>
         </Box>
@@ -1481,7 +1726,15 @@ function EnvironmentDashboard() {
               scrollbarWidth: "none",
             }}
           >
-            <BarChart width={800} height={400} data={ghgDatasetMemo}>
+            <BarChart
+              width={800}
+              height={400}
+              data={
+                division && month
+                  ? consumptionScopeDataMemo
+                  : consumptionScopeAllDataMemo
+              }
+            >
               <XAxis dataKey="month" />
               <YAxis fontSize={12} fontWeight={"bold"} />
               <Tooltip />
@@ -1492,7 +1745,7 @@ function EnvironmentDashboard() {
                   <Bar
                     key={key}
                     dataKey={key}
-                    name={key.replace("scope", "scope - ")}
+                    name={key.replace(/scope(\d)/i, "Scope $1")}
                     stackId="a"
                     fill={scopeColors[key] || "#8884d8"}
                     barSize={10}
@@ -1629,7 +1882,7 @@ function EnvironmentDashboard() {
               >
                 <CircularProgressWithLabel
                   size={300}
-                  value={135}
+                  value={waterVsWastePercentage}
                   textSize={25}
                   textLabel="Waste Water"
                 />

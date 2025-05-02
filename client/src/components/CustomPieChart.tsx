@@ -30,7 +30,13 @@ type CustomPieChartProps = {
 const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
     return (
-      <div style={{ backgroundColor: '#fff', padding: '10px', border: '1px solid #ccc' }}>
+      <div
+        style={{
+          backgroundColor: "#fff",
+          padding: "10px",
+          border: "1px solid #ccc",
+        }}
+      >
         <p>{`${payload[0].name}: ${payload[0].value}`}</p>
       </div>
     );
@@ -40,7 +46,20 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
 
 const CustomPieChart: React.FC<CustomPieChartProps> = ({
   data,
-  colors = ["#0D47A1", "#16C47F"],
+  colors = [
+    "#0D47A1", // Dark Blue
+    "#16C47F", // Green
+    "#FF7043", // Orange
+    "#AB47BC", // Purple
+    "#29B6F6", // Light Blue
+    "#EF5350", // Red
+    "#FFCA28", // Amber
+    "#66BB6A", // Light Green
+    "#5C6BC0", // Indigo
+    "#FFA726", // Orange Accent
+    "#26C6DA", // Cyan
+    "#8D6E63", // Brown
+  ],
   width = 400,
   height = 400,
   title,
