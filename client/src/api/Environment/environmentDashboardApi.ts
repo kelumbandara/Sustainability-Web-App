@@ -73,3 +73,14 @@ export async function fetchConsumptionSourceCounts(
   );
   return res.data;
 }
+
+export async function fetchConsumptionWasteWaterDetails(
+  year: String,
+  month: String,
+  division: String
+) {
+  const res = await axios.get(
+    `api/environment-record/${year}/${month}/${division}/waste-water-details`
+  );
+  return res.data;
+}

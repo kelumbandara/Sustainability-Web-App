@@ -17,13 +17,7 @@ import theme from "../../theme";
 import PageTitle from "../../components/PageTitle";
 import Breadcrumb from "../../components/BreadCrumb";
 import { Controller, useForm } from "react-hook-form";
-import {
-  HazardDashboardPeriods,
-  HazardOrRiskCategories,
-} from "../../api/hazardRiskApi";
 import useIsMobile from "../../customHooks/useIsMobile";
-import { sampleDivisions } from "../../api/sampleData/documentData";
-import DateRangePicker from "../../components/DateRangePicker";
 import CustomButton from "../../components/CustomButton";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DashboardCard from "../../components/DashboardCard";
@@ -49,20 +43,11 @@ import BatteryChargingFullOutlinedIcon from "@mui/icons-material/BatteryCharging
 import { useMemo, useState } from "react";
 import CircularProgressWithLabel from "../../components/CircularProgress";
 import {
-  airEmissionData,
-  dataset,
-  energyConsumptionData,
   fabricCutData,
   ghgDataset,
   lineData,
-  pieChartData,
-  pieChartDataWaterTreatment,
   pieChartEmissionBreakDownData,
-  pieChartRecycledWaterDownData,
   scopeColors,
-  wasteWaterData,
-  waterUsageData,
-  waterWasteData,
 } from "../../api/sampleData/environmentData";
 import CustomPieChart from "../../components/CustomPieChart";
 
@@ -84,7 +69,8 @@ import {
   fetchConsumptionRenewableEnergy,
   fetchConsumptionScope,
   fetchConsumptionSourceCounts,
-} from "../../api/Environment/envionmentDashboardApi";
+  fetchConsumptionWasteWaterDetails,
+} from "../../api/Environment/environmentDashboardApi";
 
 const breadcrumbItems = [
   { title: "Home", href: "/home" },
@@ -234,7 +220,7 @@ function EnvironmentDashboard() {
     isFetching: isConsumptionScopeDataFetching,
     refetch: refetchFetchConsumptionScope,
   } = useQuery({
-    queryKey: ["cs-cat-renewable-energy", year, division],
+    queryKey: ["cs-cat-scope", year, division],
     queryFn: () => fetchConsumptionScope(year, division),
     enabled: false,
   });
@@ -249,6 +235,16 @@ function EnvironmentDashboard() {
     enabled: false,
   });
 
+  const {
+    data: wasteWaterDetailsData,
+    isFetching: isFetchWasteWaterDetailsDataFetching,
+    refetch: refetchFetchConsumptionWasteWaterDetails,
+  } = useQuery({
+    queryKey: ["cs-waste-water", year, division],
+    queryFn: () => fetchConsumptionWasteWaterDetails(year, month, division),
+    enabled: false,
+  });
+
   const { data: consumptionAllData, isFetching: isConsumptionAllDataFetching } =
     useQuery({
       queryKey: ["cs-all-data", year],
@@ -258,6 +254,52 @@ function EnvironmentDashboard() {
   //All Data Memo
   const consumptionYearlyCategorySummaryDataMemo = useMemo(() => {
     return consumptionAllData?.yearlyCategorySummary ?? [];
+  }, [consumptionAllData]);
+
+  const waterVsWasteAllPercentage = useMemo(() => {
+    return consumptionAllData?.waterToWastePercentage ?? 0;
+  }, [consumptionAllData]);
+
+  const wasteWaterDetailsAllDataMemo = useMemo(() => {
+    if (!consumptionAllData) return null;
+
+    return {
+      reusePercentage: consumptionAllData.reusePercentage ?? 0,
+      recyclePercentage: consumptionAllData.recyclePercentage ?? 0,
+    };
+  }, [consumptionAllData]);
+
+  const waterSumAllDataMemo = useMemo(() => {
+    if (!consumptionAllData) return [];
+
+    return [
+      {
+        name: "Total Water",
+        value: consumptionAllData.totalWater,
+      },
+      {
+        name: "Total Waste Water",
+        value: consumptionAllData.totalWasteWater,
+      },
+    ];
+  }, [consumptionAllData]);
+
+  const consumptionSourceCountsAllDataMemo = useMemo(() => {
+    if (!consumptionAllData?.categorySourceSummary) return [];
+
+    const flatData = Object.entries(
+      consumptionAllData.categorySourceSummary
+    ).flatMap(([category, sources]) => {
+      if (typeof sources !== "object" || sources === null) return [];
+
+      return Object.entries(sources).map(([label, quantity]) => ({
+        label,
+        quantity: Number(quantity) || 0,
+        category,
+      }));
+    });
+
+    return flatData;
   }, [consumptionAllData]);
 
   const consumptionScopeAllDataMemo = useMemo(() => {
@@ -305,6 +347,10 @@ function EnvironmentDashboard() {
     return consumptionAllData?.totalEnergy ?? 0;
   }, [consumptionAllData]);
 
+  const renewableWaterAllMonthMemo = useMemo(() => {
+    return consumptionAllData?.month ?? "All Months";
+  }, [consumptionAllData]);
+
   const totalGhgEmission =
     consumptionCategorySumDataMemo.find((item) => item.name === "ghgEmission")
       ?.value || 0;
@@ -335,6 +381,10 @@ function EnvironmentDashboard() {
     return energyRenewablePercentageData?.totalRenewableEnergy ?? 0;
   }, [energyRenewablePercentageData]);
 
+  const renewableWaterMonthMemo = useMemo(() => {
+    return waterWastePercentageData?.month ?? "";
+  }, [waterWastePercentageData]);
+
   const consumptionSourceCountsDataMemo = useMemo(() => {
     const rawData = consumptionSourceCountsData?.data ?? {};
     const flatData = [];
@@ -356,6 +406,15 @@ function EnvironmentDashboard() {
   const renewableEnergyTotalEnergyMemo = useMemo(() => {
     return energyRenewablePercentageData?.totalEnergy ?? 0;
   }, [energyRenewablePercentageData]);
+
+  const wasteWaterDetailsDataMemo = useMemo(() => {
+    if (!wasteWaterDetailsData) return null;
+
+    return {
+      reusePercentage: wasteWaterDetailsData.reusePercentage ?? 0,
+      recyclePercentage: wasteWaterDetailsData.recyclePercentage ?? 0,
+    };
+  }, [wasteWaterDetailsData]);
 
   const consumptionScopeDataMemo = useMemo(() => {
     return (consumptionScopeData?.monthlyScope ?? []).map((entry) => {
@@ -392,6 +451,21 @@ function EnvironmentDashboard() {
     }));
   }, [monthlyQuantityData]);
 
+  const waterSumDataMemo = useMemo(() => {
+    if (!waterWastePercentageData) return [];
+
+    return [
+      {
+        name: "Total Water",
+        value: waterWastePercentageData.totalWater,
+      },
+      {
+        name: "Total Waste Water",
+        value: waterWastePercentageData.totalWasteWater,
+      },
+    ];
+  }, [waterWastePercentageData]);
+
   const categorySumDataMemo = useMemo(() => {
     if (!categorySumData?.categorySum) return [];
 
@@ -402,6 +476,7 @@ function EnvironmentDashboard() {
       }))
       .filter((item) => item.value > 0);
   }, [categorySumData]);
+
   const ghgEmission =
     categorySumDataMemo.find((item) => item.name === "ghgEmission")?.value || 0;
   const wasteWater =
@@ -419,6 +494,11 @@ function EnvironmentDashboard() {
     return waterWastePercentageData?.waterToWastePercentage ?? 0;
   }, [waterWastePercentageData]);
 
+  const ghgDatasetMemo = useMemo(() => {
+    if (!ghgDataset?.length) return [];
+    return ghgDataset;
+  }, [ghgDataset]);
+
   const handleFetch = () => {
     refetchCategorySumData();
     refetchWasteWaterPercentageData();
@@ -426,67 +506,24 @@ function EnvironmentDashboard() {
     refetchConsumptionRenewableEnergy();
     refetchFetchConsumptionScope();
     refetchFetchConsumptionSourceCounts();
+    refetchFetchConsumptionWasteWaterDetails();
   };
 
-  const datasetMemo = useMemo(() => {
-    if (!dataset?.length) return [];
-    return dataset;
-  }, [dataset]);
-
-  const energyConsumptionDataMemo = useMemo(() => {
-    if (!energyConsumptionData?.length) return [];
-    return energyConsumptionData;
-  }, [energyConsumptionData]);
-
+  //Sample Data
   const fabricCutDataMemo = useMemo(() => {
     if (!fabricCutData?.length) return [];
     return fabricCutData;
   }, [fabricCutData]);
-
-  const ghgDatasetMemo = useMemo(() => {
-    if (!ghgDataset?.length) return [];
-    return ghgDataset;
-  }, [ghgDataset]);
 
   const lineDataMemo = useMemo(() => {
     if (!lineData?.length) return [];
     return lineData;
   }, [lineData]);
 
-  const pieChartDataWaterTreatmentMemo = useMemo(() => {
-    if (!pieChartDataWaterTreatment?.length) return [];
-    return pieChartDataWaterTreatment;
-  }, [pieChartDataWaterTreatment]);
-
   const pieChartEmissionBreakDownDataMemo = useMemo(() => {
     if (!pieChartEmissionBreakDownData?.length) return [];
     return pieChartEmissionBreakDownData;
   }, [pieChartEmissionBreakDownData]);
-
-  const pieChartRecycledWaterDownDataMemo = useMemo(() => {
-    if (!pieChartRecycledWaterDownData?.length) return [];
-    return pieChartRecycledWaterDownData;
-  }, [pieChartRecycledWaterDownData]);
-
-  const waterWasteDataMemo = useMemo(() => {
-    if (!waterWasteData?.length) return [];
-    return waterWasteData;
-  }, [waterWasteData]);
-
-  const wasteWaterDataMemo = useMemo(() => {
-    if (!wasteWaterData?.length) return [];
-    return wasteWaterData;
-  }, [wasteWaterData]);
-
-  const waterUsageDataMemo = useMemo(() => {
-    if (!waterUsageData?.length) return [];
-    return waterUsageData;
-  }, [waterUsageData]);
-
-  const airEmissionDataMemo = useMemo(() => {
-    if (!airEmissionData?.length) return [];
-    return airEmissionData;
-  }, [airEmissionData]);
 
   return (
     <Stack>
@@ -1403,41 +1440,77 @@ function EnvironmentDashboard() {
                 dir={theme.direction}
               >
                 <>
-                  {consumptionSourceCountsDataMemo.map((item, index) => (
-                    <Box key={index}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "row",
-                          justifyContent: "space-between",
-                          m: "1rem",
-                        }}
-                      >
-                        <Box flex={2}>
-                          <Typography>{item.label}</Typography>
-                          <Typography variant="caption">
-                            in {item.category} Category
-                          </Typography>
-                        </Box>
-                        <Box
-                          flex={1}
-                          sx={{
-                            display: "flex",
-                            flexDirection: "row",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <Box>
-                            <Typography>Quantity</Typography>
-                            <Typography variant="caption">
-                              {item.quantity}
-                            </Typography>
+                  {division && month
+                    ? consumptionSourceCountsDataMemo.map((item, index) => (
+                        <Box key={index}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexDirection: "row",
+                              justifyContent: "space-between",
+                              m: "1rem",
+                            }}
+                          >
+                            <Box flex={2}>
+                              <Typography>{item.label}</Typography>
+                              <Typography variant="caption">
+                                in {item.category} Category
+                              </Typography>
+                            </Box>
+                            <Box
+                              flex={1}
+                              sx={{
+                                display: "flex",
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                              }}
+                            >
+                              <Box>
+                                <Typography>Quantity</Typography>
+                                <Typography variant="caption">
+                                  {item.quantity}
+                                </Typography>
+                              </Box>
+                            </Box>
                           </Box>
+                          <Divider />
                         </Box>
-                      </Box>
-                      <Divider />
-                    </Box>
-                  ))}
+                      ))
+                    : consumptionSourceCountsAllDataMemo.map((item, index) => (
+                        <Box key={index}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexDirection: "row",
+                              justifyContent: "space-between",
+                              m: "1rem",
+                            }}
+                          >
+                            <Box flex={2}>
+                              <Typography>{item.label}</Typography>
+                              <Typography variant="caption">
+                                in {item.category} Category
+                              </Typography>
+                            </Box>
+                            <Box
+                              flex={1}
+                              sx={{
+                                display: "flex",
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                              }}
+                            >
+                              <Box>
+                                <Typography>Quantity</Typography>
+                                <Typography variant="caption">
+                                  {item.quantity}
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </Box>
+                          <Divider />
+                        </Box>
+                      ))}
                 </>
               </TabPanelTwo>
               <TabPanelTwo
@@ -1446,41 +1519,83 @@ function EnvironmentDashboard() {
                 dir={theme.direction}
               >
                 <>
-                  {energyConsumptionDataMemo.map((item, index) => (
-                    <Box key={index}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          direction: "row",
-                          justifyContent: "space-between",
-                          m: "1rem",
-                        }}
-                      >
-                        <Box flex={2}>
-                          <Typography>{item.label}</Typography>
-                          <Typography variant="caption">
-                            {item.description}
-                          </Typography>
-                        </Box>
-                        <Box
-                          flex={1}
-                          sx={{
-                            display: "flex",
-                            direction: "row",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <Box>
-                            <Typography>Quantity</Typography>
-                            <Typography variant="caption">
-                              {item.quantity}
-                            </Typography>
+                  {division && month
+                    ? consumptionSourceCountsDataMemo
+                        .filter((item) => item.category === "Energy")
+                        .map((item, index) => (
+                          <Box key={index}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                m: "1rem",
+                              }}
+                            >
+                              <Box flex={2}>
+                                <Typography>{item.label}</Typography>
+                                <Typography variant="caption">
+                                  in {item.category} Category
+                                </Typography>
+                              </Box>
+                              <Box
+                                flex={1}
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <Box>
+                                  <Typography>Quantity</Typography>
+                                  <Typography variant="caption">
+                                    {item.quantity}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Divider />
                           </Box>
-                        </Box>
-                      </Box>
-                      <Divider />
-                    </Box>
-                  ))}
+                        ))
+                    : consumptionSourceCountsAllDataMemo
+                        .filter(
+                          (item) => item.category.toLowerCase() === "energy"
+                        )
+                        .map((item, index) => (
+                          <Box key={index}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                m: "1rem",
+                              }}
+                            >
+                              <Box flex={2}>
+                                <Typography>{item.label}</Typography>
+                                <Typography variant="caption">
+                                  in {item.category} Category
+                                </Typography>
+                              </Box>
+                              <Box
+                                flex={1}
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <Box>
+                                  <Typography>Quantity</Typography>
+                                  <Typography variant="caption">
+                                    {item.quantity}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Divider />
+                          </Box>
+                        ))}
                 </>
               </TabPanelTwo>
               <TabPanelTwo
@@ -1489,41 +1604,83 @@ function EnvironmentDashboard() {
                 dir={theme.direction}
               >
                 <>
-                  {waterUsageDataMemo.map((item, index) => (
-                    <Box key={index}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          direction: "row",
-                          justifyContent: "space-between",
-                          m: "1rem",
-                        }}
-                      >
-                        <Box flex={2}>
-                          <Typography>{item.label}</Typography>
-                          <Typography variant="caption">
-                            {item.description}
-                          </Typography>
-                        </Box>
-                        <Box
-                          flex={1}
-                          sx={{
-                            display: "flex",
-                            direction: "row",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <Box>
-                            <Typography>Quantity</Typography>
-                            <Typography variant="caption">
-                              {item.quantity}
-                            </Typography>
+                  {division && month
+                    ? consumptionSourceCountsDataMemo
+                        .filter((item) => item.category === "Water")
+                        .map((item, index) => (
+                          <Box key={index}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                m: "1rem",
+                              }}
+                            >
+                              <Box flex={2}>
+                                <Typography>{item.label}</Typography>
+                                <Typography variant="caption">
+                                  in {item.category} Category
+                                </Typography>
+                              </Box>
+                              <Box
+                                flex={1}
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <Box>
+                                  <Typography>Quantity</Typography>
+                                  <Typography variant="caption">
+                                    {item.quantity}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Divider />
                           </Box>
-                        </Box>
-                      </Box>
-                      <Divider />
-                    </Box>
-                  ))}
+                        ))
+                    : consumptionSourceCountsAllDataMemo
+                        .filter(
+                          (item) => item.category.toLowerCase() === "water"
+                        )
+                        .map((item, index) => (
+                          <Box key={index}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                m: "1rem",
+                              }}
+                            >
+                              <Box flex={2}>
+                                <Typography>{item.label}</Typography>
+                                <Typography variant="caption">
+                                  in {item.category} Category
+                                </Typography>
+                              </Box>
+                              <Box
+                                flex={1}
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <Box>
+                                  <Typography>Quantity</Typography>
+                                  <Typography variant="caption">
+                                    {item.quantity}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Divider />
+                          </Box>
+                        ))}
                 </>
               </TabPanelTwo>
               <TabPanelTwo
@@ -1532,41 +1689,83 @@ function EnvironmentDashboard() {
                 dir={theme.direction}
               >
                 <>
-                  {waterWasteDataMemo.map((item, index) => (
-                    <Box key={index}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          direction: "row",
-                          justifyContent: "space-between",
-                          m: "1rem",
-                        }}
-                      >
-                        <Box flex={2}>
-                          <Typography>{item.label}</Typography>
-                          <Typography variant="caption">
-                            {item.description}
-                          </Typography>
-                        </Box>
-                        <Box
-                          flex={1}
-                          sx={{
-                            display: "flex",
-                            direction: "row",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <Box>
-                            <Typography>Quantity</Typography>
-                            <Typography variant="caption">
-                              {item.quantity}
-                            </Typography>
+                  {division && month
+                    ? consumptionSourceCountsDataMemo
+                        .filter((item) => item.category === "Waste")
+                        .map((item, index) => (
+                          <Box key={index}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                m: "1rem",
+                              }}
+                            >
+                              <Box flex={2}>
+                                <Typography>{item.label}</Typography>
+                                <Typography variant="caption">
+                                  in {item.category} Category
+                                </Typography>
+                              </Box>
+                              <Box
+                                flex={1}
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <Box>
+                                  <Typography>Quantity</Typography>
+                                  <Typography variant="caption">
+                                    {item.quantity}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Divider />
                           </Box>
-                        </Box>
-                      </Box>
-                      <Divider />
-                    </Box>
-                  ))}
+                        ))
+                    : consumptionSourceCountsAllDataMemo
+                        .filter(
+                          (item) => item.category.toLowerCase() === "waste"
+                        )
+                        .map((item, index) => (
+                          <Box key={index}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                m: "1rem",
+                              }}
+                            >
+                              <Box flex={2}>
+                                <Typography>{item.label}</Typography>
+                                <Typography variant="caption">
+                                  in {item.category} Category
+                                </Typography>
+                              </Box>
+                              <Box
+                                flex={1}
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <Box>
+                                  <Typography>Quantity</Typography>
+                                  <Typography variant="caption">
+                                    {item.quantity}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Divider />
+                          </Box>
+                        ))}
                 </>
               </TabPanelTwo>
               <TabPanelTwo
@@ -1575,41 +1774,84 @@ function EnvironmentDashboard() {
                 dir={theme.direction}
               >
                 <>
-                  {airEmissionDataMemo.map((item, index) => (
-                    <Box key={index}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          direction: "row",
-                          justifyContent: "space-between",
-                          m: "1rem",
-                        }}
-                      >
-                        <Box flex={2}>
-                          <Typography>{item.label}</Typography>
-                          <Typography variant="caption">
-                            {item.description}
-                          </Typography>
-                        </Box>
-                        <Box
-                          flex={1}
-                          sx={{
-                            display: "flex",
-                            direction: "row",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <Box>
-                            <Typography>Quantity</Typography>
-                            <Typography variant="caption">
-                              {item.quantity}
-                            </Typography>
+                  {division && month
+                    ? consumptionSourceCountsDataMemo
+                        .filter((item) => item.category === "GHG Emissions")
+                        .map((item, index) => (
+                          <Box key={index}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                m: "1rem",
+                              }}
+                            >
+                              <Box flex={2}>
+                                <Typography>{item.label}</Typography>
+                                <Typography variant="caption">
+                                  in {item.category} Category
+                                </Typography>
+                              </Box>
+                              <Box
+                                flex={1}
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <Box>
+                                  <Typography>Quantity</Typography>
+                                  <Typography variant="caption">
+                                    {item.quantity}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Divider />
                           </Box>
-                        </Box>
-                      </Box>
-                      <Divider />
-                    </Box>
-                  ))}
+                        ))
+                    : consumptionSourceCountsAllDataMemo
+                        .filter(
+                          (item) =>
+                            item.category.toLowerCase() === "ghg emissions"
+                        )
+                        .map((item, index) => (
+                          <Box key={index}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                m: "1rem",
+                              }}
+                            >
+                              <Box flex={2}>
+                                <Typography>{item.label}</Typography>
+                                <Typography variant="caption">
+                                  in {item.category} Category
+                                </Typography>
+                              </Box>
+                              <Box
+                                flex={1}
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <Box>
+                                  <Typography>Quantity</Typography>
+                                  <Typography variant="caption">
+                                    {item.quantity}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Divider />
+                          </Box>
+                        ))}
                 </>
               </TabPanelTwo>
               <TabPanelTwo
@@ -1618,41 +1860,84 @@ function EnvironmentDashboard() {
                 dir={theme.direction}
               >
                 <>
-                  {wasteWaterDataMemo.map((item, index) => (
-                    <Box key={index}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          direction: "row",
-                          justifyContent: "space-between",
-                          m: "1rem",
-                        }}
-                      >
-                        <Box flex={2}>
-                          <Typography>{item.label}</Typography>
-                          <Typography variant="caption">
-                            {item.description}
-                          </Typography>
-                        </Box>
-                        <Box
-                          flex={1}
-                          sx={{
-                            display: "flex",
-                            direction: "row",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <Box>
-                            <Typography>Quantity</Typography>
-                            <Typography variant="caption">
-                              {item.quantity}
-                            </Typography>
+                  {division && month
+                    ? consumptionSourceCountsDataMemo
+                        .filter((item) => item.category === "Waste Water")
+                        .map((item, index) => (
+                          <Box key={index}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                m: "1rem",
+                              }}
+                            >
+                              <Box flex={2}>
+                                <Typography>{item.label}</Typography>
+                                <Typography variant="caption">
+                                  in {item.category} Category
+                                </Typography>
+                              </Box>
+                              <Box
+                                flex={1}
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <Box>
+                                  <Typography>Quantity</Typography>
+                                  <Typography variant="caption">
+                                    {item.quantity}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Divider />
                           </Box>
-                        </Box>
-                      </Box>
-                      <Divider />
-                    </Box>
-                  ))}
+                        ))
+                    : consumptionSourceCountsAllDataMemo
+                        .filter(
+                          (item) =>
+                            item.category.toLowerCase() === "waste water"
+                        )
+                        .map((item, index) => (
+                          <Box key={index}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                m: "1rem",
+                              }}
+                            >
+                              <Box flex={2}>
+                                <Typography>{item.label}</Typography>
+                                <Typography variant="caption">
+                                  in {item.category} Category
+                                </Typography>
+                              </Box>
+                              <Box
+                                flex={1}
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <Box>
+                                  <Typography>Quantity</Typography>
+                                  <Typography variant="caption">
+                                    {item.quantity}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Divider />
+                          </Box>
+                        ))}
                 </>
               </TabPanelTwo>
             </>
@@ -1774,7 +2059,9 @@ function EnvironmentDashboard() {
               <Box display={"flex"} justifyContent={"center"}>
                 <Box display={"flex"} justifyContent={"center"}>
                   <CustomPieChart
-                    data={pieChartDataWaterTreatmentMemo}
+                    data={
+                      division && month ? waterSumDataMemo : waterSumAllDataMemo
+                    }
                     title="Waste Water Treatment"
                   />
                 </Box>
@@ -1838,12 +2125,11 @@ function EnvironmentDashboard() {
             <>
               <Box display={"flex"} justifyContent={"center"}>
                 <Box display={"flex"} justifyContent={"center"}>
-                  <PercentagePieChart
-                    data={pieChartRecycledWaterDownDataMemo}
-                    title={"Waste Water Reused Or Recycled"}
-                    width={350}
-                    height={350}
-                  />
+                  {division && month ? (
+                    <PercentagePieChart data={wasteWaterDetailsDataMemo} />
+                  ) : (
+                    <PercentagePieChart data={wasteWaterDetailsAllDataMemo} />
+                  )}
                 </Box>
               </Box>
             </>
@@ -1873,19 +2159,29 @@ function EnvironmentDashboard() {
           </Typography>
           <ResponsiveContainer width="100%" height={500}>
             <>
-              <Box
-                width="100%"
-                height="100%"
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-              >
-                <CircularProgressWithLabel
-                  size={300}
-                  value={waterVsWastePercentage}
-                  textSize={25}
-                  textLabel="Waste Water"
-                />
+              <Box>
+                <Box display={"flex"} justifyContent={"center"} mt={7}>
+                  <Box>
+                    <CircularProgressWithLabel
+                      size={250}
+                      value={
+                        division && month
+                          ? waterVsWastePercentage
+                          : waterVsWasteAllPercentage
+                      }
+                      textSize={25}
+                      textLabel="Percentage"
+                    />
+                  </Box>
+                </Box>
+                <Box display={"flex"} flexDirection={"column"} gap={2} m={3}>
+                  <Typography display={"flex"} justifyContent={"center"}>
+                    Month:{" "}
+                    {division && month
+                      ? renewableWaterMonthMemo
+                      : renewableWaterAllMonthMemo}
+                  </Typography>
+                </Box>
               </Box>
             </>
           </ResponsiveContainer>
