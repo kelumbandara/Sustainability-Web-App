@@ -84,3 +84,13 @@ export async function fetchConsumptionWasteWaterDetails(
   );
   return res.data;
 }
+
+export async function fetchConsumptionEnergyRecodeDetails(
+  year: String,
+  division: String
+) {
+  const res = await axios.get(
+    `api/environment-record/${year}/${division}/energy-record-count-monthly`
+  );
+  return res.data;
+}

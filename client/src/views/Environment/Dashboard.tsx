@@ -66,6 +66,7 @@ import {
   fetchConsumptionCategoriesQuantity,
   fetchConsumptionCategoriesSum,
   fetchConsumptionCategoriesWasteWaterPercentage,
+  fetchConsumptionEnergyRecodeDetails,
   fetchConsumptionRenewableEnergy,
   fetchConsumptionScope,
   fetchConsumptionSourceCounts,
@@ -245,6 +246,16 @@ function EnvironmentDashboard() {
     enabled: false,
   });
 
+  const {
+    data: energyCountData,
+    isFetching: isFetchEnergyCountDataFetching,
+    refetch: refetchFetchConsumptionEnergyRecodeDetails,
+  } = useQuery({
+    queryKey: ["cs-energy-count", year, division],
+    queryFn: () => fetchConsumptionEnergyRecodeDetails(year, division),
+    enabled: false,
+  });
+
   const { data: consumptionAllData, isFetching: isConsumptionAllDataFetching } =
     useQuery({
       queryKey: ["cs-all-data", year],
@@ -407,6 +418,10 @@ function EnvironmentDashboard() {
     return energyRenewablePercentageData?.totalEnergy ?? 0;
   }, [energyRenewablePercentageData]);
 
+  const totalEnergyCountMemo = useMemo(() => {
+    return energyCountData?.monthlyEnergySources ?? [];
+  }, [energyCountData]);
+
   const wasteWaterDetailsDataMemo = useMemo(() => {
     if (!wasteWaterDetailsData) return null;
 
@@ -507,6 +522,7 @@ function EnvironmentDashboard() {
     refetchFetchConsumptionScope();
     refetchFetchConsumptionSourceCounts();
     refetchFetchConsumptionWasteWaterDetails();
+    refetchFetchConsumptionEnergyRecodeDetails();
   };
 
   //Sample Data
