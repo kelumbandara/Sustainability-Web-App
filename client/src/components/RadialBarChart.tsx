@@ -6,6 +6,7 @@ import {
   RadialBar,
   Legend,
   Tooltip,
+  Cell,
 } from 'recharts';
 
 const ResponsiveRadialBar = ({
@@ -34,17 +35,14 @@ const ResponsiveRadialBar = ({
       {...rest}
     >
       <RadialBar
-        minAngle={15}
         label={{ position: 'insideStart', fill: '#fff' }}
         background
-        clockWise
         dataKey={dataKey}
-        dataKeyName={nameKey}
         isAnimationActive={false}
         fillOpacity={1}
       >
         {data.map((entry, index) => (
-          <cell
+          <Cell
             key={`cell-${index}`}
             fill={colors[index % colors.length]}
           />
