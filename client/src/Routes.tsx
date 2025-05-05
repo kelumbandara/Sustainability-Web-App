@@ -116,6 +116,9 @@ const AuditAndInspectionDashboard = React.lazy(
 const EnvironmentDashBoard = React.lazy(
   () => import("./views/Environment/Dashboard")
 );
+const EnvironmentTable = React.lazy(
+  () => import("./views/Environment/Consumption/ConsumptionTable")
+);
 
 function withLayout(Layout: any, Component: any, restrictAccess = false) {
   return (
