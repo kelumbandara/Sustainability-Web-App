@@ -419,8 +419,30 @@ function EnvironmentDashboard() {
   }, [energyRenewablePercentageData]);
 
   const totalEnergyCountMemo = useMemo(() => {
-    return energyCountData?.monthlyEnergySources ?? [];
+    if (!energyCountData?.monthlyEnergySources) return [];
+
+    return energyCountData.monthlyEnergySources.map((monthData) => {
+      const { month, energySourceCounts } = monthData;
+      return {
+        name: month,
+        ...(energySourceCounts || {}),
+      };
+    });
   }, [energyCountData]);
+
+  const energySources = useMemo(() => {
+    const allSources = new Set<string>();
+
+    totalEnergyCountMemo.forEach((item) => {
+      Object.keys(item).forEach((key) => {
+        if (key !== "name") {
+          allSources.add(key);
+        }
+      });
+    });
+
+    return Array.from(allSources);
+  }, [totalEnergyCountMemo]);
 
   const wasteWaterDetailsDataMemo = useMemo(() => {
     if (!wasteWaterDetailsData) return null;
@@ -1193,22 +1215,24 @@ function EnvironmentDashboard() {
             </Typography>
           </Box>
           <ResponsiveContainer width="100%" height={500}>
-            <LineChart width={800} height={400} data={lineDataMemo}>
+            <LineChart width={800} height={400} data={totalEnergyCountMemo}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" /> <YAxis fontSize={12} />
+              <XAxis dataKey="name" />
+              <YAxis fontSize={12} />
               <Tooltip />
               <Legend />
-              <Line
-                type="monotone"
-                dataKey="energy"
-                stroke="#4f46e5"
-                dot={({ index }) =>
-                  index % 2 === 0 ? <circle r={5} fill="red" /> : null
-                }
-              />
-              <Line type="monotone" dataKey="water" stroke="#3b82f6" />
-              <Line type="monotone" dataKey="waste" stroke="#f59e0b" />
-              <Line type="monotone" dataKey="ghgEmission" stroke="#ef4444" />
+
+              {energySources.map((source, index) => (
+                <Line
+                  key={source}
+                  type="monotone"
+                  dataKey={source}
+                  stroke={index % 2 === 0 ? "#4f46e5" : "#3b82f6"}
+                  dot={({ index }) =>
+                    index % 2 === 0 ? <circle r={5} fill="red" /> : null
+                  }
+                />
+              ))}
             </LineChart>
           </ResponsiveContainer>
         </Box>
