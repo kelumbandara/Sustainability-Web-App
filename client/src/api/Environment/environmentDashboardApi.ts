@@ -94,3 +94,14 @@ export async function fetchConsumptionEnergyRecodeDetails(
   );
   return res.data;
 }
+
+export async function fetchConsumptionStatusSummery(
+  year: String,
+  month: String,
+  division: String
+) {
+  const res = await axios.get(
+    `api/environment-record/${year}/${month}/${division}/status-summary`
+  );
+  return res.data;
+}

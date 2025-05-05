@@ -70,6 +70,7 @@ import {
   fetchConsumptionRenewableEnergy,
   fetchConsumptionScope,
   fetchConsumptionSourceCounts,
+  fetchConsumptionStatusSummery,
   fetchConsumptionWasteWaterDetails,
 } from "../../api/Environment/environmentDashboardApi";
 
@@ -256,6 +257,16 @@ function EnvironmentDashboard() {
     enabled: false,
   });
 
+  const {
+    data: statusSummeryData,
+    isFetching: statusSummeryDataFetching,
+    refetch: refetchFetchConsumptionStatusSummery,
+  } = useQuery({
+    queryKey: ["cs-status-summery", year, division],
+    queryFn: () => fetchConsumptionStatusSummery(year, month, division),
+    enabled: false,
+  });
+
   const { data: consumptionAllData, isFetching: isConsumptionAllDataFetching } =
     useQuery({
       queryKey: ["cs-all-data", year],
@@ -265,6 +276,14 @@ function EnvironmentDashboard() {
   //All Data Memo
   const consumptionYearlyCategorySummaryDataMemo = useMemo(() => {
     return consumptionAllData?.yearlyCategorySummary ?? [];
+  }, [consumptionAllData]);
+
+  const statusSummeryAllDataMemo = useMemo(() => {
+    const rawData = consumptionAllData?.statusSummary ?? {};
+    return Object.entries(rawData).map(([key, value]) => ({
+      name: key.charAt(0).toUpperCase() + key.slice(1),
+      value: Number(value),
+    }));
   }, [consumptionAllData]);
 
   const totalEnergyAllCountMemo = useMemo(() => {
@@ -435,6 +454,14 @@ function EnvironmentDashboard() {
     return waterWastePercentageData?.month ?? "";
   }, [waterWastePercentageData]);
 
+  const statusSummeryDataMemo = useMemo(() => {
+    const rawData = statusSummeryData?.statusSummary ?? {};
+    return Object.entries(rawData).map(([key, value]) => ({
+      name: key.charAt(0).toUpperCase() + key.slice(1),
+      value: Number(value),
+    }));
+  }, [statusSummeryData]);
+
   const consumptionSourceCountsDataMemo = useMemo(() => {
     const rawData = consumptionSourceCountsData?.data ?? {};
     const flatData = [];
@@ -597,6 +624,7 @@ function EnvironmentDashboard() {
     refetchFetchConsumptionSourceCounts();
     refetchFetchConsumptionWasteWaterDetails();
     refetchFetchConsumptionEnergyRecodeDetails();
+    refetchFetchConsumptionStatusSummery();
   };
 
   //Sample Data
@@ -2210,10 +2238,12 @@ function EnvironmentDashboard() {
               <Box display={"flex"} justifyContent={"center"}>
                 <Box display={"flex"} justifyContent={"center"}>
                   <PieArcLabelChart
-                    data={pieChartEmissionBreakDownDataMemo}
+                    data={
+                      month && division ? statusSummeryDataMemo : statusSummeryAllDataMemo
+                    }
                     width={400}
                     height={400}
-                    title="Emission Breakdown"
+                    title="Environment Status Summery"
                   />
                 </Box>
               </Box>
