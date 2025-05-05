@@ -1,33 +1,94 @@
 export const dataset = [
   {
     month: "Jan",
-    totalEnergy: 59, // MWh
-    wasteWater: 57, // m³
-    waste: 86, // kg
-    water: 21, // m³
-    ghgEmission: 60, // tCO₂e
-    compliant: true,
+    numberOfAuditScheduled: 10,
+    numberOfAuditCompleted: 4,
+    numberOfAuditPending: 6,
   },
   {
     month: "Feb",
-    totalEnergy: 62,
-    wasteWater: 54,
-    waste: 79,
-    water: 25,
-    ghgEmission: 58,
-    compliant: true,
+    numberOfAuditScheduled: 12,
+    numberOfAuditCompleted: 9,
+    numberOfAuditPending: 3,
   },
   {
     month: "Mar",
-    totalEnergy: 65,
-    wasteWater: 60,
-    waste: 88,
-    water: 23,
-    ghgEmission: 62,
-    compliant: true,
+    numberOfAuditScheduled: 8,
+    numberOfAuditCompleted: 5,
+    numberOfAuditPending: 3,
   },
-  // ... etc. for other months
+  {
+    month: "Apr",
+    numberOfAuditScheduled: 11,
+    numberOfAuditCompleted: 6,
+    numberOfAuditPending: 5,
+  },
+  {
+    month: "May",
+    numberOfAuditScheduled: 9,
+    numberOfAuditCompleted: 7,
+    numberOfAuditPending: 2,
+  },
+  {
+    month: "Jun",
+    numberOfAuditScheduled: 13,
+    numberOfAuditCompleted: 10,
+    numberOfAuditPending: 3,
+  },
+  {
+    month: "Jul",
+    numberOfAuditScheduled: 10,
+    numberOfAuditCompleted: 8,
+    numberOfAuditPending: 2,
+  },
 ];
+
+export const ExternalDataset = [
+  {
+    month: "Jan",
+    numberOfAuditScheduled: 15,
+    numberOfAuditCompleted: 8,
+    numberOfAuditPending: 7,
+  },
+  {
+    month: "Feb",
+    numberOfAuditScheduled: 14,
+    numberOfAuditCompleted: 10,
+    numberOfAuditPending: 4,
+  },
+  {
+    month: "Mar",
+    numberOfAuditScheduled: 9,
+    numberOfAuditCompleted: 6,
+    numberOfAuditPending: 3,
+  },
+  {
+    month: "Apr",
+    numberOfAuditScheduled: 12,
+    numberOfAuditCompleted: 8,
+    numberOfAuditPending: 4,
+  },
+  {
+    month: "May",
+    numberOfAuditScheduled: 10,
+    numberOfAuditCompleted: 6,
+    numberOfAuditPending: 4,
+  },
+  {
+    month: "Jun",
+    numberOfAuditScheduled: 16,
+    numberOfAuditCompleted: 11,
+    numberOfAuditPending: 5,
+  },
+  {
+    month: "Jul",
+    numberOfAuditScheduled: 13,
+    numberOfAuditCompleted: 9,
+    numberOfAuditPending: 4,
+  },
+];
+
+
 
 export const transformedAuditScores = [
   { month: "Jan", Safety: 85, Quality: 78, Environmental: 91 },
@@ -35,6 +96,14 @@ export const transformedAuditScores = [
   { month: "Mar", Safety: 82, Quality: 80, Environmental: 93 },
   { month: "Apr", Safety: 87, Quality: 76, Environmental: 88 },
 ];
+
+export const ExternalTransformedAuditScores = [
+  { month: "Jan", Safety: 90, Quality: 82, Environmental: 85 },
+  { month: "Feb", Safety: 85, Quality: 80, Environmental: 88 },
+  { month: "Mar", Safety: 87, Quality: 78, Environmental: 92 },
+  { month: "Apr", Safety: 91, Quality: 79, Environmental: 86 },
+];
+
 
 export const lineData = [
   { name: "1", energy: 4, water: 7, waste: 3, ghgEmission: 9 },
@@ -305,3 +374,181 @@ export const myData = [
   { name: "Zero Tolerance Issue Resolution Time", uv: 100, fill: "#f59e0b" }, // DarkGreen
   { name: "Medium Resolution Time", uv: 300, fill: "#ef4444" }, // DarkIndigo (bonus)
 ];
+
+export const auditTeamProductivity = [
+  { team: "Team A", completedAudits: 22 },
+  { team: "Team B", completedAudits: 18 },
+  { team: "Team C", completedAudits: 27 },
+  { team: "Team D", completedAudits: 15 },
+  { team: "Team E", completedAudits: 10 },
+];
+
+export const socialAudit = [
+  {
+    label: "Social Audit",
+    description: "In Social Audit Category",
+    quantity: "5",
+  },
+  {
+    label: "Labor Rights Audit",
+    description: "Audit focused on labor rights compliance",
+    quantity: "8",
+  },
+  {
+    label: "Environmental Audit",
+    description: "Audit of environmental practices",
+    quantity: "3",
+  },
+  {
+    label: "Health & Safety Audit",
+    description: "Assessment of health and safety standards",
+    quantity: "6",
+  },
+  {
+    label: "Community Engagement Audit",
+    description: "Review of community involvement initiatives",
+    quantity: "4",
+  },
+  {
+    label: "Ethical Sourcing Audit",
+    description: "Audit of ethical sourcing standards",
+    quantity: "7",
+  },
+];
+
+export const healthSafetyAudit = [
+  {
+    label: "Health & Safety Audit",
+    description: "Audit of health and safety standards in workplaces",
+    quantity: "6",
+  },
+  {
+    label: "Fire Safety Audit",
+    description: "Evaluation of fire safety equipment and procedures",
+    quantity: "4",
+  },
+  {
+    label: "Emergency Preparedness Audit",
+    description: "Assessment of emergency drills and evacuation plans",
+    quantity: "5",
+  },
+  {
+    label: "PPE Compliance Audit",
+    description: "Audit of personal protective equipment usage",
+    quantity: "7",
+  },
+  {
+    label: "Hazardous Materials Audit",
+    description: "Review of handling and storage of hazardous materials",
+    quantity: "3",
+  },
+  {
+    label: "Workplace Ergonomics Audit",
+    description: "Evaluation of ergonomic practices in the workplace",
+    quantity: "2",
+  },
+];
+
+export const environmentalAudit = [
+  {
+    label: "Waste Management Audit",
+    description: "Evaluation of solid and liquid waste disposal in garment production",
+    quantity: "5",
+  },
+  {
+    label: "Water Usage Audit",
+    description: "Assessment of water consumption and recycling in the factory",
+    quantity: "4",
+  },
+  {
+    label: "Chemical Handling Audit",
+    description: "Inspection of chemical storage and usage protocols",
+    quantity: "6",
+  },
+  {
+    label: "Air Quality Audit",
+    description: "Monitoring of air emissions and ventilation systems",
+    quantity: "3",
+  },
+  {
+    label: "Energy Efficiency Audit",
+    description: "Review of energy-saving practices and equipment",
+    quantity: "7",
+  },
+  {
+    label: "Sustainable Materials Audit",
+    description: "Check on the use of eco-friendly and sustainable fabrics",
+    quantity: "2",
+  },
+];
+
+export const securityAudit = [
+  {
+    label: "Access Control Audit",
+    description: "Evaluation of security measures for controlling access to factory premises",
+    quantity: "5",
+  },
+  {
+    label: "CCTV Surveillance Audit",
+    description: "Inspection of CCTV camera coverage and footage storage systems",
+    quantity: "4",
+  },
+  {
+    label: "Perimeter Security Audit",
+    description: "Assessment of fencing, gates, and external security personnel",
+    quantity: "6",
+  },
+  {
+    label: "Employee Security Training Audit",
+    description: "Review of training provided to employees on security procedures",
+    quantity: "3",
+  },
+  {
+    label: "Fire Alarm and Emergency Systems Audit",
+    description: "Check of fire alarm systems, emergency exits, and evacuation protocols",
+    quantity: "7",
+  },
+  {
+    label: "Asset Protection Audit",
+    description: "Evaluation of security measures for protecting factory equipment and materials",
+    quantity: "2",
+  },
+];
+
+export const managementSystemAudit = [
+  {
+    label: "Production Process Audit",
+    description: "Audit of production line efficiency, workflow, and quality control",
+    quantity: "8",
+  },
+  {
+    label: "Inventory Management Audit",
+    description: "Assessment of raw materials, stock levels, and inventory tracking systems",
+    quantity: "5",
+  },
+  {
+    label: "Workforce Management Audit",
+    description: "Review of employee scheduling, attendance, and productivity tracking",
+    quantity: "7",
+  },
+  {
+    label: "Supplier Management Audit",
+    description: "Evaluation of supplier relationships, sourcing, and delivery timelines",
+    quantity: "6",
+  },
+  {
+    label: "Health and Safety Compliance Audit",
+    description: "Audit of health and safety regulations adherence in the factory",
+    quantity: "4",
+  },
+  {
+    label: "Quality Control System Audit",
+    description: "Inspection of quality control procedures in garment production",
+    quantity: "3",
+  },
+];
+
+
+
+
+

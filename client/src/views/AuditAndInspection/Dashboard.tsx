@@ -41,6 +41,9 @@ import {
   Bar,
   RadialBarChart,
   RadialBar,
+  PieChart,
+  Pie,
+  Cell,
 } from "recharts";
 
 import NaturePeopleIcon from "@mui/icons-material/NaturePeople";
@@ -52,17 +55,25 @@ import { useMemo, useState } from "react";
 import CircularProgressWithLabel from "../../components/CircularProgress";
 import {
   airEmissionData,
+  auditTeamProductivity,
   dataset,
   energyConsumptionData,
+  environmentalAudit,
+  ExternalDataset,
+  ExternalTransformedAuditScores,
   fabricCutData,
   ghgDataset,
+  healthSafetyAudit,
   lineData,
+  managementSystemAudit,
   myData,
   pieChartData,
   pieChartDataWaterTreatment,
   pieChartEmissionBreakDownData,
   pieChartRecycledWaterDownData,
   scopeColors,
+  securityAudit,
+  socialAudit,
   transformedAuditScores,
   wasteWaterData,
   waterUsageData,
@@ -170,6 +181,7 @@ function EnvironmentDashboard() {
   const watchPeriod = watch("period");
   const [activeTab, setActiveTab] = useState(0);
   const [activeTabTwo, setActiveTabTwo] = useState(0);
+  const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     console.log("event", event);
@@ -521,7 +533,7 @@ function EnvironmentDashboard() {
                 textAlign: "center",
               }}
             >
-              Consumption
+              Internal Audit Status
             </Typography>
           </Box>
           <ResponsiveContainer width="100%" height={500}>
@@ -531,38 +543,24 @@ function EnvironmentDashboard() {
               <Tooltip />
               <Legend />
               <Bar
-                dataKey="totalEnergy"
-                name="Total Energy"
+                dataKey="numberOfAuditScheduled"
+                name="Number Of Audit Scheduled"
                 stackId="a"
                 fill="#4f46e5"
                 barSize={10}
               />
               <Bar
-                dataKey="wasteWater"
-                name="Waste Water"
+                dataKey="numberOfAuditCompleted"
+                name="Number Of Audit Completed"
                 stackId="a"
                 fill="#10b981"
                 barSize={10}
               />
               <Bar
-                dataKey="waste"
-                name="Waste"
+                dataKey="numberOfAuditPending"
+                name="Number Of Audit Pending"
                 stackId="a"
                 fill="#f59e0b"
-                barSize={10}
-              />
-              <Bar
-                dataKey="water"
-                name="Water Usage"
-                stackId="a"
-                fill="#3b82f6"
-                barSize={10}
-              />
-              <Bar
-                dataKey="ghgEmission"
-                name="GHG Emission"
-                stackId="a"
-                fill="#ef4444"
                 barSize={10}
               />
             </BarChart>
@@ -590,7 +588,123 @@ function EnvironmentDashboard() {
                 textAlign: "center",
               }}
             >
-              Consumption
+              Internal Audit Score
+            </Typography>
+          </Box>
+          <ResponsiveContainer width={"100%"} height={500}>
+            <BarChart width={800} height={400} data={ExternalTransformedAuditScores}>
+              <XAxis dataKey="month" />
+              <YAxis fontSize={12} />
+              <Tooltip />
+              <Legend />
+              <Bar
+                dataKey="Safety"
+                name="Safety Audit"
+                stackId="a"
+                fill="#4f46e5"
+                barSize={10}
+              />
+              <Bar
+                dataKey="Quality"
+                name="Quality Audit"
+                stackId="a"
+                fill="#10b981"
+                barSize={10}
+              />
+              <Bar
+                dataKey="Environmental"
+                name="Environmental Audit"
+                stackId="a"
+                fill="#f59e0b"
+                barSize={10}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </Box>
+      </Box>
+
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+          gap: "1rem",
+        }}
+      >
+        <Box
+          sx={{
+            width: "100%",
+            height: "auto",
+            marginTop: "1rem",
+            flex: 1,
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+            padding: "1rem",
+            borderRadius: "0.3rem",
+            border: "1px solid var(--pallet-border-blue)",
+          }}
+        >
+          <Box>
+            <Typography
+              variant="h6"
+              sx={{
+                textAlign: "center",
+              }}
+            >
+              External Audit Status
+            </Typography>
+          </Box>
+          <ResponsiveContainer width="100%" height={500}>
+            <BarChart height={400} data={ExternalDataset}>
+              <XAxis dataKey="month" />
+              <YAxis fontSize={12} />
+              <Tooltip />
+              <Legend />
+              <Bar
+                dataKey="numberOfAuditScheduled"
+                name="Number Of Audit Scheduled"
+                stackId="a"
+                fill="#4f46e5"
+                barSize={10}
+              />
+              <Bar
+                dataKey="numberOfAuditCompleted"
+                name="Number Of Audit Completed"
+                stackId="a"
+                fill="#10b981"
+                barSize={10}
+              />
+              <Bar
+                dataKey="numberOfAuditPending"
+                name="Number Of Audit Pending"
+                stackId="a"
+                fill="#f59e0b"
+                barSize={10}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            flex: 1,
+            flexDirection: "column",
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+            borderRadius: "0.3rem",
+            border: "1px solid var(--pallet-border-blue)",
+            padding: "1rem",
+            height: "auto",
+            marginTop: "1rem",
+          }}
+        >
+          <Box>
+            <Typography
+              variant="h6"
+              sx={{
+                textAlign: "center",
+              }}
+            >
+              External Audit Score
             </Typography>
           </Box>
           <ResponsiveContainer width={"100%"} height={500}>
@@ -624,6 +738,7 @@ function EnvironmentDashboard() {
           </ResponsiveContainer>
         </Box>
       </Box>
+
       <Box
         sx={{
           display: "flex",
@@ -650,7 +765,7 @@ function EnvironmentDashboard() {
                 textAlign: "center",
               }}
             >
-              Environment Footprint
+              Audit Completion And Timeliness Metrics
             </Typography>
           </Box>
           <ResponsiveContainer width="100%" height={500}>
@@ -698,10 +813,29 @@ function EnvironmentDashboard() {
               textAlign: "center",
             }}
           >
-            Renewable Energy Usage
+            Audit Team Productivity
           </Typography>
-          <ResponsiveContainer width="100%" height={500}>
-            <></>
+          <ResponsiveContainer>
+            <PieChart>
+              <Pie
+                data={auditTeamProductivity}
+                dataKey="completedAudits"
+                nameKey="team"
+                cx="50%"
+                cy="50%"
+                outerRadius={120}
+                label
+              >
+                {auditTeamProductivity.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
           </ResponsiveContainer>
         </Box>
       </Box>
@@ -878,7 +1012,7 @@ function EnvironmentDashboard() {
               </AppBar>
               <TabPanel value={activeTab} index={0} dir={theme.direction}>
                 <>
-                  {wasteWaterDataMemo.map((item, index) => (
+                  {socialAudit.map((item, index) => (
                     <Box key={index}>
                       <Box
                         sx={{
@@ -903,7 +1037,7 @@ function EnvironmentDashboard() {
                           }}
                         >
                           <Box>
-                            <Typography>Quantity</Typography>
+                            <Typography>Score</Typography>
                             <Typography variant="caption">
                               {item.quantity}
                             </Typography>
@@ -917,7 +1051,7 @@ function EnvironmentDashboard() {
               </TabPanel>
               <TabPanel value={activeTab} index={1} dir={theme.direction}>
                 <>
-                  {energyConsumptionDataMemo.map((item, index) => (
+                  {socialAudit.map((item, index) => (
                     <Box key={index}>
                       <Box
                         sx={{
@@ -942,7 +1076,7 @@ function EnvironmentDashboard() {
                           }}
                         >
                           <Box>
-                            <Typography>Quantity</Typography>
+                            <Typography>Score</Typography>
                             <Typography variant="caption">
                               {item.quantity}
                             </Typography>
@@ -956,7 +1090,7 @@ function EnvironmentDashboard() {
               </TabPanel>
               <TabPanel value={activeTab} index={2} dir={theme.direction}>
                 <>
-                  {waterUsageDataMemo.map((item, index) => (
+                  {healthSafetyAudit.map((item, index) => (
                     <Box key={index}>
                       <Box
                         sx={{
@@ -981,7 +1115,7 @@ function EnvironmentDashboard() {
                           }}
                         >
                           <Box>
-                            <Typography>Quantity</Typography>
+                            <Typography>Score</Typography>
                             <Typography variant="caption">
                               {item.quantity}
                             </Typography>
@@ -995,7 +1129,7 @@ function EnvironmentDashboard() {
               </TabPanel>
               <TabPanel value={activeTab} index={3} dir={theme.direction}>
                 <>
-                  {waterWasteDataMemo.map((item, index) => (
+                  {environmentalAudit.map((item, index) => (
                     <Box key={index}>
                       <Box
                         sx={{
@@ -1020,7 +1154,7 @@ function EnvironmentDashboard() {
                           }}
                         >
                           <Box>
-                            <Typography>Quantity</Typography>
+                            <Typography>Score</Typography>
                             <Typography variant="caption">
                               {item.quantity}
                             </Typography>
@@ -1034,7 +1168,7 @@ function EnvironmentDashboard() {
               </TabPanel>
               <TabPanel value={activeTab} index={4} dir={theme.direction}>
                 <>
-                  {airEmissionDataMemo.map((item, index) => (
+                  {securityAudit.map((item, index) => (
                     <Box key={index}>
                       <Box
                         sx={{
@@ -1059,7 +1193,7 @@ function EnvironmentDashboard() {
                           }}
                         >
                           <Box>
-                            <Typography>Quantity</Typography>
+                            <Typography>Score</Typography>
                             <Typography variant="caption">
                               {item.quantity}
                             </Typography>
@@ -1073,7 +1207,7 @@ function EnvironmentDashboard() {
               </TabPanel>
               <TabPanel value={activeTab} index={5} dir={theme.direction}>
                 <>
-                  {wasteWaterDataMemo.map((item, index) => (
+                  {managementSystemAudit.map((item, index) => (
                     <Box key={index}>
                       <Box
                         sx={{
@@ -1098,7 +1232,7 @@ function EnvironmentDashboard() {
                           }}
                         >
                           <Box>
-                            <Typography>Quantity</Typography>
+                            <Typography>Score</Typography>
                             <Typography variant="caption">
                               {item.quantity}
                             </Typography>
@@ -1148,7 +1282,7 @@ function EnvironmentDashboard() {
           </ResponsiveContainer>
         </Box>
       </Box>
-      <Box
+      {/* <Box
         sx={{
           display: "flex",
           flexDirection: isMobile ? "column" : "row",
@@ -1608,8 +1742,8 @@ function EnvironmentDashboard() {
             </>
           </ResponsiveContainer>
         </Box>
-      </Box>
-      <Box
+      </Box> */}
+      {/* <Box
         sx={{
           display: "flex",
           flexDirection: isMobile ? "column" : "row",
@@ -1716,7 +1850,7 @@ function EnvironmentDashboard() {
             </>
           </ResponsiveContainer>
         </Box>
-      </Box>
+      </Box> */}
     </Stack>
   );
 }
