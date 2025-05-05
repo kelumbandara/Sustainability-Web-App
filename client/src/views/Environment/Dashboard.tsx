@@ -267,6 +267,45 @@ function EnvironmentDashboard() {
     return consumptionAllData?.yearlyCategorySummary ?? [];
   }, [consumptionAllData]);
 
+  const totalEnergyAllCountMemo = useMemo(() => {
+    if (!consumptionAllData?.monthlyEnergyCounts) return [];
+    const allEnergySources = new Set();
+    consumptionAllData.monthlyEnergyCounts.forEach(({ energySourceCounts }) => {
+      if (energySourceCounts) {
+        Object.keys(energySourceCounts).forEach((source) => {
+          allEnergySources.add(source);
+        });
+      }
+    });
+    return consumptionAllData.monthlyEnergyCounts.map(
+      ({ month, energySourceCounts = {} }) => {
+        const normalizedCounts = {};
+        allEnergySources.forEach((source: any) => {
+          normalizedCounts[source] = energySourceCounts[source] ?? 0;
+        });
+
+        return {
+          name: month,
+          ...normalizedCounts,
+        };
+      }
+    );
+  }, [consumptionAllData]);
+
+  const energyAllSources = useMemo(() => {
+    const allSources = new Set<string>();
+
+    totalEnergyAllCountMemo.forEach((item) => {
+      Object.keys(item).forEach((key) => {
+        if (key !== "name") {
+          allSources.add(key);
+        }
+      });
+    });
+
+    return Array.from(allSources);
+  }, [totalEnergyAllCountMemo]);
+
   const waterVsWasteAllPercentage = useMemo(() => {
     return consumptionAllData?.waterToWastePercentage ?? 0;
   }, [consumptionAllData]);
@@ -420,14 +459,27 @@ function EnvironmentDashboard() {
 
   const totalEnergyCountMemo = useMemo(() => {
     if (!energyCountData?.monthlyEnergySources) return [];
-
-    return energyCountData.monthlyEnergySources.map((monthData) => {
-      const { month, energySourceCounts } = monthData;
-      return {
-        name: month,
-        ...(energySourceCounts || {}),
-      };
+    const allEnergySources = new Set();
+    energyCountData.monthlyEnergySources.forEach(({ energySourceCounts }) => {
+      if (energySourceCounts) {
+        Object.keys(energySourceCounts).forEach((source) => {
+          allEnergySources.add(source);
+        });
+      }
     });
+    return energyCountData.monthlyEnergySources.map(
+      ({ month, energySourceCounts = {} }) => {
+        const normalizedCounts = {};
+        allEnergySources.forEach((source: any) => {
+          normalizedCounts[source] = energySourceCounts[source] ?? 0;
+        });
+
+        return {
+          name: month,
+          ...normalizedCounts,
+        };
+      }
+    );
   }, [energyCountData]);
 
   const energySources = useMemo(() => {
@@ -1211,26 +1263,48 @@ function EnvironmentDashboard() {
                 textAlign: "center",
               }}
             >
-              Environment Footprint
+              Energy Consumption Footprint
             </Typography>
           </Box>
           <ResponsiveContainer width="100%" height={500}>
-            <LineChart width={800} height={400} data={totalEnergyCountMemo}>
+            <LineChart
+              width={800}
+              height={400}
+              data={
+                totalEnergyCountMemo?.length > 0
+                  ? totalEnergyCountMemo
+                  : totalEnergyAllCountMemo
+              }
+            >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis fontSize={12} />
               <Tooltip />
               <Legend />
 
-              {energySources.map((source, index) => (
+              {(energySources?.length > 0
+                ? energySources
+                : energyAllSources
+              ).map((source, index) => (
                 <Line
                   key={source}
                   type="monotone"
                   dataKey={source}
-                  stroke={index % 2 === 0 ? "#4f46e5" : "#3b82f6"}
+                  stroke={
+                    index % 5 === 0
+                      ? "#8B5CF6" // Vibrant Purple
+                      : index % 5 === 1
+                      ? "#0EA5E9" // Sky Blue
+                      : index % 5 === 2
+                      ? "#22C55E" // Emerald Green
+                      : index % 5 === 3
+                      ? "#F59E0B" // Amber
+                      : "#EF4444"
+                  } // Bright Red
                   dot={({ index }) =>
                     index % 2 === 0 ? <circle r={5} fill="red" /> : null
                   }
+                  connectNulls={true}
                 />
               ))}
             </LineChart>
