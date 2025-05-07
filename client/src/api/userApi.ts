@@ -116,7 +116,7 @@ export async function validateUser() {
 }
 
 export async function fetchAllUsers() {
-  const res = await axios.get("/api/users");
+  const res = await axios.get("/api/all-users");
   return res.data;
 }
 
