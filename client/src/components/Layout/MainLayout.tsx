@@ -16,7 +16,7 @@ import ListItem from "@mui/material/ListItem";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-
+import { DrawerHeader as DrawerHeaderModal } from "../../components/ViewDataDrawer";
 import GridViewIcon from "@mui/icons-material/GridView";
 import groupLogo from "../../assets/group-logo.png";
 import {
@@ -26,6 +26,7 @@ import {
   Button,
   Collapse,
   Drawer as MobileDrawer,
+  Stack,
   useMediaQuery,
 } from "@mui/material";
 import { Link, useLocation, useNavigate } from "react-router";
@@ -39,6 +40,10 @@ import { useSnackbar } from "notistack";
 import { PermissionKeysObject } from "../../views/Administration/SectionList";
 import useCurrentUser from "../../hooks/useCurrentUser";
 import "./MainLayout.css";
+import ViewDataDrawer from "../ViewDataDrawer";
+import ViewAccidentContent from "../../views/AccidentAndIncident/ViewAccidentContent";
+import ViewUserContent from "../../views/Administration/ViewUserContent";
+import CustomButton from "../CustomButton";
 
 const drawerWidth = 265;
 
@@ -134,6 +139,10 @@ export default function MainLayout({ children }: Props) {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [open, setOpen] = React.useState(isMobile ? false : true);
   const { user } = useCurrentUser();
+  const [openViewProfileDrawer, setOpenViewProfileDrawer] = useState(false);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate();
 
   const toggleDrawerOpen = () => {
     setOpen(!open);
@@ -258,10 +267,77 @@ export default function MainLayout({ children }: Props) {
                   bgcolor: "var(--pallet-orange)",
                   height: "2rem",
                   width: "2rem",
+                  cursor: "pointer",
                 }}
+                onClick={() => setOpenViewProfileDrawer(true)}
               >
                 {user?.name?.charAt(0).toUpperCase()}
               </Avatar>
+              <ViewDataDrawer
+                open={openViewProfileDrawer}
+                handleClose={() => setOpenViewProfileDrawer(false)}
+                fullScreen={false}
+                drawerContent={
+                  <Stack spacing={1} sx={{ paddingX: theme.spacing(1) }}>
+                    <DrawerHeaderModal
+                      title="User Profile"
+                      handleClose={() => setOpenViewProfileDrawer(false)}
+                    />
+                    <Stack>
+                      <ViewUserContent selectedUser={user} />
+                      <CustomButton
+                        variant="contained"
+                        sx={{
+                          backgroundColor: "var(--pallet-blue)",
+                          marginTop: "1rem",
+                          marginX: "0.5rem",
+                        }}
+                        size="medium"
+                        startIcon={<LogoutIcon />}
+                        onClick={() => setLogoutDialogOpen(true)}
+                      >
+                        Log out
+                      </CustomButton>
+                      {logoutDialogOpen && (
+                        <DeleteConfirmationModal
+                          open={logoutDialogOpen}
+                          title="Log Out Confirmation"
+                          customDeleteButtonText="Log Out Now"
+                          customDeleteButtonIon={<LogoutIcon />}
+                          content={
+                            <>
+                              Are you sure you want to log out of the
+                              application?
+                              <Alert
+                                severity="warning"
+                                style={{ marginTop: "1rem" }}
+                              >
+                                You will be logged out of the application and
+                                will need to log in with credentials again to
+                                access your account.
+                              </Alert>
+                            </>
+                          }
+                          handleClose={() => setLogoutDialogOpen(false)}
+                          deleteFunc={async () => {
+                            localStorage.removeItem("token");
+                            navigate("/");
+                          }}
+                          onSuccess={() => {
+                            setLogoutDialogOpen(false);
+                            enqueueSnackbar("Logged Out Successfully!", {
+                              variant: "success",
+                            });
+                          }}
+                          handleReject={() => {
+                            setLogoutDialogOpen(false);
+                          }}
+                        />
+                      )}
+                    </Stack>
+                  </Stack>
+                }
+              />
             </Box>
           </Box>
         </Toolbar>
@@ -320,12 +396,10 @@ const DrawerContent = ({
 
   const userPermissionObject = useMemo(() => {
     if (user && user?.permissionObject) {
-      
       return user.permissionObject;
     }
-    
   }, [user]);
-  console.log(userPermissionObject)
+  console.log(userPermissionObject);
   return (
     <>
       <DrawerHeader sx={{ justifyContent: "flex-start" }}>

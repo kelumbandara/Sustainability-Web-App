@@ -8,6 +8,7 @@ import Paper from "@mui/material/Paper";
 import {
   Alert,
   Box,
+  Chip,
   LinearProgress,
   Stack,
   TableFooter,
@@ -29,6 +30,7 @@ import EditUserRoleDialog from "./EditUserRoleDialog";
 import { PermissionKeys } from "./SectionList";
 import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
 import { useQuery } from "@tanstack/react-query";
+import { green, grey } from "@mui/material/colors";
 
 function UserTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -109,6 +111,7 @@ function UserTable() {
                 <TableCell align="left">Email</TableCell>
                 <TableCell align="left">Role</TableCell>
                 <TableCell align="right">Job Position</TableCell>
+                <TableCell align="center">Status</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -131,6 +134,25 @@ function UserTable() {
                     <TableCell align="left">{row.userType?.userType}</TableCell>
                     <TableCell align="right">
                       {row.jobPosition ?? "--"}
+                    </TableCell>
+                    <TableCell align="center">
+                      {row.availability ? (
+                        <Chip
+                          label="Active"
+                          sx={{
+                            backgroundColor: green[100],
+                            color: green[800],
+                          }}
+                        />
+                      ) : (
+                        <Chip
+                          label="Inactive"
+                          sx={{
+                            backgroundColor: grey[100],
+                            color: grey[800],
+                          }}
+                        />
+                      )}
                     </TableCell>
                   </TableRow>
                 ))
@@ -176,10 +198,10 @@ function UserTable() {
               disableEdit={
                 !useCurrentUserHaveAccess(PermissionKeys.ADMIN_USERS_EDIT)
               }
-              onDelete={() => setDeleteDialogOpen(true)}
-              disableDelete={
-                !useCurrentUserHaveAccess(PermissionKeys.ADMIN_USERS_DELETE)
-              }
+              // onDelete={() => setDeleteDialogOpen(true)}
+              // disableDelete={
+              //   !useCurrentUserHaveAccess(PermissionKeys.ADMIN_USERS_DELETE)
+              // }
             />
 
             {selectedRow && (
