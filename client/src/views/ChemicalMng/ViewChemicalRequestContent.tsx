@@ -1,7 +1,16 @@
-import { Alert, Box, Chip, Divider, Stack, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Chip,
+  CircularProgress,
+  Divider,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { format } from "date-fns";
 import useIsMobile from "../../customHooks/useIsMobile";
 import {
+  approveChemicalRequest,
   ChemicalRequest,
   ChemicalRequestStatus,
 } from "../../api/ChemicalManagement/ChemicalRequestApi";
@@ -9,6 +18,11 @@ import { DrawerContentItem } from "../../components/ViewDataDrawer";
 import CustomButton from "../../components/CustomButton";
 import { useState } from "react";
 import ApproveConfirmationModal from "../OccupationalHealth/MedicineInventory/MedicineRequest/ApproveConfirmationModal";
+import { FileItemsViewer } from "../../components/FileItemsViewer";
+import { StorageFile } from "../../utils/StorageFiles.util";
+import { useMutation } from "@tanstack/react-query";
+import queryClient from "../../state/queryClient";
+import { useSnackbar } from "notistack";
 
 function ViewChemicalRequestContent({
   chemicalRequest,
@@ -18,7 +32,30 @@ function ViewChemicalRequestContent({
   handleCloseViewDrawer: () => void;
 }) {
   const { isTablet } = useIsMobile();
+  const { enqueueSnackbar } = useSnackbar();
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
+
+  const {
+    mutate: approveChemicalRequestMutation,
+    isPending: isChemicalRequestApproving,
+  } = useMutation({
+    mutationFn: approveChemicalRequest,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["chemical-requests"],
+      });
+      enqueueSnackbar("Chemical Request Approved Successfully!", {
+        variant: "success",
+      });
+      setApproveDialogOpen(false);
+      handleCloseViewDrawer();
+    },
+    onError: () => {
+      enqueueSnackbar(`Chemical Request Approve Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   return (
     <Stack
@@ -48,12 +85,16 @@ function ViewChemicalRequestContent({
         >
           <DrawerContentItem
             label="Reference Number"
-            value={chemicalRequest.reference_number}
+            value={chemicalRequest.referenceNumber}
             sx={{ flex: 1 }}
           />
           <DrawerContentItem
             label="Request Created Date"
-            value={format(chemicalRequest.request_date, "dd/MM/yyyy hh:mm a")}
+            value={
+              chemicalRequest.created_at
+                ? format(new Date(chemicalRequest.created_at), "dd/MM/yyyy")
+                : "--"
+            }
             sx={{ flex: 1 }}
           />
         </Box>
@@ -67,17 +108,17 @@ function ViewChemicalRequestContent({
         >
           <DrawerContentItem
             label="Commercial Name"
-            value={chemicalRequest.commercial_name}
+            value={chemicalRequest.commercialName}
             sx={{ flex: 1 }}
           />
           <DrawerContentItem
             label="Substance Name"
-            value={chemicalRequest.substance_name}
+            value={chemicalRequest.substanceName}
             sx={{ flex: 1 }}
           />
           <DrawerContentItem
             label="Molecular Formula"
-            value={chemicalRequest.molecular_formula}
+            value={chemicalRequest.molecularFormula}
             sx={{ flex: 1 }}
           />
         </Box>
@@ -90,12 +131,12 @@ function ViewChemicalRequestContent({
         >
           <DrawerContentItem
             label="Requested Quantity"
-            value={chemicalRequest.requested_quantity}
+            value={chemicalRequest.requestQuantity}
             sx={{ flex: 1 }}
           />
           <DrawerContentItem
             label="Requested Unit"
-            value={chemicalRequest.requested_unit}
+            value={chemicalRequest.requestUnit}
             sx={{ flex: 1 }}
           />
         </Box>
@@ -108,12 +149,12 @@ function ViewChemicalRequestContent({
         >
           <DrawerContentItem
             label="Reach Registration Number"
-            value={chemicalRequest.reach_registration_number}
+            value={chemicalRequest.reachRegistrationNumber}
             sx={{ flex: 1 }}
           />
           <DrawerContentItem
-            label="Category"
-            value={chemicalRequest.category}
+            label="Product Standard"
+            value={chemicalRequest.productStandard}
             sx={{ flex: 1 }}
           />
         </Box>
@@ -126,48 +167,57 @@ function ViewChemicalRequestContent({
         >
           <DrawerContentItem
             label="ZDHC Use Category"
-            value={chemicalRequest.zdhc_use_category}
+            value={chemicalRequest.zdhcCategory}
             sx={{ flex: 1 }}
           />
           <DrawerContentItem
             label="Chemical Form Type"
-            value={chemicalRequest.chemical_form_type}
+            value={chemicalRequest.chemicalFormType}
             sx={{ flex: 1 }}
           />
         </Box>
         <DrawerContentItem
           label="Where and Why it is used"
-          value={chemicalRequest.where_and_why_it_is_used}
-          sx={{ flex: 1 }}
-        />
-        <DrawerContentItem
-          label="Product Standard"
-          value={chemicalRequest.product_standard}
+          value={chemicalRequest.whereAndWhyUse}
           sx={{ flex: 1 }}
         />
         <DrawerContentItem
           label="MSDS/SDS have or not"
-          value={chemicalRequest.msds_sds ? "Yes" : "No"}
+          value={chemicalRequest.doYouHaveMSDSorSDS ? "Yes" : "No"}
           sx={{ flex: 1 }}
         />
-        {chemicalRequest.msds_sds && (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: isTablet ? "column" : "row",
-              justifyContent: "space-between",
-            }}
-          >
-            <DrawerContentItem
-              label="MSDS/SDS Issued Date"
-              value={chemicalRequest.msds_sds_issued_date?.toDateString()}
-              sx={{ flex: 1 }}
+        {chemicalRequest.doYouHaveMSDSorSDS && (
+          <Box>
+            <FileItemsViewer
+              label="MSDS/SDS documents"
+              files={chemicalRequest.documents as StorageFile[]}
+              sx={{ marginY: "1rem" }}
             />
-            <DrawerContentItem
-              label="MSDS/SDS Expiry Date"
-              value={chemicalRequest.msds_sds_expiry_date?.toDateString()}
-              sx={{ flex: 1 }}
-            />
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: isTablet ? "column" : "row",
+                justifyContent: "space-between",
+                marginY: "1rem",
+              }}
+            >
+              <DrawerContentItem
+                label="MSDS/SDS Issued Date"
+                value={format(
+                  new Date(chemicalRequest.msdsorsdsIssuedDate),
+                  "dd/MM/yyyy"
+                )}
+                sx={{ flex: 1 }}
+              />
+              <DrawerContentItem
+                label="MSDS/SDS Expiry Date"
+                value={format(
+                  new Date(chemicalRequest.msdsorsdsExpiryDate),
+                  "dd/MM/yyyy"
+                )}
+                sx={{ flex: 1 }}
+              />
+            </Box>
           </Box>
         )}
       </Box>
@@ -205,7 +255,7 @@ function ViewChemicalRequestContent({
             marginLeft: "0.5rem",
           }}
         >
-          {chemicalRequest.status === ChemicalRequestStatus.PENDING ? (
+          {chemicalRequest.status === ChemicalRequestStatus.DRAFT ? (
             <Chip label="Pending" />
           ) : (
             <Chip
@@ -223,34 +273,26 @@ function ViewChemicalRequestContent({
         />
         <DrawerContentItem
           label="Approver"
-          value={chemicalRequest.approver?.name}
+          value={chemicalRequest.reviewer?.name}
         />
         <DrawerContentItem
           label="Requested Date"
           value={
-            chemicalRequest?.request_date
-              ? chemicalRequest?.request_date?.toDateString()
-              : "--"
-          }
-        />
-        <DrawerContentItem
-          label="Approval Valid Date"
-          value={
-            chemicalRequest?.approval_valid_date
-              ? chemicalRequest.approval_valid_date?.toDateString()
+            chemicalRequest.requestDate
+              ? format(new Date(chemicalRequest.requestDate), "dd/MM/yyyy")
               : "--"
           }
         />
         <DrawerContentItem label="Division" value={chemicalRequest.division} />
         <DrawerContentItem
           label="Requested Customer"
-          value={chemicalRequest.requested_customer}
+          value={chemicalRequest.requestedCustomer}
         />
         <DrawerContentItem
           label="Requested Merchandiser"
-          value={chemicalRequest.requested_merchandiser}
+          value={chemicalRequest.requestedMerchandiser}
         />
-        {chemicalRequest.status === ChemicalRequestStatus.PENDING && (
+        {chemicalRequest.status === ChemicalRequestStatus.DRAFT && (
           <Box
             sx={{
               display: "flex",
@@ -268,6 +310,12 @@ function ViewChemicalRequestContent({
                 marginX: "0.5rem",
               }}
               size="medium"
+              disabled={isChemicalRequestApproving}
+              endIcon={
+                isChemicalRequestApproving ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : null
+              }
               onClick={() => setApproveDialogOpen(true)}
             >
               Approve Medicine Request
@@ -289,17 +337,13 @@ function ViewChemicalRequestContent({
           }
           handleClose={() => setApproveDialogOpen(false)}
           approveFunc={async () => {
-            // approveMedicineRequestMutation({ id: selectedRow.id });
-            console.log("Approving chemical request", chemicalRequest.id);
+            const { documents, ...rest } = chemicalRequest;
+            await approveChemicalRequestMutation({
+              data: rest,
+            });
           }}
-          onSuccess={() => {
-            setApproveDialogOpen(false);
-            handleCloseViewDrawer();
-          }}
-          handleReject={() => {
-            setApproveDialogOpen(false);
-            handleCloseViewDrawer();
-          }}
+          onSuccess={() => {}}
+          handleReject={() => {}}
         />
       )}
     </Stack>

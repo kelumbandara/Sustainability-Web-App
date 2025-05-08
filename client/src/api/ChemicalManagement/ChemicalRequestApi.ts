@@ -121,33 +121,33 @@ export enum HazardType {
 }
 
 export enum ChemicalRequestStatus {
-  PENDING = "Pending",
-  APPROVED = "Approved",
-  PUBLISHED = "Published",
+  DRAFT = "draft",
+  APPROVED = "approved",
+  PUBLISHED = "published",
 }
 
 export const ProductStandardSchema = z.object({
   id: z.string(),
-  name: z.string(),
+  productStandard: z.string(),
 });
 
 export type ProductStandard = z.infer<typeof ProductStandardSchema>;
 
 export const ChemicalSchema = z.object({
   id: z.string(),
-  commercial_name: z.string(),
-  substance_name: z.string().optional(),
-  molecular_formula: z.string().optional(),
-  chemical_form_type: z.string(),
-  reach_registration_number: z.string().optional(),
-  zdhc_use_category: z.string(),
-  where_and_why_it_is_used: z.string().optional(),
-  zdhc_level: z.string(),
-  cas_no: z.string().optional(),
-  colour_index: z.string().optional(),
-  use_of_ppe: z.array(z.string()),
-  hazard_type: z.array(z.string()),
-  ghs_classification: z.string(),
+  commercialName: z.string(),
+  substanceName: z.string().optional(),
+  molecularFormula: z.string().optional(),
+  chemicalFormType: z.string(),
+  reachRegistrationNumber: z.string().optional(),
+  zdhcCategory: z.string(),
+  whereAndWhyUse: z.string().optional(),
+  zdhcLevel: z.string(),
+  casNumber: z.string().optional(),
+  colourIndex: z.string().optional(),
+  useOfPPE: z.array(z.string()),
+  hazardType: z.array(z.string()),
+  ghsClassification: z.string(),
 });
 
 export type Chemical = z.infer<typeof ChemicalSchema>;
@@ -184,70 +184,321 @@ export const chemicalTestSchema = z.object({
 
 export const ChemicalRequestSchema = z.object({
   id: z.string(),
-  request_date: z.date(),
-  reference_number: z.string(),
-  commercial_name: z.string(),
-  substance_name: z.string().optional(),
-  molecular_formula: z.string().optional(),
-  reach_registration_number: z.string().optional(),
-  zdhc_use_category: z.string(),
-  where_and_why_it_is_used: z.string(),
+  referenceNumber: z.string(),
+  requestDate: z.date(),
+  commercialName: z.string(),
+  substanceName: z.string().optional(),
+  molecularFormula: z.string().optional(),
+  reachRegistrationNumber: z.string().optional(),
+  zdhcCategory: z.string(),
+  whereAndWhyUse: z.string(),
   division: z.string(),
-  requested_customer: z.string(),
-  requested_merchandiser: z.string().optional(),
+  requestedCustomer: z.string(),
+  requestedMerchandiser: z.string().optional(),
   status: z.nativeEnum(ChemicalRequestStatus),
-  modified_date: z.string().nullable(),
-  chemical_uuid: z.string(),
-  reviewer_remarks: z.string().nullable(),
-  approver_remarks: z.string().nullable(),
-  reviewer_notification: z.boolean(),
-  review_status_notification: z.boolean(),
-  approver_notification: z.boolean(),
-  approve_status_notification: z.boolean(),
-  requested_quantity: z.number(),
-  requested_unit: z.string(),
-  createdAt: z.string(),
+  requestQuantity: z.number(),
+  requestUnit: z.string(),
+  created_at: z.string(),
   updatedAt: z.string(),
   publishedAt: z.string(),
-  zdhc_level: z.string(),
-  cas_no: z.string(),
-  colour_index: z.string().optional(),
-  use_of_ppe: z.string(),
-  hazard_type: z.string(),
-  ghs_classification: z.string(),
-  chemical_form_type: z.string(),
-  product_standard: z.string().optional(),
-  msds_sds_issued_date: z.date().nullable(),
-  msds_sds_expiry_date: z.date().nullable(),
-  msds_sds: z.boolean(),
+  zdhcLevel: z.string(),
+  casNumber: z.string(),
+  colourIndex: z.string().optional(),
+  useOfPPE: z.string(),
+  hazardType: z.string(),
+  ghsClassification: z.string(),
+  chemicalFormType: z.string(),
+  productStandard: z.string().optional(),
+  msdsorsdsIssuedDate: z.date().nullable(),
+  msdsorsdsExpiryDate: z.date().nullable(),
+  doYouHaveMSDSorSDS: z.boolean(),
+  documents: z
+    .array(z.union([z.instanceof(File), StorageFileSchema]))
+    .optional(),
   created_date: z.string(),
-  approval_valid_date: z.date().nullable(),
-  category: z.string().nullable(),
   reviewer: userSchema,
-  approver: userSchema,
-  compliant_with_latest_zdhc: z.boolean().optional(),
-  apeo_npe_free_compliance_statement: z.boolean().optional(),
-  purchase_manufacturing_date: z.date().nullable().optional(),
-  purchase_expiry_date: z.date().nullable().optional(),
-  purchase_delivery_date: z.date().nullable().optional(),
-  purchase_delivered_quantity: z.number().nullable().optional(),
-  purchase_delivered_unit: z.string().nullable().optional(),
-  purchase_amount: z.number().nullable().optional(),
-  purchase_threshold_limit: z.number().nullable().optional(),
-  purchase_invoice_date: z.date().nullable().optional(),
-  purchase_invoice_reference: z.string().nullable().optional(),
-  storage_use_of_ppe: z.string().nullable().optional(),
-  storage_hazard_type: z.string().nullable().optional(),
-  storage_ghs_classification: z.string().nullable().optional(),
-  storage_hazard_statement_codes: z.string().nullable().optional(),
-  storage_condition_requirement: z.string().nullable().optional(),
-  storage_place: z.string().nullable().optional(),
-  storage_lot_number: z.string().nullable().optional(),
+  reviewerId: z.string().nullable(),
+  removeDoc: z.array(z.string()).optional(),
 });
 
 export type ChemicalRequest = z.infer<typeof ChemicalRequestSchema>;
 
+export const ChemicalCertificateSchema = z.object({
+  id: z.number().nullable(),
+  testName: z.string().nullable(),
+  testDate: z.date().nullable(),
+  testLab: z.string().nullable(),
+  issuedDate: z.date().nullable(),
+  expiryDate: z.date().nullable(),
+  positiveList: z.string().nullable(),
+  description: z.string().nullable(),
+  document: z
+    .union([z.array(StorageFileSchema), z.array(z.instanceof(File))])
+    .optional(),
+  removeDoc: z.array(z.string()).optional(),
+});
+
+export type ChemicalCertificate = z.infer<typeof ChemicalCertificateSchema>;
+
+export const ChemicalPurchaseRequestSchema = z.object({
+  id: z.string(),
+  referenceNumber: z.string().nullable(),
+  inventoryNumber: z.string().nullable(),
+  commercialName: z.string().nullable(),
+  substanceName: z.string().nullable(),
+  reachRegistrationNumber: z.string().nullable(),
+  molecularFormula: z.string().nullable(),
+  requestQuantity: z.number().nullable(),
+  requestUnit: z.string().nullable(),
+  zdhcCategory: z.string().nullable(),
+  chemicalFormType: z.string().nullable(),
+  whereAndWhyUse: z.string().nullable(),
+  productStandard: z.string().nullable(),
+  doYouHaveMSDSorSDS: z.boolean().nullable(),
+  msdsorsdsIssuedDate: z.date().nullable(),
+  msdsorsdsExpiryDate: z.date().nullable(),
+  documents: z.array(z.unknown()).nullable(),
+  division: z.string().nullable(),
+  requestedCustomer: z.string().nullable(),
+  requestedMerchandiser: z.string().nullable(),
+  requestDate: z.string().nullable(),
+  reviewerId: z.string().nullable(),
+  approverId: z.string().nullable(),
+  hazardType: z.array(z.string()).nullable(),
+  useOfPPE: z.array(z.string()).nullable(),
+  ghsClassification: z.string().nullable(),
+  zdhcLevel: z.string().nullable(),
+  casNumber: z.string().nullable(),
+  colourIndex: z.string().nullable(),
+  status: z.nativeEnum(ChemicalRequestStatus),
+  createdByUser: userSchema,
+  updatedBy: userSchema,
+  approvedBy: userSchema,
+  rejectedBy: z.string().nullable(),
+  responsibleSection: z.string().nullable().default("ChemicalManagement"),
+  assigneeLevel: z.string().nullable().default("1"),
+  type: z.string().nullable(),
+  name: z.string().nullable(),
+  manufactureName: z.string().nullable(),
+  contactNumber: z.string().nullable(),
+  emailId: z.string().nullable(),
+  location: z.string().nullable(),
+  compliantWithTheLatestVersionOfZDHCandMRSL: z.string().nullable(),
+  apeoOrNpeFreeComplianceStatement: z.string().nullable(),
+  manufacturingDate: z.date().nullable(),
+  expiryDate: z.date().nullable(),
+  deliveryDate: z.string().nullable(),
+  deliveryQuantity: z.number().nullable(),
+  deliveryUnit: z.string().nullable(),
+  purchaseAmount: z.number().nullable(),
+  thresholdLimit: z.string().nullable(),
+  invoiceDate: z.string().nullable(),
+  invoiceReference: z.string().nullable(),
+  hazardStatement: z.string().nullable(),
+  storageConditionRequirements: z.string().nullable(),
+  storagePlace: z.string().nullable(),
+  lotNumber: z.string().nullable(),
+  certificate: z.array(ChemicalCertificateSchema).nullable(),
+});
+
+export type ChemicalPurchaseRequest = z.infer<
+  typeof ChemicalPurchaseRequestSchema
+>;
+
 export async function fetchChemicalRequests() {
   const res = await axios.get(`/api/chemical-records`);
+  return res.data;
+}
+
+export async function fetchChemicalCommercialNames() {
+  const res = await axios.get(`/api/commercial-names`);
+  return res.data;
+}
+
+export async function createChemical(data: { data: Partial<Chemical> }) {
+  const res = await axios.post(`/api/commercial-names`, {
+    ...data,
+  });
+  return res.data;
+}
+
+export async function createProductStandard(data: {
+  data: Partial<ProductStandard>;
+}) {
+  const res = await axios.post(`/api/product-standard`, {
+    ...data,
+  });
+  return res.data;
+}
+
+export async function fetchProductStandards() {
+  const res = await axios.get(`/api/product-standard`);
+  return res.data;
+}
+
+export const createChemicalRequest = async ({
+  data,
+}: {
+  data: Partial<ChemicalRequest>;
+}) => {
+  const formData = new FormData();
+  Object.keys(data).forEach((key) => {
+    const value = data[key as keyof ChemicalRequest];
+
+    if (key === "documents" && Array.isArray(value)) {
+      value.forEach((file, index) => {
+        formData.append(`documents[${index}]`, file as File);
+      });
+    } else if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        formData.append(`${key}[${index}]`, JSON.stringify(item));
+      });
+    } else if (value instanceof Date) {
+      formData.append(key, value.toISOString());
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  try {
+    const response = await axios.post(`/api/chemical-records`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error updating Chemical Records:", error);
+    throw error;
+  }
+};
+
+export const updateChemicalRequest = async ({
+  data,
+}: {
+  data: Partial<ChemicalRequest>;
+}) => {
+  if (!data.id) {
+    throw new Error("Chemical Request must have an ID for an update.");
+  }
+
+  const formData = new FormData();
+  Object.keys(data).forEach((key) => {
+    const value = data[key as keyof ChemicalRequest];
+
+    if (key === "documents" && Array.isArray(value)) {
+      value.forEach((file, index) => {
+        formData.append(`documents[${index}]`, file as File);
+      });
+    } else if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        formData.append(`${key}[${index}]`, JSON.stringify(item));
+      });
+    } else if (value instanceof Date) {
+      formData.append(key, value.toISOString());
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  try {
+    const response = await axios.post(
+      `/api/chemical-records/${data.id}/update`,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error updating chemical request:", error);
+    throw error;
+  }
+};
+
+export const approveChemicalRequest = async ({
+  data,
+}: {
+  data: Partial<ChemicalRequest>;
+}) => {
+  if (!data.id) {
+    throw new Error("Chemical Request must have an ID for an update.");
+  }
+
+  const formData = new FormData();
+  Object.keys(data).forEach((key) => {
+    const value = data[key as keyof ChemicalRequest];
+
+    if (key === "documents" && Array.isArray(value)) {
+      value.forEach((file, index) => {
+        formData.append(`documents[${index}]`, file as File);
+      });
+    } else if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        formData.append(`${key}[${index}]`, JSON.stringify(item));
+      });
+    } else if (value instanceof Date) {
+      formData.append(key, value.toISOString());
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  try {
+    const response = await axios.post(
+      `/api/chemical-records/${data.id}/approve`,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error updating chemical request:", error);
+    throw error;
+  }
+};
+
+export const deleteChemicalRequest = async (id: string) => {
+  const res = await axios.delete(`/api/chemical-records/${id}/delete`);
+  return res.data;
+};
+
+export async function fetchChemicalPurchaceInventories() {
+  const res = await axios.get(`/api/purchase-inventory-records`);
+  return res.data;
+}
+
+export const publishChemicalPurchase = async (
+  chemicalPurchase: ChemicalPurchaseRequest
+) => {
+  const formData = new FormData();
+
+  // Append each property of the maternity Register object to the form data
+  Object.keys(chemicalPurchase).forEach((key) => {
+    const value = chemicalPurchase[key as keyof typeof chemicalPurchase];
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        formData.append(`${key}[${index}]`, JSON.stringify(item));
+      });
+    } else if (value instanceof Date) {
+      formData.append(key, value.toISOString());
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  const res = await axios.post(
+    `/api/medicine-inventory/${chemicalPurchase?.id}/publish`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return res.data;
+};
+
+export async function fetchAllSupplierNames() {
+  const res = await axios.get("/api/chemical-supplier-names");
   return res.data;
 }

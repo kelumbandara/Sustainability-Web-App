@@ -20,8 +20,11 @@ import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import { useSnackbar } from "notistack";
 import {
+  ChemicalPurchaseRequest,
   ChemicalRequest,
   ChemicalRequestStatus,
+  fetchChemicalPurchaceInventories,
+  fetchChemicalRequests,
 } from "../../api/ChemicalManagement/ChemicalRequestApi";
 import { sampleChemicalRequestData } from "../../api/sampleData/chemicalRequestSampleData";
 import theme from "../../theme";
@@ -33,21 +36,33 @@ import ViewChemicalRequestContent from "./ViewChemicalRequestContent";
 import AddOrEditChemicalRequestDialog from "./AddOrEditChemicalRequestDialog";
 import CustomButton from "../../components/CustomButton";
 import ApproveConfirmationModal from "../OccupationalHealth/MedicineInventory/MedicineRequest/ApproveConfirmationModal";
+import { useQuery } from "@tanstack/react-query";
+import AddOrEditPurchaseAndInventoryDialog from "../OccupationalHealth/MedicineInventory/PurchaseAndInventory/AddOrEditPurchaseAndInventoryDialog";
+import ViewChemicalPurchaseInventoryContent from "./ViewChemicalPurchaseInventoryContent";
+import AddOrEditChemicalPurchaseAndInventoryDialog from "./AddOrEditPurchaseAndInventoryDialog";
 
 function ChemicalPurchaseInventoryTable() {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<ChemicalRequest>(null);
+  const [selectedRow, setSelectedRow] = useState<ChemicalPurchaseRequest>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
-  const [chemicalRequests, setChemicalRequests] = useState<ChemicalRequest[]>(
-    sampleChemicalRequestData
-  );
+  // const [chemicalPurchaseRequests, setChemicalRequests] = useState<ChemicalRequest[]>(
+  //   sampleChemicalRequestData
+  // );
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
     { title: "Chemical Purchase & Inventory" },
   ];
+
+  const { data: chemicalPurchaseRequests, isFetching: isChemicalDataFetching } =
+    useQuery({
+      queryKey: ["chemical-purchase-inventory"],
+      queryFn: fetchChemicalPurchaceInventories,
+    });
+
+  console.log("chemicalPurchaseRequests", chemicalPurchaseRequests);
 
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("md")
@@ -80,24 +95,19 @@ function ChemicalPurchaseInventoryTable() {
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
                 <TableCell>Reference Number</TableCell>
-                <TableCell align="right">Request Date</TableCell>
-                <TableCell align="right">Expiry Date</TableCell>
-                <TableCell align="right">Commercial Name</TableCell>
-                <TableCell align="right">Customer</TableCell>
-                <TableCell align="right">Reviewer</TableCell>
-                <TableCell align="right">Approver</TableCell>
-                <TableCell align="right">Customer</TableCell>
-                <TableCell align="right">Delivered Quantity</TableCell>
-                <TableCell align="right">Storage Place</TableCell>
-                <TableCell align="right">Issued</TableCell>
-                <TableCell align="right">Disposed</TableCell>
-                <TableCell align="right">Balance</TableCell>
-                <TableCell align="right">Status</TableCell>
+                <TableCell align="left">Request Date</TableCell>
+                <TableCell align="left">Expiry Date</TableCell>
+                <TableCell align="left">Commercial Name</TableCell>
+                <TableCell align="left">Customer</TableCell>
+                <TableCell align="left">Reviewer</TableCell>
+                <TableCell align="left">Customer</TableCell>
+                <TableCell align="left">Delivered Quantity</TableCell>
+                <TableCell align="center">Status</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {chemicalRequests?.length > 0 ? (
-                chemicalRequests.map((row) => (
+              {chemicalPurchaseRequests?.length > 0 ? (
+                chemicalPurchaseRequests.map((row) => (
                   <TableRow
                     key={`${row.id}`}
                     sx={{
@@ -110,30 +120,31 @@ function ChemicalPurchaseInventoryTable() {
                     }}
                   >
                     <TableCell component="th" scope="row">
-                      {row.reference_number}
+                      {row.id}
                     </TableCell>
-                    <TableCell align="right">
-                      {row?.request_date
-                        ? format(new Date(row.request_date), "yyyy-MM-dd")
+                    <TableCell align="left">
+                      {row?.requestDate
+                        ? format(new Date(row.requestDate), "yyyy-MM-dd")
                         : "--"}
                     </TableCell>
-                    <TableCell align="right">{row.commercial_name}</TableCell>
-                    <TableCell align="right">{row.substance_name}</TableCell>
-                    <TableCell align="right">{row?.division ?? "--"}</TableCell>
-                    <TableCell align="right">
-                      {row?.requested_customer ?? "--"}
+                    <TableCell align="left">
+                      {row?.expiryDate
+                        ? format(new Date(row.expiryDate), "yyyy-MM-dd")
+                        : "--"}
                     </TableCell>
-                    <TableCell align="right">
-                      {row?.requested_merchandiser ?? "--"}
+                    <TableCell align="left">{row.commercialName}</TableCell>
+                    <TableCell align="left">{row?.substanceName}</TableCell>
+                    <TableCell align="left">
+                      {row?.requestedCustomer ?? "--"}
                     </TableCell>
-                    <TableCell align="right">
+                    <TableCell align="left">
+                      {row?.requestedMerchandiser ?? "--"}
+                    </TableCell>
+                    <TableCell align="left">
                       {row?.reviewer?.name ?? "--"}
                     </TableCell>
-                    <TableCell align="right">
-                      {row?.approver?.name ?? "--"}
-                    </TableCell>
-                    <TableCell align="right">
-                      {row.status === ChemicalRequestStatus.PENDING ? (
+                    <TableCell align="center">
+                      {row.status === ChemicalRequestStatus.DRAFT ? (
                         <Chip label="Pending" />
                       ) : (
                         <Chip
@@ -151,7 +162,7 @@ function ChemicalPurchaseInventoryTable() {
                 <TableRow>
                   <TableCell colSpan={11} align="center">
                     <Typography variant="body2">
-                      No chemicalRequests found
+                      No chemical Purchase Inventory found
                     </Typography>
                   </TableCell>
                 </TableRow>
@@ -173,20 +184,14 @@ function ChemicalPurchaseInventoryTable() {
                 setSelectedRow(selectedRow);
                 setOpenAddOrEditDialog(true);
               }}
-              disableEdit={
-                selectedRow?.status !== ChemicalRequestStatus.PENDING
-              }
+              disableEdit={selectedRow?.status !== ChemicalRequestStatus.DRAFT}
               onDelete={() => setDeleteDialogOpen(true)}
             />
 
             {selectedRow && (
               <Stack>
-                <ViewChemicalRequestContent
+                <ViewChemicalPurchaseInventoryContent
                   chemicalRequest={selectedRow}
-                  handleCloseViewDrawer={() => {
-                    setOpenViewDrawer(false);
-                    setSelectedRow(null);
-                  }}
                 />
               </Stack>
             )}
@@ -194,28 +199,9 @@ function ChemicalPurchaseInventoryTable() {
         }
       />
       {openAddOrEditDialog && (
-        <AddOrEditChemicalRequestDialog
+        <AddOrEditChemicalPurchaseAndInventoryDialog
           open={openAddOrEditDialog}
           handleClose={() => {
-            setSelectedRow(null);
-            setOpenViewDrawer(false);
-            setOpenAddOrEditDialog(false);
-          }}
-          onSubmit={(data) => {
-            if (selectedRow) {
-              setChemicalRequests(
-                chemicalRequests.map((doc) => (doc.id === data.id ? data : doc))
-              ); // Update the patient in the list if it already exists
-              enqueueSnackbar("Patient Details Updated Successfully!", {
-                variant: "success",
-              });
-            } else {
-              console.log("Adding new patient", data);
-              setChemicalRequests([...chemicalRequests, data]); // Add new patient to the list
-              enqueueSnackbar("Patient Created Successfully!", {
-                variant: "success",
-              });
-            }
             setSelectedRow(null);
             setOpenViewDrawer(false);
             setOpenAddOrEditDialog(false);
@@ -236,11 +222,7 @@ function ChemicalPurchaseInventoryTable() {
             </>
           }
           handleClose={() => setDeleteDialogOpen(false)}
-          deleteFunc={async () => {
-            setChemicalRequests(
-              chemicalRequests.filter((req) => req.id !== selectedRow.id)
-            );
-          }}
+          deleteFunc={async () => {}}
           onSuccess={() => {
             setOpenViewDrawer(false);
             setSelectedRow(null);
