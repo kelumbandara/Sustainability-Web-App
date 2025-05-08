@@ -44,6 +44,7 @@ import ViewDataDrawer from "../ViewDataDrawer";
 import ViewAccidentContent from "../../views/AccidentAndIncident/ViewAccidentContent";
 import ViewUserContent from "../../views/Administration/ViewUserContent";
 import CustomButton from "../CustomButton";
+import EditUserRoleDialog from "../../views/Administration/EditUserRoleDialog";
 
 const drawerWidth = 265;
 
@@ -141,6 +142,7 @@ export default function MainLayout({ children }: Props) {
   const { user } = useCurrentUser();
   const [openViewProfileDrawer, setOpenViewProfileDrawer] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const [openEditUserRoleDialog, setOpenEditUserRoleDialog] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
 
@@ -276,28 +278,40 @@ export default function MainLayout({ children }: Props) {
               <ViewDataDrawer
                 open={openViewProfileDrawer}
                 handleClose={() => setOpenViewProfileDrawer(false)}
-                fullScreen={false}
+                fullScreen={true}
                 drawerContent={
                   <Stack spacing={1} sx={{ paddingX: theme.spacing(1) }}>
                     <DrawerHeaderModal
                       title="User Profile"
                       handleClose={() => setOpenViewProfileDrawer(false)}
+                      onEdit={() => {
+                        setOpenEditUserRoleDialog(true);
+                      }}
                     />
                     <Stack>
                       <ViewUserContent selectedUser={user} />
-                      <CustomButton
-                        variant="contained"
+                      <Box
                         sx={{
-                          backgroundColor: "var(--pallet-blue)",
+                          display: "flex",
+                          justifyContent: "flex-end",
                           marginTop: "1rem",
-                          marginX: "0.5rem",
                         }}
-                        size="medium"
-                        startIcon={<LogoutIcon />}
-                        onClick={() => setLogoutDialogOpen(true)}
                       >
-                        Log out
-                      </CustomButton>
+                        <CustomButton
+                          variant="contained"
+                          sx={{
+                            backgroundColor: "var(--pallet-orange)",
+                            marginTop: "1rem",
+                            marginX: "0.5rem",
+                            width: "10rem",
+                          }}
+                          size="medium"
+                          startIcon={<LogoutIcon />}
+                          onClick={() => setLogoutDialogOpen(true)}
+                        >
+                          Log out
+                        </CustomButton>
+                      </Box>
                       {logoutDialogOpen && (
                         <DeleteConfirmationModal
                           open={logoutDialogOpen}
@@ -332,6 +346,17 @@ export default function MainLayout({ children }: Props) {
                           handleReject={() => {
                             setLogoutDialogOpen(false);
                           }}
+                        />
+                      )}
+                      {openEditUserRoleDialog && (
+                        <EditUserRoleDialog
+                          open={openEditUserRoleDialog}
+                          handleClose={() => {
+                            setOpenViewProfileDrawer(false);
+                            setOpenEditUserRoleDialog(false);
+                          }}
+                          onSubmit={(data) => {}}
+                          defaultValues={user}
                         />
                       )}
                     </Stack>

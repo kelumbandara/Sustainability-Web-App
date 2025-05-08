@@ -24,13 +24,14 @@ import { useMemo, useState } from "react";
 import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
-import { fetchAllUsers, User } from "../../api/userApi";
+import { fetchAllUsers, updateUserType, User } from "../../api/userApi";
 import ViewUserContent from "./ViewUserContent";
 import EditUserRoleDialog from "./EditUserRoleDialog";
 import { PermissionKeys } from "./SectionList";
 import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { green, grey } from "@mui/material/colors";
+import queryClient from "../../state/queryClient";
 
 function UserTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -78,6 +79,22 @@ function UserTable() {
       page * rowsPerPage + rowsPerPage
     );
   }, [usersData, page, rowsPerPage]);
+
+  const { mutate: updateUserRoleMutation, isPending } = useMutation({
+    mutationFn: updateUserType,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      setOpenEditUserRoleDialog(false);
+      enqueueSnackbar("User Role Updated Successfully!", {
+        variant: "success",
+      });
+    },
+    onError: () => {
+      enqueueSnackbar(`User Role Update Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   return (
     <Stack>
@@ -185,7 +202,7 @@ function UserTable() {
       <ViewDataDrawer
         open={openViewDrawer}
         handleClose={() => setOpenViewDrawer(false)}
-        fullScreen={false}
+        fullScreen={true}
         drawerContent={
           <Stack spacing={1} sx={{ paddingX: theme.spacing(1) }}>
             <DrawerHeader
@@ -220,7 +237,9 @@ function UserTable() {
             setOpenViewDrawer(false);
             setOpenEditUserRoleDialog(false);
           }}
-          onSubmit={(data) => {}}
+          onSubmit={(data) => {
+            updateUserRoleMutation(data);
+          }}
           defaultValues={selectedRow}
         />
       )}

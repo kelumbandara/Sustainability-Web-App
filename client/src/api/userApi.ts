@@ -3,7 +3,7 @@ import { z } from "zod";
 import { PermissionKeysObjectSchema } from "../views/Administration/SectionList";
 
 export const userRoleSchema = z.object({
-  id: z.string(),
+  id: z.number(),
   userType: z.string(),
   description: z.string().optional(),
   permissionObject: PermissionKeysObjectSchema,
@@ -13,7 +13,7 @@ export const userRoleSchema = z.object({
 export type UserRole = z.infer<typeof userRoleSchema>;
 
 export const userTypeSchema = z.object({
-  id: z.string(),
+  id: z.number(),
   userType: z.string(),
   description: z.string().optional(),
   permissionObject: PermissionKeysObjectSchema,
@@ -32,8 +32,9 @@ export type UserLevel = z.infer<typeof userLevelSchema>;
 export type UserType = z.infer<typeof userTypeSchema>;
 
 export const userSchema = z.object({
-  id: z.string(),
+  id: z.number(),
   email: z.string(),
+  userTypeId: z.number(),
   name: z.string(),
   mobile: z.string(),
   emailVerifiedAt: z.string().nullable(),
@@ -52,7 +53,7 @@ export const userSchema = z.object({
   assignedFactory: z.array(z.string()),
   employeeNumber: z.string(),
   jobPosition: z.string(),
-  // assigneeLevel: z.string(),
+  assigneeLevel: z.string(),
   permissionObject: PermissionKeysObjectSchema,
 });
 
@@ -116,7 +117,7 @@ export async function validateUser() {
 }
 
 export async function fetchAllUsers() {
-  const res = await axios.get("/api/all-users");
+  const res = await axios.get("/api/users");
   return res.data;
 }
 
@@ -170,8 +171,8 @@ export async function updateUserType({
   assignedFactory,
   responsibleSection,
 }: {
-  id: string;
-  userTypeId: string;
+  id: number;
+  userTypeId: number;
   assigneeLevel: string;
   department: string;
   availability: boolean;
