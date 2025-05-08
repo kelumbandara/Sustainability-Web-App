@@ -199,7 +199,7 @@ export const HazardAndRiskSchema = z.object({
   unsafeActOrCondition: z.nativeEnum(UnsafeActOrCondition),
   dueDate: z.date(),
   assignee: userSchema,
-  assigneeId: z.string().optional(),
+  assigneeId: z.number().optional(),
   documents: z
     .array(z.union([z.instanceof(File), StorageFileSchema]))
     .optional(),

@@ -5,7 +5,7 @@ import { userSchema } from "./userApi";
 export const MedicineRequestSchema = z.object({
   id: z.string(),
   approver: userSchema,
-  approverId: z.string(),
+  approverId: z.number(),
   createdAt: z.string(),
   division: z.string(),
   genericName: z.string(),

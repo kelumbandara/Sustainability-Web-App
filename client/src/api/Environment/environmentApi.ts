@@ -33,9 +33,9 @@ export const EnvironmentSchema = z.object({
   numberOfDaysWorked: z.number(),
   impactConsumption: z.array(ConsumptionSchema),
   areaInSquareMeter: z.number(),
-  reviewerId: z.string(),
+  reviewerId: z.number(),
   reviewer: userSchema,
-  approverId: z.string(),
+  approverId: z.number(),
   approver: userSchema,
   status: z.nativeEnum(Status),
   area: z.number(),
@@ -164,7 +164,7 @@ export async function updateConsumption(environment: Environment) {
   return res.data;
 }
 
-export async function deleteConsumption(id: String) {
+export async function deleteConsumption(id: string) {
   const res = await axios.delete(`/api/environment-record/${id}/delete`);
   return res.data;
 }
@@ -174,12 +174,12 @@ export async function fetchConsumptionCategories() {
   return res.data;
 }
 
-export async function fetchConsumptionUnit(category: String) {
+export async function fetchConsumptionUnit(category: string) {
   const res = await axios.get(`/api/consumption-get/${category}/units`);
   return res.data;
 }
 
-export async function fetchConsumptionSource(category: String) {
+export async function fetchConsumptionSource(category: string) {
   const res = await axios.get(`/api/consumption-get/${category}/sources`);
   return res.data;
 }

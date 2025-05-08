@@ -21,7 +21,7 @@ export const ExternalAuditSchema = z.object({
   auditDate: z.date(),
   approvalDate: z.date(),
   approver: userSchema,
-  approverId: z.string().optional(),
+  approverId: z.number().optional(),
   representor: userSchema.optional(),
   created_At: z.date(),
   createdBy: z.string(),
@@ -41,7 +41,7 @@ export const ExternalAuditSchema = z.object({
   assigneeLevel: z.string(),
   assessmentDate: z.date(),
   auditExpiryDate: z.date(),
-  representorId: z.string(),
+  representorId: z.number(),
   assesmentDate: z.date(),
   createdByUserName: z.string(),
   auditorName: z.string(),
@@ -86,10 +86,9 @@ export const updateExternalAudit = async (externalAudit: ExternalAudit) => {
     console.error("Error updating hazard risk:", error);
     throw error;
   }
-
-}
+};
 export async function deleteExternalAudit(id: string) {
-  const res = await axios.delete(`/api/external-audit/${id}/delete`)
+  const res = await axios.delete(`/api/external-audit/${id}/delete`);
 }
 export async function getExternalAuditData() {
   const res = await axios.get("/api/external-audit");
@@ -149,5 +148,3 @@ export async function fetchAuditFirm() {
   const res = await axios.get("/api/external-audit-firm");
   return res.data;
 }
-
-

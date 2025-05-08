@@ -22,7 +22,7 @@ export const sampleAssignees = [
 
 export const sampleUsers: User[] = [
   {
-    id: "1",
+    id: 1,
     name: "John Doe",
     email: "johnd@gmail.com",
     mobile: "1234567890",
@@ -38,7 +38,7 @@ export const sampleUsers: User[] = [
     roleId: "1",
   },
   {
-    id: "2",
+    id: 2,
     name: "Jane Doe",
     email: "janeD@gmail.com",
     mobile: "1234567890",

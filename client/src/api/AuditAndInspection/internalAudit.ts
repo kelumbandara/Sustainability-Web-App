@@ -127,7 +127,7 @@ export const ProcessTypeSchema = z.object({
 export type ProcessType = z.infer<typeof ProcessTypeSchema>;
 
 export const auditeeSchema = z.object({
-  id: z.string().optional(),
+  id: z.number().optional(),
   name: z.string(),
   email: z.string(),
 });
@@ -135,8 +135,8 @@ export const auditeeSchema = z.object({
 export type Auditee = z.infer<typeof auditeeSchema>;
 
 export const InternalAuditAnswerToQuestionsSchema = z.object({
-  answerId: z.string().optional(),
-  internalAuditId: z.string().optional(),
+  answerId: z.number().optional(),
+  internalAuditId: z.number().optional(),
   questionRecoId: z.number().optional(),
   queGroupId: z.number().optional(),
   questionId: z.number().optional(),
@@ -178,7 +178,7 @@ export type InternalAuditDepartment = z.infer<
 >;
 
 export const ScheduledInternalAuditSchema = z.object({
-  id: z.string().optional(),
+  id: z.number().optional(),
   referenceNumber: z.string(),
   auditDate: z.date(),
   division: z.string(),
@@ -210,9 +210,9 @@ export const ScheduledInternalAuditSchema = z.object({
   description: z.string().optional(),
   designation: z.string().optional(),
   auditee: auditeeSchema.optional(),
-  auditeeId: z.string().optional(),
+  auditeeId: z.number().optional(),
   approver: userSchema,
-  approverId: z.string(),
+  approverId: z.number(),
   dateForApproval: z.date(),
   status: z.nativeEnum(ScheduledInternalAuditStatus).optional(),
   created_at: z.date(),
@@ -257,7 +257,7 @@ export const updateInternalAudit = async (
   return res.data;
 };
 
-export const deleteInternalAudit = async (id: string) => {
+export const deleteInternalAudit = async (id: number) => {
   const res = await axios.delete(`/api/internal-audit/${id}/delete`);
   return res.data;
 };
