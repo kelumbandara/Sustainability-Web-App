@@ -59,6 +59,14 @@ export const userSchema = z.object({
 
 export type User = z.infer<typeof userSchema>;
 
+export const passwordResetSchema = z.object({
+  oldPassword: z.string(),
+  newPassword: z.string(),
+});
+
+export type PasswordReset = z.infer<typeof passwordResetSchema>;
+
+
 export async function login({
   email,
   password,

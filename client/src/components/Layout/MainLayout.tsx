@@ -45,6 +45,7 @@ import ViewAccidentContent from "../../views/AccidentAndIncident/ViewAccidentCon
 import ViewUserContent from "../../views/Administration/ViewUserContent";
 import CustomButton from "../CustomButton";
 import EditUserRoleDialog from "../../views/Administration/EditUserRoleDialog";
+import PasswordResetDialog from "../../views/Administration/OpenPasswordResetDiaolg";
 
 const drawerWidth = 265;
 
@@ -143,6 +144,8 @@ export default function MainLayout({ children }: Props) {
   const [openViewProfileDrawer, setOpenViewProfileDrawer] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [openEditUserRoleDialog, setOpenEditUserRoleDialog] = useState(false);
+  const [openEditUserPasswordResetDialog, setOpenEditUserPasswordResetDialog] = useState(false);
+
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
 
@@ -307,6 +310,20 @@ export default function MainLayout({ children }: Props) {
                           }}
                           size="medium"
                           startIcon={<LogoutIcon />}
+                          onClick={() => setOpenEditUserPasswordResetDialog(true)}
+                        >
+                          Reset Password
+                        </CustomButton>
+                        <CustomButton
+                          variant="contained"
+                          sx={{
+                            backgroundColor: "var(--pallet-orange)",
+                            marginTop: "1rem",
+                            marginX: "0.5rem",
+                            width: "10rem",
+                          }}
+                          size="medium"
+                          startIcon={<LogoutIcon />}
                           onClick={() => setLogoutDialogOpen(true)}
                         >
                           Log out
@@ -357,6 +374,16 @@ export default function MainLayout({ children }: Props) {
                           }}
                           onSubmit={(data) => {}}
                           defaultValues={user}
+                        />
+                      )}
+                      {openEditUserPasswordResetDialog && (
+                        <PasswordResetDialog
+                          open={openEditUserPasswordResetDialog}
+                          handleClose={() => {
+                            setOpenEditUserPasswordResetDialog(false);
+                            setOpenEditUserRoleDialog(false);
+                          }}
+                          onSubmit={(data) => {}}
                         />
                       )}
                     </Stack>
