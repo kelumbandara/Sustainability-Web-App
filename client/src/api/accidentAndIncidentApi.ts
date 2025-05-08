@@ -148,7 +148,7 @@ export const AccidentSchema = z.object({
   affectedTertiaryRegion: z.string(),
   rootCause: z.string().nullable(),
   assignee: userSchema.optional(),
-  assigneeId: z.string().optional(),
+  assigneeId: z.number().optional(),
   witnesses: z.array(AccidentWitnessSchema),
   effectedIndividuals: z.array(AccidentEffectedIndividualSchema),
   imageUrl: z.string().optional(),
@@ -181,7 +181,7 @@ export const IncidentSchema = z.object({
   updatedAt: z.string(),
   publishedAt: z.string(),
   assignee: userSchema.optional(),
-  assigneeId: z.string().optional(),
+  assigneeId: z.number().optional(),
   witnesses: z.array(AccidentWitnessSchema),
   effectedIndividuals: z.array(AccidentEffectedIndividualSchema),
   reporter: z.string(),
@@ -192,7 +192,7 @@ export const IncidentSchema = z.object({
   typeOfConcern: z.nativeEnum(IncidentTypeOfConcern),
   factors: z.nativeEnum(IncidentFactors),
   causes: z.string().optional(),
-  createdByUser: z.string(),
+  createdByUser: z.number(),
   removeDoc: z.array(z.string()).optional(),
 });
 

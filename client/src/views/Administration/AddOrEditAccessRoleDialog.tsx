@@ -33,6 +33,7 @@ import { grey } from "@mui/material/colors";
 import CustomButton from "../../components/CustomButton";
 import { useForm } from "react-hook-form";
 import { v4 as uuid } from "uuid";
+import { generateRandomNumberId } from "../../util/numbers.util";
 
 function AddOrEditAccessRoleDialog({
   open,
@@ -71,7 +72,7 @@ function AddOrEditAccessRoleDialog({
     description: string;
   }) => {
     const submitData: UserRole = {
-      id: defaultValues?.id ?? uuid(),
+      id: defaultValues?.id ?? generateRandomNumberId(),
       userType: data.userType,
       description: data.description,
       permissionObject: rolePermissions,
