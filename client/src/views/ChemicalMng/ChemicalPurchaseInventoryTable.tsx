@@ -8,38 +8,32 @@ import Paper from "@mui/material/Paper";
 import {
   Alert,
   Box,
-  Button,
   Chip,
+  LinearProgress,
   Stack,
   Theme,
   Typography,
   useMediaQuery,
 } from "@mui/material";
 import { useState } from "react";
-import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import { useSnackbar } from "notistack";
 import {
   ChemicalPurchaseRequest,
-  ChemicalRequest,
   ChemicalRequestStatus,
+  deleteChemicalPurchaseRequest,
+  deleteChemicalRequest,
   fetchChemicalPurchaceInventories,
-  fetchChemicalRequests,
 } from "../../api/ChemicalManagement/ChemicalRequestApi";
-import { sampleChemicalRequestData } from "../../api/sampleData/chemicalRequestSampleData";
 import theme from "../../theme";
 import PageTitle from "../../components/PageTitle";
 import Breadcrumb from "../../components/BreadCrumb";
 import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
-import ViewChemicalRequestContent from "./ViewChemicalRequestContent";
-import AddOrEditChemicalRequestDialog from "./AddOrEditChemicalRequestDialog";
-import CustomButton from "../../components/CustomButton";
-import ApproveConfirmationModal from "../OccupationalHealth/MedicineInventory/MedicineRequest/ApproveConfirmationModal";
-import { useQuery } from "@tanstack/react-query";
-import AddOrEditPurchaseAndInventoryDialog from "../OccupationalHealth/MedicineInventory/PurchaseAndInventory/AddOrEditPurchaseAndInventoryDialog";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import ViewChemicalPurchaseInventoryContent from "./ViewChemicalPurchaseInventoryContent";
 import AddOrEditChemicalPurchaseAndInventoryDialog from "./AddOrEditPurchaseAndInventoryDialog";
+import queryClient from "../../state/queryClient";
 
 function ChemicalPurchaseInventoryTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -62,11 +56,29 @@ function ChemicalPurchaseInventoryTable() {
       queryFn: fetchChemicalPurchaceInventories,
     });
 
-  console.log("chemicalPurchaseRequests", chemicalPurchaseRequests);
-
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("md")
   );
+
+  const { mutate: deleteChemicalRequestMutation } = useMutation({
+    mutationFn: deleteChemicalPurchaseRequest,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["chemical-purchase-inventory"],
+      });
+      setOpenViewDrawer(false);
+      setSelectedRow(null);
+      setDeleteDialogOpen(false);
+      enqueueSnackbar("Chemical Purchase Deleted Successfully!", {
+        variant: "success",
+      });
+    },
+    onError: () => {
+      enqueueSnackbar(`Chemical Request Delete Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   return (
     <Stack>
@@ -91,6 +103,7 @@ function ChemicalPurchaseInventoryTable() {
             maxWidth: isMobile ? "88vw" : "100%",
           }}
         >
+          {isChemicalDataFetching && <LinearProgress sx={{ width: "100%" }} />}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -101,7 +114,7 @@ function ChemicalPurchaseInventoryTable() {
                 <TableCell align="left">Customer</TableCell>
                 <TableCell align="left">Reviewer</TableCell>
                 <TableCell align="left">Customer</TableCell>
-                <TableCell align="left">Delivered Quantity</TableCell>
+                <TableCell align="left">Requested Quantity</TableCell>
                 <TableCell align="center">Status</TableCell>
               </TableRow>
             </TableHead>
@@ -140,20 +153,20 @@ function ChemicalPurchaseInventoryTable() {
                     <TableCell align="left">
                       {row?.requestedMerchandiser ?? "--"}
                     </TableCell>
-                    <TableCell align="left">
-                      {row?.reviewer?.name ?? "--"}
-                    </TableCell>
+                    <TableCell align="left">{row?.requestQuantity}</TableCell>
                     <TableCell align="center">
                       {row.status === ChemicalRequestStatus.DRAFT ? (
-                        <Chip label="Pending" />
-                      ) : (
+                        <Chip label="Draft" />
+                      ) : row.status === ChemicalRequestStatus.PUBLISHED ? (
                         <Chip
-                          label="Approved"
+                          label="Published"
                           sx={{
                             backgroundColor: "var(--pallet-blue)",
                             color: "white",
                           }}
                         />
+                      ) : (
+                        "--"
                       )}
                     </TableCell>
                   </TableRow>
@@ -221,16 +234,15 @@ function ChemicalPurchaseInventoryTable() {
               </Alert>
             </>
           }
-          handleClose={() => setDeleteDialogOpen(false)}
-          deleteFunc={async () => {}}
-          onSuccess={() => {
+          handleClose={() => {
             setOpenViewDrawer(false);
             setSelectedRow(null);
             setDeleteDialogOpen(false);
-            enqueueSnackbar("Chemical Request Deleted Successfully!", {
-              variant: "success",
-            });
           }}
+          deleteFunc={async () => {
+            deleteChemicalRequestMutation(selectedRow?.id);
+          }}
+          onSuccess={() => {}}
           handleReject={() => {
             setOpenViewDrawer(false);
             setSelectedRow(null);

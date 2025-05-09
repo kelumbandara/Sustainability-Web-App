@@ -8,6 +8,7 @@ import {
   Autocomplete,
   Box,
   Chip,
+  CircularProgress,
   Divider,
   IconButton,
   Paper,
@@ -27,7 +28,6 @@ import { Controller, useForm } from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
 import { grey } from "@mui/material/colors";
 import { useEffect, useMemo, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
 import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -39,47 +39,40 @@ import SaveIcon from "@mui/icons-material/Save";
 import PublishIcon from "@mui/icons-material/Publish";
 import { useSnackbar } from "notistack";
 import { fetchDivision } from "../../api/divisionApi";
-import { HazardAndRiskStatus } from "../../api/hazardRiskApi";
-import {
-  MedicineInventory,
-  publishMedicineInventory,
-} from "../../api/OccupationalHealth/medicineInventoryApi";
-import { fetchMedicineList } from "../../api/OccupationalHealth/medicineNameApi";
-import { fetchAllSupplierName } from "../../api/OccupationalHealth/medicineSupplierNameApi";
 import { fetchAllSupplierTypes } from "../../api/OccupationalHealth/supplierType";
 import CustomButton from "../../components/CustomButton";
 import DatePickerComponent from "../../components/DatePickerComponent";
-import RichTextComponent from "../../components/RichTextComponent";
 import useIsMobile from "../../customHooks/useIsMobile";
 import queryClient from "../../state/queryClient";
 import theme from "../../theme";
 import ApproveConfirmationModal from "../OccupationalHealth/MedicineInventory/MedicineRequest/ApproveConfirmationModal";
 import {
-  ChemicalCertificate,
   ChemicalPurchaseRequest,
+  ChemicalRequestStatus,
+  deleteChemicalRequest,
   fetchAllSupplierNames,
   fetchProductStandards,
   HazardType,
   publishChemicalPurchase,
+  updateChemicalPurchaseInventory,
   UseOfPpe,
+  ZdhcUseCategory,
 } from "../../api/ChemicalManagement/ChemicalRequestApi";
 import DropzoneComponent from "../../components/DropzoneComponent";
 import { ExistingFileItemsEdit } from "../../components/ExistingFileItemsEdit";
 import SwitchButton from "../../components/SwitchButton";
 import { StorageFile } from "../../utils/StorageFiles.util";
 import AutoCheckBox from "../../components/AutoCheckbox";
-import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
-import AddOrEditCertificateDialog from "./AddCertificateDialog";
 import AddCertificateDialog from "./AddCertificateDialog";
+import { deleteAccident } from "../../api/accidentAndIncidentApi";
 
 type DialogProps = {
   open: boolean;
   handleClose: () => void;
   defaultValues?: ChemicalPurchaseRequest;
-  onSubmit?: (data: ChemicalPurchaseRequest) => void;
 };
 
 interface TabPanelProps {
@@ -116,7 +109,6 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
   open,
   handleClose,
   defaultValues,
-  onSubmit,
 }: DialogProps) {
   const { enqueueSnackbar } = useSnackbar();
   const { isMobile, isTablet } = useIsMobile();
@@ -127,11 +119,10 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
     defaultValues?.documents as StorageFile[]
   );
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
-  const [selectedCertificate, setSelectedCertificate] =
-    useState<ChemicalCertificate>();
   const [addCertificateDialogOpen, setAddCertificateDialogOpen] =
     useState(false);
 
+  console.log("defaultValues", files);
   const {
     register,
     handleSubmit,
@@ -160,15 +151,23 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
     setFiles([]);
   };
 
-  const handleCreateMedicineInventory = (data: ChemicalPurchaseRequest) => {
+  const handleCreateChemicalPurchaseInventory = (
+    data: ChemicalPurchaseRequest
+  ) => {
     const submitData: Partial<ChemicalPurchaseRequest> = data;
-    onSubmit(submitData as ChemicalPurchaseRequest);
-    resetForm();
+    console.log("submitData", submitData);
+    submitData.documents = files;
+    if (filesToRemove?.length > 0) submitData.removeDoc = filesToRemove;
+    updateChemicalInventoryMutation(submitData as ChemicalPurchaseRequest);
   };
 
-  const handlePublishMedicineInventory = () => {
+  const handlePublishChemicalPurchaseInventory = () => {
     const data = getValues();
-    publishChemicalPurchaseMutation(data);
+    const submitData: Partial<ChemicalPurchaseRequest> = data;
+    console.log("submitData", submitData);
+    submitData.documents = files;
+    if (filesToRemove?.length > 0) submitData.removeDoc = filesToRemove;
+    publishChemicalPurchaseMutation(submitData as ChemicalPurchaseRequest);
   };
 
   const { data: productStandardList } = useQuery({
@@ -176,45 +175,63 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
     queryFn: fetchProductStandards,
   });
 
-  const {
-    data: medicineInventoryData,
-    isFetching: isMedicineInventoryFetching,
-  } = useQuery({
-    queryKey: ["medicineInventory"],
-    queryFn: fetchMedicineList,
-  });
-
-  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
+  const { data: divisionData } = useQuery({
     queryKey: ["divisions"],
     queryFn: fetchDivision,
   });
 
-  const { data: supplierTypeData, isFetching: isSupplierDataFetching } =
-    useQuery({
-      queryKey: ["supplierType"],
-      queryFn: fetchAllSupplierTypes,
-    });
-
-  const { data: supplierNameData, isFetching: isSupplierNameDataFetching } =
-    useQuery({
-      queryKey: ["supplierName"],
-      queryFn: fetchAllSupplierNames,
-    });
-
-  const { mutate: publishChemicalPurchaseMutation } = useMutation({
-    mutationFn: publishChemicalPurchase,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["medicine-inventory"] });
-      enqueueSnackbar("Medicine Inventory Report Published Successfully!", {
-        variant: "success",
-      });
-    },
-    onError: () => {
-      enqueueSnackbar(`Medicine Inventory Publish Failed`, {
-        variant: "error",
-      });
-    },
+  const { data: supplierTypeData } = useQuery({
+    queryKey: ["supplierType"],
+    queryFn: fetchAllSupplierTypes,
   });
+
+  const { data: supplierNameData } = useQuery({
+    queryKey: ["supplierName"],
+    queryFn: fetchAllSupplierNames,
+  });
+
+  const { mutate: updateChemicalInventoryMutation, isPending: isUpdating } =
+    useMutation({
+      mutationFn: updateChemicalPurchaseInventory,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["medicine-inventory"] });
+        enqueueSnackbar(
+          "Chemical Purchase Inventory Report Updated Successfully!",
+          {
+            variant: "success",
+          }
+        );
+        handleClose();
+      },
+      onError: () => {
+        enqueueSnackbar(`Chemical Purchase Inventory Update Failed`, {
+          variant: "error",
+        });
+      },
+    });
+
+  const { mutate: publishChemicalPurchaseMutation, isPending: isPublishing } =
+    useMutation({
+      mutationFn: publishChemicalPurchase,
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["chemical-purchase-inventory"],
+        });
+        enqueueSnackbar(
+          "Chemical Purchase Inventory Report Published Successfully!",
+          {
+            variant: "success",
+          }
+        );
+        handleClose();
+        resetForm();
+      },
+      onError: () => {
+        enqueueSnackbar(`Chemical Purchase Inventory Publish Failed`, {
+          variant: "error",
+        });
+      },
+    });
 
   const isChemicalDetailsValid = useMemo(() => {
     return (
@@ -342,8 +359,8 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
         >
           <Typography variant="h6" component="div">
             {defaultValues
-              ? "Edit an Medicine Inventory"
-              : "Create a Medicine Inventory Item"}
+              ? "Edit an Chemical Purchase Inventory"
+              : "Create a Chemical Purchase Inventory Item"}
           </Typography>
           <IconButton
             aria-label="open drawer"
@@ -438,7 +455,7 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                     >
                       <TextSnippetIcon fontSize="small" />
                       <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                        Medicine Details
+                        Chemical Details
                       </Typography>
                       {!isChemicalDetailsValid && (
                         <Typography
@@ -851,7 +868,6 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                       id="manufactureName"
                       label="Manufacture Name"
                       size="small"
-                      type="email"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("manufactureName")}
                     />
@@ -877,7 +893,7 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                       label="Email ID"
                       required
                       size="small"
-                      type="number"
+                      type="email"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("emailId", {
                         required: true,
@@ -891,6 +907,53 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("location", { required: true })}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                    }}
+                  >
+                    <Controller
+                      name="zdhcLevel"
+                      control={control}
+                      defaultValue={defaultValues?.zdhcLevel}
+                      {...register("zdhcLevel", { required: true })}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(event, newValue) =>
+                            field.onChange(newValue)
+                          }
+                          size="small"
+                          options={[
+                            "Not Applicable",
+                            "Level 3",
+                            "Level 2",
+                            "Level 1",
+                            "Level 0",
+                          ]}
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              required
+                              error={!!errors.name}
+                              label="ZDHC Level"
+                              name="zdhcLevel"
+                            />
+                          )}
+                        />
+                      )}
+                    />
+                    <TextField
+                      required
+                      id="casNumber"
+                      label="CAS Number"
+                      error={!!errors.casNumber}
+                      size="small"
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      {...register("casNumber", { required: true })}
                     />
                   </Box>
                   <Box
@@ -1021,6 +1084,40 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                       </Box>
                     </>
                   )}
+                  <Box sx={{ margin: "0.5rem" }}>
+                    <Controller
+                      control={control}
+                      name={"compliantWithTheLatestVersionOfZDHCandMRSL"}
+                      render={({ field }) => {
+                        return (
+                          <SwitchButton
+                            label="Complaint with the latest version of ZDHC and MRSL?"
+                            onChange={field.onChange}
+                            value={
+                              Boolean(field.value) && field.value !== "false"
+                            }
+                          />
+                        );
+                      }}
+                    />
+                  </Box>
+                  <Box sx={{ margin: "0.5rem" }}>
+                    <Controller
+                      control={control}
+                      name={"apeoOrNpeFreeComplianceStatement"}
+                      render={({ field }) => {
+                        return (
+                          <SwitchButton
+                            label="APEO/NPE free compliance statement?"
+                            onChange={field.onChange}
+                            value={
+                              Boolean(field.value) && field.value !== "false"
+                            }
+                          />
+                        );
+                      }}
+                    />
+                  </Box>
                   <Box
                     sx={{
                       display: "flex",
@@ -1288,39 +1385,49 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                       display: "flex",
                     }}
                   >
-                    <AutoCheckBox
-                      control={control}
-                      name="useOfPPE"
-                      label="Use of PPE"
-                      options={Object.keys(UseOfPpe)?.map((key) => ({
-                        label: key,
-                        value: UseOfPpe[key],
-                      }))}
-                      selectedValues={useOfPPE}
-                      setSelectedValues={(value) => setValue("useOfPPE", value)}
-                      getOptionLabel={(option) => option?.label || ""}
-                      getOptionValue={(option) => option?.value || ""}
-                      placeholder="Use of PPE"
-                      limitTags={1}
-                    />
-                    <AutoCheckBox
-                      control={control}
-                      required={false}
-                      name="hazardType"
-                      label="Hazard Type"
-                      options={Object.keys(HazardType)?.map((key) => ({
-                        label: key,
-                        value: HazardType[key],
-                      }))}
-                      selectedValues={hazardType}
-                      setSelectedValues={(value) =>
-                        setValue("hazardType", value)
-                      }
-                      getOptionLabel={(option) => option?.label || ""}
-                      getOptionValue={(option) => option?.value || ""}
-                      placeholder="Hazard Type"
-                      limitTags={1}
-                    />
+                    <Box sx={{ flex: 1, margin: "0.5rem" }}>
+                      <AutoCheckBox
+                        control={control}
+                        name="useOfPPE"
+                        label="Use of PPE"
+                        options={Object.keys(UseOfPpe)?.map((key) => ({
+                          label: key,
+                          value: UseOfPpe[key],
+                        }))}
+                        selectedValues={useOfPPE}
+                        setSelectedValues={(value) =>
+                          setValue("useOfPPE", value)
+                        }
+                        getOptionLabel={(option) => option?.label || ""}
+                        getOptionValue={(option) => option?.value || ""}
+                        placeholder="Use of PPE"
+                        limitTags={1}
+                      />
+                    </Box>
+                    <Box sx={{ flex: 1, margin: "0.5rem" }}>
+                      <AutoCheckBox
+                        control={control}
+                        required={false}
+                        name="hazardType"
+                        label="Hazard Type"
+                        options={Object.keys(HazardType)?.map((key) => ({
+                          label: key,
+                          value: HazardType[key],
+                        }))}
+                        selectedValues={hazardType}
+                        setSelectedValues={(value) =>
+                          setValue("hazardType", value)
+                        }
+                        getOptionLabel={(option) => option?.value || ""}
+                        getOptionValue={(option) => option?.value || ""}
+                        placeholder="Hazard Type"
+                        limitTags={1}
+                      />
+                    </Box>
+                  </Box>
+
+                  <Box sx={{ display: "flex" }}>
+                    {" "}
                     <TextField
                       id="ghsClassification"
                       label="GHS Classification"
@@ -1337,7 +1444,7 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                   >
                     <TextField
                       id="hazardStatement"
-                      label="Hazard Statement"
+                      label="Hazard Statement Codes"
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("hazardStatement")}
@@ -1392,7 +1499,7 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                       }}
                       size="medium"
                       onClick={() => {
-                        handleTabChange(null, 2);
+                        handleTabChange(null, 3);
                       }}
                       endIcon={<ArrowBackIcon />}
                     >
@@ -1406,7 +1513,7 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                       }}
                       size="medium"
                       onClick={() => {
-                        handleTabChange(null, 3);
+                        handleTabChange(null, 4);
                       }}
                       endIcon={<ArrowForwardIcon />}
                     >
@@ -1437,7 +1544,6 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                         sx={{ backgroundColor: "var(--pallet-blue)" }}
                         startIcon={<AddIcon />}
                         onClick={() => {
-                          setSelectedCertificate(null);
                           setAddCertificateDialogOpen(true);
                         }}
                       >
@@ -1496,8 +1602,7 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                                     setValue(
                                       "certificate",
                                       (certificatesWatch ?? []).filter(
-                                        (item) =>
-                                          item.inventoryId !== row.inventoryId
+                                        (item) => item.id !== row.id
                                       )
                                     );
                                   }}
@@ -1545,9 +1650,10 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                     Status
                   </Typography>
                   <Box>
-                    {defaultValues.status === "approved" ? (
-                      <Chip label="Request Approved" />
-                    ) : defaultValues.status === "published" ? (
+                    {defaultValues.status === ChemicalRequestStatus.DRAFT ? (
+                      <Chip label="Draft" />
+                    ) : defaultValues.status ===
+                      ChemicalRequestStatus.PUBLISHED ? (
                       <Chip
                         label="Published"
                         sx={{
@@ -1641,10 +1747,17 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
             sx={{
               backgroundColor: "var(--pallet-grey)",
             }}
-            startIcon={<SaveIcon />}
+            startIcon={
+              isUpdating ? (
+                <CircularProgress size={20} sx={{ color: "white" }} />
+              ) : (
+                <SaveIcon />
+              )
+            }
+            disabled={isUpdating}
             size="medium"
             onClick={handleSubmit((data) => {
-              handleCreateMedicineInventory(data);
+              handleCreateChemicalPurchaseInventory(data);
             })}
           >
             {defaultValues ? "Save Draft" : "Submit Item"}
@@ -1655,7 +1768,14 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
               backgroundColor: "var(--pallet-blue)",
             }}
             size="medium"
-            startIcon={<PublishIcon />}
+            startIcon={
+              isPublishing ? (
+                <CircularProgress size={20} sx={{ color: "white" }} />
+              ) : (
+                <PublishIcon />
+              )
+            }
+            disabled={isPublishing}
             onClick={() =>
               trigger().then((isValid) => {
                 if (isValid) {
@@ -1673,11 +1793,7 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
             onClose={() => setAddCertificateDialogOpen(false)}
             onSubmit={(data) => {
               console.log("Certificate Data", data);
-              setValue("certificate", [
-                ...(certificatesWatch ?? []),
-                selectedCertificate,
-              ]);
-
+              setValue("certificate", [...(certificatesWatch ?? []), data]);
               setAddCertificateDialogOpen(false);
             }}
           />
@@ -1686,10 +1802,11 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
         {publishModalOpen && (
           <ApproveConfirmationModal
             open={publishModalOpen}
-            title="Publish Medicine Inventory Confirmation"
+            title="Publish Chemical Purchase Inventory Confirmation"
             content={
               <>
-                Are you sure you want to publish this Medicine Inventory Item?
+                Are you sure you want to publish this Chemical Purchase
+                Inventory Item?
                 <Alert severity="warning" style={{ marginTop: "1rem" }}>
                   This action is not reversible.
                 </Alert>
@@ -1699,7 +1816,7 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
             approveFunc={async () => {
               const isValid = await trigger();
               if (isValid) {
-                handlePublishMedicineInventory();
+                handlePublishChemicalPurchaseInventory();
               } else {
                 enqueueSnackbar("Please fill in all required fields.", {
                   variant: "error",
@@ -1708,13 +1825,8 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                 throw new Error("Form Validation Error");
               }
             }}
-            onSuccess={() => {
-              setPublishModalOpen(false);
-              handleClose();
-            }}
-            handleReject={() => {
-              setPublishModalOpen(false);
-            }}
+            onSuccess={() => {}}
+            handleReject={() => {}}
           />
         )}
       </Dialog>

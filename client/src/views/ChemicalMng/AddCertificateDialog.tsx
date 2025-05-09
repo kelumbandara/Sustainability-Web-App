@@ -25,11 +25,24 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../api/divisionApi";
 import { fetchDepartmentData } from "../../api/departmentApi";
-import { ChemicalCertificate } from "../../api/ChemicalManagement/ChemicalRequestApi";
+import {
+  ChemicalCertificate,
+  fetchPositiveList,
+  fetchTestingLabsData,
+} from "../../api/ChemicalManagement/ChemicalRequestApi";
 import DatePickerComponent from "../../components/DatePickerComponent";
 import RichTextComponent from "../../components/RichTextComponent";
 import DropzoneComponent from "../../components/DropzoneComponent";
 import { useState } from "react";
+import {
+  AddNewTestingLabButton,
+  AddNewTestingLabDialog,
+} from "./AddNewTestingLabDialog";
+import {
+  AddNewPositiveListButton,
+  AddNewPositiveListDialog,
+} from "./AddNewPositiveListDialog";
+import { generateRandomNumberId } from "../../util/numbers.util";
 
 const AddCertificateDialog = ({
   open,
@@ -42,6 +55,10 @@ const AddCertificateDialog = ({
 }) => {
   const { isMobile } = useIsMobile();
   const [files, setFiles] = useState<File[]>([]);
+  const [openAddNewTestingLabDialog, setOpenAddNewTestingLabDialog] =
+    useState(false);
+  const [openAddNewPositiveListDialog, setOpenAddNewPositiveListDialog] =
+    useState(false);
   const {
     register,
     handleSubmit,
@@ -58,6 +75,17 @@ const AddCertificateDialog = ({
     useQuery({
       queryKey: ["departments"],
       queryFn: fetchDepartmentData,
+    });
+
+  const { data: testingLabs, isFetching: isLabsDataFetching } = useQuery({
+    queryKey: ["testing-labs"],
+    queryFn: fetchTestingLabsData,
+  });
+
+  const { data: positiveListData, isFetching: isPositiveListDataFetching } =
+    useQuery({
+      queryKey: ["positive-list"],
+      queryFn: fetchPositiveList,
     });
 
   return (
@@ -142,26 +170,63 @@ const AddCertificateDialog = ({
                   );
                 }}
               />
-              <Autocomplete
+              <Controller
+                name="testLab"
+                control={control}
                 {...register("testLab", { required: true })}
-                size="small"
-                options={
-                  divisionData?.length
-                    ? divisionData.map((division) => division.divisionName)
-                    : []
-                }
-                sx={{
-                  flex: 1,
-                  margin: "0.5rem",
-                  marginTop: isMobile ? "0.5rem" : "1.85rem",
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    error={!!errors.testLab}
-                    label="Testing Lab"
-                    name="testLab"
+                render={({ field }) => (
+                  <Autocomplete
+                    {...field}
+                    onChange={(event, newValue) => field.onChange(newValue)}
+                    size="small"
+                    noOptionsText={
+                      <>
+                        <Typography
+                          variant="body2"
+                          color="inherit"
+                          gutterBottom
+                        >
+                          No matching Items
+                        </Typography>
+                      </>
+                    }
+                    options={[
+                      ...(testingLabs?.length
+                        ? testingLabs.map((category) => category.laboratoryName)
+                        : []),
+                      "$ADD_NEW_LAB",
+                    ]}
+                    renderOption={(props, option) => (
+                      <>
+                        {option === "$ADD_NEW_LAB" ? (
+                          <AddNewTestingLabButton
+                            {...props}
+                            onMouseDown={() => {
+                              setOpenAddNewTestingLabDialog(true);
+                            }}
+                          />
+                        ) : (
+                          <li {...props} key={option}>
+                            {option}
+                          </li>
+                        )}
+                      </>
+                    )}
+                    sx={{
+                      flex: 1,
+                      margin: "0.5rem",
+                      marginTop: isMobile ? "0.5rem" : "1.85rem",
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        error={!!errors.testLab}
+                        required
+                        label="Testing Lab"
+                        name="testLab"
+                        slotProps={{ inputLabel: { shrink: true } }}
+                      />
+                    )}
                   />
                 )}
               />
@@ -203,14 +268,65 @@ const AddCertificateDialog = ({
               />
             </Box>
             <Box sx={{ display: "flex", flexDirection: "row" }}>
-              <TextField
+              <Controller
+                name="positiveList"
+                control={control}
                 {...register("positiveList", { required: true })}
-                required
-                id="positiveList"
-                label="Positive List"
-                error={!!errors.positiveList}
-                size="small"
-                sx={{ margin: "0.5rem", width: "100%" }}
+                render={({ field }) => (
+                  <Autocomplete
+                    {...field}
+                    size="small"
+                    onChange={(event, newValue) => field.onChange(newValue)}
+                    noOptionsText={
+                      <>
+                        <Typography
+                          variant="body2"
+                          color="inherit"
+                          gutterBottom
+                        >
+                          No matching Items
+                        </Typography>
+                      </>
+                    }
+                    options={[
+                      ...(positiveListData?.length
+                        ? positiveListData.map((category) => category?.name)
+                        : []),
+                      "$ADD_NEW_LIST",
+                    ]}
+                    renderOption={(props, option) => (
+                      <>
+                        {option === "$ADD_NEW_LIST" ? (
+                          <AddNewPositiveListButton
+                            {...props}
+                            onMouseDown={() => {
+                              setOpenAddNewPositiveListDialog(true);
+                            }}
+                          />
+                        ) : (
+                          <li {...props} key={option}>
+                            {option}
+                          </li>
+                        )}
+                      </>
+                    )}
+                    sx={{
+                      flex: 1,
+                      margin: "0.5rem",
+                      marginTop: isMobile ? "0.5rem" : "1.85rem",
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        required
+                        error={!!errors.positiveList}
+                        label="Positive List"
+                        name="positiveList"
+                        slotProps={{ inputLabel: { shrink: true } }}
+                      />
+                    )}
+                  />
+                )}
               />
             </Box>
             <Box
@@ -262,13 +378,22 @@ const AddCertificateDialog = ({
           size="medium"
           onClick={handleSubmit((data) => {
             data.documents = files;
+            data.id = generateRandomNumberId();
             onSubmit(data);
             reset();
           })}
         >
-          Add Cirtificate
+          Add Certificate
         </CustomButton>
       </DialogActions>
+      <AddNewTestingLabDialog
+        open={openAddNewTestingLabDialog}
+        setOpen={setOpenAddNewTestingLabDialog}
+      />
+      <AddNewPositiveListDialog
+        open={openAddNewPositiveListDialog}
+        setOpen={setOpenAddNewPositiveListDialog}
+      />
     </Dialog>
   );
 };

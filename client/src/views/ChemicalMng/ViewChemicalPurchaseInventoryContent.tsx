@@ -356,6 +356,27 @@ function ViewChemicalPurchaseInventoryContent({
                 </Box>
               </Box>
             )}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: isTablet ? "column" : "row",
+                justifyContent: "space-between",
+                marginY: "1rem",
+              }}
+            >
+              <DrawerContentItem
+                label="Complaint with the latest version of ZDHC and MRSL?"
+                value={
+                  chemicalRequest.compliantWithTheLatestVersionOfZDHCandMRSL
+                }
+                sx={{ flex: 1 }}
+              />
+              <DrawerContentItem
+                label="APEO/NPE free compliance statement?"
+                value={chemicalRequest.apeoOrNpeFreeComplianceStatement}
+                sx={{ flex: 1 }}
+              />
+            </Box>
           </Box>
         </TabPanel>
         <TabPanel value={activeTab} index={2} dir={theme.direction}>

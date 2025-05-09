@@ -271,7 +271,7 @@ export const AddNewChemicalDialog = ({
               }))}
               selectedValues={hazardType}
               setSelectedValues={(value) => setValue("hazardType", value)}
-              getOptionLabel={(option) => option?.label || ""}
+              getOptionLabel={(option) => option?.value || ""}
               getOptionValue={(option) => option?.value || ""}
               placeholder="Hazard Type"
               limitTags={1}

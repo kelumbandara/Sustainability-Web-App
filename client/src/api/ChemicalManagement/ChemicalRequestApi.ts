@@ -154,7 +154,7 @@ export type Chemical = z.infer<typeof ChemicalSchema>;
 
 export const ChemicalTestLabSchema = z.object({
   id: z.string(),
-  name: z.string(),
+  laboratoryName: z.string(),
 });
 
 export type ChemicalTestLab = z.infer<typeof ChemicalTestLabSchema>;
@@ -232,7 +232,7 @@ export const ChemicalCertificateSchema = z.object({
   expiryDate: z.date().nullable(),
   positiveList: z.string().nullable(),
   description: z.string().nullable(),
-  document: z
+  documents: z
     .union([z.array(StorageFileSchema), z.array(z.instanceof(File))])
     .optional(),
   removeDoc: z.array(z.string()).optional(),
@@ -299,6 +299,7 @@ export const ChemicalPurchaseRequestSchema = z.object({
   storagePlace: z.string().nullable(),
   lotNumber: z.string().nullable(),
   certificate: z.array(ChemicalCertificateSchema).nullable(),
+  removeDoc: z.array(z.string()).optional(),
 });
 
 export type ChemicalPurchaseRequest = z.infer<
@@ -474,7 +475,12 @@ export const publishChemicalPurchase = async (
   // Append each property of the maternity Register object to the form data
   Object.keys(chemicalPurchase).forEach((key) => {
     const value = chemicalPurchase[key as keyof typeof chemicalPurchase];
-    if (Array.isArray(value)) {
+
+    if (key === "documents" && Array.isArray(value)) {
+      value.forEach((file, index) => {
+        formData.append(`documents[${index}]`, file as File);
+      });
+    } else if (Array.isArray(value)) {
       value.forEach((item, index) => {
         formData.append(`${key}[${index}]`, JSON.stringify(item));
       });
@@ -486,7 +492,7 @@ export const publishChemicalPurchase = async (
   });
 
   const res = await axios.post(
-    `/api/medicine-inventory/${chemicalPurchase?.id}/publish`,
+    `/api/purchase-inventory-records/${chemicalPurchase?.id}/publish-update`,
     formData,
     {
       headers: {
@@ -502,3 +508,69 @@ export async function fetchAllSupplierNames() {
   const res = await axios.get("/api/chemical-supplier-names");
   return res.data;
 }
+
+export async function fetchTestingLabsData() {
+  const res = await axios.get("/api/testing-labs");
+  return res.data;
+}
+
+export async function createTestLab(data: Partial<ChemicalTestLab>) {
+  const res = await axios.post("/api/testing-labs", data);
+  return res.data;
+}
+
+export async function fetchPositiveList() {
+  const res = await axios.get("/api/positive-list");
+  return res.data;
+}
+
+export async function createPositiveList(
+  data: Partial<ChemicalTestPositiveList>
+) {
+  const res = await axios.post("/api/positive-list", data);
+  return res.data;
+}
+
+export const updateChemicalPurchaseInventory = async (
+  chemicalPurchaseInventory: ChemicalPurchaseRequest
+) => {
+  const formData = new FormData();
+
+  // Append each property of the maternity Register object to the form data
+  Object.keys(chemicalPurchaseInventory).forEach((key) => {
+    const value =
+      chemicalPurchaseInventory[key as keyof typeof chemicalPurchaseInventory];
+    if (key === "documents" && Array.isArray(value)) {
+      value.forEach((file, index) => {
+        formData.append(`documents[${index}]`, file as File);
+      });
+    } else if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        formData.append(`${key}[${index}]`, JSON.stringify(item));
+      });
+    } else if (value instanceof Date) {
+      formData.append(key, value.toISOString());
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  const res = await axios.post(
+    `/api/purchase-inventory-records/${chemicalPurchaseInventory.id}/update`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return res.data;
+};
+
+export const deleteChemicalPurchaseRequest = async (id: string) => {
+  const res = await axios.delete(
+    `/api/purchase-inventory-records/${id}/delete`
+  );
+  return res.data;
+};
