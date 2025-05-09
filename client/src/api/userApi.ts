@@ -1,6 +1,7 @@
 import axios from "axios";
 import { z } from "zod";
 import { PermissionKeysObjectSchema } from "../views/Administration/SectionList";
+import { StorageFileSchema } from "../utils/StorageFiles.util";
 
 export const userRoleSchema = z.object({
   id: z.number(),
@@ -40,11 +41,14 @@ export const userSchema = z.object({
   emailVerifiedAt: z.string().nullable(),
   role: z.string(),
   roleId: z.string(),
+  gender: z.string(),
   availability: z.boolean(),
   responsibleSection: z.array(z.string()),
   userType: userTypeSchema,
   userLevel: userLevelSchema,
-  profileImage: z.string().nullable(),
+  profileImage: z
+    .array(z.union([z.instanceof(File), StorageFileSchema]))
+    .optional(),
   status: z.string(),
   isCompanyEmployee: z.boolean(),
   createdAt: z.string(),
@@ -60,12 +64,12 @@ export const userSchema = z.object({
 export type User = z.infer<typeof userSchema>;
 
 export const passwordResetSchema = z.object({
-  oldPassword: z.string(),
+  currentPassword: z.string(),
   newPassword: z.string(),
+  newPassword_confirmation: z.string(),
 });
 
 export type PasswordReset = z.infer<typeof passwordResetSchema>;
-
 
 export async function login({
   email,
@@ -78,6 +82,11 @@ export async function login({
     email,
     password,
   });
+  return res.data;
+}
+
+export async function userPasswordReset(data: PasswordReset) {
+  const res = await axios.post(`/api/user-change-password`, data);
   return res.data;
 }
 
@@ -238,3 +247,69 @@ export async function fetchExternalAuditAssignee() {
   const res = await axios.get("/api/external-audit-assignee");
   return res.data;
 }
+
+export async function updateUserProfileImage({
+  id,
+  imageFile,
+}: {
+  id: number;
+  imageFile: File;
+}) {
+  const formData = new FormData();
+  formData.append("profileImage[0]", imageFile); // Backend expects an array
+
+  const res = await axios.post(`/api/user/${id}/profile-update`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return res.data;
+}
+
+export async function updateUserProfileDetails({
+  id,
+  name,
+  gender,
+  mobile,
+}: {
+  id: number;
+  name: string;
+  gender: string;
+  mobile: string;
+}) {
+  const data = {
+    name,
+    gender,
+    mobile,
+  };
+
+  const res = await axios.post(`/api/user/${id}/profile-update`, data);
+
+  return res.data;
+}
+
+export async function resetProfileEmail({ currentEmail,id }: { currentEmail: string, id: number }) {
+  const res = await axios.post(`/api/user/${id}/email-change`, {
+    currentEmail,
+  });
+  return res.data;
+}
+
+export async function resetProfileEmailVerification({ otp,id }: { otp: string, id: number }) {
+  const res = await axios.post(`/api/user/${id}/email-change-verify`, {
+    otp,
+  });
+  return res.data;
+}
+
+export async function resetProfileEmailConfirm({ newEmail,id }: { newEmail: string, id: number }) {
+  const res = await axios.post(`/api/user/${id}/email-change-confirm`, {
+    newEmail,
+  });
+  return res.data;
+}
+
+
+
+

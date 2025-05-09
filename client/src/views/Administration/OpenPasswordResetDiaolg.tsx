@@ -16,31 +16,30 @@ import { useForm } from "react-hook-form";
 import { useSnackbar } from "notistack";
 import CustomButton from "../../components/CustomButton";
 import useIsMobile from "../../customHooks/useIsMobile";
+import ForgotPasswordDialog from "../LoginPage/ForgotPasswordDialog";
+import { useState } from "react";
+import { PasswordReset, User, userPasswordReset } from "../../api/userApi";
+import { useMutation } from "@tanstack/react-query";
+import queryClient from "../../state/queryClient";
+import { useNavigate } from "react-router";
 
 type DialogProps = {
   open: boolean;
   handleClose: () => void;
-  onSubmit: (data: {
-    oldPassword: string;
-    newPassword: string;
-  }) => void;
+  defaultValues?: User;
+  onSubmit: (data: PasswordReset) => void;
   isSubmitting?: boolean;
-};
-
-type PasswordReset = {
-  oldPassword: string;
-  newPassword: string;
-  confirmPassword: string;
 };
 
 export default function PasswordResetDialog({
   open,
   handleClose,
   onSubmit,
+  defaultValues,
   isSubmitting = false,
 }: DialogProps) {
   const { enqueueSnackbar } = useSnackbar();
-  const { isTablet } = useIsMobile();
+  const { isMobile } = useIsMobile();
 
   const {
     register,
@@ -53,8 +52,28 @@ export default function PasswordResetDialog({
   const resetForm = () => {
     reset();
   };
+  const navigate = useNavigate();
 
   const newPassword = watch("newPassword");
+  const [openForgotPasswordDialog, setOpenForgotPasswordDialog] =
+    useState(false);
+
+  const { mutate: resetUserPasswordMutation, isPending } = useMutation({
+    mutationFn: userPasswordReset,
+    onSuccess: () => {
+      localStorage.removeItem("token");
+      navigate("/");
+      queryClient.invalidateQueries({ queryKey: ["current-user"] });
+      enqueueSnackbar("Password Reset Successfully", {
+        variant: "success",
+      });
+    },
+    onError: (error: any) => {
+      enqueueSnackbar(error?.data?.message ?? `User Role Update Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   return (
     <Dialog
@@ -63,11 +82,12 @@ export default function PasswordResetDialog({
         resetForm();
         handleClose();
       }}
-      fullScreen={isTablet}
+      fullWidth
+      maxWidth={"sm"}
+      fullScreen={isMobile}
       PaperProps={{
         style: {
           backgroundColor: grey[50],
-          minWidth: "500px",
         },
         component: "form",
       }}
@@ -80,7 +100,9 @@ export default function PasswordResetDialog({
           justifyContent: "space-between",
         }}
       >
-        <Typography variant="h6">Password Reset</Typography>
+        <Typography variant="h6" textAlign={"center"}>
+          Password Reset For {defaultValues.name}
+        </Typography>
         <IconButton
           onClick={() => {
             resetForm();
@@ -95,16 +117,20 @@ export default function PasswordResetDialog({
       <DialogContent>
         <Stack direction="column" gap={2} mt={2}>
           <TextField
-            {...register("oldPassword", { required: "Old password is required" })}
-            label="Old Password"
+            {...register("currentPassword", {
+              required: "Current password is required",
+            })}
+            label="Current Password"
             type="password"
             fullWidth
             size="small"
-            error={!!errors.oldPassword}
-            helperText={errors.oldPassword?.message}
+            error={!!errors.currentPassword}
+            helperText={errors.currentPassword?.message}
           />
           <TextField
-            {...register("newPassword", { required: "New password is required" })}
+            {...register("newPassword", {
+              required: "New password is required",
+            })}
             label="New Password"
             type="password"
             fullWidth
@@ -113,7 +139,7 @@ export default function PasswordResetDialog({
             helperText={errors.newPassword?.message}
           />
           <TextField
-            {...register("confirmPassword", {
+            {...register("newPassword_confirmation", {
               required: "Please confirm your password",
               validate: (value) =>
                 value === newPassword || "Passwords do not match",
@@ -122,8 +148,8 @@ export default function PasswordResetDialog({
             type="password"
             fullWidth
             size="small"
-            error={!!errors.confirmPassword}
-            helperText={errors.confirmPassword?.message}
+            error={!!errors.newPassword_confirmation}
+            helperText={errors.newPassword_confirmation?.message}
           />
         </Stack>
       </DialogContent>
@@ -139,18 +165,29 @@ export default function PasswordResetDialog({
           Cancel
         </Button>
         <CustomButton
+          variant="text"
+          sx={{
+            color: "var(--pallet-orange)",
+          }}
+          size="medium"
+          onClick={() => setOpenForgotPasswordDialog(true)}
+        >
+          Forgot Password
+        </CustomButton>
+        <CustomButton
           variant="contained"
           sx={{ backgroundColor: "var(--pallet-blue)" }}
-          disabled={isSubmitting}
-          onClick={handleSubmit((data) => {
-            onSubmit({
-              oldPassword: data.oldPassword,
-              newPassword: data.newPassword,
-            });
+          disabled={isPending}
+          onClick={handleSubmit((data: PasswordReset) => {
+            resetUserPasswordMutation(data);
           })}
         >
           Reset Password
         </CustomButton>
+        <ForgotPasswordDialog
+          open={openForgotPasswordDialog}
+          handleClose={() => setOpenForgotPasswordDialog(false)}
+        />
       </DialogActions>
     </Dialog>
   );

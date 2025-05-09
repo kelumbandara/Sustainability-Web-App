@@ -40,12 +40,12 @@ import { useSnackbar } from "notistack";
 import { PermissionKeysObject } from "../../views/Administration/SectionList";
 import useCurrentUser from "../../hooks/useCurrentUser";
 import "./MainLayout.css";
-import ViewDataDrawer from "../ViewDataDrawer";
-import ViewAccidentContent from "../../views/AccidentAndIncident/ViewAccidentContent";
-import ViewUserContent from "../../views/Administration/ViewUserContent";
+import ViewUserContent from "../../views/Administration/ViewUserProfileContent";
 import CustomButton from "../CustomButton";
-import EditUserRoleDialog from "../../views/Administration/EditUserRoleDialog";
-import PasswordResetDialog from "../../views/Administration/OpenPasswordResetDiaolg";
+import ViewProfileDataDrawer, {
+  DrawerProfileHeader,
+} from "../ViewProfileDataDrawer";
+import ProfileImage from "../ProfileImageComponent";
 
 const drawerWidth = 265;
 
@@ -144,7 +144,7 @@ export default function MainLayout({ children }: Props) {
   const [openViewProfileDrawer, setOpenViewProfileDrawer] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [openEditUserRoleDialog, setOpenEditUserRoleDialog] = useState(false);
-  const [openEditUserPasswordResetDialog, setOpenEditUserPasswordResetDialog] = useState(false);
+  const statusColor = user?.availability ? "#44b700" : "#f44336";
 
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
@@ -196,8 +196,8 @@ export default function MainLayout({ children }: Props) {
                 <img
                   src={groupLogo}
                   alt="logo"
-                  height={"35em"}
-                  style={{ marginTop: "5px" }}
+                  height={"45rem"}
+                  style={{ marginTop: "10px" }}
                 />
               </Box>
             </Box>
@@ -267,7 +267,7 @@ export default function MainLayout({ children }: Props) {
                   </IconButton>
                 </>
               )} */}
-              <Avatar
+              {/* <Avatar
                 sx={{
                   bgcolor: "var(--pallet-orange)",
                   height: "2rem",
@@ -277,14 +277,37 @@ export default function MainLayout({ children }: Props) {
                 onClick={() => setOpenViewProfileDrawer(true)}
               >
                 {user?.name?.charAt(0).toUpperCase()}
-              </Avatar>
-              <ViewDataDrawer
+              </Avatar> */}
+
+              <Badge
+                overlap="circular"
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                variant="dot"
+                sx={{
+                  "& .MuiBadge-badge": {
+                    backgroundColor: statusColor,
+                    color: statusColor,
+                    boxShadow: "0 0 0 2px white",
+                    height: "8px",
+                    width: "8px",
+                    borderRadius: "50%",
+                  },
+                }}
+              >
+                <ProfileImage
+                  name={user?.name}
+                  files={user?.profileImage}
+                  size="2rem"
+                  onClick={() => setOpenViewProfileDrawer(true)}
+                />
+              </Badge>
+              <ViewProfileDataDrawer
                 open={openViewProfileDrawer}
                 handleClose={() => setOpenViewProfileDrawer(false)}
                 fullScreen={true}
                 drawerContent={
                   <Stack spacing={1} sx={{ paddingX: theme.spacing(1) }}>
-                    <DrawerHeaderModal
+                    <DrawerProfileHeader
                       title="User Profile"
                       handleClose={() => setOpenViewProfileDrawer(false)}
                       onEdit={() => {
@@ -300,20 +323,6 @@ export default function MainLayout({ children }: Props) {
                           marginTop: "1rem",
                         }}
                       >
-                        <CustomButton
-                          variant="contained"
-                          sx={{
-                            backgroundColor: "var(--pallet-orange)",
-                            marginTop: "1rem",
-                            marginX: "0.5rem",
-                            width: "10rem",
-                          }}
-                          size="medium"
-                          startIcon={<LogoutIcon />}
-                          onClick={() => setOpenEditUserPasswordResetDialog(true)}
-                        >
-                          Reset Password
-                        </CustomButton>
                         <CustomButton
                           variant="contained"
                           sx={{
@@ -363,27 +372,6 @@ export default function MainLayout({ children }: Props) {
                           handleReject={() => {
                             setLogoutDialogOpen(false);
                           }}
-                        />
-                      )}
-                      {openEditUserRoleDialog && (
-                        <EditUserRoleDialog
-                          open={openEditUserRoleDialog}
-                          handleClose={() => {
-                            setOpenViewProfileDrawer(false);
-                            setOpenEditUserRoleDialog(false);
-                          }}
-                          onSubmit={(data) => {}}
-                          defaultValues={user}
-                        />
-                      )}
-                      {openEditUserPasswordResetDialog && (
-                        <PasswordResetDialog
-                          open={openEditUserPasswordResetDialog}
-                          handleClose={() => {
-                            setOpenEditUserPasswordResetDialog(false);
-                            setOpenEditUserRoleDialog(false);
-                          }}
-                          onSubmit={(data) => {}}
                         />
                       )}
                     </Stack>

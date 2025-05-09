@@ -1,17 +1,37 @@
-import { Avatar, Box, Stack, Typography } from "@mui/material";
+import { Avatar, Badge, Box, Button, Stack, Typography } from "@mui/material";
 import { DrawerContentItem } from "../../components/ViewDataDrawer";
 import useIsMobile from "../../customHooks/useIsMobile";
 import { User } from "../../api/userApi";
+import { useState } from "react";
+import MultiDrawerContent from "../../components/MultiDrawerContent";
+import ProfileImage from "../../components/ProfileImageComponent";
 
 function ViewUserContent({ selectedUser }: { selectedUser: User }) {
   const { isTablet } = useIsMobile();
+  const [image, setImage] = useState(null);
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  const statusColor =
+    selectedUser?.availability == true ? "#44b700" : "#f44336";
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
   return (
     <Stack
       sx={{
         display: "flex",
-        marginY: 4,
+        marginY: 5,
         flexDirection: isTablet ? "column" : "row",
+        p: "3rem",
       }}
+      gap={4}
     >
       <Box
         sx={{
@@ -20,26 +40,11 @@ function ViewUserContent({ selectedUser }: { selectedUser: User }) {
           justifyContent: "center",
           alignItems: "center",
           flexDirection: "column",
+          p: "3rem",
+          boxShadow: 3,
         }}
+        gap={2}
       >
-        <Avatar
-          sx={{
-            bgcolor: "var(--pallet-light-blue)",
-            height: "12rem",
-            width: "12rem",
-            display: "flex",
-          }}
-        >
-          <Typography
-            variant="h1"
-            sx={{
-              fontSize: "6rem",
-              color: "#fff",
-            }}
-          >
-            {selectedUser?.name?.charAt(0).toUpperCase()}
-          </Typography>
-        </Avatar>
         <Typography
           variant="h4"
           sx={{
@@ -50,51 +55,150 @@ function ViewUserContent({ selectedUser }: { selectedUser: User }) {
         >
           {selectedUser?.name}
         </Typography>
+        <Badge
+          overlap="circular"
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          variant="dot"
+          sx={{
+            "& .MuiBadge-badge": {
+              backgroundColor: statusColor,
+              color: statusColor,
+              boxShadow: "0 0 0 2px white",
+              height: "16px",
+              width: "16px",
+              borderRadius: "50%",
+            },
+          }}
+        >
+          <ProfileImage
+            name={selectedUser?.name}
+            files={imageFile ? [imageFile] : selectedUser?.profileImage}
+            fontSize="5rem"
+          />
+        </Badge>
       </Box>
-      <Box
+      <Stack
         sx={{
           display: "flex",
           flexDirection: "column",
           backgroundColor: "#fff",
-          flex: 1,
+          flex: 2,
+          boxShadow: 3,
+          p: "3rem",
         }}
       >
-        <DrawerContentItem
-          label="Id"
-          value={selectedUser?.id}
-          sx={{ flex: 1 }}
-        />
-        <DrawerContentItem
-          label="Email"
-          value={selectedUser?.email}
-          sx={{ flex: 1 }}
-        />
-        <DrawerContentItem
-          label="Mobile Number"
-          value={selectedUser?.mobile}
-          sx={{ flex: 1 }}
-        />
-        <DrawerContentItem
-          label="Role"
-          value={selectedUser?.userType?.userType}
-          sx={{ flex: 1 }}
-        />
-        <DrawerContentItem
-          label="Department"
-          value={selectedUser?.department}
-          sx={{ flex: 1 }}
-        />
-        <DrawerContentItem
-          label="Status"
-          value={selectedUser?.status}
-          sx={{ flex: 1 }}
-        />
-        <DrawerContentItem
-          label="Job Position"
-          value={selectedUser?.jobPosition}
-          sx={{ flex: 1 }}
-        />
-      </Box>
+        <Stack
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            backgroundColor: "#fff",
+            flex: 1,
+          }}
+        >
+          <DrawerContentItem
+            label="Employee Id"
+            value={selectedUser?.id}
+            sx={{ flex: 1 }}
+          />
+          <DrawerContentItem
+            label="Email"
+            value={selectedUser?.email}
+            sx={{ flex: 1 }}
+          />
+        </Stack>
+
+        <Stack
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            backgroundColor: "#fff",
+            flex: 1,
+          }}
+        >
+          <DrawerContentItem
+            label="Full Name"
+            value={selectedUser?.name}
+            sx={{ flex: 1 }}
+          />
+          <DrawerContentItem
+            label="Mobile Number"
+            value={selectedUser?.mobile}
+            sx={{ flex: 1 }}
+          />
+        </Stack>
+
+        <Stack
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            backgroundColor: "#fff",
+            flex: 1,
+          }}
+        >
+          <DrawerContentItem
+            label="Designation"
+            value={selectedUser?.jobPosition}
+            sx={{ flex: 1 }}
+          />
+          <DrawerContentItem
+            label="Gender"
+            value={selectedUser?.gender}
+            sx={{ flex: 1 }}
+          />
+        </Stack>
+        <Stack
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            backgroundColor: "#fff",
+            flex: 1,
+          }}
+        >
+          <DrawerContentItem
+            label="User Level"
+            value={selectedUser?.userLevel?.levelName}
+            sx={{ flex: 1 }}
+          />
+          <DrawerContentItem
+            label="User Type"
+            value={selectedUser?.userType?.userType}
+            sx={{ flex: 1 }}
+          />
+        </Stack>
+        <Stack
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            backgroundColor: "#fff",
+            flex: 1,
+          }}
+        >
+          <DrawerContentItem
+            label="Department"
+            value={selectedUser?.department}
+            sx={{ flex: 1 }}
+          />
+        </Stack>
+        <Stack
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            backgroundColor: "#fff",
+            flex: 1,
+          }}
+        >
+          <MultiDrawerContent
+            label="Assigned Factories"
+            value={selectedUser?.assignedFactory}
+            sx={{ flex: 1 }}
+          />
+          <MultiDrawerContent
+            label="Responsible Sections"
+            value={selectedUser?.responsibleSection}
+            sx={{ flex: 1 }}
+          />
+        </Stack>
+      </Stack>
     </Stack>
   );
 }
