@@ -8,6 +8,7 @@ import Paper from "@mui/material/Paper";
 import {
   Alert,
   Box,
+  Chip,
   LinearProgress,
   Stack,
   TableFooter,
@@ -23,12 +24,14 @@ import { useMemo, useState } from "react";
 import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
-import { fetchAllUsers, User } from "../../api/userApi";
+import { fetchAllUsers, updateUserType, User } from "../../api/userApi";
 import ViewUserContent from "./ViewUserContent";
 import EditUserRoleDialog from "./EditUserRoleDialog";
 import { PermissionKeys } from "./SectionList";
 import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { green, grey } from "@mui/material/colors";
+import queryClient from "../../state/queryClient";
 
 function UserTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -77,6 +80,22 @@ function UserTable() {
     );
   }, [usersData, page, rowsPerPage]);
 
+  const { mutate: updateUserRoleMutation, isPending } = useMutation({
+    mutationFn: updateUserType,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      setOpenEditUserRoleDialog(false);
+      enqueueSnackbar("User Role Updated Successfully!", {
+        variant: "success",
+      });
+    },
+    onError: () => {
+      enqueueSnackbar(`User Role Update Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
   return (
     <Stack>
       <Box
@@ -109,6 +128,7 @@ function UserTable() {
                 <TableCell align="left">Email</TableCell>
                 <TableCell align="left">Role</TableCell>
                 <TableCell align="right">Job Position</TableCell>
+                <TableCell align="center">Status</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -131,6 +151,25 @@ function UserTable() {
                     <TableCell align="left">{row.userType?.userType}</TableCell>
                     <TableCell align="right">
                       {row.jobPosition ?? "--"}
+                    </TableCell>
+                    <TableCell align="center">
+                      {row.availability ? (
+                        <Chip
+                          label="Active"
+                          sx={{
+                            backgroundColor: green[100],
+                            color: green[800],
+                          }}
+                        />
+                      ) : (
+                        <Chip
+                          label="Inactive"
+                          sx={{
+                            backgroundColor: grey[100],
+                            color: grey[800],
+                          }}
+                        />
+                      )}
                     </TableCell>
                   </TableRow>
                 ))
@@ -163,7 +202,7 @@ function UserTable() {
       <ViewDataDrawer
         open={openViewDrawer}
         handleClose={() => setOpenViewDrawer(false)}
-        fullScreen={false}
+        fullScreen={true}
         drawerContent={
           <Stack spacing={1} sx={{ paddingX: theme.spacing(1) }}>
             <DrawerHeader
@@ -176,10 +215,10 @@ function UserTable() {
               disableEdit={
                 !useCurrentUserHaveAccess(PermissionKeys.ADMIN_USERS_EDIT)
               }
-              onDelete={() => setDeleteDialogOpen(true)}
-              disableDelete={
-                !useCurrentUserHaveAccess(PermissionKeys.ADMIN_USERS_DELETE)
-              }
+              // onDelete={() => setDeleteDialogOpen(true)}
+              // disableDelete={
+              //   !useCurrentUserHaveAccess(PermissionKeys.ADMIN_USERS_DELETE)
+              // }
             />
 
             {selectedRow && (
@@ -198,7 +237,9 @@ function UserTable() {
             setOpenViewDrawer(false);
             setOpenEditUserRoleDialog(false);
           }}
-          onSubmit={(data) => {}}
+          onSubmit={(data) => {
+            updateUserRoleMutation(data);
+          }}
           defaultValues={selectedRow}
         />
       )}

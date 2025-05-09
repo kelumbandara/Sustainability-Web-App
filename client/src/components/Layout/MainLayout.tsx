@@ -16,7 +16,7 @@ import ListItem from "@mui/material/ListItem";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-
+import { DrawerHeader as DrawerHeaderModal } from "../../components/ViewDataDrawer";
 import GridViewIcon from "@mui/icons-material/GridView";
 import groupLogo from "../../assets/group-logo.png";
 import {
@@ -26,6 +26,7 @@ import {
   Button,
   Collapse,
   Drawer as MobileDrawer,
+  Stack,
   useMediaQuery,
 } from "@mui/material";
 import { Link, useLocation, useNavigate } from "react-router";
@@ -39,6 +40,12 @@ import { useSnackbar } from "notistack";
 import { PermissionKeysObject } from "../../views/Administration/SectionList";
 import useCurrentUser from "../../hooks/useCurrentUser";
 import "./MainLayout.css";
+import ViewUserContent from "../../views/Administration/ViewUserProfileContent";
+import CustomButton from "../CustomButton";
+import ViewProfileDataDrawer, {
+  DrawerProfileHeader,
+} from "../ViewProfileDataDrawer";
+import ProfileImage from "../ProfileImageComponent";
 
 const drawerWidth = 265;
 
@@ -134,6 +141,13 @@ export default function MainLayout({ children }: Props) {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [open, setOpen] = React.useState(isMobile ? false : true);
   const { user } = useCurrentUser();
+  const [openViewProfileDrawer, setOpenViewProfileDrawer] = useState(false);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const [openEditUserRoleDialog, setOpenEditUserRoleDialog] = useState(false);
+  const statusColor = user?.availability ? "#44b700" : "#f44336";
+
+  const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate();
 
   const toggleDrawerOpen = () => {
     setOpen(!open);
@@ -182,8 +196,8 @@ export default function MainLayout({ children }: Props) {
                 <img
                   src={groupLogo}
                   alt="logo"
-                  height={"35em"}
-                  style={{ marginTop: "5px" }}
+                  height={"45rem"}
+                  style={{ marginTop: "10px" }}
                 />
               </Box>
             </Box>
@@ -253,15 +267,117 @@ export default function MainLayout({ children }: Props) {
                   </IconButton>
                 </>
               )} */}
-              <Avatar
+              {/* <Avatar
                 sx={{
                   bgcolor: "var(--pallet-orange)",
                   height: "2rem",
                   width: "2rem",
+                  cursor: "pointer",
                 }}
+                onClick={() => setOpenViewProfileDrawer(true)}
               >
                 {user?.name?.charAt(0).toUpperCase()}
-              </Avatar>
+              </Avatar> */}
+
+              <Badge
+                overlap="circular"
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                variant="dot"
+                sx={{
+                  "& .MuiBadge-badge": {
+                    backgroundColor: statusColor,
+                    color: statusColor,
+                    boxShadow: "0 0 0 2px white",
+                    height: "8px",
+                    width: "8px",
+                    borderRadius: "50%",
+                  },
+                }}
+              >
+                <ProfileImage
+                  name={user?.name}
+                  files={user?.profileImage}
+                  size="2rem"
+                  onClick={() => setOpenViewProfileDrawer(true)}
+                />
+              </Badge>
+              <ViewProfileDataDrawer
+                open={openViewProfileDrawer}
+                handleClose={() => setOpenViewProfileDrawer(false)}
+                fullScreen={true}
+                drawerContent={
+                  <Stack spacing={1} sx={{ paddingX: theme.spacing(1) }}>
+                    <DrawerProfileHeader
+                      title="User Profile"
+                      handleClose={() => setOpenViewProfileDrawer(false)}
+                      onEdit={() => {
+                        setOpenEditUserRoleDialog(true);
+                      }}
+                    />
+                    <Stack>
+                      <ViewUserContent selectedUser={user} />
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          marginTop: "1rem",
+                        }}
+                      >
+                        <CustomButton
+                          variant="contained"
+                          sx={{
+                            backgroundColor: "var(--pallet-orange)",
+                            marginTop: "1rem",
+                            marginX: "0.5rem",
+                            width: "10rem",
+                          }}
+                          size="medium"
+                          startIcon={<LogoutIcon />}
+                          onClick={() => setLogoutDialogOpen(true)}
+                        >
+                          Log out
+                        </CustomButton>
+                      </Box>
+                      {logoutDialogOpen && (
+                        <DeleteConfirmationModal
+                          open={logoutDialogOpen}
+                          title="Log Out Confirmation"
+                          customDeleteButtonText="Log Out Now"
+                          customDeleteButtonIon={<LogoutIcon />}
+                          content={
+                            <>
+                              Are you sure you want to log out of the
+                              application?
+                              <Alert
+                                severity="warning"
+                                style={{ marginTop: "1rem" }}
+                              >
+                                You will be logged out of the application and
+                                will need to log in with credentials again to
+                                access your account.
+                              </Alert>
+                            </>
+                          }
+                          handleClose={() => setLogoutDialogOpen(false)}
+                          deleteFunc={async () => {
+                            localStorage.removeItem("token");
+                            navigate("/");
+                          }}
+                          onSuccess={() => {
+                            setLogoutDialogOpen(false);
+                            enqueueSnackbar("Logged Out Successfully!", {
+                              variant: "success",
+                            });
+                          }}
+                          handleReject={() => {
+                            setLogoutDialogOpen(false);
+                          }}
+                        />
+                      )}
+                    </Stack>
+                  </Stack>
+                }
+              />
             </Box>
           </Box>
         </Toolbar>
@@ -320,12 +436,10 @@ const DrawerContent = ({
 
   const userPermissionObject = useMemo(() => {
     if (user && user?.permissionObject) {
-      
       return user.permissionObject;
     }
-    
   }, [user]);
-  console.log(userPermissionObject)
+  console.log(userPermissionObject);
   return (
     <>
       <DrawerHeader sx={{ justifyContent: "flex-start" }}>

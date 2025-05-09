@@ -45,7 +45,7 @@ export const AddOrEditActionPlan = ({
   setOpen: (open: boolean) => void;
   handleClose: () => void;
   selectedActionItem: ScheduledInternalAuditActionPlan;
-  internalAuditId: string;
+  internalAuditId: number;
 }) => {
   const {
     register,

@@ -74,12 +74,12 @@ function LoginForm() {
       }}
     >
       <Box>
-        <img src={companyLogo} alt="logo" height={"65em"} />
+        <img src={companyLogo} alt="logo" height={"65em" } />
         <img
           src={groupLogo}
           alt="logo"
           style={{ marginLeft: "1rem" }}
-          height={"45em"}
+          height={"50rem"}
         />
       </Box>
       <Box>
