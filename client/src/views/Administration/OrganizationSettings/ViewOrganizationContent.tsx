@@ -10,6 +10,7 @@ import FireExtinguisherIcon from "@mui/icons-material/FireExtinguisher";
 import { FileItemsViewer } from "../../../components/FileItemsViewer";
 import { StorageFile } from "../../../utils/StorageFiles.util";
 import { Organization } from "../../../api/OrganizationSettings/organizationSettingsApi";
+import ProfileImage from "../../../components/ProfileImageComponent";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -44,7 +45,7 @@ function a11yProps(index: number) {
 function ViewOrganizationContent({
   organizationSettings,
 }: {
-    organizationSettings: Organization;
+  organizationSettings: Organization;
 }) {
   const [activeTab, setActiveTab] = useState(0);
   const { isTablet } = useIsMobile();
@@ -87,7 +88,10 @@ function ViewOrganizationContent({
             label="Reported Date"
             value={
               organizationSettings.created_at
-                ? format(new Date(organizationSettings.created_at), "yyyy-MM-dd")
+                ? format(
+                    new Date(organizationSettings.created_at),
+                    "yyyy-MM-dd"
+                  )
                 : "N/A"
             }
             sx={{ flex: 1 }}
@@ -120,7 +124,7 @@ function ViewOrganizationContent({
                 >
                   <TextSnippetIcon fontSize="small" />
                   <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                    Hazard / Risk Details
+                    General Details
                   </Typography>
                 </Box>
               }
@@ -137,7 +141,7 @@ function ViewOrganizationContent({
                 >
                   <FireExtinguisherIcon fontSize="small" />
                   <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                    Resolution Details
+                    Insight View
                   </Typography>
                 </Box>
               }
@@ -146,20 +150,22 @@ function ViewOrganizationContent({
           </Tabs>
         </AppBar>
         <TabPanel value={activeTab} index={0} dir={theme.direction}>
-          <Box>
-            
-            
-
-            
-            
-            
-            
-            
+          <Box
+            display={"flex"}
+            flexDirection={"row"}
+          >
+            <ProfileImage
+              name={organizationSettings?.organizationName}
+              files={organizationSettings.logoUrl}
+              size="5rem"
+            />
+            <DrawerContentItem
+              label="Organization Name"
+              value={organizationSettings.organizationName}
+            />
           </Box>
         </TabPanel>
-        <TabPanel value={activeTab} index={1} dir={theme.direction}>
-          
-        </TabPanel>
+        <TabPanel value={activeTab} index={1} dir={theme.direction}></TabPanel>
       </Box>
       <Box
         sx={{
@@ -175,8 +181,10 @@ function ViewOrganizationContent({
           height: "fit-content",
         }}
       >
-        <DrawerContentItem label="Status" value={organizationSettings.organizationName} />
-        
+        <DrawerContentItem
+          label="Status"
+          value={organizationSettings.organizationName}
+        />
       </Box>
     </Stack>
   );
