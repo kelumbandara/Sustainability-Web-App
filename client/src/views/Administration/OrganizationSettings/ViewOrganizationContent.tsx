@@ -150,20 +150,31 @@ function ViewOrganizationContent({
           </Tabs>
         </AppBar>
         <TabPanel value={activeTab} index={0} dir={theme.direction}>
-          <Box
-            display={"flex"}
-            flexDirection={"row"}
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+
           >
-            <ProfileImage
-              name={organizationSettings?.organizationName}
-              files={organizationSettings.logoUrl}
-              size="5rem"
-            />
-            <DrawerContentItem
-              label="Organization Name"
-              value={organizationSettings.organizationName}
-            />
-          </Box>
+            <Box
+              flex={1}
+            >
+              <ProfileImage
+                name={organizationSettings?.organizationName}
+                files={organizationSettings.logoUrl}
+                size="5rem"
+              />
+            </Box>
+
+            <Box
+              flex={2}
+
+            >
+              <DrawerContentItem
+                label="Organization Name"
+                value={organizationSettings.organizationName}
+              />
+            </Box>
+          </Stack>
         </TabPanel>
         <TabPanel value={activeTab} index={1} dir={theme.direction}></TabPanel>
       </Box>
