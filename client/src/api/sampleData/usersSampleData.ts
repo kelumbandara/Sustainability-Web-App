@@ -69,3 +69,30 @@ export const sampleRoles = [
     accessSettings: defaultAdminPermissions,
   },
 ];
+
+export const sampleOrganization = [
+  {
+    id: 1,
+    logoUrl: [
+      {
+        fileName: "681c9863425b5_map.png",
+        imageUrl: "https://example.com/681c9863425b5_map.png",
+      },
+    ],
+    organizationName: "ABA GROUP",
+    insightImage: [
+      {
+        fileName: "681c9863425b5_map.png",
+        imageUrl: "https://example.com/681c9863425b5_map.png",
+      },
+    ],
+    insightDescription: "Hi",
+    colorPallet: [
+      {
+        primaryColor: "#1E3A8A",
+        secondaryColor: "#60A5FA",
+        buttonColor: "#10B981",
+      },
+    ],
+  },
+];

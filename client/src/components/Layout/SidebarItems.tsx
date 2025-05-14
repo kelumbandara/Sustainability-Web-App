@@ -19,6 +19,7 @@ import SentimentSatisfiedAltOutlinedIcon from "@mui/icons-material/SentimentSati
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import SubdirectoryArrowRightIcon from "@mui/icons-material/SubdirectoryArrowRight";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import KeyIcon from "@mui/icons-material/Key";
 import { PermissionKeys } from "../../views/Administration/SectionList";
 
@@ -59,6 +60,12 @@ export const sidebarItems: Array<SidebarItem> = [
   },
   {
     headline: "Administration",
+  },
+  {
+    title: "Organization Settings",
+    icon: <SettingsOutlinedIcon fontSize="small" />,
+    href: "/admin/organization-settings",
+    accessKey: PermissionKeys.ADMIN_USERS_VIEW, // need to add permission key
   },
   {
     title: "Users",
