@@ -15,10 +15,10 @@ export const OrganizationSchema = z.object({
   organizationName: z.string(),
   logoUrl: z.array(z.union([z.instanceof(File), StorageFileSchema])).optional(),
   insightDescription: z.string(),
-  colorPallet: ColorPalletSchema,
+  colorPallet: z.array(ColorPalletSchema),
   insightImage: z
     .array(z.union([z.instanceof(File), StorageFileSchema]))
     .optional(),
-    created_at: z.date()
+  created_at: z.date(),
 });
 export type Organization = z.infer<typeof OrganizationSchema>;

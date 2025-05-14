@@ -33,15 +33,15 @@ import { green, grey } from "@mui/material/colors";
 import queryClient from "../../../state/queryClient";
 import { sampleOrganization } from "../../../api/sampleData/usersSampleData";
 import ProfileImage from "../../../components/ProfileImageComponent";
-import UpdateOrganizationDialog from "./ViewOrganizationContent";
 import { Organization } from "../../../api/OrganizationSettings/organizationSettingsApi";
 import ViewOrganizationContent from "./ViewOrganizationContent";
+import EditOrganizationDialog from "./EditOrganizationDialog";
 
 function organizationSettings() {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<Organization>(null);
-  const [openEditUserRoleDialog, setOpenEditUserRoleDialog] = useState(false);
+  const [openEditOrganizationDialog, setOpenEditOrganizationDialog] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const breadcrumbItems = [
@@ -57,7 +57,7 @@ function organizationSettings() {
     mutationFn: updateUserType,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
-      setOpenEditUserRoleDialog(false);
+      setOpenEditOrganizationDialog(false);
       enqueueSnackbar("User Role Updated Successfully!", {
         variant: "success",
       });
@@ -194,7 +194,7 @@ function organizationSettings() {
               handleClose={() => setOpenViewDrawer(false)}
               onEdit={() => {
                 setSelectedRow(selectedRow);
-                setOpenEditUserRoleDialog(true);
+                setOpenEditOrganizationDialog(true);
               }}
               disableEdit={
                 !useCurrentUserHaveAccess(PermissionKeys.ADMIN_USERS_EDIT)
@@ -209,13 +209,13 @@ function organizationSettings() {
           </Stack>
         }
       />
-      {openEditUserRoleDialog && (
-        <UpdateOrganizationDialog
-          open={openEditUserRoleDialog}
+      {openEditOrganizationDialog && (
+        <EditOrganizationDialog
+          open={openEditOrganizationDialog}
           handleClose={() => {
             setSelectedRow(null);
             setOpenViewDrawer(false);
-            setOpenEditUserRoleDialog(false);
+            setOpenEditOrganizationDialog(false);
           }}
           onSubmit={(data) => {
             updateUserRoleMutation(data);

@@ -1,4 +1,14 @@
-import { AppBar, Box, Stack, Tab, Tabs, Typography } from "@mui/material";
+import {
+  AppBar,
+  Badge,
+  Box,
+  Button,
+  IconButton,
+  Stack,
+  Tab,
+  Tabs,
+  Typography,
+} from "@mui/material";
 import { DrawerContentItem } from "../../../components/ViewDataDrawer";
 import { HazardAndRisk } from "../../../api/hazardRiskApi";
 import { differenceInDays, format } from "date-fns";
@@ -11,6 +21,11 @@ import { FileItemsViewer } from "../../../components/FileItemsViewer";
 import { StorageFile } from "../../../utils/StorageFiles.util";
 import { Organization } from "../../../api/OrganizationSettings/organizationSettingsApi";
 import ProfileImage from "../../../components/ProfileImageComponent";
+import CustomButton from "../../../components/CustomButton";
+import { enqueueSnackbar } from "notistack";
+import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
+import { Controller } from "react-hook-form";
+import RichTextComponent from "../../../components/RichTextComponent";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -72,31 +87,6 @@ function ViewOrganizationContent({
           borderRadius: "0.3rem",
         }}
       >
-        <Box
-          sx={{
-            p: "0.5rem",
-            display: "flex",
-            justifyContent: "space-between",
-          }}
-        >
-          <DrawerContentItem
-            label="Reference"
-            value={organizationSettings.organizationId}
-            sx={{ flex: 1 }}
-          />
-          <DrawerContentItem
-            label="Reported Date"
-            value={
-              organizationSettings.created_at
-                ? format(
-                    new Date(organizationSettings.created_at),
-                    "yyyy-MM-dd"
-                  )
-                : "N/A"
-            }
-            sx={{ flex: 1 }}
-          />
-        </Box>
         <AppBar position="static">
           <Tabs
             value={activeTab}
@@ -150,33 +140,135 @@ function ViewOrganizationContent({
           </Tabs>
         </AppBar>
         <TabPanel value={activeTab} index={0} dir={theme.direction}>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
+          <Stack gap={3} mt={3}>
+            <Box sx={{ position: "relative" }}>
+              <Badge
+                overlap="circular"
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                badgeContent={
+                  <IconButton
+                    onClick={async () => {
+                      const file = organizationSettings.logoUrl?.[0];
 
-          >
-            <Box
-              flex={1}
-            >
-              <ProfileImage
-                name={organizationSettings?.organizationName}
-                files={organizationSettings.logoUrl}
-                size="5rem"
-              />
+                      if (file && "imageUrl" in file && file.imageUrl) {
+                        try {
+                          const response = await fetch(file.imageUrl);
+                          const blob = await response.blob();
+                          const url = URL.createObjectURL(blob);
+
+                          const link = document.createElement("a");
+                          link.href = url;
+                          link.download = file.fileName || "logo.png";
+                          link.click();
+
+                          URL.revokeObjectURL(url);
+                        } catch (error) {
+                          enqueueSnackbar("Failed To Download Image", {
+                            variant: "error",
+                          });
+                        }
+                      } else {
+                        alert("No image available to download.");
+                      }
+                    }}
+                    sx={{
+                      backgroundColor: "white",
+                      borderRadius: "50%",
+                      ":hover": {
+                        backgroundColor: "white",
+                      },
+                    }}
+                  >
+                    <DownloadOutlinedIcon
+                      fontSize="medium"
+                      sx={{ color: "var(--pallet-blue)" }}
+                    />
+                  </IconButton>
+                }
+              >
+                <ProfileImage
+                  name={organizationSettings?.organizationName}
+                  files={organizationSettings.logoUrl}
+                  size="20rem"
+                />
+              </Badge>
             </Box>
 
-            <Box
-              flex={2}
-
-            >
+            <Box>
               <DrawerContentItem
                 label="Organization Name"
                 value={organizationSettings.organizationName}
               />
             </Box>
+
+            <Box>
+              <Typography
+                variant="caption"
+                sx={{ paddingBottom: 0, color: "var(--pallet-grey)" }}
+              >
+                Color Pallet
+              </Typography>
+
+              {organizationSettings.colorPallet.map((palette, index) => (
+                <Box key={index} display="flex" flexDirection="column" gap={1}>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Box
+                      width={20}
+                      height={20}
+                      borderRadius="50%"
+                      bgcolor={palette.primaryColor}
+                      border="1px solid #ccc"
+                    />
+                    <Typography variant="body2">Primary Color</Typography>
+                  </Box>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Box
+                      width={20}
+                      height={20}
+                      borderRadius="50%"
+                      bgcolor={palette.secondaryColor}
+                      border="1px solid #ccc"
+                    />
+                    <Typography variant="body2">Secondary Color</Typography>
+                  </Box>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Box
+                      width={20}
+                      height={20}
+                      borderRadius="50%"
+                      bgcolor={palette.buttonColor}
+                      border="1px solid #ccc"
+                    />
+                    <Typography variant="body2">Button Color</Typography>
+                  </Box>
+                </Box>
+              ))}
+            </Box>
           </Stack>
         </TabPanel>
-        <TabPanel value={activeTab} index={1} dir={theme.direction}></TabPanel>
+        <TabPanel value={activeTab} index={1} dir={theme.direction}>
+          <Box
+            component="img"
+            src={
+              (organizationSettings.insightImage[0] as { imageUrl?: string })
+                ?.imageUrl ?? ""
+            }
+            alt="Under Development"
+            sx={{
+              height: "auto",
+              width: "60vw",
+              maxHeight: "50vh",
+              objectFit: "contain",
+              justifySelf: "center",
+              alignSelf: "center",
+            }}
+          />
+
+          <DrawerContentItem
+            label="Insight View Description"
+            value={organizationSettings.insightDescription}
+          />
+        </TabPanel>
       </Box>
       <Box
         sx={{
@@ -193,8 +285,18 @@ function ViewOrganizationContent({
         }}
       >
         <DrawerContentItem
-          label="Status"
+          label="Organization Name"
           value={organizationSettings.organizationName}
+        />
+
+        <DrawerContentItem
+          label="Started Date"
+          value={
+            organizationSettings.created_at
+              ? format(new Date(organizationSettings.created_at), "yyyy-MM-dd")
+              : "N/A"
+          }
+          sx={{ flex: 1 }}
         />
       </Box>
     </Stack>

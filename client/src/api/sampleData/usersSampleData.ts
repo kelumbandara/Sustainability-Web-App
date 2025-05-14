@@ -76,14 +76,15 @@ export const sampleOrganization = [
     logoUrl: [
       {
         fileName: "681c9863425b5_map.png",
-        imageUrl: "https://example.com/681c9863425b5_map.png",
+        imageUrl: "https:\/\/storage.googleapis.com\/mas_silueta_bucket\/uploads\/profile\/681c9863425b5_map.png?GoogleAccessId=silueta-storage-service-accoun%40silueta-image-upload.iam.gserviceaccount.com&Expires=1747220527&Signature=o3DicV%2B1mveiAoMxDtLh9J8%2BTyZX9Fkb1ebLliroPbqPf2s7fKVd6cqxpo25DSmjCIelULJ5oVxvGZ0CA%2BeQ99KpkbmDokF%2FvyJW2jcFmNODobZtQdWVo7ELaAdveToemKtTDKQdRG5Z35hpdCfBLJNOlJM7WZFiN4eoPvh%2FAEsGgANUYl5hDyw2MtjjE2GqaHDSFzfxv1tHyrPuhyRmCHKVxT9d0%2BZu4p6%2FlyOV0RUOMEZIqblLgcUOnmbFC27DHt7MnPtGBpGIzuurEgAuI0j3wkriUVDCC1GDgmgryGeH1QnK9jxcnvQnHZH4fHQ552ay6QbG0W160PSQHqwHwA%3D%3D",
       },
     ],
     organizationName: "ABA GROUP",
     insightImage: [
       {
         fileName: "681c9863425b5_map.png",
-        imageUrl: "https://example.com/681c9863425b5_map.png",
+        imageUrl:
+          "https://storage.googleapis.com/mas_silueta_bucket/uploads/profile/681c9863425b5_map.png?GoogleAccessId=silueta-storage-service-accoun%40silueta-image-upload.iam.gserviceaccount.com&Expires=1747220527&Signature=o3DicV%2B1mveiAoMxDtLh9J8%2BTyZX9Fkb1ebLliroPbqPf2s7fKVd6cqxpo25DSmjCIelULJ5oVxvGZ0CA%2BeQ99KpkbmDokF%2FvyJW2jcFmNODobZtQdWVo7ELaAdveToemKtTDKQdRG5Z35hpdCfBLJNOlJM7WZFiN4eoPvh%2FAEsGgANUYl5hDyw2MtjjE2GqaHDSFzfxv1tHyrPuhyRmCHKVxT9d0%2BZu4p6%2FlyOV0RUOMEZIqblLgcUOnmbFC27DHt7MnPtGBpGIzuurEgAuI0j3wkriUVDCC1GDgmgryGeH1QnK9jxcnvQnHZH4fHQ552ay6QbG0W160PSQHqwHwA%3D%3D",
       },
     ],
     insightDescription: "Hi",
@@ -94,5 +95,6 @@ export const sampleOrganization = [
         buttonColor: "#10B981",
       },
     ],
+    created_at: "2025.05.14"
   },
 ];
