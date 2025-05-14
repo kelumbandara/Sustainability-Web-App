@@ -64,7 +64,7 @@ function ChemicalRequestTable() {
       queryFn: fetchChemicalRequests,
     });
 
-  const { mutate: deleteInternalAuditMutation, isPending: isDeleting } =
+  const { mutate: deleteChemicalRequestMutation, isPending: isDeleting } =
     useMutation({
       mutationFn: deleteChemicalRequest,
       onSuccess: () => {
@@ -262,7 +262,7 @@ function ChemicalRequestTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            deleteInternalAuditMutation(selectedRow.id);
+            deleteChemicalRequestMutation(selectedRow.id);
             setDeleteDialogOpen(false);
             setOpenViewDrawer(false);
           }}

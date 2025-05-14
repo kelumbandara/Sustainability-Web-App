@@ -65,6 +65,7 @@ const AddCertificateDialog = ({
     formState: { errors },
     reset,
     control,
+    watch,
   } = useForm<ChemicalCertificate>();
   const { data: divisionData, isFetching: isCategoryDataFetching } = useQuery({
     queryKey: ["divisions"],
@@ -87,6 +88,8 @@ const AddCertificateDialog = ({
       queryKey: ["positive-list"],
       queryFn: fetchPositiveList,
     });
+
+  const watchIssuedDate = watch("issuedDate");
 
   return (
     <Dialog
@@ -261,6 +264,7 @@ const AddCertificateDialog = ({
                         value={field.value ? new Date(field.value) : undefined}
                         label="Expiry Date"
                         error={errors?.expiryDate ? "Required" : ""}
+                        minDate={watchIssuedDate}
                       />
                     </Box>
                   );
@@ -378,7 +382,7 @@ const AddCertificateDialog = ({
           size="medium"
           onClick={handleSubmit((data) => {
             data.documents = files;
-            data.id = generateRandomNumberId();
+            data.inventoryId = generateRandomNumberId();
             onSubmit(data);
             reset();
           })}

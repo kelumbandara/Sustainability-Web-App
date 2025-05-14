@@ -158,6 +158,8 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
     console.log("submitData", submitData);
     submitData.documents = files;
     if (filesToRemove?.length > 0) submitData.removeDoc = filesToRemove;
+    submitData.compliantWithTheLatestVersionOfZDHCandMRSL =
+      data.compliantWithTheLatestVersionOfZDHCandMRSL ? "true" : "false";
     updateChemicalInventoryMutation(submitData as ChemicalPurchaseRequest);
   };
 
@@ -167,6 +169,8 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
     console.log("submitData", submitData);
     submitData.documents = files;
     if (filesToRemove?.length > 0) submitData.removeDoc = filesToRemove;
+    submitData.compliantWithTheLatestVersionOfZDHCandMRSL =
+      data.compliantWithTheLatestVersionOfZDHCandMRSL ? "true" : "false";
     publishChemicalPurchaseMutation(submitData as ChemicalPurchaseRequest);
   };
 
@@ -194,7 +198,9 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
     useMutation({
       mutationFn: updateChemicalPurchaseInventory,
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["medicine-inventory"] });
+        queryClient.invalidateQueries({
+          queryKey: ["chemical-purchase-inventory"],
+        });
         enqueueSnackbar(
           "Chemical Purchase Inventory Report Updated Successfully!",
           {
@@ -877,6 +883,8 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                       required
                       size="small"
                       type="number"
+                      error={!!errors.contactNumber}
+                      helperText={errors.contactNumber ? "Required" : ""}
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("contactNumber", {
                         required: true,
@@ -894,6 +902,8 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                       required
                       size="small"
                       type="email"
+                      error={!!errors.emailId}
+                      helperText={errors.emailId ? "Required" : ""}
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("emailId", {
                         required: true,
@@ -904,6 +914,7 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                       id="location"
                       label="Location / Country"
                       error={!!errors.location}
+                      helperText={errors.location ? "Required" : ""}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("location", { required: true })}
@@ -1251,21 +1262,39 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("deliveryQuantity", { required: true })}
                     />
-                    <Autocomplete
+                    <Controller
+                      name="deliveryUnit"
+                      control={control}
+                      defaultValue={defaultValues?.deliveryUnit ?? ""}
                       {...register("deliveryUnit", { required: true })}
-                      size="small"
-                      options={["KG", "L", "G", "ML", "M", "CM", "MM", "PCS"]}
-                      defaultValue={defaultValues?.deliveryUnit}
-                      sx={{ flex: 1, margin: "0.5rem" }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          required
-                          error={!!errors.deliveryUnit}
-                          helperText={errors.deliveryUnit ? "Required" : ""}
-                          label="Delivery Unit"
-                          name="deliveryUnit"
-                          slotProps={{ inputLabel: { shrink: true } }}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(event, newValue) =>
+                            field.onChange(newValue)
+                          }
+                          size="small"
+                          options={[
+                            "KG",
+                            "L",
+                            "G",
+                            "ML",
+                            "M",
+                            "CM",
+                            "MM",
+                            "PCS",
+                          ]}
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              required
+                              error={!!errors.deliveryUnit}
+                              helperText={errors.deliveryUnit && "Required"}
+                              label="Delivery Unit"
+                              name="deliveryUnit"
+                            />
+                          )}
                         />
                       )}
                     />
@@ -1602,7 +1631,8 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                                     setValue(
                                       "certificate",
                                       (certificatesWatch ?? []).filter(
-                                        (item) => item.id !== row.id
+                                        (item) =>
+                                          item.inventoryId !== row.inventoryId
                                       )
                                     );
                                   }}

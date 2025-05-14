@@ -224,7 +224,7 @@ export const ChemicalRequestSchema = z.object({
 export type ChemicalRequest = z.infer<typeof ChemicalRequestSchema>;
 
 export const ChemicalCertificateSchema = z.object({
-  id: z.number().nullable(),
+  inventoryId: z.number().nullable(),
   testName: z.string().nullable(),
   testDate: z.date().nullable(),
   testLab: z.string().nullable(),
@@ -467,43 +467,6 @@ export async function fetchChemicalPurchaceInventories() {
   return res.data;
 }
 
-export const publishChemicalPurchase = async (
-  chemicalPurchase: ChemicalPurchaseRequest
-) => {
-  const formData = new FormData();
-
-  // Append each property of the maternity Register object to the form data
-  Object.keys(chemicalPurchase).forEach((key) => {
-    const value = chemicalPurchase[key as keyof typeof chemicalPurchase];
-
-    if (key === "documents" && Array.isArray(value)) {
-      value.forEach((file, index) => {
-        formData.append(`documents[${index}]`, file as File);
-      });
-    } else if (Array.isArray(value)) {
-      value.forEach((item, index) => {
-        formData.append(`${key}[${index}]`, JSON.stringify(item));
-      });
-    } else if (value instanceof Date) {
-      formData.append(key, value.toISOString());
-    } else if (value !== null && value !== undefined) {
-      formData.append(key, value.toString());
-    }
-  });
-
-  const res = await axios.post(
-    `/api/purchase-inventory-records/${chemicalPurchase?.id}/publish-update`,
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
-  );
-
-  return res.data;
-};
-
 export async function fetchAllSupplierNames() {
   const res = await axios.get("/api/chemical-supplier-names");
   return res.data;
@@ -544,6 +507,59 @@ export const updateChemicalPurchaseInventory = async (
       value.forEach((file, index) => {
         formData.append(`documents[${index}]`, file as File);
       });
+    } else if (key === "certificate" && Array.isArray(value)) {
+      const validatedCertificate = z
+        .array(ChemicalCertificateSchema)
+        .safeParse(value);
+      console.log("validatedCertificate", validatedCertificate);
+      if (validatedCertificate.success) {
+        validatedCertificate?.data.forEach((item, index) => {
+          formData.append(
+            `certificate.${index}.testName`,
+            item.testName.toString()
+          );
+          formData.append(
+            `certificate.${index}.testDate`,
+            item.testDate.toISOString()
+          );
+          formData.append(
+            `certificate.${index}.testLab`,
+            item.testLab.toString()
+          );
+          formData.append(
+            `certificate.${index}.issuedDate`,
+            item.issuedDate.toISOString()
+          );
+          formData.append(
+            `certificate.${index}.expiryDate`,
+            item.expiryDate.toISOString()
+          );
+          formData.append(
+            `certificate.${index}.positiveList`,
+            item.positiveList.toString()
+          );
+          formData.append(
+            `certificate.${index}.description`,
+            item.description.toString()
+          );
+          if (item.documents && Array.isArray(item.documents)) {
+            item.documents.forEach((file, docIndex) => {
+              formData.append(
+                `certificate.${index}.documents[${docIndex}]`,
+                file as File
+              );
+            });
+          }
+          if (item.removeDoc && Array.isArray(item.removeDoc)) {
+            item.removeDoc.forEach((docId, docIndex) => {
+              formData.append(
+                `certificate.${index}.removeDoc[${docIndex}]`,
+                docId.toString()
+              );
+            });
+          }
+        });
+      }
     } else if (Array.isArray(value)) {
       value.forEach((item, index) => {
         formData.append(`${key}[${index}]`, JSON.stringify(item));
@@ -557,6 +573,96 @@ export const updateChemicalPurchaseInventory = async (
 
   const res = await axios.post(
     `/api/purchase-inventory-records/${chemicalPurchaseInventory.id}/update`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return res.data;
+};
+
+export const publishChemicalPurchase = async (
+  chemicalPurchaseInventory: ChemicalPurchaseRequest
+) => {
+  const formData = new FormData();
+
+  // Append each property of the maternity Register object to the form data
+  Object.keys(chemicalPurchaseInventory).forEach((key) => {
+    const value =
+      chemicalPurchaseInventory[key as keyof typeof chemicalPurchaseInventory];
+    if (key === "documents" && Array.isArray(value)) {
+      value.forEach((file, index) => {
+        formData.append(`documents[${index}]`, file as File);
+      });
+    } else if (key === "certificate" && Array.isArray(value)) {
+      const validatedCertificate = z
+        .array(ChemicalCertificateSchema)
+        .safeParse(value);
+      console.log("validatedCertificate", validatedCertificate);
+      if (validatedCertificate.success) {
+        validatedCertificate?.data.forEach((item, index) => {
+          formData.append(
+            `certificate.${index}.testName`,
+            item.testName.toString()
+          );
+          formData.append(
+            `certificate.${index}.testDate`,
+            item.testDate.toISOString()
+          );
+          formData.append(
+            `certificate.${index}.testLab`,
+            item.testLab.toString()
+          );
+          formData.append(
+            `certificate.${index}.issuedDate`,
+            item.issuedDate.toISOString()
+          );
+          formData.append(
+            `certificate.${index}.expiryDate`,
+            item.expiryDate.toISOString()
+          );
+          formData.append(
+            `certificate.${index}.positiveList`,
+            item.positiveList.toString()
+          );
+          formData.append(
+            `certificate.${index}.description`,
+            item.description.toString()
+          );
+          if (item.documents && Array.isArray(item.documents)) {
+            item.documents.forEach((file, docIndex) => {
+              formData.append(
+                `certificate.${index}.documents[${docIndex}]`,
+                file as File
+              );
+            });
+          }
+          if (item.removeDoc && Array.isArray(item.removeDoc)) {
+            item.removeDoc.forEach((docId, docIndex) => {
+              formData.append(
+                `certificate.${index}.removeDoc[${docIndex}]`,
+                docId.toString()
+              );
+            });
+          }
+        });
+      }
+    } else if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        formData.append(`${key}[${index}]`, JSON.stringify(item));
+      });
+    } else if (value instanceof Date) {
+      formData.append(key, value.toISOString());
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString());
+    }
+  });
+
+  const res = await axios.post(
+    `/api/purchase-inventory-records/${chemicalPurchaseInventory.id}/publish-update`,
     formData,
     {
       headers: {
