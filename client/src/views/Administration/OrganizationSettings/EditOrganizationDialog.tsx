@@ -64,12 +64,13 @@ import { fetchAccidentAssignee, fetchAllUsers } from "../../../api/userApi";
 import UserAutoComplete from "../../../components/UserAutoComplete";
 import { StorageFile } from "../../../utils/StorageFiles.util";
 import { ExistingFileItemsEdit } from "../../../components/ExistingFileItemsEdit";
+import { Organization } from "../../../api/OrganizationSettings/organizationSettingsApi";
 
 type DialogProps = {
   open: boolean;
   handleClose: () => void;
-  defaultValues?: Accident;
-  onSubmit?: (data: Accident) => void;
+  defaultValues?: Organization;
+  onSubmit?: (data: Organization) => void;
 };
 
 interface TabPanelProps {
@@ -111,7 +112,7 @@ export default function AddOrEditAccidentDialog({
   const { isMobile, isTablet } = useIsMobile();
   const [files, setFiles] = useState<File[]>([]);
   const [existingFiles, setExistingFiles] = useState<StorageFile[]>(
-    defaultValues?.evidence as StorageFile[]
+    defaultValues?.logoUrl as StorageFile[]
   );
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState(0);
@@ -131,24 +132,21 @@ export default function AddOrEditAccidentDialog({
     reset,
     setValue,
     trigger,
-  } = useForm<Accident>({
+  } = useForm<Organization>({
     defaultValues: {
-      evidence: [],
-      ...defaultValues,
     },
     reValidateMode: "onChange",
     mode: "onChange",
   });
 
-  const witnessesWatch = watch("witnesses");
-  const categoryWatch = watch("category");
-  const effectedIndividualsWatch = watch("effectedIndividuals");
   const { user } = useCurrentUser();
 
   const resetForm = () => {
     reset();
     setFiles([]);
   };
+
+  console.log(defaultValues)
 
   const { data: divisionData } = useQuery({
     queryKey: ["divisions"],
@@ -170,97 +168,19 @@ export default function AddOrEditAccidentDialog({
     queryFn: fetchAccidentAssignee,
   });
 
-  const category = watch("category");
-  const assignee = watch("assignee");
 
   const { data: accidentCategoryData } = useQuery({
     queryKey: ["accidentCategory"],
     queryFn: fetchMainAccidentCategory,
   });
 
-  const { data: accidentSubCategoryData } = useQuery({
-    queryKey: ["accidentSubCategory", category],
-    queryFn: () => fetchAccidentSubCategory(category),
-    enabled: !!category,
-  });
 
-  const handleSubmitAccidentRecord = (data: Accident) => {
-    const submitData: Partial<Accident> = data;
-    submitData.assigneeId = assignee?.id;
-    submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
-    submitData.evidence = files;
-    if (filesToRemove?.length > 0) submitData.removeDoc = filesToRemove;
-    onSubmit(submitData as Accident);
-  };
-
-  const isGeneralDetailsValid = useMemo(() => {
-    return (
-      !errors.division &&
-      !errors.location &&
-      !errors.department &&
-      !errors.supervisorName
-    );
-  }, [
-    errors.division,
-    errors.location,
-    errors.department,
-    errors.supervisorName,
-  ]);
-
-  const isAccidentDetailsValid = useMemo(() => {
-    return (
-      !errors.category &&
-      !errors.subCategory &&
-      !errors.accidentType &&
-      !errors.affectedPrimaryRegion &&
-      !errors.affectedSecondaryRegion &&
-      !errors.affectedTertiaryRegion &&
-      !errors.injuryCause &&
-      !errors.rootCause &&
-      !errors.consultedHospital &&
-      !errors.consultedDoctor &&
-      !errors.description
-    );
-  }, [
-    errors.category,
-    errors.subCategory,
-    errors.accidentType,
-    errors.affectedPrimaryRegion,
-    errors.affectedSecondaryRegion,
-    errors.affectedTertiaryRegion,
-    errors.injuryCause,
-    errors.rootCause,
-    errors.consultedHospital,
-    errors.consultedDoctor,
-    errors.description,
-  ]);
-
-  const triggerGeneralDetailsSection = () => {
-    trigger(["division", "location", "department", "supervisorName"]);
-  };
-
-  const triggerAccidentDetailsSection = () => {
-    trigger([
-      "category",
-      "subCategory",
-      "accidentType",
-      "affectedPrimaryRegion",
-      "affectedSecondaryRegion",
-      "affectedTertiaryRegion",
-      "injuryCause",
-      "rootCause",
-      "consultedHospital",
-      "consultedDoctor",
-      "description",
-    ]);
+  const handleSubmitAccidentRecord = (data: Organization) => {
+    const submitData: Partial<Organization> = data;
+    onSubmit(submitData as Organization);
   };
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    if (newValue === 1) {
-      triggerGeneralDetailsSection();
-    } else {
-      triggerAccidentDetailsSection();
-    }
     setActiveTab(newValue);
   };
 
@@ -353,10 +273,6 @@ export default function AddOrEditAccidentDialog({
                 indicatorColor="secondary"
                 TabIndicatorProps={{
                   style: {
-                    backgroundColor:
-                      isAccidentDetailsValid && isGeneralDetailsValid
-                        ? "var(--pallet-blue)"
-                        : "var(--pallet-red)",
                     height: "3px",
                   },
                 }}
@@ -371,9 +287,6 @@ export default function AddOrEditAccidentDialog({
                   label={
                     <Box
                       sx={{
-                        color: isGeneralDetailsValid
-                          ? "var(--pallet-blue)"
-                          : "var(--pallet-red)",
                         display: "flex",
                         alignItems: "center",
                       }}
@@ -382,14 +295,7 @@ export default function AddOrEditAccidentDialog({
                       <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                         General Details
                       </Typography>
-                      {!isGeneralDetailsValid && (
-                        <Typography
-                          variant="subtitle1"
-                          sx={{ ml: "0.3rem", color: "var(--pallet-red)" }}
-                        >
-                          *
-                        </Typography>
-                      )}
+                      
                     </Box>
                   }
                   {...a11yProps(0)}
@@ -398,9 +304,6 @@ export default function AddOrEditAccidentDialog({
                   label={
                     <Box
                       sx={{
-                        color: isAccidentDetailsValid
-                          ? "var(--pallet-blue)"
-                          : "var(--pallet-red)",
                         display: "flex",
                         alignItems: "center",
                       }}
@@ -409,14 +312,7 @@ export default function AddOrEditAccidentDialog({
                       <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                         Accident Details
                       </Typography>{" "}
-                      {!isAccidentDetailsValid && (
-                        <Typography
-                          variant="subtitle1"
-                          sx={{ ml: "0.3rem", color: "var(--pallet-red)" }}
-                        >
-                          *
-                        </Typography>
-                      )}
+                      
                     </Box>
                   }
                   {...a11yProps(1)}
@@ -440,13 +336,13 @@ export default function AddOrEditAccidentDialog({
                   >
                     <TextField
                       required
-                      id="location"
-                      label="Location"
-                      error={!!errors.location}
-                      helperText={errors.location && "Required"}
+                      id="organizationName"
+                      label="Organization Name"
+                      error={!!errors.organizationName}
+                      helperText={errors.organizationName && "Required"}
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("location", { required: true })}
+                      {...register("organizationName", { required: true })}
                     />
                   </Box>
 
