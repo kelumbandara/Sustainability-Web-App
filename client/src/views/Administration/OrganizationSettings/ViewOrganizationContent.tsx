@@ -147,37 +147,37 @@ function ViewOrganizationContent({
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                 badgeContent={
                   <IconButton
-                    onClick={async () => {
-                      const file = organizationSettings.logoUrl?.[0];
+                  // onClick={async () => {
+                  //   const file = organizationSettings?.logoUrl?.[0];
 
-                      if (file && "imageUrl" in file && file.imageUrl) {
-                        try {
-                          const response = await fetch(file.imageUrl);
-                          const blob = await response.blob();
-                          const url = URL.createObjectURL(blob);
+                  //   if (file && "imageUrl" in file && file.imageUrl) {
+                  //     try {
+                  //       const response = await fetch(file.imageUrl);
+                  //       const blob = await response.blob();
+                  //       const url = URL.createObjectURL(blob);
 
-                          const link = document.createElement("a");
-                          link.href = url;
-                          link.download = file.fileName || "logo.png";
-                          link.click();
+                  //       const link = document.createElement("a");
+                  //       link.href = url;
+                  //       link.download = file.fileName || "logo.png";
+                  //       link.click();
 
-                          URL.revokeObjectURL(url);
-                        } catch (error) {
-                          enqueueSnackbar("Failed To Download Image", {
-                            variant: "error",
-                          });
-                        }
-                      } else {
-                        alert("No image available to download.");
-                      }
-                    }}
-                    sx={{
-                      backgroundColor: "white",
-                      borderRadius: "50%",
-                      ":hover": {
-                        backgroundColor: "white",
-                      },
-                    }}
+                  //       URL.revokeObjectURL(url);
+                  //     } catch (error) {
+                  //       enqueueSnackbar("Failed To Download Image", {
+                  //         variant: "error",
+                  //       });
+                  //     }
+                  //   } else {
+                  //     alert("No image available to download.");
+                  //   }
+                  // }}
+                  // sx={{
+                  //   backgroundColor: "white",
+                  //   borderRadius: "50%",
+                  //   ":hover": {
+                  //     backgroundColor: "white",
+                  //   },
+                  // }}
                   >
                     <DownloadOutlinedIcon
                       fontSize="medium"
@@ -188,7 +188,7 @@ function ViewOrganizationContent({
               >
                 <ProfileImage
                   name={organizationSettings?.organizationName}
-                  files={organizationSettings.logoUrl}
+                  files={organizationSettings?.logoUrl}
                   size="20rem"
                 />
               </Badge>
@@ -197,7 +197,7 @@ function ViewOrganizationContent({
             <Box>
               <DrawerContentItem
                 label="Organization Name"
-                value={organizationSettings.organizationName}
+                value={organizationSettings?.organizationName}
               />
             </Box>
 
@@ -209,7 +209,7 @@ function ViewOrganizationContent({
                 Color Pallet
               </Typography>
 
-              {organizationSettings.colorPallet.map((palette, index) => (
+              {organizationSettings?.colorPallet.map((palette, index) => (
                 <Box key={index} display="flex" flexDirection="column" gap={1}>
                   <Box display="flex" alignItems="center" gap={1}>
                     <Box
@@ -250,7 +250,7 @@ function ViewOrganizationContent({
           <Box
             component="img"
             src={
-              (organizationSettings.insightImage[0] as { imageUrl?: string })
+              (organizationSettings?.insightImage[0] as { imageUrl?: string })
                 ?.imageUrl ?? ""
             }
             alt="Under Development"
@@ -266,38 +266,9 @@ function ViewOrganizationContent({
 
           <DrawerContentItem
             label="Insight View Description"
-            value={organizationSettings.insightDescription}
+            value={organizationSettings?.insightDescription}
           />
         </TabPanel>
-      </Box>
-      <Box
-        sx={{
-          display: "flex",
-          flex: { lg: 1, md: 1 },
-          flexDirection: "column",
-          backgroundColor: "#fff",
-          boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-          padding: "1rem",
-          borderRadius: "0.3rem",
-          marginY: isTablet ? "0.5rem" : 0,
-          marginLeft: isTablet ? 0 : "0.5rem",
-          height: "fit-content",
-        }}
-      >
-        <DrawerContentItem
-          label="Organization Name"
-          value={organizationSettings.organizationName}
-        />
-
-        <DrawerContentItem
-          label="Started Date"
-          value={
-            organizationSettings.created_at
-              ? format(new Date(organizationSettings.created_at), "yyyy-MM-dd")
-              : "N/A"
-          }
-          sx={{ flex: 1 }}
-        />
       </Box>
     </Stack>
   );

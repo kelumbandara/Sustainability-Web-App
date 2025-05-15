@@ -22,3 +22,8 @@ export const OrganizationSchema = z.object({
   created_at: z.date(),
 });
 export type Organization = z.infer<typeof OrganizationSchema>;
+
+export async function getOrganization() {
+  const res = await axios.get(`/api/organizations`);
+  return res.data;
+}
