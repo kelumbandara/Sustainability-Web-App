@@ -1,24 +1,13 @@
-import {
-  AppBar,
-  Badge,
-  Box,
-  IconButton,
-  Stack,
-  Tab,
-  Tabs,
-  Typography,
-} from "@mui/material";
+import { AppBar, Box, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { DrawerContentItem } from "../../../components/ViewDataDrawer";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import theme from "../../../theme";
 import useIsMobile from "../../../customHooks/useIsMobile";
 import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
-import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
-import WarehouseOutlinedIcon from "@mui/icons-material/WarehouseOutlined";
-import StairsOutlinedIcon from "@mui/icons-material/StairsOutlined";
-
-import { ColorPallet, ColorPalletSchema, Organization } from "../../../api/OrganizationSettings/organizationSettingsApi";
+import { Organization } from "../../../api/OrganizationSettings/organizationSettingsApi";
+import { hasSignedUrl } from "./orgUtils";
+import OrganizationGeneralDetails from "./OrganizationGeneralDetails";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -50,16 +39,6 @@ function a11yProps(index: number) {
   };
 }
 
-// Type guard for objects with signedUrl
-const hasSignedUrl = (file: unknown): file is { signedUrl: string } => {
-  return (
-    typeof file === "object" &&
-    file !== null &&
-    "signedUrl" in file &&
-    typeof (file as any).signedUrl === "string"
-  );
-};
-
 function ViewOrganizationContent({
   organizationSettings,
 }: {
@@ -67,35 +46,6 @@ function ViewOrganizationContent({
 }) {
   const [activeTab, setActiveTab] = useState(0);
   const { isTablet } = useIsMobile();
-
-  const parsedColorPallet = useMemo<ColorPallet[]>(() => {
-    if (!organizationSettings?.colorPallet) return [];
-    if (typeof organizationSettings.colorPallet === 'string') {
-      try {
-        const palletArrayString = JSON.parse(organizationSettings.colorPallet);
-        const palletArray = Array.isArray(palletArrayString) ? palletArrayString : [palletArrayString];
-        
-        return palletArray.map(pallet => {
-          const parsed = typeof pallet === 'string' ? JSON.parse(pallet) : pallet;
-          const result = ColorPalletSchema.safeParse(parsed);
-          return result.success ? result.data : null;
-        }).filter((pallet): pallet is ColorPallet => pallet !== null);
-      } catch (error) {
-        console.error("Error parsing color pallet:", error);
-        return [];
-      }
-    }
-    return organizationSettings.colorPallet.map(pallet => {
-      const result = ColorPalletSchema.safeParse(pallet);
-      return result.success ? result.data : null;
-    }).filter((pallet): pallet is ColorPallet => pallet !== null);
-  }, [organizationSettings]);
-  
-  console.log(parsedColorPallet);
-
-  const logo = Array.isArray(organizationSettings.logoUrl)
-    ? organizationSettings.logoUrl[0]
-    : organizationSettings.logoUrl;
 
   const insightImage = Array.isArray(organizationSettings.insightImage)
     ? organizationSettings.insightImage[0]
@@ -110,7 +60,6 @@ function ViewOrganizationContent({
       sx={{
         display: "flex",
         flexDirection: isTablet ? "column" : "row",
-        padding: "1rem",
       }}
     >
       <Box
@@ -120,7 +69,6 @@ function ViewOrganizationContent({
           backgroundColor: "#fff",
           flex: { lg: 3, md: 1 },
           boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-          padding: "0.5rem",
           borderRadius: "0.3rem",
         }}
       >
@@ -211,92 +159,9 @@ function ViewOrganizationContent({
           </Tabs>
         </AppBar>
         <TabPanel value={activeTab} index={0} dir={theme.direction}>
-          <Stack gap={3} mt={3}>
-            {hasSignedUrl(logo) && (
-              <Box
-                sx={{
-                  position: "relative",
-                  display: "flex",
-                  justifyContent: "flex-start",
-                }}
-              >
-                <Badge
-                  overlap="circular"
-                  anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                  badgeContent={
-                    <IconButton>
-                      <DownloadOutlinedIcon
-                        fontSize="medium"
-                        sx={{ color: "var(--pallet-blue)" }}
-                      />
-                    </IconButton>
-                  }
-                >
-                  <img
-                    src={logo.signedUrl}
-                    alt="Organization Logo"
-                    style={{
-                      width: 300,
-                      height: 300,
-                      border: "1px solid #ccc",
-                    }}
-                  />
-                </Badge>
-              </Box>
-            )}
-
-            <Box>
-              <DrawerContentItem
-                label="Organization Name"
-                value={organizationSettings?.organizationName}
-              />
-            </Box>
-            <Box
-              m={"0.5rem"}
-            >
-              <Typography
-                variant="caption"
-                sx={{ paddingBottom: 0, color: "var(--pallet-grey)" }}
-              >
-                Color Pallet
-              </Typography>
-
-              {parsedColorPallet?.map((palette, index) => (
-                <Box key={index} display="flex" flexDirection="column" gap={1}>
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <Box
-                      width={20}
-                      height={20}
-                      borderRadius="50%"
-                      bgcolor={palette.primaryColor}
-                      border="1px solid #ccc"
-                    />
-                    <Typography variant="body2">Primary Color</Typography>
-                  </Box>
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <Box
-                      width={20}
-                      height={20}
-                      borderRadius="50%"
-                      bgcolor={palette.secondaryColor}
-                      border="1px solid #ccc"
-                    />
-                    <Typography variant="body2">Secondary Color</Typography>
-                  </Box>
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <Box
-                      width={20}
-                      height={20}
-                      borderRadius="50%"
-                      bgcolor={palette.buttonColor}
-                      border="1px solid #ccc"
-                    />
-                    <Typography variant="body2">Button Color</Typography>
-                  </Box>
-                </Box>
-              ))}
-            </Box>
-          </Stack>
+          <OrganizationGeneralDetails
+            organizationSettings={organizationSettings}
+          />
         </TabPanel>
         <TabPanel value={activeTab} index={1} dir={theme.direction}>
           <Stack gap={2}>

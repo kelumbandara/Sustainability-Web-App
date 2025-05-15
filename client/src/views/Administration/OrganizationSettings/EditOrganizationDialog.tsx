@@ -12,12 +12,14 @@ import {
   Tabs,
   Tab,
   Box,
+  CircularProgress,
 } from "@mui/material";
 import { useState, useEffect, useMemo } from "react";
 import {
   Organization,
   ColorPallet,
   ColorPalletSchema,
+  updateOrganization,
 } from "../../../api/OrganizationSettings/organizationSettingsApi";
 import CloseIcon from "@mui/icons-material/Close";
 import { Controller, useForm } from "react-hook-form";
@@ -25,18 +27,17 @@ import { ChromePicker } from "react-color";
 import theme from "../../../theme";
 import RichTextComponent from "../../../components/RichTextComponent";
 import useIsMobile from "../../../customHooks/useIsMobile";
-import DropzoneComponent from "../../../components/DropzoneComponent";
 import { StorageFile } from "../../../utils/StorageFiles.util";
-import { ExistingFileItemsEdit } from "../../../components/ExistingFileItemsEdit";
 import ImagePreview from "../../../components/OrganizationImagePreview";
-import OrganizationSettings from "./OrganizationSettingsTable";
 import CustomButton from "../../../components/CustomButton";
 import SingleImagePreview from "../../../components/SingleImagePreview";
+import { useMutation } from "@tanstack/react-query";
+import queryClient from "../../../state/queryClient";
+import { useSnackbar } from "notistack";
 
 interface Props {
   open: boolean;
   handleClose: () => void;
-  onSubmit: (data: Organization) => void;
   defaultValues: Organization;
 }
 
@@ -47,45 +48,29 @@ interface TabPanelProps {
   value: number;
 }
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`full-width-tabpanel-${index}`}
-      aria-labelledby={`full-width-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-}
-
-function a11yProps(index: number) {
-  return {
-    id: `full-width-tab-${index}`,
-    "aria-controls": `full-width-tabpanel-${index}`,
-  };
-}
-
 const EditOrganizationDialog = ({
   open,
   handleClose,
-  onSubmit,
   defaultValues,
 }: Props) => {
-  const initialColors: ColorPallet[] = defaultValues.colorPallet?.length
-    ? defaultValues.colorPallet
-    : [
-        {
-          palletId: 1,
-          primaryColor: "#000000",
-          secondaryColor: "#ffffff",
-          buttonColor: "#0000ff",
-        },
-      ];
+  const { enqueueSnackbar } = useSnackbar();
+  const { isMobile } = useIsMobile();
+  const [files, setFiles] = useState<File[]>([]);
+
+  const [logoUrls, setLogoUrls] = useState<(StorageFile | File)[]>(() => {
+    const logos = defaultValues.logoUrl;
+    if (Array.isArray(logos)) return logos;
+    if (logos) return [logos];
+    return [];
+  });
+
+  const [insightUrl, setInsightUrl] = useState<(StorageFile | File)[]>(() => {
+    const insight = defaultValues.insightImage;
+    if (Array.isArray(insight)) return insight;
+    if (insight) return [insight];
+    return [];
+  });
+
   const {
     register,
     handleSubmit,
@@ -105,6 +90,7 @@ const EditOrganizationDialog = ({
     reset();
     setFiles([]);
   };
+
   const parsedColorPallet = useMemo<ColorPallet[]>(() => {
     if (!defaultValues?.colorPallet) return [];
 
@@ -181,7 +167,7 @@ const EditOrganizationDialog = ({
     };
 
     console.log("logo", logoUrls);
-    onSubmit(submitData);
+    updateOrganizationMutation(submitData);
     resetForm();
   };
 
@@ -203,26 +189,20 @@ const EditOrganizationDialog = ({
     });
   };
 
-  const [activeTab, setActiveTab] = useState(0);
-
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
-  };
-  const { isMobile, isTablet } = useIsMobile();
-  const [files, setFiles] = useState<File[]>([]);
-
-  const [logoUrls, setLogoUrls] = useState<(StorageFile | File)[]>(() => {
-    const logos = defaultValues.logoUrl;
-    if (Array.isArray(logos)) return logos;
-    if (logos) return [logos];
-    return [];
-  });
-
-  const [insightUrl, setInsightUrl] = useState<(StorageFile | File)[]>(() => {
-    const insight = defaultValues.insightImage;
-    if (Array.isArray(insight)) return insight;
-    if (insight) return [insight];
-    return [];
+  const { mutate: updateOrganizationMutation, isPending } = useMutation({
+    mutationFn: updateOrganization,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["organization"] });
+      enqueueSnackbar("Organization Updated Successfully!", {
+        variant: "success",
+      });
+      handleClose();
+    },
+    onError: (error) => {
+      enqueueSnackbar(`Error updating organization: ${error.message}`, {
+        variant: "error",
+      });
+    },
   });
 
   return (
@@ -236,7 +216,7 @@ const EditOrganizationDialog = ({
         }}
       >
         <Typography variant="h6" component="div">
-          {defaultValues ? "Edit an Organization" : "Create an Organization"}
+          Edit Organization General Details
         </Typography>
         <IconButton
           onClick={handleClose}
@@ -247,178 +227,124 @@ const EditOrganizationDialog = ({
         </IconButton>
       </DialogTitle>
       <DialogContent>
-        <AppBar position="static">
-          <Tabs
-            value={activeTab}
-            onChange={handleChange}
-            indicatorColor="secondary"
-            TabIndicatorProps={{
-              style: { backgroundColor: "var(--pallet-blue)", height: "3px" },
-            }}
-            sx={{
-              backgroundColor: "var(--pallet-lighter-grey)",
-              color: "var(--pallet-blue)",
-            }}
-            textColor="inherit"
-            variant="scrollable"
-            scrollButtons={true}
-          >
-            <Tab
-              label={
-                <Box
-                  sx={{
-                    color: "var(--pallet-blue)",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  {/* <TextSnippetIcon fontSize="small" /> */}
-                  <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                    General Details
-                  </Typography>
-                </Box>
-              }
-              {...a11yProps(0)}
-            />
-            <Tab
-              label={
-                <Box
-                  sx={{
-                    color: "var(--pallet-blue)",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  {/* <HomeOutlinedIcon fontSize="small" /> */}
-                  <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                    Insight View
-                  </Typography>
-                </Box>
-              }
-              {...a11yProps(1)}
-            />
-          </Tabs>
-        </AppBar>
-        <TabPanel value={activeTab} index={0} dir={theme.direction}>
-          <Stack
+        <Stack
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          alignContent="center"
+        >
+          <Box
             display="flex"
             justifyContent="center"
             alignItems="center"
             alignContent="center"
           >
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              alignContent="center"
-            >
-              <ImagePreview
-                image={logoUrls}
-                onRemove={(fileToRemove) => {
-                  setLogoUrls((prev) =>
-                    prev.filter(
-                      (file) =>
-                        !(
-                          (file instanceof File && file === fileToRemove) ||
-                          ("gsutil_uri" in file &&
-                            file.gsutil_uri ===
-                              (fileToRemove as any).gsutil_uri) ||
-                          ("fileName" in file &&
-                            file.fileName === (fileToRemove as any).fileName)
-                        )
-                    )
-                  );
-                }}
-              />
-            </Box>
-            <CustomButton variant="outlined" component="label" sx={{ mt: 2 }}>
-              Change Logo Image
-              <input
-                type="file"
-                hidden
-                accept="image/*"
-                onChange={(e) => {
-                  const files = e.target.files;
-                  if (files && files.length > 0) {
-                    setLogoUrls([files[0]]);
-                  }
-                }}
-              />
-            </CustomButton>
-          </Stack>
-
-          <Stack m={4}>
-            <TextField
-              required
-              id="organizationName"
-              label="Organization Name"
-              error={!!errors.organizationName}
-              helperText={errors.organizationName && "Required"}
-              size="small"
-              sx={{ flex: 1 }}
-              {...register("organizationName", { required: true })}
+            <ImagePreview
+              image={logoUrls}
+              onRemove={(fileToRemove) => {
+                setLogoUrls((prev) =>
+                  prev.filter(
+                    (file) =>
+                      !(
+                        (file instanceof File && file === fileToRemove) ||
+                        ("gsutil_uri" in file &&
+                          file.gsutil_uri ===
+                            (fileToRemove as any).gsutil_uri) ||
+                        ("fileName" in file &&
+                          file.fileName === (fileToRemove as any).fileName)
+                      )
+                  )
+                );
+              }}
             />
+          </Box>
+          <CustomButton variant="outlined" component="label" sx={{ mt: 2 }}>
+            Change Logo Image
+            <input
+              type="file"
+              hidden
+              accept="image/*"
+              onChange={(e) => {
+                const files = e.target.files;
+                if (files && files.length > 0) {
+                  setLogoUrls([files[0]]);
+                }
+              }}
+            />
+          </CustomButton>
+        </Stack>
 
-            <Box mt={4}>
-              {formData.colorPallet.map((palette, index) => (
-                <div key={`palette-${index}`}>
-                  {" "}
-                  {/* Added proper key */}
-                  <Typography
-                    variant="caption"
-                    sx={{ paddingBottom: 0, color: "var(--pallet-grey)" }}
-                  >
-                    Color Palette
-                  </Typography>
-                  <Stack
-                    mt={1}
-                    gap={6}
-                    flexDirection={isMobile ? "column" : "row"}
-                    sx={{
-                      display: "flex",
-                      justifyContent: "flex-start",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Box>
-                      <Typography>Primary Color</Typography>
-                      <ChromePicker
-                        color={palette.primaryColor}
-                        onChangeComplete={(color) =>
-                          handleColorChange(index, "primaryColor", color.hex)
-                        }
-                        disableAlpha // Optional: if you don't need alpha channel
-                      />
-                    </Box>
+        <Stack m={4}>
+          <TextField
+            required
+            id="organizationName"
+            label="Organization Name"
+            error={!!errors.organizationName}
+            helperText={errors.organizationName && "Required"}
+            size="small"
+            sx={{ flex: 1 }}
+            {...register("organizationName", { required: true })}
+          />
 
-                    <Box>
-                      <Typography>Secondary Color</Typography>
-                      <ChromePicker
-                        color={palette.secondaryColor}
-                        onChangeComplete={(color) =>
-                          handleColorChange(index, "secondaryColor", color.hex)
-                        }
-                        disableAlpha
-                      />
-                    </Box>
+          <Box mt={4}>
+            {formData.colorPallet.map((palette, index) => (
+              <div key={`palette-${index}`}>
+                {" "}
+                {/* Added proper key */}
+                <Typography
+                  variant="caption"
+                  sx={{ paddingBottom: 0, color: "var(--pallet-grey)" }}
+                >
+                  Color Palette
+                </Typography>
+                <Stack
+                  mt={1}
+                  gap={6}
+                  flexDirection={isMobile ? "column" : "row"}
+                  sx={{
+                    display: "flex",
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                  }}
+                >
+                  <Box>
+                    <Typography>Primary Color</Typography>
+                    <ChromePicker
+                      color={palette.primaryColor}
+                      onChangeComplete={(color) =>
+                        handleColorChange(index, "primaryColor", color.hex)
+                      }
+                      disableAlpha // Optional: if you don't need alpha channel
+                    />
+                  </Box>
 
-                    <Box>
-                      <Typography>Button Color</Typography>
-                      <ChromePicker
-                        color={palette.buttonColor}
-                        onChangeComplete={(color) =>
-                          handleColorChange(index, "buttonColor", color.hex)
-                        }
-                        disableAlpha
-                      />
-                    </Box>
-                  </Stack>
-                </div>
-              ))}
-            </Box>
-          </Stack>
-        </TabPanel>
-        <TabPanel value={activeTab} index={1} dir={theme.direction}>
+                  <Box>
+                    <Typography>Secondary Color</Typography>
+                    <ChromePicker
+                      color={palette.secondaryColor}
+                      onChangeComplete={(color) =>
+                        handleColorChange(index, "secondaryColor", color.hex)
+                      }
+                      disableAlpha
+                    />
+                  </Box>
+
+                  <Box>
+                    <Typography>Button Color</Typography>
+                    <ChromePicker
+                      color={palette.buttonColor}
+                      onChangeComplete={(color) =>
+                        handleColorChange(index, "buttonColor", color.hex)
+                      }
+                      disableAlpha
+                    />
+                  </Box>
+                </Stack>
+              </div>
+            ))}
+          </Box>
+        </Stack>
+        {/* <TabPanel value={activeTab} index={1} dir={theme.direction}>
           <Stack
             display="flex"
             justifyContent="center"
@@ -482,20 +408,35 @@ const EditOrganizationDialog = ({
               />
             </Box>
           </Stack>
-        </TabPanel>
+        </TabPanel> */}
       </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose} variant="outlined">
+      <DialogActions sx={{ padding: "1rem" }}>
+        <Button
+          onClick={() => {
+            resetForm();
+            handleClose();
+          }}
+          sx={{ color: "var(--pallet-blue)" }}
+          disabled={isPending}
+        >
           Cancel
         </Button>
-        <Button
+        <CustomButton
+          variant="contained"
+          sx={{
+            backgroundColor: "var(--pallet-blue)",
+          }}
+          size="medium"
           onClick={handleSubmit((data) => {
             handleSubmitOrganization(data);
           })}
-          variant="contained"
+          disabled={isPending}
+          endIcon={
+            isPending && <CircularProgress size={20} sx={{ color: "gray" }} />
+          }
         >
-          Save
-        </Button>
+          Save Changes
+        </CustomButton>
       </DialogActions>
     </Dialog>
   );

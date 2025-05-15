@@ -1,9 +1,14 @@
 import {
-  Avatar,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Badge,
   Box,
   Button,
+  Checkbox,
   CircularProgress,
+  colors,
+  IconButton,
   Stack,
   Typography,
 } from "@mui/material";
@@ -14,17 +19,15 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import queryClient from "../../state/queryClient";
 import { enqueueSnackbar } from "notistack";
-import {
-  DrawerProfileHeader,
-  DrawerUpdateButtons,
-} from "../../components/ViewProfileDataDrawer";
+import { DrawerUpdateButtons } from "../../components/ViewProfileDataDrawer";
 import UpdateUserProfile from "./UpdateUserProfileDialog";
 import useCurrentUser from "../../hooks/useCurrentUser";
-import { StorageFile } from "../../utils/StorageFiles.util";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ProfileImage from "../../components/ProfileImageComponent";
 import PasswordResetDialog from "./OpenPasswordResetDiaolg";
 import ResetEmailDialog from "./OpenEmailResetDialog";
 import CustomButton from "../../components/CustomButton";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 
 function ViewUserContent({ selectedUser }: { selectedUser: User }) {
   const { isTablet } = useIsMobile();
@@ -73,11 +76,11 @@ function ViewUserContent({ selectedUser }: { selectedUser: User }) {
     <Stack
       sx={{
         display: "flex",
-        marginY: 10,
         flexDirection: isTablet ? "column" : "row",
-        p: "3rem",
+        px: "1rem",
+        boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+        my: 2,
       }}
-      gap={4}
     >
       <Box
         sx={{
@@ -87,21 +90,9 @@ function ViewUserContent({ selectedUser }: { selectedUser: User }) {
           alignItems: "center",
           flexDirection: "column",
           p: "3rem",
-          boxShadow: 3,
         }}
         gap={2}
       >
-        <Typography
-          variant="h4"
-          textAlign={"center"}
-          sx={{
-            fontSize: "1.5rem",
-            color: "var(--pallet-dark-blue)",
-            marginTop: 2,
-          }}
-        >
-          {selectedUser?.name}
-        </Typography>
         <Badge
           overlap="circular"
           anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
@@ -123,7 +114,16 @@ function ViewUserContent({ selectedUser }: { selectedUser: User }) {
             fontSize="5rem"
           />
         </Badge>
-
+        <Typography
+          variant="h4"
+          textAlign={"center"}
+          sx={{
+            fontSize: "1.5rem",
+            color: "var(--pallet-dark-blue)",
+          }}
+        >
+          {selectedUser?.name}
+        </Typography>
         <Box
           sx={{
             display: "flex",
@@ -165,10 +165,39 @@ function ViewUserContent({ selectedUser }: { selectedUser: User }) {
           flexDirection: "column",
           backgroundColor: "#fff",
           flex: 2,
-          boxShadow: 3,
           p: "3rem",
         }}
       >
+        <Stack
+          mb={4}
+          sx={{
+            display: "flex",
+            alignItems: "flex-end",
+          }}
+        >
+          <Box>
+            <>
+              {isTablet ? (
+                <IconButton
+                  aria-label="edit"
+                  onClick={() => setOpenEditUserRoleDialog(true)}
+                >
+                  <EditOutlinedIcon sx={{ color: "var(--pallet-blue)" }} />
+                </IconButton>
+              ) : (
+                <CustomButton
+                  variant="contained"
+                  sx={{ backgroundColor: "var(--pallet-blue)" }}
+                  size="medium"
+                  onClick={() => setOpenEditUserRoleDialog(true)}
+                  startIcon={<EditOutlinedIcon />}
+                >
+                  Edit My Profile
+                </CustomButton>
+              )}
+            </>
+          </Box>
+        </Stack>
         <Stack direction={isTablet ? "column" : "row"}>
           <DrawerContentItem
             label="Employee Id"
@@ -207,20 +236,58 @@ function ViewUserContent({ selectedUser }: { selectedUser: User }) {
             sx={{ flex: 1 }}
           />
         </Stack>
-        <Stack mt={isTablet ? 3 : 15}>
-          <Box>
-            <DrawerUpdateButtons
-              onEdit={() => {
-                setOpenEditUserRoleDialog(true);
+
+        <Stack
+          sx={{
+            mt: "1rem",
+          }}
+        >
+          <Accordion
+            variant="elevation"
+            sx={{
+              paddingTop: 0,
+              borderRadius: "8px",
+              marginTop: "1rem",
+            }}
+          >
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel1a-content"
+              style={{
+                borderBottom: `1px solid${colors.grey[100]}`,
+                borderRadius: "8px",
               }}
-              onResetEmail={() => {
-                setOpenEditUserEmailResetDialog(true);
-              }}
-              onResetPassword={() => {
-                setOpenEditUserPasswordResetDialog(true);
-              }}
-            />
-          </Box>
+              id="panel1a-header"
+            >
+              <Box
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  margin: "10px 0",
+                }}
+              >
+                <Typography
+                  color="textSecondary"
+                  variant="body2"
+                  sx={{
+                    color: "var(--pallet-red)",
+                  }}
+                >
+                  DANGER ZONE
+                </Typography>
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails style={{ paddingTop: 0 }}>
+              <DrawerUpdateButtons
+                onResetEmail={() => {
+                  setOpenEditUserEmailResetDialog(true);
+                }}
+                onResetPassword={() => {
+                  setOpenEditUserPasswordResetDialog(true);
+                }}
+              />
+            </AccordionDetails>
+          </Accordion>
         </Stack>
       </Stack>
 
