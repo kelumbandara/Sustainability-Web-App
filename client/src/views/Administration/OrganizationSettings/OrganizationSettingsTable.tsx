@@ -1,4 +1,4 @@
-import { Box, Stack, Theme, useMediaQuery } from "@mui/material";
+import { Box, Button, Stack, Theme, useMediaQuery } from "@mui/material";
 import theme from "../../../theme";
 import PageTitle from "../../../components/PageTitle";
 import Breadcrumb from "../../../components/BreadCrumb";
@@ -7,7 +7,15 @@ import { updateUserType } from "../../../api/userApi";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../../state/queryClient";
 import ViewOrganizationContent from "./ViewOrganizationContent";
-import { getOrganization } from "../../../api/OrganizationSettings/organizationSettingsApi";
+import {
+  getOrganization,
+  updateOrganization,
+} from "../../../api/OrganizationSettings/organizationSettingsApi";
+import { useMemo, useState } from "react";
+import EditOrganizationDialog from "./EditOrganizationDialog";
+import { error } from "console";
+import CustomButton from "../../../components/CustomButton";
+import { DrawerHeader } from "../../../components/ViewDataDrawer";
 
 function OrganizationSettings() {
   const { enqueueSnackbar } = useSnackbar();
@@ -26,20 +34,33 @@ function OrganizationSettings() {
     queryFn: getOrganization,
   });
 
-  const { mutate: updateUserRoleMutation, isPending } = useMutation({
-    mutationFn: updateUserType,
+  const firstOrganization = useMemo(() => {
+    return organizationData ? organizationData[0] : [];
+  }, [organizationData]);
+
+  const [openEditOrganizationDialog, setOpenEditOrganizationDialog] =
+    useState(false);
+
+  console.log("org", firstOrganization);
+
+  const { mutate: updateOrganizationMutation, isPending } = useMutation({
+    mutationFn: updateOrganization,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      enqueueSnackbar("User Role Updated Successfully!", {
+      queryClient.invalidateQueries({ queryKey: ["organization"] });
+      enqueueSnackbar("Organization Updated Successfully!", {
         variant: "success",
       });
+      setOpenEditOrganizationDialog(false); // Close the dialog on success
     },
-    onError: () => {
-      enqueueSnackbar(`User Role Update Failed`, {
+    onError: (error) => {
+      enqueueSnackbar(`Error updating organization: ${error.message}`, {
         variant: "error",
       });
     },
   });
+  const handleEditClick = () => {
+    setOpenEditOrganizationDialog(true);
+  };
 
   return (
     <Stack>
@@ -57,23 +78,27 @@ function OrganizationSettings() {
       </Box>
 
       <Stack>
-        <ViewOrganizationContent organizationSettings={organizationData} />
+        <DrawerHeader
+          title="Organization Details"
+          handleClose={() => {}}
+          disableEdit={false}
+          onEdit={() => {
+            handleEditClick();
+          }}
+        />
+        <ViewOrganizationContent organizationSettings={firstOrganization} />
       </Stack>
 
-      {/* {openEditOrganizationDialog && (
+      {openEditOrganizationDialog && (
         <EditOrganizationDialog
           open={openEditOrganizationDialog}
-          handleClose={() => {
-            setSelectedRow(null);
-            setOpenViewDrawer(false);
-            setOpenEditOrganizationDialog(false);
-          }}
+          handleClose={() => setOpenEditOrganizationDialog(false)}
           onSubmit={(data) => {
-            updateUserRoleMutation(data);
+            updateOrganizationMutation(data);
           }}
-          defaultValues={selectedRow}
+          defaultValues={firstOrganization}
         />
-      )} */}
+      )}
     </Stack>
   );
 }
