@@ -18,6 +18,8 @@ import { ChemicalCertificate } from "../../api/ChemicalManagement/ChemicalReques
 import { useState } from "react";
 import { DrawerContentItem } from "../../components/ViewDataDrawer";
 import { format } from "date-fns";
+import { FileItemsViewer } from "../../components/FileItemsViewer";
+import { StorageFile } from "../../utils/StorageFiles.util";
 
 const ViewCertificateDialog = ({
   open,
@@ -71,6 +73,12 @@ const ViewCertificateDialog = ({
         <DrawerContentItem label="Test Name" value={defaultValues?.testName} />
         <Stack flexDirection={"row"}>
           <DrawerContentItem
+            label="Testing Lab"
+            value={defaultValues?.testLab}
+          />
+        </Stack>
+        <Stack flexDirection={"row"}>
+          <DrawerContentItem
             label="Test Date"
             value={
               defaultValues?.testDate
@@ -79,12 +87,6 @@ const ViewCertificateDialog = ({
             }
             sx={{ flex: 1 }}
           />
-          <DrawerContentItem
-            label="Testing Lab"
-            value={defaultValues?.testLab}
-          />
-        </Stack>
-        <Stack flexDirection={"row"}>
           <DrawerContentItem
             label="Issued Date"
             value={
@@ -104,9 +106,19 @@ const ViewCertificateDialog = ({
             sx={{ flex: 1 }}
           />
         </Stack>
-        <DrawerContentItem label="Positive List" value={defaultValues?.positiveList} />
-        <DrawerContentItem label="Positive List" value={defaultValues?.description} />
-        
+        <DrawerContentItem
+          label="Positive List"
+          value={defaultValues?.positiveList}
+        />
+        <DrawerContentItem
+          label="Positive List"
+          value={defaultValues?.description}
+        />
+        <FileItemsViewer
+          label="Report"
+          files={defaultValues?.documents as StorageFile[]}
+          sx={{ marginY: "1rem" }}
+        />
       </DialogContent>
       <Divider />
       <DialogActions sx={{ padding: "1rem" }}>

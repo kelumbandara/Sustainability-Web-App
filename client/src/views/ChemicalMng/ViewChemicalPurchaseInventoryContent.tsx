@@ -71,20 +71,11 @@ function ViewChemicalPurchaseInventoryContent({
   const [activeTab, setActiveTab] = useState(0);
   const { isTablet } = useIsMobile();
   console.log(chemicalRequest);
+
   const [certificateViewDialogOpen, setCertificateViewDialogOpen] =
     useState(false);
   const [selectedViewCertificate, setSelectedViewCertificate] =
     useState<ChemicalCertificate | null>(null);
-  const handleOpenCertificateViewDialog = (
-    certificate: ChemicalCertificate
-  ) => {
-    setSelectedViewCertificate(certificate);
-    setCertificateViewDialogOpen(true);
-  };
-  const handleCloseCertificateDialog = () => {
-    setCertificateViewDialogOpen(false);
-    setSelectedViewCertificate(null);
-  };
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -551,7 +542,10 @@ function ViewChemicalPurchaseInventoryContent({
                     </TableCell>
                     <TableCell align="left">
                       <IconButton
-                        onClick={() => handleOpenCertificateViewDialog(row)}
+                        onClick={() => {
+                          setSelectedViewCertificate(row);
+                          setCertificateViewDialogOpen(true);
+                        }}
                       >
                         <VisibilityOutlinedIcon />
                       </IconButton>
@@ -625,7 +619,7 @@ function ViewChemicalPurchaseInventoryContent({
       </Box>
       <ViewCertificateDialog
         open={certificateViewDialogOpen}
-        onClose={handleCloseCertificateDialog}
+        onClose={() => setCertificateViewDialogOpen(false)}
         defaultValues={selectedViewCertificate}
       />
     </Stack>

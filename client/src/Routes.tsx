@@ -32,6 +32,9 @@ const ChemicalRequestTable = React.lazy(
 const ChemicalPurchaseInventoryTable = React.lazy(
   () => import("./views/ChemicalMng/ChemicalPurchaseInventoryTable")
 );
+const ChemicalTransactionTable = React.lazy(
+  () => import("./views/ChemicalMng/TransactionTable")
+);
 
 //health and safety apps
 //document
@@ -130,6 +133,7 @@ const TargetSettingsTable = React.lazy(
 const EnvironmentTable = React.lazy(
   () => import("./views/Environment/Consumption/ConsumptionTable")
 );
+
 
 function withLayout(Layout: any, Component: any, restrictAccess = false) {
   return (
@@ -295,9 +299,7 @@ const AppRoutes = () => {
         />
         <Route
           path="/chemical-mng/transaction"
-          element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="Chemical Management > Transaction" />
-          ))}
+          element={withLayout(MainLayout, ChemicalTransactionTable)}
         />
         <Route
           path="/chemical-mng/assigned-tasks"

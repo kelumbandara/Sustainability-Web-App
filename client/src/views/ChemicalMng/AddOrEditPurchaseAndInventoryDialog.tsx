@@ -47,6 +47,7 @@ import queryClient from "../../state/queryClient";
 import theme from "../../theme";
 import ApproveConfirmationModal from "../OccupationalHealth/MedicineInventory/MedicineRequest/ApproveConfirmationModal";
 import {
+  ChemicalCertificate,
   ChemicalPurchaseRequest,
   ChemicalRequestStatus,
   deleteChemicalRequest,
@@ -68,7 +69,8 @@ import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import AddCertificateDialog from "./AddCertificateDialog";
 import { deleteAccident } from "../../api/accidentAndIncidentApi";
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import ViewCertificateDialog from "./ViewCertificateDialog";
 
 type DialogProps = {
   open: boolean;
@@ -339,6 +341,11 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
   const useOfPPE = watch("useOfPPE");
   const hazardType = watch("hazardType");
   const certificatesWatch = watch("certificate");
+
+  const [certificateViewDialogOpen, setCertificateViewDialogOpen] =
+    useState(false);
+  const [selectedViewCertificate, setSelectedViewCertificate] =
+    useState<ChemicalCertificate | null>(null);
 
   return (
     <>
@@ -1648,13 +1655,8 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                                 </IconButton>
                                 <IconButton
                                   onClick={() => {
-                                    setValue(
-                                      "certificate",
-                                      (certificatesWatch ?? []).filter(
-                                        (item) =>
-                                          item.inventoryId !== row.inventoryId
-                                      )
-                                    );
+                                    setSelectedViewCertificate(row);
+                                    setCertificateViewDialogOpen(true);
                                   }}
                                 >
                                   <VisibilityOutlinedIcon />
@@ -1880,6 +1882,11 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
           />
         )}
       </Dialog>
+      <ViewCertificateDialog
+        open={certificateViewDialogOpen}
+        onClose={() => setCertificateViewDialogOpen(false)}
+        defaultValues={selectedViewCertificate}
+      />
     </>
   );
 }

@@ -644,3 +644,8 @@ export const deleteChemicalPurchaseRequest = async (id: string) => {
   );
   return res.data;
 };
+
+export async function fetchChemicalTransactionPublished() {
+  const res = await axios.get(`/api/chemical-transaction-published`);
+  return res.data;
+}
