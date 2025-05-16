@@ -2,6 +2,7 @@ import {
   AppBar,
   Box,
   Chip,
+  IconButton,
   Stack,
   Tab,
   Table,
@@ -22,10 +23,15 @@ import { MedicineInventory } from "../../api/OccupationalHealth/medicineInventor
 import { DrawerContentItem } from "../../components/ViewDataDrawer";
 import useIsMobile from "../../customHooks/useIsMobile";
 import theme from "../../theme";
-import { ChemicalPurchaseRequest } from "../../api/ChemicalManagement/ChemicalRequestApi";
+import {
+  ChemicalCertificate,
+  ChemicalPurchaseRequest,
+} from "../../api/ChemicalManagement/ChemicalRequestApi";
 import { FileItemsViewer } from "../../components/FileItemsViewer";
 import { StorageFile } from "../../utils/StorageFiles.util";
 import { format } from "date-fns";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import ViewCertificateDialog from "./ViewCertificateDialog";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -64,6 +70,21 @@ function ViewChemicalPurchaseInventoryContent({
 }) {
   const [activeTab, setActiveTab] = useState(0);
   const { isTablet } = useIsMobile();
+  console.log(chemicalRequest);
+  const [certificateViewDialogOpen, setCertificateViewDialogOpen] =
+    useState(false);
+  const [selectedViewCertificate, setSelectedViewCertificate] =
+    useState<ChemicalCertificate | null>(null);
+  const handleOpenCertificateViewDialog = (
+    certificate: ChemicalCertificate
+  ) => {
+    setSelectedViewCertificate(certificate);
+    setCertificateViewDialogOpen(true);
+  };
+  const handleCloseCertificateDialog = () => {
+    setCertificateViewDialogOpen(false);
+    setSelectedViewCertificate(null);
+  };
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -491,42 +512,60 @@ function ViewChemicalPurchaseInventoryContent({
               }}
             >
               <TableRow>
-                <TableCell align="center">Disposal Date</TableCell>
-                <TableCell align="center">Available Quantity</TableCell>
-                <TableCell align="center">Disposed Quantity</TableCell>
-                <TableCell align="center">Contractor</TableCell>
-                <TableCell align="center">Cost</TableCell>
-                <TableCell align="center">Balance Quantity</TableCell>
+                <TableCell align="left">Name</TableCell>
+                <TableCell align="left">Test Date</TableCell>
+                <TableCell align="left">Testing Lab</TableCell>
+                <TableCell align="left">Issued Date</TableCell>
+                <TableCell align="left">Expiry Date</TableCell>
+                <TableCell align="left"></TableCell>
               </TableRow>
             </TableHead>
-            {/* <TableBody>
-              {chemicalRequest?.medicineDisposals?.length > 0 ? (
-                chemicalRequest?.medicineDisposals.map((row) => (
+            <TableBody>
+              {chemicalRequest?.certificate?.length > 0 ? (
+                chemicalRequest?.certificate.map((row) => (
                   <TableRow
-                    key={`${row.id}${row.disposalDate}`}
+                    key={`${row.id}`}
                     sx={{
                       "&:last-child td, &:last-child th": { border: 0 },
                       cursor: "pointer",
                     }}
                   >
-                    <TableCell align="center" component="th" scope="row">
-                      {row.disposalDate}
+                    <TableCell align="left" component="th" scope="row">
+                      {row.testName}
                     </TableCell>
-                    <TableCell align="center">{row.disposalQuantity}</TableCell>
-                    <TableCell align="center">{row.disposalQuantity}</TableCell>
-                    <TableCell align="center">{row.contractor}</TableCell>
-                    <TableCell align="center">{row.cost}</TableCell>
-                    <TableCell align="center">{row.balanceQuantity}</TableCell>
+                    <TableCell align="left">
+                      {row?.testDate
+                        ? format(new Date(row.testDate), "yyyy-MM-dd")
+                        : "--"}
+                    </TableCell>
+                    <TableCell align="left">{row.testLab}</TableCell>
+                    <TableCell align="left">
+                      {row?.issuedDate
+                        ? format(new Date(row.issuedDate), "yyyy-MM-dd")
+                        : "--"}
+                    </TableCell>
+                    <TableCell align="left">
+                      {row?.expiryDate
+                        ? format(new Date(row.expiryDate), "yyyy-MM-dd")
+                        : "--"}
+                    </TableCell>
+                    <TableCell align="left">
+                      <IconButton
+                        onClick={() => handleOpenCertificateViewDialog(row)}
+                      >
+                        <VisibilityOutlinedIcon />
+                      </IconButton>
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={11} align="center">
+                  <TableCell colSpan={11} align="left">
                     <Typography variant="body2">No Disposals found</Typography>
                   </TableCell>
                 </TableRow>
               )}
-            </TableBody> */}
+            </TableBody>
           </Table>
         </TabPanel>
       </Box>
@@ -584,6 +623,11 @@ function ViewChemicalPurchaseInventoryContent({
         />
         <DrawerContentItem label="Division" value={chemicalRequest.division} />
       </Box>
+      <ViewCertificateDialog
+        open={certificateViewDialogOpen}
+        onClose={handleCloseCertificateDialog}
+        defaultValues={selectedViewCertificate}
+      />
     </Stack>
   );
 }

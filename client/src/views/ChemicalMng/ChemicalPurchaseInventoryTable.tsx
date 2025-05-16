@@ -146,7 +146,7 @@ function ChemicalPurchaseInventoryTable() {
                         : "--"}
                     </TableCell>
                     <TableCell align="left">{row.commercialName}</TableCell>
-                    <TableCell align="left">{row?.substanceName}</TableCell>
+                    <TableCell align="left">{row?.certificate.testName}</TableCell>
                     <TableCell align="left">
                       {row?.requestedCustomer ?? "--"}
                     </TableCell>

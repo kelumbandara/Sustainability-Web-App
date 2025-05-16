@@ -225,6 +225,7 @@ export type ChemicalRequest = z.infer<typeof ChemicalRequestSchema>;
 
 export const ChemicalCertificateSchema = z.object({
   inventoryId: z.number().nullable(),
+  id: z.number().nullable(),
   testName: z.string().nullable(),
   testDate: z.date().nullable(),
   testLab: z.string().nullable(),
@@ -298,7 +299,7 @@ export const ChemicalPurchaseRequestSchema = z.object({
   storageConditionRequirements: z.string().nullable(),
   storagePlace: z.string().nullable(),
   lotNumber: z.string().nullable(),
-  certificate: z.array(ChemicalCertificateSchema).nullable(),
+  certificate: z.array(ChemicalCertificateSchema),
   removeDoc: z.array(z.string()).optional(),
 });
 

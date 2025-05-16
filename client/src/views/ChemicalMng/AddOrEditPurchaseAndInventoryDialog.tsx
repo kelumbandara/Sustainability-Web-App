@@ -68,6 +68,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import AddCertificateDialog from "./AddCertificateDialog";
 import { deleteAccident } from "../../api/accidentAndIncidentApi";
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 
 type DialogProps = {
   open: boolean;
@@ -1626,6 +1627,12 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                                 )}
                               </TableCell>
                               <TableCell align="center">
+                                {format(
+                                  new Date(row?.expiryDate),
+                                  "yyyy-MM-dd"
+                                )}
+                              </TableCell>
+                              <TableCell align="center">
                                 <IconButton
                                   onClick={() => {
                                     setValue(
@@ -1638,6 +1645,19 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                                   }}
                                 >
                                   <DeleteIcon />
+                                </IconButton>
+                                <IconButton
+                                  onClick={() => {
+                                    setValue(
+                                      "certificate",
+                                      (certificatesWatch ?? []).filter(
+                                        (item) =>
+                                          item.inventoryId !== row.inventoryId
+                                      )
+                                    );
+                                  }}
+                                >
+                                  <VisibilityOutlinedIcon />
                                 </IconButton>
                               </TableCell>
                             </TableRow>
