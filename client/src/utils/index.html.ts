@@ -9,7 +9,7 @@ export function useCurrentOrganization() {
   });
 
   return {
-    organizationName: data?.[0]?.organizationName ?? 'Hi',
+    organizationName: data?.[0]?.organizationName ?? 'Dhara Soft',
     organizationLogo: data?.[0]?.logoUrl?.signedUrl,
   };
 }
