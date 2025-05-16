@@ -344,7 +344,7 @@ const EditOrganizationDialog = ({
             ))}
           </Box>
         </Stack>
-        {/* <TabPanel value={activeTab} index={1} dir={theme.direction}>
+        {/* <TabPanel value={activeTab} index={1} dir={theme.direction}> */}
           <Stack
             display="flex"
             justifyContent="center"
@@ -408,7 +408,7 @@ const EditOrganizationDialog = ({
               />
             </Box>
           </Stack>
-        </TabPanel> */}
+        {/* </TabPanel> */}
       </DialogContent>
       <DialogActions sx={{ padding: "1rem" }}>
         <Button
