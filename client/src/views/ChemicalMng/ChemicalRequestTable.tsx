@@ -12,11 +12,13 @@ import {
   Chip,
   LinearProgress,
   Stack,
+  TableFooter,
+  TablePagination,
   Theme,
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import { useSnackbar } from "notistack";
@@ -24,6 +26,7 @@ import {
   ChemicalRequest,
   ChemicalRequestStatus,
   deleteChemicalRequest,
+  fetchChemicalAssignedRequest,
   fetchChemicalRequests,
 } from "../../api/ChemicalManagement/ChemicalRequestApi";
 import { sampleChemicalRequestData } from "../../api/sampleData/chemicalRequestSampleData";
@@ -39,7 +42,11 @@ import ApproveConfirmationModal from "../OccupationalHealth/MedicineInventory/Me
 import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../state/queryClient";
 
-function ChemicalRequestTable() {
+function ChemicalRequestTable({
+  isAssignedTasks,
+}: {
+  isAssignedTasks: boolean;
+}) {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<ChemicalRequest>(null);
@@ -47,11 +54,27 @@ function ChemicalRequestTable() {
   // const [chemicalRequests, setChemicalRequests] = useState<ChemicalRequest[]>(
   //   sampleChemicalRequestData
   // );
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const handleChangePage = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
-    { title: "Chemical Management" },
+    { title: `${isAssignedTasks ? "Assigned " : ""}Chemical Management` },
   ];
 
   const isMobile = useMediaQuery((theme: Theme) =>
@@ -63,6 +86,14 @@ function ChemicalRequestTable() {
       queryKey: ["chemical-requests"],
       queryFn: fetchChemicalRequests,
     });
+
+  const {
+    data: chemicalRequestsAssignedData,
+    isFetching: isChemicalAssignedDataFetching,
+  } = useQuery({
+    queryKey: ["chemical-requests-assigned"],
+    queryFn: fetchChemicalAssignedRequest,
+  });
 
   const { mutate: deleteChemicalRequestMutation, isPending: isDeleting } =
     useMutation({
@@ -85,6 +116,27 @@ function ChemicalRequestTable() {
       },
     });
 
+  const paginatedChemicalRequestData = useMemo(() => {
+    if (isAssignedTasks) {
+      if (!chemicalRequestsAssignedData) return [];
+      return chemicalRequestsAssignedData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
+    } else {
+      if (!chemicalRequests) return [];
+      return chemicalRequests.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
+    }
+  }, [
+    isAssignedTasks,
+    chemicalRequestsAssignedData,
+    page,
+    rowsPerPage,
+    chemicalRequests,
+  ]);
   return (
     <Stack>
       <Box
@@ -145,8 +197,8 @@ function ChemicalRequestTable() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {chemicalRequests?.length > 0 ? (
-                chemicalRequests.map((row) => (
+              {paginatedChemicalRequestData?.length > 0 ? (
+                paginatedChemicalRequestData.map((row) => (
                   <TableRow
                     key={`${row.id}`}
                     sx={{
@@ -203,6 +255,25 @@ function ChemicalRequestTable() {
                 </TableRow>
               )}
             </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                  colSpan={100}
+                  count={
+                    isAssignedTasks
+                      ? chemicalRequestsAssignedData?.length
+                      : chemicalRequests?.length
+                  }
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  showFirstButton={true}
+                  showLastButton={true}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+              </TableRow>
+            </TableFooter>
           </Table>
         </TableContainer>
       </Stack>

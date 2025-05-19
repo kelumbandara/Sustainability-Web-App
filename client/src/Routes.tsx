@@ -304,7 +304,8 @@ const AppRoutes = () => {
         <Route
           path="/chemical-mng/assigned-tasks"
           element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="Chemical Management > Assigned Tasks" />
+            <ChemicalRequestTable isAssignedTasks={true} />
+
           ))}
         />
 
