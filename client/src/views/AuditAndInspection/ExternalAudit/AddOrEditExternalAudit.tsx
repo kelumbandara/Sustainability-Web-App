@@ -7,6 +7,7 @@ import {
   Alert,
   Autocomplete,
   Box,
+  CircularProgress,
   Divider,
   IconButton,
   Stack,
@@ -56,6 +57,7 @@ import Diversity3Icon from "@mui/icons-material/Diversity3";
 type DialogProps = {
   open: boolean;
   handleClose: () => void;
+  isPending: boolean;
   defaultValues?: ExternalAudit;
   onSubmit?: (data: ExternalAudit) => void;
 };
@@ -90,11 +92,12 @@ function a11yProps(index: number) {
   };
 }
 
-export default function AddOrEditSustainabilityDialog({
+export default function AddOrEditExternalAuditDialog({
   open,
   handleClose,
   defaultValues,
   onSubmit,
+  isPending,
 }: DialogProps) {
   const { isMobile, isTablet } = useIsMobile();
   const [files, setFiles] = useState<File[]>([]);
@@ -141,7 +144,6 @@ export default function AddOrEditSustainabilityDialog({
 
   const handleCreateExternalAudit = (data: ExternalAudit) => {
     const submitData: Partial<ExternalAudit> = data;
-    submitData.id = defaultValues?.id ?? uuidv4();
     submitData.documents = files;
     submitData.approverId = approver.id;
     submitData.representorId = representorSchema.id;
@@ -1137,6 +1139,10 @@ export default function AddOrEditSustainabilityDialog({
               backgroundColor: "var(--pallet-blue)",
             }}
             size="medium"
+            disabled={isPending}
+            startIcon={
+              isPending && <CircularProgress color="inherit" size={"1rem"} />
+            }
             onClick={handleSubmit((data) => {
               handleCreateExternalAudit(data);
             })}

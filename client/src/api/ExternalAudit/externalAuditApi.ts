@@ -22,7 +22,7 @@ export enum ScheduledTaskActionPlanPriority {
 
 export const ScheduledExternalAuditActionPlanSchema = z.object({
   actionPlanId: z.string().optional(),
-  internalAuditId: z.number(),
+  externalAuditId: z.number(),
   correctiveOrPreventiveAction: z.string(),
   priority: z.nativeEnum(ScheduledTaskActionPlanPriority).optional(),
   dueDate: z.date(),
@@ -175,5 +175,33 @@ export async function fetchAuditStandard() {
 
 export async function fetchAuditFirm() {
   const res = await axios.get("/api/external-audit-firm");
+  return res.data;
+}
+
+export async function createExternalActionPlan(
+  data: Partial<ScheduledExternalAuditActionPlan>
+) {
+  const res = await axios.post(`/api/external-audit-action-plan`, {
+    ...data,
+  });
+  return res.data;
+}
+
+export async function updateExternalActionPlan(
+  data: Partial<ScheduledExternalAuditActionPlan>
+) {
+  const res = await axios.post(
+    `/api/external-audit-action-plan/${data.actionPlanId}/update`,
+    {
+      ...data,
+    }
+  );
+  return res.data;
+}
+
+export async function deleteExternalActionPlan({ id }: { id: string }) {
+  const res = await axios.delete(
+    `/api/external-audit-action-plan/${id}/delete`
+  );
   return res.data;
 }

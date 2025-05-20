@@ -33,6 +33,11 @@ import { fetchInternalAuditAssignee } from "../../../api/userApi";
 import RichTextComponent from "../../../components/RichTextComponent";
 import theme from "../../../theme";
 import { useEffect } from "react";
+import {
+  createExternalActionPlan,
+  ScheduledExternalAuditActionPlan,
+  updateExternalActionPlan,
+} from "../../../api/ExternalAudit/externalAuditApi";
 
 export const AddOrEditActionPlan = ({
   open,
@@ -74,63 +79,63 @@ export const AddOrEditActionPlan = ({
   }, [selectedActionItem, reset]);
 
   const handleSubmitActionPlan = async (data: any) => {
-    const actionPlanData: ScheduledInternalAuditActionPlan = {
-      internalAuditId: Number(auditId),
+    const actionPlanData: ScheduledExternalAuditActionPlan = {
+      externalAuditId: Number(auditId),
       correctiveOrPreventiveAction: data.correctiveOrPreventiveAction,
       dueDate: data.dueDate,
       targetCompletionDate: data.targetCompletionDate,
       priority: data.priority,
       approverId: data.approver?.id,
     };
-    console.log(actionPlanData)
+    console.log(actionPlanData);
 
-    // if (selectedActionItem) {
-    //   actionPlanData.actionPlanId = selectedActionItem.actionPlanId;
-    //   updateActionPlanMutation(actionPlanData);
-    // } else {
-    //   createActionPlanMutation(actionPlanData);
-    // }
+    if (selectedActionItem) {
+      actionPlanData.actionPlanId = selectedActionItem.actionPlanId;
+      updateActionPlanMutation(actionPlanData);
+    } else {
+      createActionPlanMutation(actionPlanData);
+    }
   };
 
-  // const { mutate: createActionPlanMutation, isPending: isActionPlanCreating } =
-  //   useMutation({
-  //     mutationFn: createActionPlan,
-  //     onSuccess: () => {
-  //       queryClient.invalidateQueries({
-  //         queryKey: ["scheduled-internal-audit"],
-  //       });
-  //       enqueueSnackbar("Action Plan Updated Successfully!", {
-  //         variant: "success",
-  //       });
-  //       reset();
-  //       handleClose();
-  //     },
-  //     onError: () => {
-  //       enqueueSnackbar(`Action Plan Update Failed`, {
-  //         variant: "error",
-  //       });
-  //     },
-  //   });
+  const { mutate: createActionPlanMutation, isPending: isActionPlanCreating } =
+    useMutation({
+      mutationFn: createExternalActionPlan,
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["external-audit"],
+        });
+        enqueueSnackbar("Action Plan Create Successfully!", {
+          variant: "success",
+        });
+        reset();
+        handleClose();
+      },
+      onError: () => {
+        enqueueSnackbar(`Action Plan Create Failed`, {
+          variant: "error",
+        });
+      },
+    });
 
-  // const { mutate: updateActionPlanMutation, isPending: isActionPlanUpdating } =
-  //   useMutation({
-  //     mutationFn: updateActionPlan,
-  //     onSuccess: () => {
-  //       queryClient.invalidateQueries({
-  //         queryKey: ["scheduled-internal-audit"],
-  //       });
-  //       enqueueSnackbar("Action Plan Updated Successfully!", {
-  //         variant: "success",
-  //       });
-  //       reset();
-  //       handleClose();
-  //     },
-  //     onError: () => {
-  //       enqueueSnackbar(`Action Plan Update Failed`, {
-  //         variant: "error",
-  //       });
-  //     },
-  //   });
+  const { mutate: updateActionPlanMutation, isPending: isActionPlanUpdating } =
+    useMutation({
+      mutationFn: updateExternalActionPlan,
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["external-audit"],
+        });
+        enqueueSnackbar("Action Plan Updated Successfully!", {
+          variant: "success",
+        });
+        reset();
+        handleClose();
+      },
+      onError: () => {
+        enqueueSnackbar(`Action Plan Update Failed`, {
+          variant: "error",
+        });
+      },
+    });
 
   return (
     <Dialog
@@ -357,12 +362,12 @@ export const AddOrEditActionPlan = ({
             backgroundColor: "var(--pallet-blue)",
           }}
           size="medium"
-          // disabled={isActionPlanCreating || isActionPlanUpdating}
-          // endIcon={
-          //   isActionPlanUpdating || isActionPlanCreating ? (
-          //     <CircularProgress size={20} />
-          //   ) : null
-          // }
+          disabled={isActionPlanCreating || isActionPlanUpdating}
+          endIcon={
+            isActionPlanUpdating || isActionPlanCreating ? (
+              <CircularProgress size={20} />
+            ) : null
+          }
           onClick={handleSubmit(handleSubmitActionPlan)}
         >
           {selectedActionItem ? "Update New" : "Add New"}

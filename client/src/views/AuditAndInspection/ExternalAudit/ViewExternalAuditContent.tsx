@@ -21,6 +21,7 @@ import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import ListIcon from "@mui/icons-material/List";
 import Diversity3Icon from "@mui/icons-material/Diversity3";
 import {
+  deleteExternalActionPlan,
   ExternalAudit,
   getExternalAuditData,
   ScheduledExternalAuditActionPlan,
@@ -29,12 +30,14 @@ import {
 import { FileItemsViewer } from "../../../components/FileItemsViewer";
 import { StorageFile } from "../../../utils/StorageFiles.util";
 import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CustomButton from "../../../components/CustomButton";
 import { ScheduledInternalAuditActionPlan } from "../../../api/AuditAndInspection/internalAudit";
 import { AddOrEditActionPlan } from "./AddOrEditActionPlan";
+import queryClient from "../../../state/queryClient";
+import { enqueueSnackbar } from "notistack";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -81,6 +84,26 @@ function ViewExternalAuditContent({
       queryKey: ["external-audit"],
       queryFn: getExternalAuditData,
     });
+
+    const { mutate: deleteActionItemMutation } = useMutation({
+        mutationFn: deleteExternalActionPlan,
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: ["external-audit"],
+          });
+          enqueueSnackbar("Action Item Deleted Successfully!", {
+            variant: "success",
+          });
+          setOpenDeleteActionItemModal(false);
+          setSelectedActionItem(null);
+        },
+        onError: () => {
+          enqueueSnackbar
+          (`Action Item Delete Failed`, {
+            variant: "error",
+          });
+        },
+      });
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     console.log("event", event);
@@ -339,7 +362,7 @@ function ViewExternalAuditContent({
               <Stack spacing={1}>
                 {audit?.actionPlan?.map((actionPlan, index) => (
                   <ActionPlanItem
-                    key={`${actionPlan.actionPlanId}${actionPlan.internalAuditId}${index}`}
+                    key={`${actionPlan.actionPlanId}${actionPlan.externalAuditId}${index}`}
                     actionPlan={actionPlan}
                     onClickEdit={() => {
                       setSelectedActionItem(actionPlan);
@@ -390,11 +413,11 @@ function ViewExternalAuditContent({
                 }
                 handleClose={() => setOpenDeleteActionItemModal(false)}
                 deleteFunc={async () => {
-                  // if (selectedActionItem) {
-                  //   await deleteActionItemMutation({
-                  //     id: selectedActionItem.actionPlanId,
-                  //   });
-                  // }
+                  if (selectedActionItem) {
+                    await deleteActionItemMutation({
+                      id: selectedActionItem.actionPlanId,
+                    });
+                  }
                   console.log(selectedActionItem)
                 }}
                 onSuccess={() => {
