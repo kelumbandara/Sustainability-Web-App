@@ -35,6 +35,7 @@ import {
   fetchAuditFirm,
   fetchAuditStandard,
   fetchAuditType,
+  Status,
 } from "../../../api/ExternalAudit/externalAuditApi";
 import useIsMobile from "../../../customHooks/useIsMobile";
 import theme from "../../../theme";
@@ -365,24 +366,26 @@ export default function AddOrEditSustainabilityDialog({
                   }
                   {...a11yProps(1)}
                 />
-                {(defaultValues ? <Tab
-                  label={
-                    <Box
-                      sx={{
-                        backgroundColor: "var(--pallet-lighter-grey)",
-                        color: "var(--pallet-blue)",
-                        width: "100%",
-                        display: "flex",
-                      }}
-                    >
-                      <Diversity3Icon fontSize="small" />
-                      <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                        Action Plan
-                      </Typography>
-                    </Box>
-                  }
-                  {...a11yProps(2)}
-                /> : null)}
+                {defaultValues ? (
+                  <Tab
+                    label={
+                      <Box
+                        sx={{
+                          backgroundColor: "var(--pallet-lighter-grey)",
+                          color: "var(--pallet-blue)",
+                          width: "100%",
+                          display: "flex",
+                        }}
+                      >
+                        <Diversity3Icon fontSize="small" />
+                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                          Action Plan
+                        </Typography>
+                      </Box>
+                    }
+                    {...a11yProps(2)}
+                  />
+                ) : null}
               </Tabs>
               <TabPanel value={activeTab} index={0} dir={theme.direction}>
                 <Stack
@@ -1004,6 +1007,60 @@ export default function AddOrEditSustainabilityDialog({
                   }}
                 />
               </Box>
+              {defaultValues && defaultValues.status !== Status.COMPLETE &&(
+                <Box sx={{ margin: "0.5rem" }}>
+                  <Typography
+                    variant="caption"
+                    sx={{ marginBottom: "0.1rem", color: grey[700] }}
+                  >
+                    Status:
+                  </Typography>
+                  <Controller
+                    control={control}
+                    name={"status"}
+                    render={({ field }) => {
+                      return (
+                        <ToggleButtonGroup
+                          size="small"
+                          {...control}
+                          aria-label="Small sizes"
+                          color="primary"
+                          value={field.value}
+                          exclusive
+                          orientation="vertical"
+                          fullWidth
+                          onChange={(e, value) => {
+                            console.log("e", e);
+                            field.onChange(value);
+                          }}
+                        >
+                          <ToggleButton value={Status.DRAFT} key={Status.DRAFT}>
+                            <Typography variant="caption" component="div">
+                              {Status.DRAFT}
+                            </Typography>
+                          </ToggleButton>
+                          <ToggleButton
+                            value={Status.APPROVED}
+                            key={Status.APPROVED}
+                          >
+                            <Typography variant="caption" component="div">
+                              {Status.APPROVED}
+                            </Typography>
+                          </ToggleButton>
+                          <ToggleButton
+                            value={Status.COMPLETE}
+                            key={Status.COMPLETE}
+                          >
+                            <Typography variant="caption" component="div">
+                              {Status.COMPLETE}
+                            </Typography>
+                          </ToggleButton>
+                        </ToggleButtonGroup>
+                      );
+                    }}
+                  />
+                </Box>
+              )}
 
               <Box sx={{ margin: "0.5rem" }}>
                 <Typography

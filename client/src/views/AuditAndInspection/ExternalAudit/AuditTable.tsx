@@ -36,6 +36,7 @@ import useCurrentUserHaveAccess from "../../../hooks/useCurrentUserHaveAccess";
 import { PermissionKeys } from "../../Administration/SectionList";
 import {
   ExternalAudit,
+  Status,
   createExternalAudit,
   deleteExternalAudit,
   getExternalAssignedAudit,
@@ -425,7 +426,9 @@ function ExternalAuditTable({
                 setOpenAddOrEditDialog(true);
               }}
               disableEdit={
-                isAssignedTasks
+                selectedRow?.status === Status.COMPLETE
+                  ? true
+                  : isAssignedTasks
                   ? isExternalAuditTaskEditDisabled ||
                     isExternalAuditCorrectiveEditDisabled ||
                     isExternalAuditQueueEditDisabled
@@ -443,7 +446,10 @@ function ExternalAuditTable({
 
             {selectedRow && (
               <Stack>
-                <ViewExternalAuditContent audit={selectedRow} />
+                <ViewExternalAuditContent
+                  audit={selectedRow}
+                  handleClose={() => setOpenViewDrawer(false)}
+                />
               </Stack>
             )}
           </Stack>
