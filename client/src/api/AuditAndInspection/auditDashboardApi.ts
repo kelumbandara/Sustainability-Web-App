@@ -35,3 +35,41 @@ export async function fetchAuditStatusCountByMonth(
   );
   return res.data;
 }
+
+export async function fetchAuditAssignedCompletion(
+  dateFrom: String,
+  dateTo: String,
+  division: String,
+  auditType: String
+) {
+  const res = await axios.get(
+    `api/audit-status-count/${dateFrom}/${dateTo}/${division}/${auditType}/assigned-completion`
+  );
+  return res.data;
+}
+
+export async function fetchAuditAssignedGradeStats(
+  dateFrom: String,
+  dateTo: String,
+  division: String,
+  auditType: String
+) {
+  console.log(auditType)
+  const res = await axios.get(
+    `api/audit-status-count/${dateFrom}/${dateTo}/${division}/External Audit/grade-stats`
+  );
+  return res.data;
+}
+
+export async function fetchAuditAnnouncementStats(
+  dateFrom: String,
+  dateTo: String,
+  division: String,
+  auditType: String
+) {
+  console.log(auditType)
+  const res = await axios.get(
+    `api/audit-status-count/${dateFrom}/${dateTo}/${division}/External Audit/announcement-stats`
+  );
+  return res.data;
+}

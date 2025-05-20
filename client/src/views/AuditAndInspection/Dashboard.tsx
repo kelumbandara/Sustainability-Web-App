@@ -98,11 +98,15 @@ import { auditTypeData } from "../../api/sampleData/auditData";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../api/divisionApi";
 import {
+  fetchAuditAnnouncementStats,
+  fetchAuditAssignedCompletion,
+  fetchAuditAssignedGradeStats,
   fetchAuditScoreCount,
   fetchAuditStatusCount,
   fetchAuditStatusCountByMonth,
 } from "../../api/AuditAndInspection/auditDashboardApi";
 import { dateFormatter, getColorForType } from "../../util/dateFormat.util";
+import CustomPieChart from "../../components/CustomPieChart";
 
 const breadcrumbItems = [
   { title: "Home", href: "/home" },
@@ -317,7 +321,7 @@ function EnvironmentDashboard() {
 
   const { data: scoreCountData, refetch: refetchScoreCountData } = useQuery({
     queryKey: [
-      "audit-score",
+      "audit-team-productivity",
       formattedDateFrom,
       formattedDateTo,
       division,
@@ -333,6 +337,121 @@ function EnvironmentDashboard() {
     enabled: false,
   });
 
+  const {
+    data: assignedCompletionData,
+    refetch: refetchAssignedCompletionData,
+  } = useQuery({
+    queryKey: [
+      "audit-score",
+      formattedDateFrom,
+      formattedDateTo,
+      division,
+      auditType,
+    ],
+    queryFn: () =>
+      fetchAuditAssignedCompletion(
+        formattedDateFrom,
+        formattedDateTo,
+        division,
+        auditType
+      ),
+    enabled: false,
+  });
+
+  const { data: gradeStatsData, refetch: refetchAuditAssignedGradeStats } =
+    useQuery({
+      queryKey: [
+        "audit-grade-stats",
+        formattedDateFrom,
+        formattedDateTo,
+        division,
+        auditType,
+      ],
+      queryFn: () =>
+        fetchAuditAssignedGradeStats(
+          formattedDateFrom,
+          formattedDateTo,
+          division,
+          auditType
+        ),
+      enabled: false,
+    });
+
+  const {
+    data: announcementStatsData,
+    refetch: refetchAuditAnnouncementStats,
+  } = useQuery({
+    queryKey: [
+      "audit-announcement-stats",
+      formattedDateFrom,
+      formattedDateTo,
+      division,
+      auditType,
+    ],
+    queryFn: () =>
+      fetchAuditAnnouncementStats(
+        formattedDateFrom,
+        formattedDateTo,
+        division,
+        auditType
+      ),
+    enabled: false,
+  });
+
+  const announcementStatsDataMemo = useMemo(() => {
+    return (announcementStatsData?.data ?? []).map((item: any) => ({
+      name: item.announcement,
+      value: item.count,
+    }));
+  }, [announcementStatsData]);
+
+  const gradeStatsDataMemo = useMemo(() => {
+    return (gradeStatsData?.data ?? []).map((item: any) => ({
+      name: item.grade,
+      value: item.count,
+    }));
+  }, [gradeStatsData]);
+
+  const completionDataMemo = useMemo(() => {
+    return assignedCompletionData?.data ?? [];
+  }, [assignedCompletionData]);
+
+  const statusCountByMonthMemo = useMemo(() => {
+    if (!statusCountByMonthData?.data) return [];
+
+    const allStatuses = new Set();
+
+    // First pass: collect all unique statuses
+    Object.values(statusCountByMonthData.data).forEach((statusObj) => {
+      if (typeof statusObj === "object" && !Array.isArray(statusObj)) {
+        Object.keys(statusObj).forEach((status) => allStatuses.add(status));
+      }
+    });
+
+    // Second pass: build formatted data for chart
+    return Object.entries(statusCountByMonthData.data).map(
+      ([month, statuses]) => {
+        const entry = { month };
+        allStatuses.forEach((status) => {
+          entry[status as any] = statuses?.[status as any] || 0;
+        });
+        return entry;
+      }
+    );
+  }, [statusCountByMonthData]);
+
+  const allStatuses = useMemo(() => {
+    const statusSet = new Set();
+    if (statusCountByMonthData?.data) {
+      Object.values(statusCountByMonthData.data).forEach((statusObj) => {
+        if (typeof statusObj === "object" && !Array.isArray(statusObj)) {
+          Object.keys(statusObj).forEach((status) => statusSet.add(status));
+        }
+      });
+    }
+    return Array.from(statusSet);
+  }, [statusCountByMonthData]);
+
   const statusCountMemo = useMemo(() => {
     return statusCountData?.data ?? {};
   }, [statusCountData]);
@@ -346,16 +465,17 @@ function EnvironmentDashboard() {
     for (const [month, audits] of Object.entries(rawData)) {
       const monthGroup: Record<string, any> = { month };
 
-      for (const audit of audits as any) {
-        const { auditType, auditScore } = audit;
+      if (Array.isArray(audits)) {
+        for (const audit of audits) {
+          const { auditType, auditScore } = audit;
+          const normalizedType = auditType?.replace(/\s+/g, "_");
+          auditTypeSet.add(normalizedType);
 
-        const normalizedType = auditType.replace(/\s+/g, "_");
-        auditTypeSet.add(normalizedType);
+          monthGroup[normalizedType] =
+            (monthGroup[normalizedType] ?? 0) + auditScore;
 
-        monthGroup[normalizedType] =
-          (monthGroup[normalizedType] ?? 0) + auditScore;
-
-        detailed.push({ month, ...audit });
+          detailed.push({ month, ...audit });
+        }
       }
 
       stacked.push(monthGroup);
@@ -372,6 +492,9 @@ function EnvironmentDashboard() {
     refetchStatusCountData();
     refetchScoreCountData();
     refetchStatusCountByMonthData();
+    refetchAssignedCompletionData();
+    refetchAuditAssignedGradeStats();
+    refetchAuditAnnouncementStats();
   };
 
   return (
@@ -578,7 +701,9 @@ function EnvironmentDashboard() {
             titleIcon={<EditCalendarIcon fontSize="large" />}
             value={
               (statusCountMemo?.status?.draft ?? 0) +
-              (statusCountMemo?.status?.approved ?? 0)
+                (statusCountMemo?.status?.approved ?? 0) ||
+              (statusCountMemo?.status?.completed ?? 0) +
+                (statusCountMemo?.status?.scheduled ?? 0)
             }
             subDescription="0% from previous period"
           />
@@ -609,7 +734,10 @@ function EnvironmentDashboard() {
           <DashboardCard
             title="In-Progress"
             titleIcon={<RotateRightOutlinedIcon fontSize="large" />}
-            value={statusCountMemo?.status?.draft ?? 0}
+            value={
+              (statusCountMemo?.status?.draft ?? 0) ||
+              (statusCountMemo?.status?.scheduled ?? 0)
+            }
             subDescription="8% From previous period"
           />
         </Box>
@@ -624,7 +752,7 @@ function EnvironmentDashboard() {
           <DashboardCard
             title="Completed"
             titleIcon={<VerifiedOutlinedIcon fontSize="large" />}
-            value={3}
+            value={statusCountMemo?.status?.completed ?? 0}
             subDescription="1.5% From previous period"
           />
         </Box>
@@ -670,142 +798,29 @@ function EnvironmentDashboard() {
                 textAlign: "center",
               }}
             >
-              Internal Audit Status
+              {auditType} Status
             </Typography>
           </Box>
           <ResponsiveContainer width="100%" height={500}>
-            <BarChart height={400} data={datasetMemo}>
+            <BarChart height={400} width={600} data={statusCountByMonthMemo}>
               <XAxis dataKey="month" />
               <YAxis fontSize={12} />
               <Tooltip />
               <Legend />
-              <Bar
-                dataKey="numberOfAuditScheduled"
-                name="Number Of Audit Scheduled"
-                stackId="a"
-                fill="#4f46e5"
-                barSize={10}
-              />
-              <Bar
-                dataKey="numberOfAuditCompleted"
-                name="Number Of Audit Completed"
-                stackId="a"
-                fill="#10b981"
-                barSize={10}
-              />
-              <Bar
-                dataKey="numberOfAuditPending"
-                name="Number Of Audit Pending"
-                stackId="a"
-                fill="#f59e0b"
-                barSize={10}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </Box>
-
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            flex: 1,
-            flexDirection: "column",
-            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-            borderRadius: "0.3rem",
-            border: "1px solid var(--pallet-border-blue)",
-            padding: "1rem",
-            height: "auto",
-            marginTop: "1rem",
-          }}
-        >
-          <Box>
-            <Typography
-              variant="h6"
-              sx={{
-                textAlign: "center",
-              }}
-            >
-              Internal Audit Score
-            </Typography>
-          </Box>
-          {(stackedData.length > 0 ?<ResponsiveContainer width={"100%"} height={500}>
-            <BarChart data={stackedData}>
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              {auditTypes.map((type) => (
+              {(allStatuses as string[]).map((status, index) => (
                 <Bar
-                  key={type}
-                  dataKey={type}
-                  name={type.replace(/_/g, " ")}
-                  stackId="a"
+                  key={String(status)}
                   barSize={10}
-                  fill={getColorForType(type)}
+                  dataKey={String(status)}
+                  stackId="a" // ✅ This makes the bars stack
+                  fill={
+                    ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#a4de6c"][
+                      index % 5
+                    ]
+                  }
                 />
               ))}
             </BarChart>
-          </ResponsiveContainer> : <Typography textAlign={"center"}>Please Select a filters to display data</Typography>)}
-        </Box>
-      </Box>
-
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: isMobile ? "column" : "row",
-          gap: "1rem",
-        }}
-      >
-        <Box
-          sx={{
-            width: "100%",
-            height: "auto",
-            marginTop: "1rem",
-            flex: 1,
-            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-            padding: "1rem",
-            borderRadius: "0.3rem",
-            border: "1px solid var(--pallet-border-blue)",
-          }}
-        >
-          <Box>
-            <Typography
-              variant="h6"
-              sx={{
-                textAlign: "center",
-              }}
-            >
-              External Audit Status
-            </Typography>
-          </Box>
-          <ResponsiveContainer width="100%" height={500}>
-            <BarChart height={400} data={ExternalDataset}>
-              <XAxis dataKey="month" />
-              <YAxis fontSize={12} />
-              <Tooltip />
-              <Legend />
-              <Bar
-                dataKey="numberOfAuditScheduled"
-                name="Number Of Audit Scheduled"
-                stackId="a"
-                fill="#4f46e5"
-                barSize={10}
-              />
-              <Bar
-                dataKey="numberOfAuditCompleted"
-                name="Number Of Audit Completed"
-                stackId="a"
-                fill="#10b981"
-                barSize={10}
-              />
-              <Bar
-                dataKey="numberOfAuditPending"
-                name="Number Of Audit Pending"
-                stackId="a"
-                fill="#f59e0b"
-                barSize={10}
-              />
-            </BarChart>
           </ResponsiveContainer>
         </Box>
 
@@ -830,38 +845,33 @@ function EnvironmentDashboard() {
                 textAlign: "center",
               }}
             >
-              External Audit Score
+              {auditType} Status
             </Typography>
           </Box>
-          <ResponsiveContainer width={"100%"} height={500}>
-            <BarChart width={800} height={400} data={transformedAuditScores}>
-              <XAxis dataKey="month" />
-              <YAxis fontSize={12} />
-              <Tooltip />
-              <Legend />
-              <Bar
-                dataKey="Safety"
-                name="Safety Audit"
-                stackId="a"
-                fill="#4f46e5"
-                barSize={10}
-              />
-              <Bar
-                dataKey="Quality"
-                name="Quality Audit"
-                stackId="a"
-                fill="#10b981"
-                barSize={10}
-              />
-              <Bar
-                dataKey="Environmental"
-                name="Environmental Audit"
-                stackId="a"
-                fill="#f59e0b"
-                barSize={10}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+          {stackedData.length > 0 ? (
+            <ResponsiveContainer width={"100%"} height={500}>
+              <BarChart data={stackedData}>
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                {auditTypes.map((type) => (
+                  <Bar
+                    key={type}
+                    dataKey={type}
+                    name={type?.replace(/_/g, " ")}
+                    stackId="a"
+                    barSize={10}
+                    fill={getColorForType(type)}
+                  />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <Typography textAlign={"center"}>
+              Please Select a filters to display data
+            </Typography>
+          )}
         </Box>
       </Box>
 
@@ -922,7 +932,8 @@ function EnvironmentDashboard() {
         <Box
           sx={{
             display: "flex",
-            justifyContent: "center",
+            // justifyContent: "center",
+            alignContent: "center",
             flex: 1,
             flexDirection: "column",
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
@@ -941,28 +952,33 @@ function EnvironmentDashboard() {
           >
             Audit Team Productivity
           </Typography>
-          <ResponsiveContainer>
-            <PieChart>
-              <Pie
-                data={auditTeamProductivity}
-                dataKey="completedAudits"
-                nameKey="team"
-                cx="50%"
-                cy="50%"
-                outerRadius={120}
-                label
-              >
-                {auditTeamProductivity.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
+          <Stack flexDirection="column" spacing={2} marginTop={6} p={5}>
+            {completionDataMemo?.map((completionMemo: any) => (
+              <>
+                <Stack
+                  key={completionMemo?.userId}
+                  flexDirection="row"
+                  spacing={2}
+                  flex={3}
+                  alignItems="center"
+                >
+                  <Box flex={3}>{completionMemo?.userName}</Box>
+
+                  <Typography flex={3}>
+                    {completionMemo?.total} Count
+                  </Typography>
+
+                  <Box display="flex" alignItems="center">
+                    <CircularProgressWithLabel
+                      size={50}
+                      value={completionMemo?.percentage}
+                    />
+                  </Box>
+                </Stack>
+                <Divider />
+              </>
+            ))}
+          </Stack>
         </Box>
       </Box>
       <Box
@@ -1408,7 +1424,7 @@ function EnvironmentDashboard() {
           </ResponsiveContainer>
         </Box>
       </Box>
-      {/* <Box
+      <Box
         sx={{
           display: "flex",
           flexDirection: isMobile ? "column" : "row",
@@ -1445,399 +1461,7 @@ function EnvironmentDashboard() {
               scrollbarWidth: "none",
             }}
           >
-            <>
-              <AppBar
-                position="sticky"
-                sx={{
-                  display: "flex",
-                  mt: "1rem",
-                  maxWidth: isMobile ? 400 : "auto",
-                }}
-              >
-                <Tabs
-                  value={activeTabTwo}
-                  onChange={handleChangeTabTwo}
-                  indicatorColor="secondary"
-                  TabIndicatorProps={{
-                    style: {
-                      backgroundColor: "var(--pallet-blue)",
-                      height: "3px",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    },
-                  }}
-                  sx={{
-                    backgroundColor: "var(--pallet-lighter-grey)",
-                    color: "var(--pallet-blue)",
-                    display: "flex",
-                  }}
-                  textColor="inherit"
-                  variant="scrollable"
-                  scrollButtons={true}
-                >
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <SummarizeIcon fontSize="small" />
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Overview
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps2(0)}
-                  />
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <ConnectWithoutContactIcon fontSize="small" />
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Social
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps2(1)}
-                  />
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <EmergencyOutlinedIcon fontSize="small" />
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Health And Safety
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps2(2)}
-                  />
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <ForestOutlinedIcon fontSize="small" />
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Environmental
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps2(3)}
-                  />
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <SecurityOutlinedIcon fontSize="small" />
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Security
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps2(4)}
-                  />
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <ManageAccountsOutlinedIcon fontSize="small" />
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Management System
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps2(5)}
-                  />
-                </Tabs>
-              </AppBar>
-              <TabPanelTwo
-                value={activeTabTwo}
-                indexTwo={0}
-                dir={theme.direction}
-              >
-                <>
-                  {wasteWaterDataMemo.map((item, index) => (
-                    <Box key={index}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          direction: "row",
-                          justifyContent: "space-between",
-                          m: "1rem",
-                        }}
-                      >
-                        <Box flex={2}>
-                          <Typography>{item.label}</Typography>
-                          <Typography variant="caption">
-                            {item.description}
-                          </Typography>
-                        </Box>
-                        <Box
-                          flex={1}
-                          sx={{
-                            display: "flex",
-                            direction: "row",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <Box>
-                            <Typography>Quantity</Typography>
-                            <Typography variant="caption">
-                              {item.quantity}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </Box>
-                      <Divider />
-                    </Box>
-                  ))}
-                </>
-              </TabPanelTwo>
-              <TabPanelTwo
-                value={activeTabTwo}
-                indexTwo={1}
-                dir={theme.direction}
-              >
-                <>
-                  {energyConsumptionDataMemo.map((item, index) => (
-                    <Box key={index}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          direction: "row",
-                          justifyContent: "space-between",
-                          m: "1rem",
-                        }}
-                      >
-                        <Box flex={2}>
-                          <Typography>{item.label}</Typography>
-                          <Typography variant="caption">
-                            {item.description}
-                          </Typography>
-                        </Box>
-                        <Box
-                          flex={1}
-                          sx={{
-                            display: "flex",
-                            direction: "row",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <Box>
-                            <Typography>Quantity</Typography>
-                            <Typography variant="caption">
-                              {item.quantity}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </Box>
-                      <Divider />
-                    </Box>
-                  ))}
-                </>
-              </TabPanelTwo>
-              <TabPanelTwo
-                value={activeTabTwo}
-                indexTwo={2}
-                dir={theme.direction}
-              >
-                <>
-                  {waterUsageDataMemo.map((item, index) => (
-                    <Box key={index}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          direction: "row",
-                          justifyContent: "space-between",
-                          m: "1rem",
-                        }}
-                      >
-                        <Box flex={2}>
-                          <Typography>{item.label}</Typography>
-                          <Typography variant="caption">
-                            {item.description}
-                          </Typography>
-                        </Box>
-                        <Box
-                          flex={1}
-                          sx={{
-                            display: "flex",
-                            direction: "row",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <Box>
-                            <Typography>Quantity</Typography>
-                            <Typography variant="caption">
-                              {item.quantity}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </Box>
-                      <Divider />
-                    </Box>
-                  ))}
-                </>
-              </TabPanelTwo>
-              <TabPanelTwo
-                value={activeTabTwo}
-                indexTwo={3}
-                dir={theme.direction}
-              >
-                <>
-                  {waterWasteDataMemo.map((item, index) => (
-                    <Box key={index}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          direction: "row",
-                          justifyContent: "space-between",
-                          m: "1rem",
-                        }}
-                      >
-                        <Box flex={2}>
-                          <Typography>{item.label}</Typography>
-                          <Typography variant="caption">
-                            {item.description}
-                          </Typography>
-                        </Box>
-                        <Box
-                          flex={1}
-                          sx={{
-                            display: "flex",
-                            direction: "row",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <Box>
-                            <Typography>Quantity</Typography>
-                            <Typography variant="caption">
-                              {item.quantity}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </Box>
-                      <Divider />
-                    </Box>
-                  ))}
-                </>
-              </TabPanelTwo>
-              <TabPanelTwo
-                value={activeTabTwo}
-                indexTwo={4}
-                dir={theme.direction}
-              >
-                <>
-                  {airEmissionDataMemo.map((item, index) => (
-                    <Box key={index}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          direction: "row",
-                          justifyContent: "space-between",
-                          m: "1rem",
-                        }}
-                      >
-                        <Box flex={2}>
-                          <Typography>{item.label}</Typography>
-                          <Typography variant="caption">
-                            {item.description}
-                          </Typography>
-                        </Box>
-                        <Box
-                          flex={1}
-                          sx={{
-                            display: "flex",
-                            direction: "row",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <Box>
-                            <Typography>Quantity</Typography>
-                            <Typography variant="caption">
-                              {item.quantity}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </Box>
-                      <Divider />
-                    </Box>
-                  ))}
-                </>
-              </TabPanelTwo>
-              <TabPanelTwo
-                value={activeTabTwo}
-                indexTwo={5}
-                dir={theme.direction}
-              >
-                <>
-                  {wasteWaterDataMemo.map((item, index) => (
-                    <Box key={index}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          direction: "row",
-                          justifyContent: "space-between",
-                          m: "1rem",
-                        }}
-                      >
-                        <Box flex={2}>
-                          <Typography>{item.label}</Typography>
-                          <Typography variant="caption">
-                            {item.description}
-                          </Typography>
-                        </Box>
-                        <Box
-                          flex={1}
-                          sx={{
-                            display: "flex",
-                            direction: "row",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <Box>
-                            <Typography>Quantity</Typography>
-                            <Typography variant="caption">
-                              {item.quantity}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </Box>
-                      <Divider />
-                    </Box>
-                  ))}
-                </>
-              </TabPanelTwo>
-            </>
+            <></>
           </ResponsiveContainer>
         </Box>
 
@@ -1860,15 +1484,84 @@ function EnvironmentDashboard() {
               <Box display={"flex"} justifyContent={"center"}>
                 <Box display={"flex"} justifyContent={"center"}>
                   <CustomPieChart
-                    data={pieChartDataWaterTreatmentMemo}
-                    title="Waste Water Treatment"
+                    data={gradeStatsDataMemo}
+                    title={`External Grade Stats`}
                   />
                 </Box>
               </Box>
             </>
           </ResponsiveContainer>
         </Box>
-      </Box> */}
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+          gap: "1rem",
+        }}
+      >
+        <Box
+          sx={{
+            width: "100%",
+            height: "auto",
+            marginTop: "1rem",
+            flex: 2,
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+            padding: "1rem",
+            borderRadius: "0.3rem",
+            border: "1px solid var(--pallet-border-blue)",
+          }}
+        >
+          <Box>
+            <Typography
+              variant="h6"
+              sx={{
+                textAlign: "center",
+              }}
+            >
+              GHG Emission
+            </Typography>
+          </Box>
+          <ResponsiveContainer
+            width="100%"
+            height={500}
+            style={{
+              overflowY: "scroll",
+              scrollbarWidth: "none",
+            }}
+          >
+            <></>
+          </ResponsiveContainer>
+        </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            flex: 1,
+            flexDirection: "column",
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+            borderRadius: "0.3rem",
+            border: "1px solid var(--pallet-border-blue)",
+            padding: "1rem",
+            height: "auto",
+            marginTop: "1rem",
+          }}
+        >
+          <ResponsiveContainer width="100%" height={500}>
+            <>
+              <Box display={"flex"} justifyContent={"center"}>
+                <Box display={"flex"} justifyContent={"center"}>
+                  <CustomPieChart
+                    data={announcementStatsDataMemo}
+                    title={`External Announcement Stats`}
+                  />
+                </Box>
+              </Box>
+            </>
+          </ResponsiveContainer>
+        </Box>
+      </Box>
       {/* <Box
         sx={{
           display: "flex",
