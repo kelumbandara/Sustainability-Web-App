@@ -16,7 +16,7 @@ import {
 import theme from "../../theme";
 import PageTitle from "../../components/PageTitle";
 import Breadcrumb from "../../components/BreadCrumb";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import {
   HazardDashboardPeriods,
   HazardOrRiskCategories,
@@ -79,32 +79,34 @@ import {
   waterUsageData,
   waterWasteData,
 } from "../../api/sampleData/sampleAuditDashboardData";
-import CustomPieChart from "../../components/CustomPieChart";
 
 import SummarizeIcon from "@mui/icons-material/Summarize";
-import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
-import AcUnitOutlinedIcon from "@mui/icons-material/AcUnitOutlined";
-import OfflineBoltIcon from "@mui/icons-material/OfflineBolt";
-import Co2Icon from "@mui/icons-material/Co2";
-import PieArcLabelChart from "../../components/PieChartComponent";
-import PercentagePieChart from "../../components/PercentagePieChart";
 
 import EditCalendarIcon from "@mui/icons-material/EditCalendar";
 import CheckBoxOutlinedIcon from "@mui/icons-material/CheckBoxOutlined";
 import RotateRightOutlinedIcon from "@mui/icons-material/RotateRightOutlined";
 import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import PaidOutlinedIcon from "@mui/icons-material/PaidOutlined";
-import RadialBarGraph from "../../components/RadialBarChart";
 
 import ConnectWithoutContactIcon from "@mui/icons-material/ConnectWithoutContact";
 import EmergencyOutlinedIcon from "@mui/icons-material/EmergencyOutlined";
 import ForestOutlinedIcon from "@mui/icons-material/ForestOutlined";
 import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
 import ManageAccountsOutlinedIcon from "@mui/icons-material/ManageAccountsOutlined";
+import { yearData } from "../../api/sampleData/consumptionData";
+import { auditTypeData } from "../../api/sampleData/auditData";
+import { useQuery } from "@tanstack/react-query";
+import { fetchDivision } from "../../api/divisionApi";
+import {
+  fetchAuditScoreCount,
+  fetchAuditStatusCount,
+  fetchAuditStatusCountByMonth,
+} from "../../api/AuditAndInspection/auditDashboardApi";
+import { dateFormatter, getColorForType } from "../../util/dateFormat.util";
 
 const breadcrumbItems = [
   { title: "Home", href: "/home" },
-  { title: "Environment Management" },
+  { title: "Audit Management" },
 ];
 
 interface TabPanelProps {
@@ -173,12 +175,21 @@ function EnvironmentDashboard() {
     register,
     handleSubmit,
     watch,
+    reset,
     control,
     formState: { errors },
     setValue,
   } = useForm();
 
-  const watchPeriod = watch("period");
+  const auditType = watch("auditType");
+  const division = watch("division");
+
+  const dateRangeFrom = watch("dateRangeFrom");
+  const formattedDateFrom = dateFormatter(dateRangeFrom);
+
+  const dateRangeTo = watch("dateRangeTo");
+  const formattedDateTo = dateFormatter(dateRangeTo);
+
   const [activeTab, setActiveTab] = useState(0);
   const [activeTabTwo, setActiveTabTwo] = useState(0);
   const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
@@ -260,6 +271,109 @@ function EnvironmentDashboard() {
     return airEmissionData;
   }, [airEmissionData]);
 
+  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
+    queryKey: ["divisions"],
+    queryFn: fetchDivision,
+  });
+
+  const { data: statusCountData, refetch: refetchStatusCountData } = useQuery({
+    queryKey: [
+      "audit-status-cards",
+      formattedDateFrom,
+      formattedDateTo,
+      division,
+      auditType,
+    ],
+    queryFn: () =>
+      fetchAuditStatusCount(
+        formattedDateFrom,
+        formattedDateTo,
+        division,
+        auditType
+      ),
+    enabled: false,
+  });
+
+  const {
+    data: statusCountByMonthData,
+    refetch: refetchStatusCountByMonthData,
+  } = useQuery({
+    queryKey: [
+      "audit-status",
+      formattedDateFrom,
+      formattedDateTo,
+      division,
+      auditType,
+    ],
+    queryFn: () =>
+      fetchAuditStatusCountByMonth(
+        formattedDateFrom,
+        formattedDateTo,
+        division,
+        auditType
+      ),
+    enabled: false,
+  });
+
+  const { data: scoreCountData, refetch: refetchScoreCountData } = useQuery({
+    queryKey: [
+      "audit-score",
+      formattedDateFrom,
+      formattedDateTo,
+      division,
+      auditType,
+    ],
+    queryFn: () =>
+      fetchAuditScoreCount(
+        formattedDateFrom,
+        formattedDateTo,
+        division,
+        auditType
+      ),
+    enabled: false,
+  });
+
+  const statusCountMemo = useMemo(() => {
+    return statusCountData?.data ?? {};
+  }, [statusCountData]);
+
+  const { stackedData, detailedData, auditTypes } = useMemo(() => {
+    const rawData = scoreCountData?.data ?? {};
+    const stacked: any[] = [];
+    const detailed: any[] = [];
+    const auditTypeSet = new Set<string>();
+
+    for (const [month, audits] of Object.entries(rawData)) {
+      const monthGroup: Record<string, any> = { month };
+
+      for (const audit of audits as any) {
+        const { auditType, auditScore } = audit;
+
+        const normalizedType = auditType.replace(/\s+/g, "_");
+        auditTypeSet.add(normalizedType);
+
+        monthGroup[normalizedType] =
+          (monthGroup[normalizedType] ?? 0) + auditScore;
+
+        detailed.push({ month, ...audit });
+      }
+
+      stacked.push(monthGroup);
+    }
+
+    return {
+      stackedData: stacked,
+      detailedData: detailed,
+      auditTypes: Array.from(auditTypeSet),
+    };
+  }, [scoreCountData]);
+
+  const handleFetch = () => {
+    refetchStatusCountData();
+    refetchScoreCountData();
+    refetchStatusCountByMonthData();
+  };
+
   return (
     <Stack>
       <Box
@@ -271,7 +385,7 @@ function EnvironmentDashboard() {
           overflowX: "hidden",
         }}
       >
-        <PageTitle title="Environment Management Dashboard" />
+        <PageTitle title="Audit Management Dashboard" />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
 
@@ -294,6 +408,13 @@ function EnvironmentDashboard() {
               marginTop: "0.5rem",
             }}
           >
+            <DateRangePicker
+              control={control}
+              register={register}
+              errors={errors}
+              label="Enter a date Range"
+            />
+
             <Box
               sx={{
                 display: "flex",
@@ -301,42 +422,35 @@ function EnvironmentDashboard() {
                 minWidth: "250px",
               }}
             >
-              <Autocomplete
-                {...register("period", { required: true })}
-                size="small"
-                options={Object.values(HazardDashboardPeriods)}
-                sx={{ flex: 1, margin: "0.5rem" }}
-                onChange={(e, value) => {
-                  setValue("period", value);
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    error={!!errors.period}
-                    label="Period"
-                    name="period"
+              <Controller
+                name="division"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <Autocomplete
+                    {...field}
+                    onChange={(e, value) => field.onChange(value)}
+                    value={field.value || ""}
+                    options={
+                      divisionData?.map((division) => division.divisionName) ||
+                      []
+                    }
+                    size="small"
+                    sx={{ flex: 1, margin: "0.5rem" }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        required
+                        error={!!errors.division}
+                        helperText={errors.division && "Required"}
+                        label="Division"
+                      />
+                    )}
                   />
                 )}
               />
             </Box>
-            {watchPeriod === HazardDashboardPeriods.CUSTOM && (
-              <Box
-                sx={{
-                  display: "flex",
-                  flex: 2,
-                  minWidth: "250px",
-                  borderRadius: "0.3rem",
-                }}
-              >
-                <DateRangePicker
-                  control={control}
-                  register={register}
-                  errors={errors}
-                  label="Enter a date Range"
-                />
-              </Box>
-            )}
+
             <Box
               sx={{
                 display: "flex",
@@ -344,18 +458,30 @@ function EnvironmentDashboard() {
                 minWidth: "250px",
               }}
             >
-              <Autocomplete
-                {...register("division", { required: true })}
-                size="small"
-                options={sampleDivisions?.map((division) => division.name)}
-                sx={{ flex: 1, margin: "0.5rem" }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    error={!!errors.division}
-                    label="Division"
-                    name="division"
+              <Controller
+                name="year"
+                control={control}
+                rules={{ required: true }}
+                defaultValue={new Date().getFullYear().toString()}
+                render={({ field }) => (
+                  <Autocomplete
+                    {...field}
+                    onChange={(event, newValue) => field.onChange(newValue)}
+                    size="small"
+                    options={
+                      yearData?.length ? yearData.map((year) => year.year) : []
+                    }
+                    sx={{ flex: 1, margin: "0.5rem" }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        required
+                        error={!!errors.year}
+                        helperText={errors.year && "Required"}
+                        label="Year"
+                        name="year"
+                      />
+                    )}
                   />
                 )}
               />
@@ -367,24 +493,32 @@ function EnvironmentDashboard() {
                 minWidth: "250px",
               }}
             >
-              <Autocomplete
-                {...register("category", { required: true })}
-                size="small"
-                options={HazardOrRiskCategories?.map(
-                  (category) => category.name
-                )}
-                sx={{ flex: 1, margin: "0.5rem" }}
-                onChange={(e, value) => {
-                  console.log("e", e);
-                  setValue("category", value);
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    error={!!errors.category}
-                    label="Category"
-                    name="category"
+              <Controller
+                name="auditType"
+                control={control}
+                defaultValue={null}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <Autocomplete
+                    {...field}
+                    onChange={(event, newValue) => field.onChange(newValue)}
+                    size="small"
+                    options={
+                      auditTypeData?.length
+                        ? auditTypeData.map((type) => type.type)
+                        : []
+                    }
+                    sx={{ flex: 1, margin: "0.5rem" }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        required
+                        error={!!errors.auditType}
+                        helperText={errors.auditType && "Required"}
+                        label="Audit Type"
+                        name="auditType"
+                      />
+                    )}
                   />
                 )}
               />
@@ -400,7 +534,7 @@ function EnvironmentDashboard() {
           >
             <Button
               onClick={() => {
-                console.log("reset");
+                reset();
               }}
               sx={{ color: "var(--pallet-blue)", marginRight: "0.5rem" }}
             >
@@ -413,7 +547,7 @@ function EnvironmentDashboard() {
               }}
               size="medium"
               onClick={handleSubmit((data) => {
-                // handleCreateDocument(data);
+                handleFetch();
                 console.log("data", data);
               })}
             >
@@ -442,7 +576,10 @@ function EnvironmentDashboard() {
           <DashboardCard
             title="Schedule"
             titleIcon={<EditCalendarIcon fontSize="large" />}
-            value={25}
+            value={
+              (statusCountMemo?.status?.draft ?? 0) +
+              (statusCountMemo?.status?.approved ?? 0)
+            }
             subDescription="0% from previous period"
           />
         </Box>
@@ -457,7 +594,7 @@ function EnvironmentDashboard() {
           <DashboardCard
             title="Approved"
             titleIcon={<CheckBoxOutlinedIcon fontSize="large" />}
-            value={10}
+            value={statusCountMemo?.status?.approved ?? 0}
             subDescription="3% From previous period"
           />
         </Box>
@@ -472,7 +609,7 @@ function EnvironmentDashboard() {
           <DashboardCard
             title="In-Progress"
             titleIcon={<RotateRightOutlinedIcon fontSize="large" />}
-            value={10}
+            value={statusCountMemo?.status?.draft ?? 0}
             subDescription="8% From previous period"
           />
         </Box>
@@ -502,7 +639,7 @@ function EnvironmentDashboard() {
           <DashboardCard
             title="Amount"
             titleIcon={<PaidOutlinedIcon fontSize="large" />}
-            value={5254.0}
+            value={statusCountMemo?.auditFeeTotal ?? 0}
             subDescription="5% From previous period"
           />
         </Box>
@@ -591,35 +728,24 @@ function EnvironmentDashboard() {
               Internal Audit Score
             </Typography>
           </Box>
-          <ResponsiveContainer width={"100%"} height={500}>
-            <BarChart width={800} height={400} data={ExternalTransformedAuditScores}>
+          {(stackedData.length > 0 ?<ResponsiveContainer width={"100%"} height={500}>
+            <BarChart data={stackedData}>
               <XAxis dataKey="month" />
-              <YAxis fontSize={12} />
+              <YAxis />
               <Tooltip />
               <Legend />
-              <Bar
-                dataKey="Safety"
-                name="Safety Audit"
-                stackId="a"
-                fill="#4f46e5"
-                barSize={10}
-              />
-              <Bar
-                dataKey="Quality"
-                name="Quality Audit"
-                stackId="a"
-                fill="#10b981"
-                barSize={10}
-              />
-              <Bar
-                dataKey="Environmental"
-                name="Environmental Audit"
-                stackId="a"
-                fill="#f59e0b"
-                barSize={10}
-              />
+              {auditTypes.map((type) => (
+                <Bar
+                  key={type}
+                  dataKey={type}
+                  name={type.replace(/_/g, " ")}
+                  stackId="a"
+                  barSize={10}
+                  fill={getColorForType(type)}
+                />
+              ))}
             </BarChart>
-          </ResponsiveContainer>
+          </ResponsiveContainer> : <Typography textAlign={"center"}>Please Select a filters to display data</Typography>)}
         </Box>
       </Box>
 

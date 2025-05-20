@@ -6,6 +6,7 @@ import {
   UseFormRegister,
 } from "react-hook-form";
 import DatePickerComponent from "./DatePickerComponent";
+import { useState } from "react";
 
 function DateRangePicker({
   label,
@@ -14,10 +15,12 @@ function DateRangePicker({
   errors,
 }: {
   label: string;
-  control: Control;
+  control: Control<any>;
   register: UseFormRegister<any>;
   errors: FieldErrors<any>;
 }) {
+  const [startDate, setStartDate] = useState<Date | null>(null);
+
   return (
     <Box
       sx={{
@@ -34,7 +37,10 @@ function DateRangePicker({
         render={({ field }) => {
           return (
             <DatePickerComponent
-              onChange={(e) => field.onChange(e)}
+              onChange={(e) => {
+                field.onChange(e);
+                setStartDate(e);
+              }}
               value={field.value}
               error={errors?.dateRangeFrom ? "Required" : ""}
             />
@@ -55,6 +61,7 @@ function DateRangePicker({
               onChange={(e) => field.onChange(e)}
               value={field.value}
               error={errors?.dateRangeTo ? "Required" : ""}
+              minDate={startDate} // This will disable dates before the start date
             />
           );
         }}

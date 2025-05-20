@@ -39,3 +39,14 @@ export const sampleAuditData = [
     }
   }
 ];
+
+export const auditTypeData = [
+  {
+    id:"1",
+    type: "Internal Audit"
+  },
+  {
+    id:"2",
+    type: "External Audit"
+  },
+]
