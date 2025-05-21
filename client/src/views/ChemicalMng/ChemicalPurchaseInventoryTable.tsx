@@ -208,7 +208,7 @@ function ChemicalPurchaseInventoryTable() {
         drawerContent={
           <Stack spacing={1} sx={{ paddingX: theme.spacing(1) }}>
             <DrawerHeader
-              title="Chemical Request Details"
+              title="Chemical Purchase Details"
               handleClose={() => setOpenViewDrawer(false)}
               onEdit={() => {
                 setSelectedRow(selectedRow);

@@ -49,15 +49,12 @@ import ApproveConfirmationModal from "../OccupationalHealth/MedicineInventory/Me
 import {
   ChemicalCertificate,
   ChemicalPurchaseRequest,
-  ChemicalRequestStatus,
-  deleteChemicalRequest,
   fetchAllSupplierNames,
   fetchProductStandards,
   HazardType,
   publishChemicalPurchase,
   updateChemicalPurchaseInventory,
   UseOfPpe,
-  ZdhcUseCategory,
 } from "../../api/ChemicalManagement/ChemicalRequestApi";
 import DropzoneComponent from "../../components/DropzoneComponent";
 import { ExistingFileItemsEdit } from "../../components/ExistingFileItemsEdit";
@@ -1712,10 +1709,9 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                     Status
                   </Typography>
                   <Box>
-                    {defaultValues.status === ChemicalRequestStatus.DRAFT ? (
-                      <Chip label="Draft" />
-                    ) : defaultValues.status ===
-                      ChemicalRequestStatus.PUBLISHED ? (
+                    {defaultValues.status === "approved" ? (
+                      <Chip label="Request Approved" />
+                    ) : defaultValues.status === "published" ? (
                       <Chip
                         label="Published"
                         sx={{
