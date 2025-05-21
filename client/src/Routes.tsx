@@ -19,6 +19,9 @@ const UserTable = React.lazy(() => import("./views/Administration/UserTable"));
 const AccessManagementTable = React.lazy(
   () => import("./views/Administration/AccessManagementTable")
 );
+const OrganizationTable = React.lazy(
+  () => import("./views/Administration/OrganizationSettings/OrganizationSettingsTable")
+);
 
 const UnderDevelopment = React.lazy(
   () => import("./components/UnderDevelopment")
@@ -133,6 +136,12 @@ const TargetSettingsTable = React.lazy(
 const EnvironmentTable = React.lazy(
   () => import("./views/Environment/Consumption/ConsumptionTable")
 );
+const AuditAndInspectionDashboard = React.lazy(
+  () => import("./views/AuditAndInspection/Dashboard")
+);
+const EnvironmentDashBoard = React.lazy(
+  () => import("./views/Environment/Dashboard")
+);
 
 
 function withLayout(Layout: any, Component: any, restrictAccess = false) {
@@ -207,6 +216,15 @@ const AppRoutes = () => {
 
         {/* Administration */}
         <Route
+          path="/admin/organization-settings"
+          element={withLayout(
+            MainLayout,
+            OrganizationTable,
+            !userPermissionObject?.[PermissionKeys.ADMIN_USERS_VIEW]
+          )}
+        />
+
+        <Route
           path="/admin/users"
           element={withLayout(
             MainLayout,
@@ -222,18 +240,16 @@ const AppRoutes = () => {
             !userPermissionObject?.[PermissionKeys.ADMIN_ACCESS_MNG_VIEW]
           )}
         />
-
+        
         {/* Audit & Inspection */}
         <Route
           path="/audit-inspection/dashboard"
           element={withLayout(
             MainLayout,
-            () => (
-              <UnderDevelopment pageName="Audit & Inspection > Dashboard" />
-            )
-            // !userPermissionObject?.[
-            //   PermissionKeys.AUDIT_INSPECTION_DASHBOARD_VIEW
-            // ]
+            AuditAndInspectionDashboard,
+            !userPermissionObject?.[
+              PermissionKeys.AUDIT_INSPECTION_DASHBOARD_VIEW
+            ]
           )}
         />
         <Route
@@ -581,9 +597,11 @@ const AppRoutes = () => {
         />
         <Route
           path="/environment/dashboard"
-          element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="Environment > Dashboard" />
-          ))}
+          element={withLayout(
+            MainLayout,
+            EnvironmentDashBoard,
+            !userPermissionObject?.[PermissionKeys.ENVIRONMENT_DASHBOARD_VIEW]
+          )}
         />
         <Route
           path="/environment/history/target-setting"

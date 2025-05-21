@@ -22,7 +22,7 @@ export const sampleAssignees = [
 
 export const sampleUsers: User[] = [
   {
-    id: "1",
+    id: 1,
     name: "John Doe",
     email: "johnd@gmail.com",
     mobile: "1234567890",
@@ -38,7 +38,7 @@ export const sampleUsers: User[] = [
     roleId: "1",
   },
   {
-    id: "2",
+    id: 2,
     name: "Jane Doe",
     email: "janeD@gmail.com",
     mobile: "1234567890",
@@ -67,5 +67,35 @@ export const sampleRoles = [
     name: "Manager",
     description: "Manager role",
     accessSettings: defaultAdminPermissions,
+  },
+];
+
+export const sampleOrganization = [
+  {
+    id: 1,
+    logoUrl: [
+      {
+        fileName: "681c9863425b5_map.png",
+        imageUrl:
+          "https://www.shutterstock.com/image-vector/circle-line-simple-design-logo-600nw-2174926871.jpg",
+      },
+    ],
+    organizationName: "ABA GROUP",
+    insightImage: [
+      {
+        fileName: "681c9863425b5_map.png",
+        imageUrl:
+          "https://storage.googleapis.com/mas_silueta_bucket/uploads/profile/681c9863425b5_map.png?GoogleAccessId=silueta-storage-service-accoun%40silueta-image-upload.iam.gserviceaccount.com&Expires=1747220527&Signature=o3DicV%2B1mveiAoMxDtLh9J8%2BTyZX9Fkb1ebLliroPbqPf2s7fKVd6cqxpo25DSmjCIelULJ5oVxvGZ0CA%2BeQ99KpkbmDokF%2FvyJW2jcFmNODobZtQdWVo7ELaAdveToemKtTDKQdRG5Z35hpdCfBLJNOlJM7WZFiN4eoPvh%2FAEsGgANUYl5hDyw2MtjjE2GqaHDSFzfxv1tHyrPuhyRmCHKVxT9d0%2BZu4p6%2FlyOV0RUOMEZIqblLgcUOnmbFC27DHt7MnPtGBpGIzuurEgAuI0j3wkriUVDCC1GDgmgryGeH1QnK9jxcnvQnHZH4fHQ552ay6QbG0W160PSQHqwHwA%3D%3D",
+      },
+    ],
+    insightDescription: "Hi",
+    colorPallet: [
+      {
+        primaryColor: "#1E3A8A",
+        secondaryColor: "#60A5FA",
+        buttonColor: "#10B981",
+      },
+    ],
+    created_at: "2025.05.14",
   },
 ];

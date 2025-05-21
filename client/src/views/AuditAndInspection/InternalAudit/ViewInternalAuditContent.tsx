@@ -23,6 +23,7 @@ import { useMemo, useState } from "react";
 import { DrawerContentItem } from "../../../components/ViewDataDrawer";
 import useIsMobile from "../../../customHooks/useIsMobile";
 import {
+  deleteActionPlan,
   getScheduledInternalAuditList,
   InternalAuditAnswerToQuestions,
   InternalAuditQuestionGroup,
@@ -41,7 +42,11 @@ import { RenderAuditQuestionColorTag } from "../AuditBuilder/InternalAuditFormDr
 import { CircularProgressWithLabel } from "../../../components/CircularProgressWithLabel";
 import CustomButton from "../../../components/CustomButton";
 import { AddOrEditActionPlan } from "./AddOrEditActionPlan";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import DeleteIcon from "@mui/icons-material/Delete";
+import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
+import queryClient from "../../../state/queryClient";
+import { useSnackbar } from "notistack";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -80,12 +85,14 @@ function ViewInternalAuditContent({
   internalAudit: ScheduledInternalAudit;
   handleClose: () => void;
 }) {
+  const { enqueueSnackbar } = useSnackbar();
   const [activeTab, setActiveTab] = useState(0);
   const [openActionItemDialog, setOpenActionItemDialog] = useState(false);
   const [selectedActionItem, setSelectedActionItem] =
     useState<ScheduledInternalAuditActionPlan | null>(null);
   const { isTablet } = useIsMobile();
-
+  const [openDeleteActionItemModal, setOpenDeleteActionItemModal] =
+    useState(false);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
   };
@@ -111,6 +118,25 @@ function ViewInternalAuditContent({
   const percentageAchieved = useMemo(() => {
     return (earnedScore / internalAudit?.audit?.achievableScore) * 100 || 0;
   }, [earnedScore, internalAudit]);
+
+  const { mutate: deleteActionItemMutation } = useMutation({
+    mutationFn: deleteActionPlan,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["scheduled-internal-audit"],
+      });
+      enqueueSnackbar("Action Item Deleted Successfully!", {
+        variant: "success",
+      });
+      setOpenDeleteActionItemModal(false);
+      setSelectedActionItem(null);
+    },
+    onError: () => {
+      enqueueSnackbar(`Action Item Delete Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   return (
     <Stack
@@ -382,11 +408,15 @@ function ViewInternalAuditContent({
               <Stack spacing={1}>
                 {internalAudit?.actionPlan?.map((actionPlan, index) => (
                   <ActionPlanItem
-                    key={`${actionPlan.acctionPlanId}${actionPlan.internalAuditId}${index}`}
+                    key={`${actionPlan.actionPlanId}${actionPlan.internalAuditId}${index}`}
                     actionPlan={actionPlan}
                     onClickEdit={() => {
                       setSelectedActionItem(actionPlan);
                       setOpenActionItemDialog(true);
+                    }}
+                    onClickDelete={() => {
+                      setSelectedActionItem(actionPlan);
+                      setOpenDeleteActionItemModal(true);
                     }}
                   />
                 ))}
@@ -415,11 +445,43 @@ function ViewInternalAuditContent({
                 </Box>
               </Stack>
             )}
+            {openDeleteActionItemModal && (
+              <DeleteConfirmationModal
+                open={openDeleteActionItemModal}
+                title="Remove Action Plan Confirmation"
+                content={
+                  <>
+                    Are you sure you want to remove this action plan?
+                    <Alert severity="warning" style={{ marginTop: "1rem" }}>
+                      This action is not reversible.
+                    </Alert>
+                  </>
+                }
+                handleClose={() => setOpenDeleteActionItemModal(false)}
+                deleteFunc={async () => {
+                  if (selectedActionItem) {
+                    await deleteActionItemMutation({
+                      id: selectedActionItem.actionPlanId,
+                    });
+                  }
+                }}
+                onSuccess={() => {
+                  setOpenDeleteActionItemModal(false);
+                  setSelectedActionItem(null);
+                  handleClose();
+                }}
+                handleReject={() => {
+                  setOpenDeleteActionItemModal(false);
+                  setSelectedActionItem(null);
+                }}
+              />
+            )}
           </TabPanel>
         )}
       </Box>
       <AddOrEditActionPlan
         open={openActionItemDialog}
+        setOpen={setOpenActionItemDialog}
         handleClose={() => {
           setSelectedActionItem(null);
           setOpenActionItemDialog(false);
@@ -606,9 +668,11 @@ export const AuditQuestionsSectionAccordion = ({
 const ActionPlanItem = ({
   actionPlan,
   onClickEdit,
+  onClickDelete,
 }: {
   actionPlan: ScheduledInternalAuditActionPlan;
   onClickEdit: () => void;
+  onClickDelete: () => void;
 }) => {
   return (
     <Box
@@ -633,11 +697,23 @@ const ActionPlanItem = ({
           <IconButton
             aria-label="edit"
             size="small"
+            sx={{
+              marginRight: "0.5rem",
+            }}
             onClick={() => {
               onClickEdit();
             }}
           >
             <EditIcon fontSize="inherit" />
+          </IconButton>
+          <IconButton
+            aria-label="edit"
+            size="small"
+            onClick={() => {
+              onClickDelete();
+            }}
+          >
+            <DeleteIcon fontSize="inherit" />
           </IconButton>
         </Box>
         <Box sx={{ display: "flex", flexDirection: "row" }}>

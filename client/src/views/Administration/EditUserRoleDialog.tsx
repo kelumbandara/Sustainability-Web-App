@@ -40,7 +40,17 @@ type DialogProps = {
   open: boolean;
   handleClose: () => void;
   defaultValues?: User;
-  onSubmit?: (data: User) => void;
+  onSubmit: (data: {
+    id: number;
+    userTypeId: number;
+    assigneeLevel: string;
+    department: string;
+    availability: boolean;
+    jobPosition: string;
+    assignedFactory: string[];
+    responsibleSection: string[];
+  }) => void;
+  isSubmitting?: boolean;
 };
 
 export default function EditUserRoleDialog({
@@ -48,6 +58,7 @@ export default function EditUserRoleDialog({
   handleClose,
   defaultValues,
   onSubmit,
+  isSubmitting = false,
 }: DialogProps) {
   const { isTablet } = useIsMobile();
   const { data: roles, isFetching: isFetchingRoles } = useQuery<UserRole[]>({
@@ -107,23 +118,6 @@ export default function EditUserRoleDialog({
   const resetForm = () => {
     reset();
   };
-
-  const { mutate: updateUserRoleMutation, isPending } = useMutation({
-    mutationFn: updateUserType,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      resetForm();
-      handleClose();
-      enqueueSnackbar("User Role Updated Successfully!", {
-        variant: "success",
-      });
-    },
-    onError: () => {
-      enqueueSnackbar(`User Role Update Failed`, {
-        variant: "error",
-      });
-    },
-  });
 
   return (
     <Dialog
@@ -369,10 +363,10 @@ export default function EditUserRoleDialog({
           sx={{
             backgroundColor: "var(--pallet-blue)",
           }}
-          disabled={isPending}
+          disabled={isSubmitting}
           size="medium"
           onClick={handleSubmit((data) => {
-            updateUserRoleMutation({
+            onSubmit({
               id: defaultValues?.id,
               userTypeId: data.userType?.id,
               assigneeLevel: data.userLevel?.id,

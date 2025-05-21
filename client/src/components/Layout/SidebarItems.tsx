@@ -19,6 +19,7 @@ import SentimentSatisfiedAltOutlinedIcon from "@mui/icons-material/SentimentSati
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import SubdirectoryArrowRightIcon from "@mui/icons-material/SubdirectoryArrowRight";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import KeyIcon from "@mui/icons-material/Key";
 import { PermissionKeys } from "../../views/Administration/SectionList";
 
@@ -61,6 +62,12 @@ export const sidebarItems: Array<SidebarItem> = [
     headline: "Administration",
   },
   {
+    title: "Organization Settings",
+    icon: <SettingsOutlinedIcon fontSize="small" />,
+    href: "/admin/organization-settings",
+    accessKey: PermissionKeys.ADMIN_USERS_VIEW, // need to add permission key
+  },
+  {
     title: "Users",
     icon: <PeopleAltIcon fontSize="small" />,
     href: "/admin/users",
@@ -80,6 +87,7 @@ export const sidebarItems: Array<SidebarItem> = [
     icon: <LayersIcon fontSize="small" />,
     href: "/audit-inspection",
     open: false,
+    disabled: false,
     nestedItems: [
       {
         title: "Dashboard",
@@ -133,20 +141,20 @@ export const sidebarItems: Array<SidebarItem> = [
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
             accessKey: PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_TASK_VIEW,
           },
-          {
-            title: "External Audit Queue",
-            href: "/audit-inspection/external-audit/audit-queue",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-            accessKey:
-              PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_VIEW,
-          },
-          {
-            title: "Corrective Action",
-            href: "/audit-inspection/external-audit/corrective-action",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-            accessKey:
-              PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_CORRECTIVE_ACTION_VIEW,
-          },
+          // {
+          //   title: "External Audit Queue",
+          //   href: "/audit-inspection/external-audit/audit-queue",
+          //   icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+          //   accessKey:
+          //     PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_VIEW,
+          // },
+          // {
+          //   title: "Corrective Action",
+          //   href: "/audit-inspection/external-audit/corrective-action",
+          //   icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+          //   accessKey:
+          //     PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_CORRECTIVE_ACTION_VIEW,
+          // },
         ],
       },
     ],
@@ -312,12 +320,12 @@ export const sidebarItems: Array<SidebarItem> = [
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
             accessKey: PermissionKeys.INCIDENT_ACCIDENT_REGISTER_INCIDENT_VIEW,
           },
-          {
-            title: "Corrective Action",
-            href: "/accident-incident/register/corrective-action",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-            accessKey: PermissionKeys.INCIDENT_ACCIDENT_CORRECTIVE_ACTION_VIEW,
-          },
+          // {
+          //   title: "Corrective Action",
+          //   href: "/accident-incident/register/corrective-action",
+          //   icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+          //   accessKey: PermissionKeys.INCIDENT_ACCIDENT_CORRECTIVE_ACTION_VIEW,
+          // },
         ],
       },
 

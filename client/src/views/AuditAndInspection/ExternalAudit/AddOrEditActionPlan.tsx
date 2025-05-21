@@ -33,19 +33,24 @@ import { fetchInternalAuditAssignee } from "../../../api/userApi";
 import RichTextComponent from "../../../components/RichTextComponent";
 import theme from "../../../theme";
 import { useEffect } from "react";
+import {
+  createExternalActionPlan,
+  ScheduledExternalAuditActionPlan,
+  updateExternalActionPlan,
+} from "../../../api/ExternalAudit/externalAuditApi";
 
 export const AddOrEditActionPlan = ({
   open,
   setOpen,
   handleClose,
   selectedActionItem,
-  internalAuditId,
+  auditId,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
   handleClose: () => void;
   selectedActionItem: ScheduledInternalAuditActionPlan;
-  internalAuditId: number;
+  auditId: number;
 }) => {
   const {
     register,
@@ -74,14 +79,15 @@ export const AddOrEditActionPlan = ({
   }, [selectedActionItem, reset]);
 
   const handleSubmitActionPlan = async (data: any) => {
-    const actionPlanData: ScheduledInternalAuditActionPlan = {
-      internalAuditId: Number(internalAuditId),
+    const actionPlanData: ScheduledExternalAuditActionPlan = {
+      externalAuditId: Number(auditId),
       correctiveOrPreventiveAction: data.correctiveOrPreventiveAction,
       dueDate: data.dueDate,
       targetCompletionDate: data.targetCompletionDate,
       priority: data.priority,
       approverId: data.approver?.id,
     };
+    console.log(actionPlanData);
 
     if (selectedActionItem) {
       actionPlanData.actionPlanId = selectedActionItem.actionPlanId;
@@ -93,19 +99,19 @@ export const AddOrEditActionPlan = ({
 
   const { mutate: createActionPlanMutation, isPending: isActionPlanCreating } =
     useMutation({
-      mutationFn: createActionPlan,
+      mutationFn: createExternalActionPlan,
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ["scheduled-internal-audit"],
+          queryKey: ["external-audit"],
         });
-        enqueueSnackbar("Action Plan Updated Successfully!", {
+        enqueueSnackbar("Action Plan Create Successfully!", {
           variant: "success",
         });
         reset();
         handleClose();
       },
       onError: () => {
-        enqueueSnackbar(`Action Plan Update Failed`, {
+        enqueueSnackbar(`Action Plan Create Failed`, {
           variant: "error",
         });
       },
@@ -113,10 +119,10 @@ export const AddOrEditActionPlan = ({
 
   const { mutate: updateActionPlanMutation, isPending: isActionPlanUpdating } =
     useMutation({
-      mutationFn: updateActionPlan,
+      mutationFn: updateExternalActionPlan,
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ["scheduled-internal-audit"],
+          queryKey: ["external-audit"],
         });
         enqueueSnackbar("Action Plan Updated Successfully!", {
           variant: "success",

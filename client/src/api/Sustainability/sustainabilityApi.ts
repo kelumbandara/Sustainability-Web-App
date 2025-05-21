@@ -41,31 +41,38 @@ export type Sustainability = z.infer<typeof SustainabilitySchema>;
 export const createSustainabilityReport = async (
   sustainability: Sustainability
 ) => {
-  const parsedMaterialityType = Array.isArray(sustainability.materialityType)
-    ? sustainability.materialityType
-    : JSON.parse(sustainability.materialityType || "[]");
-  const parsedMaterialityIssue = Array.isArray(sustainability.materialityIssue)
-    ? sustainability.materialityIssue
-    : JSON.parse(sustainability.materialityIssue || "[]");
-  const parsedPillars = Array.isArray(sustainability.pillars)
-    ? sustainability.pillars
-    : JSON.parse(sustainability.pillars || "[]");
-  const parsedAdditionalSdg = Array.isArray(sustainability.additionalSdg)
-    ? sustainability.additionalSdg
-    : JSON.parse(sustainability.additionalSdg || "[]");
+  // Clone and preprocess input
+  const processed = { ...sustainability };
+
+  ["pillars", "materialityType", "materialityIssue", "additionalSdg"].forEach(
+    (key) => {
+      if (processed[key]) {
+        try {
+          let value = processed[key];
+          value = typeof value === "string" ? JSON.parse(value) : value;
+          processed[key] = Array.isArray(value)
+            ? value.map((item: string) => item.replace(/^"|"$/g, ""))
+            : [];
+        } catch (error) {
+          console.warn(`Failed to parse ${key}:`, processed[key]);
+          processed[key] = [];
+        }
+      }
+    }
+  );
 
   const formData = new FormData();
 
-  Object.keys(sustainability).forEach((key) => {
-    const value = sustainability[key];
+  Object.keys(processed).forEach((key) => {
+    const value = processed[key];
 
     if (key === "documents" && Array.isArray(value)) {
-      value.forEach((file, index) => {
+      value.forEach((file: File, index: number) => {
         formData.append(`documents[${index}]`, file);
       });
     } else if (Array.isArray(value)) {
       value.forEach((item, index) => {
-        if (key === "impactDetails") {
+        if (key === "impactDetails" && typeof item === "object") {
           Object.keys(item).forEach((nestedKey) => {
             formData.append(
               `${key}[${index}][${nestedKey}]`,
@@ -73,7 +80,7 @@ export const createSustainabilityReport = async (
             );
           });
         } else {
-          formData.append(`${key}[${index}]`, JSON.stringify(item));
+          formData.append(`${key}[${index}]`, item.toString());
         }
       });
     } else if (value instanceof Date) {
@@ -82,17 +89,6 @@ export const createSustainabilityReport = async (
       formData.append(key, value.toString());
     }
   });
-
-  formData.append(
-    "parsedMaterialityType",
-    JSON.stringify(parsedMaterialityType)
-  );
-  formData.append(
-    "parsedMaterialityIssue",
-    JSON.stringify(parsedMaterialityIssue)
-  );
-  formData.append("parsedPillars", JSON.stringify(parsedPillars));
-  formData.append("parsedAdditionalSdg", JSON.stringify(parsedAdditionalSdg));
 
   try {
     const res = await axios.post("/api/sdg-report", formData, {
