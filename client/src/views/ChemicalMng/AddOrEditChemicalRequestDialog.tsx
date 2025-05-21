@@ -28,7 +28,6 @@ import {
 } from "../../api/ChemicalManagement/ChemicalRequestApi";
 import useIsMobile from "../../customHooks/useIsMobile";
 import CustomButton from "../../components/CustomButton";
-import { sampleProductStandardList } from "../../api/sampleData/chemicalRequestSampleData";
 import DatePickerComponent from "../../components/DatePickerComponent";
 import SwitchButton from "../../components/SwitchButton";
 import DropzoneComponent from "../../components/DropzoneComponent";

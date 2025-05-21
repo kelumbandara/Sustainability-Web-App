@@ -29,7 +29,6 @@ import {
   fetchChemicalAssignedRequest,
   fetchChemicalRequests,
 } from "../../api/ChemicalManagement/ChemicalRequestApi";
-import { sampleChemicalRequestData } from "../../api/sampleData/chemicalRequestSampleData";
 import theme from "../../theme";
 import PageTitle from "../../components/PageTitle";
 import Breadcrumb from "../../components/BreadCrumb";
