@@ -24,10 +24,6 @@ function OrganizationSettings() {
     queryFn: getOrganization,
   });
 
-  const firstOrganization = useMemo(() => {
-    return organizationData ? organizationData[0] : [];
-  }, [organizationData]);
-
   return (
     <Stack>
       <Box
@@ -62,13 +58,13 @@ function OrganizationSettings() {
         </CustomButton>
       </Box>
       <Stack>
-        <ViewOrganizationContent organizationSettings={firstOrganization} />
+        <ViewOrganizationContent organizationSettings={organizationData} />
       </Stack>
       {openEditOrganizationDialog && (
         <EditOrganizationDialog
           open={openEditOrganizationDialog}
           handleClose={() => setOpenEditOrganizationDialog(false)}
-          defaultValues={firstOrganization}
+          defaultValues={organizationData}
         />
       )}
     </Stack>

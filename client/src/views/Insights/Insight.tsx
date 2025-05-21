@@ -13,20 +13,20 @@ function Insight() {
     queryFn: getOrganization,
   });
 
-  console.log("yoo", organizationData?.[0].insightImage);
+  console.log("yoo", organizationData?.insightImage);
   const insightImage = useMemo(() => {
-    if (organizationData && organizationData[0]?.insightImage) {
-      return Array.isArray(organizationData[0].insightImage)
-        ? organizationData[0].insightImage[0]
-        : organizationData[0].insightImage;
+    if (organizationData && organizationData?.insightImage) {
+      return Array.isArray(organizationData.insightImage)
+        ? organizationData.insightImage[0]
+        : organizationData.insightImage;
     }
   }, [organizationData]);
 
   const insightDescription = useMemo(() => {
-    if (organizationData && organizationData[0]?.insightDescription) {
-      return Array.isArray(organizationData[0].insightDescription)
-        ? organizationData[0].insightDescription[0]
-        : organizationData[0].insightDescription;
+    if (organizationData && organizationData?.insightDescription) {
+      return Array.isArray(organizationData.insightDescription)
+        ? organizationData.insightDescription[0]
+        : organizationData.insightDescription;
     }
   }, [organizationData]);
 
