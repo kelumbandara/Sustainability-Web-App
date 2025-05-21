@@ -8,7 +8,6 @@ import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import { Organization } from "../../../api/OrganizationSettings/organizationSettingsApi";
 import { hasSignedUrl } from "./orgUtils";
 import OrganizationGeneralDetails from "./OrganizationGeneralDetails";
-
 interface TabPanelProps {
   children?: React.ReactNode;
   dir?: string;

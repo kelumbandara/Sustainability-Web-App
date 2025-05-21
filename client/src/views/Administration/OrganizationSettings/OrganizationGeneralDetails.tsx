@@ -1,21 +1,14 @@
 import { Stack, Box, Badge, IconButton, Typography } from "@mui/material";
-import React, { useMemo, useState } from "react";
-import CustomButton from "../../../components/CustomButton";
+import React, { useMemo } from "react";
 import { DrawerContentItem } from "../../../components/ViewDataDrawer";
 import {
   ColorPallet,
   ColorPalletSchema,
   Organization,
-  updateOrganization,
 } from "../../../api/OrganizationSettings/organizationSettingsApi";
 import useIsMobile from "../../../customHooks/useIsMobile";
 import { hasSignedUrl } from "./orgUtils";
-import EditOrganizationDialog from "./EditOrganizationDialog";
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
-import EditIcon from "@mui/icons-material/Edit";
-import { useMutation } from "@tanstack/react-query";
-import queryClient from "../../../state/queryClient";
-import { useSnackbar } from "notistack";
 
 function OrganizationGeneralDetails({
   organizationSettings,
@@ -23,9 +16,6 @@ function OrganizationGeneralDetails({
   organizationSettings: Organization;
 }) {
   const { isTablet } = useIsMobile();
-  const { enqueueSnackbar } = useSnackbar();
-  const [openEditOrganizationDialog, setOpenEditOrganizationDialog] =
-    useState(false);
 
   const parsedColorPallet = useMemo<ColorPallet[]>(() => {
     if (!organizationSettings?.colorPallet) return [];
@@ -80,7 +70,7 @@ function OrganizationGeneralDetails({
             justifyContent: "center",
           }}
         >
-          <Badge
+          {/* <Badge
             overlap="circular"
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             badgeContent={
@@ -98,42 +88,24 @@ function OrganizationGeneralDetails({
                 />
               </IconButton>
             }
-          >
-            <img
-              src={logo.signedUrl}
-              alt="Organization Logo"
-              style={{
-                width: 300,
-                height: 300,
-                borderRadius: "50%",
-                objectFit: "contain",
-                boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-                padding: "1rem",
-              }}
-            />
-          </Badge>
+          > */}
+          <img
+            src={logo.signedUrl}
+            alt="Organization Logo"
+            style={{
+              width: 300,
+              height: 300,
+              borderRadius: "50%",
+              objectFit: "contain",
+              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+              padding: "1rem",
+            }}
+          />
+          {/* </Badge> */}
         </Box>
       )}
 
       <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-          }}
-        >
-          <CustomButton
-            variant="contained"
-            sx={{
-              backgroundColor: "var(--pallet-blue)",
-            }}
-            size="medium"
-            startIcon={<EditIcon />}
-            onClick={() => setOpenEditOrganizationDialog(true)}
-          >
-            Edit General Details
-          </CustomButton>
-        </Box>
         <DrawerContentItem
           label="Organization Name"
           value={organizationSettings?.organizationName}
@@ -185,13 +157,6 @@ function OrganizationGeneralDetails({
           ))}
         </Box>
       </Box>
-      {openEditOrganizationDialog && (
-        <EditOrganizationDialog
-          open={openEditOrganizationDialog}
-          handleClose={() => setOpenEditOrganizationDialog(false)}
-          defaultValues={organizationSettings}
-        />
-      )}
     </Stack>
   );
 }

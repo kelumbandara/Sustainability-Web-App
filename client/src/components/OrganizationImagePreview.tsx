@@ -63,8 +63,8 @@ const SingleImagePreview: React.FC<Props> = ({
     >
       <Card
         sx={{
-          width: "25%",
-          height: "25%",
+          width: "50%",
+          height: "50%",
           position: "relative",
           overflow: "hidden",
         }}

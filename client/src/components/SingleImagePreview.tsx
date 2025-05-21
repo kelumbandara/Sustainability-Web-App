@@ -42,7 +42,11 @@ const getFileName = (file: StorageFile | File): string => {
   return "Unnamed file";
 };
 
-const SingleImagePreview: React.FC<Props> = ({ image, label = "Image", onRemove }) => {
+const SingleImagePreview: React.FC<Props> = ({
+  image,
+  label = "Image",
+  onRemove,
+}) => {
   const resolvedImage = Array.isArray(image) ? image[0] : image;
   const imageUrl = resolvedImage ? getPreviewUrl(resolvedImage) : null;
   const fileName = resolvedImage ? getFileName(resolvedImage) : "";
@@ -57,8 +61,8 @@ const SingleImagePreview: React.FC<Props> = ({ image, label = "Image", onRemove 
       >
         <Card
           sx={{
-            width: "100%",
-            height: "100%",
+            width: "50%",
+            height: "50%",
             position: "relative",
             overflow: "hidden",
           }}

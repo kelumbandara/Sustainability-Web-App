@@ -1,21 +1,18 @@
 import theme from "../../../theme";
 import PageTitle from "../../../components/PageTitle";
 import Breadcrumb from "../../../components/BreadCrumb";
-import { useSnackbar } from "notistack";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import queryClient from "../../../state/queryClient";
+import { useQuery } from "@tanstack/react-query";
 import ViewOrganizationContent from "./ViewOrganizationContent";
-import {
-  getOrganization,
-  updateOrganization,
-} from "../../../api/OrganizationSettings/organizationSettingsApi";
+import { getOrganization } from "../../../api/OrganizationSettings/organizationSettingsApi";
 import { useMemo, useState } from "react";
 import EditOrganizationDialog from "./EditOrganizationDialog";
-import { DrawerHeader } from "../../../components/ViewDataDrawer";
 import { Box, Stack } from "@mui/material";
+import CustomButton from "../../../components/CustomButton";
+import EditIcon from "@mui/icons-material/Edit";
 
 function OrganizationSettings() {
-  const { enqueueSnackbar } = useSnackbar();
+  const [openEditOrganizationDialog, setOpenEditOrganizationDialog] =
+    useState(false);
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
@@ -45,10 +42,35 @@ function OrganizationSettings() {
         <PageTitle title="Organization Settings" />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
-
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginBottom: theme.spacing(2),
+        }}
+      >
+        <CustomButton
+          variant="contained"
+          sx={{
+            backgroundColor: "var(--pallet-blue)",
+          }}
+          size="medium"
+          startIcon={<EditIcon />}
+          onClick={() => setOpenEditOrganizationDialog(true)}
+        >
+          Edit General Details
+        </CustomButton>
+      </Box>
       <Stack>
         <ViewOrganizationContent organizationSettings={firstOrganization} />
       </Stack>
+      {openEditOrganizationDialog && (
+        <EditOrganizationDialog
+          open={openEditOrganizationDialog}
+          handleClose={() => setOpenEditOrganizationDialog(false)}
+          defaultValues={firstOrganization}
+        />
+      )}
     </Stack>
   );
 }
