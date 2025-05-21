@@ -133,7 +133,7 @@ function ChemicalPurchaseInventoryTable() {
                     }}
                   >
                     <TableCell component="th" scope="row">
-                      {row.id}
+                      {row.referenceNumber}
                     </TableCell>
                     <TableCell align="left">
                       {row?.requestDate
@@ -146,7 +146,9 @@ function ChemicalPurchaseInventoryTable() {
                         : "--"}
                     </TableCell>
                     <TableCell align="left">{row.commercialName}</TableCell>
-                    <TableCell align="left">{row?.certificate.testName}</TableCell>
+                    <TableCell align="left">
+                      {row?.certificate.testName}
+                    </TableCell>
                     <TableCell align="left">
                       {row?.requestedCustomer ?? "--"}
                     </TableCell>
@@ -155,36 +157,34 @@ function ChemicalPurchaseInventoryTable() {
                     </TableCell>
                     <TableCell align="left">{row?.requestQuantity}</TableCell>
                     <TableCell align="center">
-                      <TableCell align="center">
-                        {(() => {
-                          switch (row.status) {
-                            case ChemicalRequestStatus.DRAFT:
-                              return <Chip label="Draft" />;
-                            case ChemicalRequestStatus.APPROVED:
-                              return (
-                                <Chip
-                                  label="Approved"
-                                  sx={{
-                                    backgroundColor: "var(--pallet-blue)",
-                                    color: "white",
-                                  }}
-                                />
-                              );
-                            case ChemicalRequestStatus.PUBLISHED:
-                              return (
-                                <Chip
-                                  label="Published"
-                                  sx={{
-                                    backgroundColor: "var(--pallet-blue)",
-                                    color: "white",
-                                  }}
-                                />
-                              );
-                            default:
-                              return null;
-                          }
-                        })()}
-                      </TableCell>
+                      {(() => {
+                        switch (row.status) {
+                          case ChemicalRequestStatus.DRAFT:
+                            return <Chip label="Draft" />;
+                          case ChemicalRequestStatus.APPROVED:
+                            return (
+                              <Chip
+                                label="Approved"
+                                sx={{
+                                  backgroundColor: "var(--pallet-light-blue)",
+                                  color: "var(--pallet-blue)",
+                                }}
+                              />
+                            );
+                          case ChemicalRequestStatus.PUBLISHED:
+                            return (
+                              <Chip
+                                label="Published"
+                                sx={{
+                                  backgroundColor: "var(--pallet-blue)",
+                                  color: "white",
+                                }}
+                              />
+                            );
+                          default:
+                            return null;
+                        }
+                      })()}
                     </TableCell>
                   </TableRow>
                 ))
@@ -214,7 +214,9 @@ function ChemicalPurchaseInventoryTable() {
                 setSelectedRow(selectedRow);
                 setOpenAddOrEditDialog(true);
               }}
-              disableEdit={selectedRow?.status !== ChemicalRequestStatus.APPROVED}
+              disableEdit={
+                selectedRow?.status !== ChemicalRequestStatus.APPROVED
+              }
               onDelete={() => setDeleteDialogOpen(true)}
             />
 

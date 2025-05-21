@@ -622,6 +622,7 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                       label="Substance Name"
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
+                      {...register("substanceName", { required: true })}
                     />
                   </Box>
                   <Box
@@ -1622,22 +1623,31 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                                 {row?.testName}
                               </TableCell>
                               <TableCell align="center">
-                                {format(new Date(row?.testDate), "yyyy-MM-dd")}
+                                {row?.testDate
+                                  ? format(
+                                      new Date(row?.testDate),
+                                      "yyyy-MM-dd"
+                                    )
+                                  : "--"}
                               </TableCell>
                               <TableCell align="center">
                                 {row?.testLab}
                               </TableCell>
                               <TableCell align="center">
-                                {format(
-                                  new Date(row?.issuedDate),
-                                  "yyyy-MM-dd"
-                                )}
+                                {row?.issuedDate
+                                  ? format(
+                                      new Date(row?.issuedDate),
+                                      "yyyy-MM-dd"
+                                    )
+                                  : "--"}
                               </TableCell>
                               <TableCell align="center">
-                                {format(
-                                  new Date(row?.expiryDate),
-                                  "yyyy-MM-dd"
-                                )}
+                                {row?.expiryDate
+                                  ? format(
+                                      new Date(row?.expiryDate),
+                                      "yyyy-MM-dd"
+                                    )
+                                  : "--"}
                               </TableCell>
                               <TableCell align="center">
                                 <IconButton
