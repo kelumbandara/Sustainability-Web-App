@@ -73,3 +73,54 @@ export async function fetchAuditAnnouncementStats(
   );
   return res.data;
 }
+
+export async function fetchAllDivisionTRecord(
+  dateFrom: String,
+  dateTo: String,
+  division: String,
+  auditType: String
+) {
+  console.log(division)
+  const res = await axios.get(
+    `api/audit-status-count/${dateFrom}/${dateTo}/${auditType}/all-division-record`
+  );
+  return res.data;
+}
+
+export async function fetchAuditCategoryBreakdown(
+  dateFrom: String,
+  dateTo: String,
+  division: String,
+  auditType: String
+) {
+  console.log(dateFrom)
+  console.log(dateTo)
+  const res = await axios.get(
+    `api/audit-status-count/${division}/${auditType}/select-division-record`
+  );
+  return res.data;
+}
+
+export async function fetchAuditStandardsByDivision(
+  dateFrom: String,
+  dateTo: String,
+  division: String,
+  auditType: String
+) {
+  const res = await axios.get(
+    `api/audit-status-count/${dateFrom}/${dateTo}/${division}/${auditType}/audit-standards`
+  );
+  return res.data;
+}
+
+export async function fetchAuditCompletionsByDivision(
+  dateFrom: String,
+  dateTo: String,
+  division: String,
+  auditType: String
+) {
+  const res = await axios.get(
+    `api/audit-status-count/${dateFrom}/${dateTo}/${division}/${auditType}/audit-completion-draft`
+  );
+  return res.data;
+}
