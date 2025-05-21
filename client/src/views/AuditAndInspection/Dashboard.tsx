@@ -703,9 +703,11 @@ function EnvironmentDashboard() {
             titleIcon={<EditCalendarIcon fontSize="large" />}
             value={
               (statusCountMemo?.status?.draft ?? 0) +
-                (statusCountMemo?.status?.approved ?? 0) ||
-              (statusCountMemo?.status?.completed ?? 0) +
-                (statusCountMemo?.status?.scheduled ?? 0)
+                (statusCountMemo?.status?.approved ?? 0) +
+                (statusCountMemo?.status?.complete ?? 0) ||
+              (statusCountMemo?.status?.complete ?? 0) +
+                (statusCountMemo?.status?.scheduled ?? 0) +
+                (statusCountMemo?.status?.approved ?? 0)
             }
             subDescription="0% from previous period"
           />
@@ -754,7 +756,7 @@ function EnvironmentDashboard() {
           <DashboardCard
             title="Completed"
             titleIcon={<VerifiedOutlinedIcon fontSize="large" />}
-            value={statusCountMemo?.status?.completed ?? 0}
+            value={statusCountMemo?.status?.complete ?? 0}
             subDescription="1.5% From previous period"
           />
         </Box>
