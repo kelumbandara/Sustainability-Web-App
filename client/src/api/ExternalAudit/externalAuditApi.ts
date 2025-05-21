@@ -9,8 +9,36 @@ export enum Announcement {
   UN_ANNOUNCED = "Un Announced",
 }
 
+export enum Status {
+  DRAFT = "draft",
+  APPROVED = "approved",
+  COMPLETE = "complete",
+}
+export enum ScheduledTaskActionPlanPriority {
+  HIGH = "High",
+  MEDIUM = "Medium",
+  LOW = "Low",
+}
+
+export const ScheduledExternalAuditActionPlanSchema = z.object({
+  actionPlanId: z.string().optional(),
+  externalAuditId: z.number(),
+  correctiveOrPreventiveAction: z.string(),
+  priority: z.nativeEnum(ScheduledTaskActionPlanPriority).optional(),
+  dueDate: z.date(),
+  created_at: z.date(),
+  updated_at: z.date().optional(),
+  targetCompletionDate: z.date(),
+  approver: userSchema.optional(),
+  approverId: z.string().optional(),
+});
+
+export type ScheduledExternalAuditActionPlan = z.infer<
+  typeof ScheduledExternalAuditActionPlanSchema
+>;
+
 export const ExternalAuditSchema = z.object({
-  id: z.string(),
+  id: z.number(),
   referenceNumber: z.string(),
   auditType: z.string(),
   auditCategory: z.string(),
@@ -25,7 +53,7 @@ export const ExternalAuditSchema = z.object({
   representor: userSchema.optional(),
   created_At: z.date(),
   createdBy: z.string(),
-  status: z.string(),
+  status: z.nativeEnum(Status),
   announcement: z.nativeEnum(Announcement),
   remarks: z.string(),
   auditStatus: z.string(),
@@ -46,6 +74,7 @@ export const ExternalAuditSchema = z.object({
   createdByUserName: z.string(),
   auditorName: z.string(),
   removeDoc: z.array(z.string()).optional(),
+  actionPlan: z.array(ScheduledExternalAuditActionPlanSchema).optional(),
 });
 
 export type ExternalAudit = z.infer<typeof ExternalAuditSchema>;
@@ -87,7 +116,7 @@ export const updateExternalAudit = async (externalAudit: ExternalAudit) => {
     throw error;
   }
 };
-export async function deleteExternalAudit(id: string) {
+export async function deleteExternalAudit(id: number) {
   const res = await axios.delete(`/api/external-audit/${id}/delete`);
 }
 export async function getExternalAuditData() {
@@ -146,5 +175,33 @@ export async function fetchAuditStandard() {
 
 export async function fetchAuditFirm() {
   const res = await axios.get("/api/external-audit-firm");
+  return res.data;
+}
+
+export async function createExternalActionPlan(
+  data: Partial<ScheduledExternalAuditActionPlan>
+) {
+  const res = await axios.post(`/api/external-audit-action-plan`, {
+    ...data,
+  });
+  return res.data;
+}
+
+export async function updateExternalActionPlan(
+  data: Partial<ScheduledExternalAuditActionPlan>
+) {
+  const res = await axios.post(
+    `/api/external-audit-action-plan/${data.actionPlanId}/update`,
+    {
+      ...data,
+    }
+  );
+  return res.data;
+}
+
+export async function deleteExternalActionPlan({ id }: { id: string }) {
+  const res = await axios.delete(
+    `/api/external-audit-action-plan/${id}/delete`
+  );
   return res.data;
 }

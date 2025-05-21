@@ -158,12 +158,12 @@ export default function MainLayout({ children }: Props) {
     queryFn: getOrganization,
   });
 
-  console.log("yoo", organizationData?.[0].logoUrl);
+  console.log("yoo", organizationData?.logoUrl);
   const logoUrl = useMemo(() => {
-    if (organizationData && organizationData[0]?.logoUrl) {
-      return Array.isArray(organizationData[0].logoUrl)
-        ? organizationData[0].logoUrl[0]
-        : organizationData[0].logoUrl;
+    if (organizationData && organizationData?.logoUrl) {
+      return Array.isArray(organizationData.logoUrl)
+        ? organizationData.logoUrl[0]
+        : organizationData.logoUrl;
     }
   }, [organizationData]);
 

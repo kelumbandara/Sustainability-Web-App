@@ -9,6 +9,8 @@ import {
   Alert,
   Box,
   Button,
+  Chip,
+  colors,
   LinearProgress,
   Stack,
   TableFooter,
@@ -36,6 +38,7 @@ import useCurrentUserHaveAccess from "../../../hooks/useCurrentUserHaveAccess";
 import { PermissionKeys } from "../../Administration/SectionList";
 import {
   ExternalAudit,
+  Status,
   createExternalAudit,
   deleteExternalAudit,
   getExternalAssignedAudit,
@@ -125,7 +128,10 @@ function ExternalAuditTable({
     theme.breakpoints.down("md")
   );
 
-  const { mutate: createExternalAuditMutation } = useMutation({
+  const {
+    mutate: createExternalAuditMutation,
+    isPending: createExternalAuditMutationIsPending,
+  } = useMutation({
     mutationFn: createExternalAudit,
     onSuccess: () => {
       setSelectedRow(null);
@@ -144,7 +150,10 @@ function ExternalAuditTable({
     },
   });
 
-  const { mutate: updateExternalAuditMutation } = useMutation({
+  const {
+    mutate: updateExternalAuditMutation,
+    isPending: updateExternalAuditMutationIsPending,
+  } = useMutation({
     mutationFn: updateExternalAudit,
     onSuccess: () => {
       setSelectedRow(null);
@@ -163,7 +172,10 @@ function ExternalAuditTable({
     },
   });
 
-  const { mutate: deleteExternalAuditMutation } = useMutation({
+  const {
+    mutate: deleteExternalAuditMutation,
+    isPending: deleteExternalAuditMutationIsPending,
+  } = useMutation({
     mutationFn: deleteExternalAudit,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["external-audit"] });
@@ -312,7 +324,7 @@ function ExternalAuditTable({
                 setOpenAddOrEditDialog(true);
               }}
               disabled={
-                isAssignedTasks
+                isAssignedTasks || isCorrectiveAction || isAuditQueue
                   ? isExternalAuditTaskListDisabled ||
                     isExternalAuditCorrectiveCreateDisabled ||
                     isExternalAuditQueueCreateDisabled
@@ -331,17 +343,16 @@ function ExternalAuditTable({
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
-                <TableCell align="right">Reference</TableCell>
-                <TableCell align="right">Audit Date</TableCell>
-                <TableCell align="right">Expiry Date</TableCell>
-                <TableCell align="right">Audit Type</TableCell>
-                <TableCell align="right">Audit Category</TableCell>
-                <TableCell align="right">Audit Standards</TableCell>
-                <TableCell align="right">Customer</TableCell>
-                <TableCell align="right">Audit Firm</TableCell>
-                <TableCell align="right">Division</TableCell>
-                <TableCell align="right">Audit Status</TableCell>
-                <TableCell align="right">Lapsed Status</TableCell>
+                <TableCell align="left">Reference</TableCell>
+                <TableCell align="left">Audit Date</TableCell>
+                <TableCell align="left">Expiry Date</TableCell>
+                <TableCell align="left">Audit Type</TableCell>
+                <TableCell align="left">Audit Category</TableCell>
+                <TableCell align="left">Audit Standards</TableCell>
+                <TableCell align="left">Customer</TableCell>
+                <TableCell align="left">Audit Firm</TableCell>
+                <TableCell align="left">Division</TableCell>
+                <TableCell align="left">Audit Status</TableCell>
                 <TableCell align="right">Status</TableCell>
               </TableRow>
             </TableHead>
@@ -359,24 +370,25 @@ function ExternalAuditTable({
                       setOpenViewDrawer(true);
                     }}
                   >
-                    <TableCell align="right">{row.referenceNumber}</TableCell>
-                    <TableCell align="right">
+                    <TableCell align="left">{row.referenceNumber}</TableCell>
+                    <TableCell align="left">
                       {format(new Date(row.auditDate), "yyyy-MM-dd")}
                     </TableCell>
-                    <TableCell align="right">
+                    <TableCell align="left">
                       {row.auditExpiryDate
                         ? format(new Date(row.auditExpiryDate), "yyyy-MM-dd")
                         : "N/A"}
                     </TableCell>
-                    <TableCell align="right">{row.auditType}</TableCell>
-                    <TableCell align="right">{row.auditCategory}</TableCell>
-                    <TableCell align="right">{row.auditStandard}</TableCell>
-                    <TableCell align="right">{row.customer}</TableCell>
-                    <TableCell align="right">{row.auditFirm}</TableCell>
-                    <TableCell align="right">{row.division}</TableCell>
-                    <TableCell align="right">{row.auditStatus}</TableCell>
-                    <TableCell align="right">{row.lapsedStatus}</TableCell>
-                    <TableCell align="right">{row.status}</TableCell>
+                    <TableCell align="left">{row.auditType}</TableCell>
+                    <TableCell align="left">{row.auditCategory}</TableCell>
+                    <TableCell align="left">{row.auditStandard}</TableCell>
+                    <TableCell align="left">{row.customer}</TableCell>
+                    <TableCell align="left">{row.auditFirm}</TableCell>
+                    <TableCell align="left">{row.division}</TableCell>
+                    <TableCell align="left">{row.auditStatus}</TableCell>
+                    <TableCell align="right">
+                      {RenderExternalAuditStatusChip(row.status)}
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
@@ -425,7 +437,9 @@ function ExternalAuditTable({
                 setOpenAddOrEditDialog(true);
               }}
               disableEdit={
-                isAssignedTasks
+                selectedRow?.status === Status.COMPLETE
+                  ? true
+                  : isAssignedTasks || isCorrectiveAction || isAuditQueue
                   ? isExternalAuditTaskEditDisabled ||
                     isExternalAuditCorrectiveEditDisabled ||
                     isExternalAuditQueueEditDisabled
@@ -433,7 +447,7 @@ function ExternalAuditTable({
               }
               onDelete={() => setDeleteDialogOpen(true)}
               disableDelete={
-                isAssignedTasks
+                isAssignedTasks || isCorrectiveAction || isAuditQueue
                   ? isExternalAuditTaskDeleteDisabled ||
                     isExternalAuditCorrectiveDeleteDisabled ||
                     isExternalAuditQueueDeleteDisabled
@@ -443,7 +457,10 @@ function ExternalAuditTable({
 
             {selectedRow && (
               <Stack>
-                <ViewExternalAuditContent audit={selectedRow} />
+                <ViewExternalAuditContent
+                  audit={selectedRow}
+                  handleClose={() => setOpenViewDrawer(false)}
+                />
               </Stack>
             )}
           </Stack>
@@ -465,6 +482,11 @@ function ExternalAuditTable({
             }
           }}
           defaultValues={selectedRow}
+          isPending={
+            createExternalAuditMutationIsPending ||
+            updateExternalAuditMutationIsPending ||
+            deleteExternalAuditMutationIsPending
+          }
         />
       )}
       {deleteDialogOpen && (
@@ -500,3 +522,48 @@ function ExternalAuditTable({
 }
 
 export default ExternalAuditTable;
+
+export function RenderExternalAuditStatusChip(status: Status) {
+  switch (status) {
+    case Status.DRAFT:
+      return (
+        <Chip
+          label={status}
+          sx={{
+            color: "var(--pallet-blue)",
+            backgroundColor: "var(--pallet-lighter-blue)",
+          }}
+        />
+      );
+    case Status.APPROVED:
+      return (
+        <Chip
+          label={status}
+          sx={{
+            color: "var(--pallet-orange)",
+            backgroundColor: colors.orange[50],
+          }}
+        />
+      );
+    case Status.COMPLETE:
+      return (
+        <Chip
+          label={status}
+          sx={{
+            color: "var(--pallet-green)",
+            backgroundColor: colors.green[50],
+          }}
+        />
+      );
+    default:
+      return (
+        <Chip
+          label={status}
+          sx={{
+            color: "var(--pallet-blue)",
+            backgroundColor: "var(--pallet-lighter-blue)",
+          }}
+        />
+      );
+  }
+}
