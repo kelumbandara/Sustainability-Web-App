@@ -217,7 +217,7 @@ export const ChemicalRequestSchema = z.object({
     .optional(),
   created_date: z.string(),
   reviewer: userSchema,
-  reviewerId: z.string().nullable(),
+  reviewerId: z.number().nullable(),
   removeDoc: z.array(z.string()).optional(),
 });
 
