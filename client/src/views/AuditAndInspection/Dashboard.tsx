@@ -185,6 +185,8 @@ function EnvironmentDashboard() {
     setValue,
   } = useForm();
 
+  const year = watch("year");
+
   const auditType = watch("auditType");
   const division = watch("division");
 
@@ -531,11 +533,47 @@ function EnvironmentDashboard() {
               marginTop: "0.5rem",
             }}
           >
+            <Box
+              sx={{
+                display: "flex",
+                flex: 1,
+                minWidth: "250px",
+              }}
+            >
+              <Controller
+                name="year"
+                control={control}
+                rules={{ required: true }}
+                defaultValue={new Date().getFullYear().toString()}
+                render={({ field }) => (
+                  <Autocomplete
+                    {...field}
+                    onChange={(event, newValue) => field.onChange(newValue)}
+                    size="small"
+                    options={
+                      yearData?.length ? yearData.map((year) => year.year) : []
+                    }
+                    sx={{ flex: 1, margin: "0.5rem" }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        required
+                        error={!!errors.year}
+                        helperText={errors.year && "Required"}
+                        label="Year"
+                        name="year"
+                      />
+                    )}
+                  />
+                )}
+              />
+            </Box>
             <DateRangePicker
               control={control}
               register={register}
               errors={errors}
               label="Enter a date Range"
+              year={year}
             />
 
             <Box
@@ -567,42 +605,6 @@ function EnvironmentDashboard() {
                         error={!!errors.division}
                         helperText={errors.division && "Required"}
                         label="Division"
-                      />
-                    )}
-                  />
-                )}
-              />
-            </Box>
-
-            <Box
-              sx={{
-                display: "flex",
-                flex: 1,
-                minWidth: "250px",
-              }}
-            >
-              <Controller
-                name="year"
-                control={control}
-                rules={{ required: true }}
-                defaultValue={new Date().getFullYear().toString()}
-                render={({ field }) => (
-                  <Autocomplete
-                    {...field}
-                    onChange={(event, newValue) => field.onChange(newValue)}
-                    size="small"
-                    options={
-                      yearData?.length ? yearData.map((year) => year.year) : []
-                    }
-                    sx={{ flex: 1, margin: "0.5rem" }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        required
-                        error={!!errors.year}
-                        helperText={errors.year && "Required"}
-                        label="Year"
-                        name="year"
                       />
                     )}
                   />
