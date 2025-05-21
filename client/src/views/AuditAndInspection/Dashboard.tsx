@@ -110,14 +110,18 @@ import {
   fetchAuditAssignedGradeStats,
   fetchAuditCategoryBreakdown,
   fetchAuditCompletionsByDivision,
+  fetchAuditExpiryAction,
   fetchAuditScoreCount,
   fetchAuditStandardsByDivision,
   fetchAuditStatusCount,
   fetchAuditStatusCountByMonth,
+  fetchAuditTypesByDivision,
 } from "../../api/AuditAndInspection/auditDashboardApi";
 import { dateFormatter, getColorForType } from "../../util/dateFormat.util";
 import CustomPieChart from "../../components/CustomPieChart";
 import { count } from "console";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
+import { format, parseISO } from "date-fns";
 
 const breadcrumbItems = [
   { title: "Home", href: "/home" },
@@ -505,6 +509,77 @@ function EnvironmentDashboard() {
     enabled: false,
   });
 
+  const {
+    data: expiryAuditActionData,
+    refetch: refetchAuditExpiryAction,
+    isFetching: isFetchAuditExpiryAction,
+  } = useQuery({
+    queryKey: [
+      "audit-division-action",
+      formattedDateFrom,
+      formattedDateTo,
+      division,
+      auditType,
+    ],
+    queryFn: () =>
+      fetchAuditExpiryAction(
+        formattedDateFrom,
+        formattedDateTo,
+        division,
+        auditType
+      ),
+    enabled: false,
+  });
+
+  const {
+    data: auditTypeDivisionData,
+    refetch: refetchAuditTypesByDivision,
+    isFetching: isAuditTypeDivisionData,
+  } = useQuery({
+    queryKey: [
+      "audit-type-division",
+      formattedDateFrom,
+      formattedDateTo,
+      division,
+      auditType,
+    ],
+    queryFn: () =>
+      fetchAuditTypesByDivision(
+        formattedDateFrom,
+        formattedDateTo,
+        division,
+        auditType
+      ),
+    enabled: false,
+  });
+
+  // const announcementStatsDataMemo = useMemo(() => {
+  //   return (announcementStatsData?.data ?? []).map((item: any) => ({
+  //     name: item.announcement,
+  //     value: item.count,
+  //   }));
+  // }, [announcementStatsData]);
+
+  const auditTypeDivisionDataMemo = useMemo(() => {
+    return (auditTypeDivisionData?.data || []).map((item: any) => ({
+      name: item.auditType, // recharts expects "name"
+      value: item.count, // recharts expects "value"
+    }));
+  }, [auditTypeDivisionData]);
+
+  const expiryInternalAuditDataMemo = useMemo(() => {
+    return expiryAuditActionData?.internal_completed_with_action_plans ?? [];
+  }, [expiryAuditActionData]);
+
+  console.log("expiryInternalAuditDataMemo:", expiryInternalAuditDataMemo);
+
+  const expiryExternalAuditDataMemo = useMemo(() => {
+    return expiryAuditActionData?.external_not_completed ?? [];
+  }, [expiryAuditActionData]);
+  const expiryExternalAuditActionDataMemo = useMemo(() => {
+    return expiryAuditActionData?.external_completed_with_action_plans ?? [];
+  }, [expiryAuditActionData]);
+
   const auditCompletionDataMemo = useMemo(() => {
     return auditCompletionData ?? {};
   }, [auditCompletionData]);
@@ -655,6 +730,8 @@ function EnvironmentDashboard() {
     refetchAllSelectDivisionTRecord();
     refetchAuditStandardsByDivision();
     refetchAuditCompletionsByDivision();
+    refetchAuditExpiryAction();
+    refetchAuditTypesByDivision();
   };
 
   const CustomCountLabel = ({ x, y, value }: any) => {
@@ -1774,6 +1851,417 @@ function EnvironmentDashboard() {
               Please select filters to display data
             </Typography>
           )}
+        </Box>
+      </Box>
+
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+          gap: "1rem",
+        }}
+      >
+        <Box
+          sx={{
+            width: "100%",
+            height: "auto",
+            marginTop: "1rem",
+            flex: 2,
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+            padding: "1rem",
+            borderRadius: "0.3rem",
+            border: "1px solid var(--pallet-border-blue)",
+          }}
+        >
+          <Box>
+            <Typography
+              variant="h6"
+              sx={{
+                textAlign: "center",
+              }}
+            >
+              Other
+            </Typography>
+          </Box>
+          <ResponsiveContainer
+            width="100%"
+            height={500}
+            style={{
+              overflowY: "scroll",
+              scrollbarWidth: "none",
+            }}
+          >
+            <>
+              <AppBar
+                position="sticky"
+                sx={{
+                  display: "flex",
+                  mt: "1rem",
+                  maxWidth: isMobile ? 400 : "auto",
+                }}
+              >
+                <Tabs
+                  value={activeTabTwo}
+                  onChange={handleChangeTabTwo}
+                  indicatorColor="secondary"
+                  TabIndicatorProps={{
+                    style: {
+                      backgroundColor: "var(--pallet-blue)",
+                      height: "3px",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    },
+                  }}
+                  sx={{
+                    backgroundColor: "var(--pallet-lighter-grey)",
+                    color: "var(--pallet-blue)",
+                    display: "flex",
+                  }}
+                  textColor="inherit"
+                  variant="scrollable"
+                  scrollButtons={true}
+                >
+                  <Tab
+                    label={
+                      <Box
+                        sx={{
+                          color: "var(--pallet-blue)",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                          External Audit Expiry
+                        </Typography>
+                      </Box>
+                    }
+                    {...a11yProps2(0)}
+                  />
+                  <Tab
+                    label={
+                      <Box
+                        sx={{
+                          color: "var(--pallet-blue)",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                          External Audit Action Expiry
+                        </Typography>
+                      </Box>
+                    }
+                    {...a11yProps2(1)}
+                  />
+                  <Tab
+                    label={
+                      <Box
+                        sx={{
+                          color: "var(--pallet-blue)",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                          Internal Audit Action Expiry
+                        </Typography>
+                      </Box>
+                    }
+                    {...a11yProps2(2)}
+                  />
+                </Tabs>
+              </AppBar>
+              <TabPanel value={activeTabTwo} index={0} dir={theme.direction}>
+                <>
+                  {expiryExternalAuditDataMemo.map((item, index) => (
+                    <Box key={index}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          direction: "row",
+                          justifyContent: "space-between",
+                          m: "1rem",
+                        }}
+                      >
+                        <Box flex={1}>
+                          <Stack
+                            sx={{
+                              display: "flex",
+                              direction: isMobile ? "column" : "row",
+                            }}
+                          >
+                            <BookmarkIcon sx={{ color: "red" }} />
+                            <Typography>{item?.referenceNumber}</Typography>
+                          </Stack>
+
+                          <Typography variant="caption">
+                            {item?.auditType}
+                          </Typography>
+                        </Box>
+                        <Box
+                          flex={1}
+                          sx={{
+                            display: "flex",
+                            direction: "row",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Box>
+                            <Typography>Category</Typography>
+                            <Typography variant="caption">
+                              {item?.auditCategory}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <Box
+                          flex={1}
+                          sx={{
+                            display: "flex",
+                            direction: "row",
+                            justifyContent: isMobile ? "flex-end" : "center",
+                          }}
+                        >
+                          <Box>
+                            <Typography>Division</Typography>
+                            <Typography variant="caption">
+                              {item?.division}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <Box
+                          flex={1}
+                          sx={{
+                            display: "flex",
+                            direction: "row",
+                            justifyContent: isMobile ? "flex-end" : "center",
+                          }}
+                        >
+                          <Box>
+                            <Typography textAlign={"right"}>
+                              Audit Date
+                            </Typography>
+                            <Typography textAlign={"right"} variant="caption">
+                              {format(parseISO(item?.auditDate), "dd/MM/yyyy")}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                      <Divider />
+                    </Box>
+                  ))}
+                </>
+              </TabPanel>
+              <TabPanel value={activeTabTwo} index={1} dir={theme.direction}>
+                <>
+                  {expiryExternalAuditActionDataMemo.map((item, index) => (
+                    <Box key={index}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          direction: "row",
+                          justifyContent: "space-between",
+                          m: "1rem",
+                        }}
+                      >
+                        <Box flex={1}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              direction: "row",
+                            }}
+                          >
+                            <BookmarkIcon sx={{ color: "red" }} />
+                            <Typography>{item.referenceNumber}</Typography>
+                          </Box>
+
+                          <Typography variant="caption">
+                            {item.auditType}
+                          </Typography>
+                        </Box>
+                        <Box
+                          flex={1}
+                          sx={{
+                            display: "flex",
+                            direction: "row",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Box>
+                            <Typography>Category</Typography>
+                            <Typography variant="caption">
+                              {item.auditCategory}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <Box
+                          flex={1}
+                          sx={{
+                            display: "flex",
+                            direction: "row",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Box>
+                            <Typography>Division</Typography>
+                            <Typography variant="caption">
+                              {item.division}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <Box
+                          flex={1}
+                          sx={{
+                            display: "flex",
+                            direction: "row",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Box>
+                            <Typography>Audit Date</Typography>
+                            <Typography variant="caption">
+                              {format(parseISO(item.auditDate), "dd/MM/yyyy")}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                      <Divider />
+                    </Box>
+                  ))}
+                </>
+              </TabPanel>
+              <TabPanel value={activeTabTwo} index={2} dir={theme.direction}>
+                <>
+                  {expiryInternalAuditDataMemo.map((item, index) => (
+                    <Box key={index}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          direction: "row",
+                          justifyContent: "space-between",
+                          m: "1rem",
+                        }}
+                      >
+                        <Box flex={1}>
+                          <Stack
+                            sx={{
+                              display: "flex",
+                              direction: isMobile ? "column" : "row",
+                              alignContent: "center",
+                            }}
+                          >
+                            <BookmarkIcon sx={{ color: "red" }} />
+                            <Typography>{item?.referenceNumber}</Typography>
+                          </Stack>
+
+                          <Typography variant="caption">
+                            {item?.auditType}
+                          </Typography>
+                        </Box>
+                        <Box
+                          flex={1}
+                          sx={{
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Box>
+                            <Typography>Action Plans</Typography>
+                            {item?.action_plans?.map((action) => (
+                              <Box key={action.actionPlanId} sx={{ mb: 1 }}>
+                                <Typography variant="caption">
+                                  Plan ID {action.actionPlanId}
+                                </Typography>
+                                <Typography
+                                  sx={{
+                                    color:
+                                      action.priority === "High"
+                                        ? "red"
+                                        : action.priority === "Medium"
+                                        ? "orange"
+                                        : "green",
+                                  }}
+                                >
+                                  {action.priority}
+                                </Typography>
+                              </Box>
+                            ))}
+                          </Box>
+                        </Box>
+
+                        <Box
+                          flex={1}
+                          sx={{
+                            display: "flex",
+                            direction: "row",
+                            justifyContent: isMobile ? "flex-end" : "center",
+                          }}
+                        >
+                          <Box>
+                            <Typography>Division</Typography>
+                            <Typography variant="caption">
+                              {item?.division}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <Box
+                          flex={1}
+                          sx={{
+                            display: "flex",
+                            direction: "row",
+                            justifyContent: isMobile ? "flex-end" : "center",
+                          }}
+                        >
+                          <Box>
+                            <Typography textAlign={"right"}>
+                              Audit Date
+                            </Typography>
+                            <Typography textAlign={"right"} variant="caption">
+                              {format(parseISO(item?.auditDate), "dd/MM/yyyy")}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                      <Divider />
+                    </Box>
+                  ))}
+                </>
+              </TabPanel>
+            </>
+          </ResponsiveContainer>
+        </Box>
+
+        <Box
+          sx={{
+            width: "100%",
+            height: "auto",
+            marginTop: "1rem",
+            flex: 1,
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+            padding: "1rem",
+            borderRadius: "0.3rem",
+            border: "1px solid var(--pallet-border-blue)",
+          }}
+        >
+          <ResponsiveContainer
+            width="100%"
+            height={500}
+            style={{
+              overflowY: "scroll",
+              scrollbarWidth: "none",
+            }}
+          >
+            <>
+              <Box display={"flex"} justifyContent={"center"}>
+                <Box display={"flex"} justifyContent={"center"}>
+                  <CustomPieChart
+                    data={auditTypeDivisionDataMemo}
+                    title={`Audit Type Distribution`}
+                  />
+                </Box>
+              </Box>
+            </>
+          </ResponsiveContainer>
         </Box>
       </Box>
       <Box

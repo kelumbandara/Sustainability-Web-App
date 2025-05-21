@@ -124,3 +124,27 @@ export async function fetchAuditCompletionsByDivision(
   );
   return res.data;
 }
+
+export async function fetchAuditExpiryAction(
+  dateFrom: String,
+  dateTo: String,
+  division: String,
+  auditType: String
+) {
+  const res = await axios.get(
+    `api/audit-status-count/${dateFrom}/${dateTo}/${division}/${auditType}/expiry-acction`
+  );
+  return res.data;
+}
+
+export async function fetchAuditTypesByDivision(
+  dateFrom: String,
+  dateTo: String,
+  division: String,
+  auditType: String
+) {
+  const res = await axios.get(
+    `api/audit-status-count/${dateFrom}/${dateTo}/${division}/${auditType}/audit-type`
+  );
+  return res.data;
+}
