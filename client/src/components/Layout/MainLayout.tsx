@@ -13,15 +13,10 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ListItem from "@mui/material/ListItem";
-import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { DrawerHeader as DrawerHeaderModal } from "../../components/ViewDataDrawer";
-import GridViewIcon from "@mui/icons-material/GridView";
-import groupLogo from "../../assets/group-logo.png";
 import {
   Alert,
-  Avatar,
   Badge,
   Button,
   Collapse,
@@ -41,11 +36,12 @@ import { PermissionKeysObject } from "../../views/Administration/SectionList";
 import useCurrentUser from "../../hooks/useCurrentUser";
 import "./MainLayout.css";
 import ViewUserContent from "../../views/Administration/ViewUserProfileContent";
-import CustomButton from "../CustomButton";
 import ViewProfileDataDrawer, {
   DrawerProfileHeader,
 } from "../ViewProfileDataDrawer";
 import ProfileImage from "../ProfileImageComponent";
+import { useQuery } from "@tanstack/react-query";
+import { getOrganization } from "../../api/OrganizationSettings/organizationSettingsApi";
 
 const drawerWidth = 265;
 
@@ -157,6 +153,20 @@ export default function MainLayout({ children }: Props) {
     setOpen(false);
   };
 
+  const { data: organizationData } = useQuery({
+    queryKey: ["organization"],
+    queryFn: getOrganization,
+  });
+
+  console.log("yoo", organizationData?.logoUrl);
+  const logoUrl = useMemo(() => {
+    if (organizationData && organizationData?.logoUrl) {
+      return Array.isArray(organizationData.logoUrl)
+        ? organizationData.logoUrl[0]
+        : organizationData.logoUrl;
+    }
+  }, [organizationData]);
+
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
@@ -192,14 +202,16 @@ export default function MainLayout({ children }: Props) {
               >
                 <MenuIcon />
               </IconButton>
-              <Box>
-                <img
-                  src={groupLogo}
-                  alt="logo"
-                  height={"45rem"}
-                  style={{ marginTop: "10px" }}
-                />
-              </Box>
+              {logoUrl && (
+                <Box>
+                  <img
+                    src={logoUrl?.signedUrl}
+                    alt="logo"
+                    height={"45rem"}
+                    style={{ marginTop: "10px" }}
+                  />
+                </Box>
+              )}
             </Box>
             {!isMobile && (
               <Box
@@ -316,64 +328,6 @@ export default function MainLayout({ children }: Props) {
                     />
                     <Stack>
                       <ViewUserContent selectedUser={user} />
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "flex-end",
-                          marginTop: "1rem",
-                        }}
-                      >
-                        <CustomButton
-                          variant="contained"
-                          sx={{
-                            backgroundColor: "var(--pallet-orange)",
-                            marginTop: "1rem",
-                            marginX: "0.5rem",
-                            width: "10rem",
-                          }}
-                          size="medium"
-                          startIcon={<LogoutIcon />}
-                          onClick={() => setLogoutDialogOpen(true)}
-                        >
-                          Log out
-                        </CustomButton>
-                      </Box>
-                      {logoutDialogOpen && (
-                        <DeleteConfirmationModal
-                          open={logoutDialogOpen}
-                          title="Log Out Confirmation"
-                          customDeleteButtonText="Log Out Now"
-                          customDeleteButtonIon={<LogoutIcon />}
-                          content={
-                            <>
-                              Are you sure you want to log out of the
-                              application?
-                              <Alert
-                                severity="warning"
-                                style={{ marginTop: "1rem" }}
-                              >
-                                You will be logged out of the application and
-                                will need to log in with credentials again to
-                                access your account.
-                              </Alert>
-                            </>
-                          }
-                          handleClose={() => setLogoutDialogOpen(false)}
-                          deleteFunc={async () => {
-                            localStorage.removeItem("token");
-                            navigate("/");
-                          }}
-                          onSuccess={() => {
-                            setLogoutDialogOpen(false);
-                            enqueueSnackbar("Logged Out Successfully!", {
-                              variant: "success",
-                            });
-                          }}
-                          handleReject={() => {
-                            setLogoutDialogOpen(false);
-                          }}
-                        />
-                      )}
                     </Stack>
                   </Stack>
                 }
