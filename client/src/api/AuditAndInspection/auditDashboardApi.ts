@@ -148,3 +148,27 @@ export async function fetchAuditTypesByDivision(
   );
   return res.data;
 }
+
+export async function fetchAuditPriorityFindings(
+  dateFrom: String,
+  dateTo: String,
+  division: String,
+  auditType: String
+) {
+  const res = await axios.get(
+    `api/audit-status-count/${dateFrom}/${dateTo}/${division}/category-priority-findings`
+  );
+  return res.data;
+}
+
+export async function fetchAuditScore(
+  dateFrom: String,
+  dateTo: String,
+  division: String,
+  auditType: String
+) {
+  const res = await axios.get(
+    `api/audit-status-count/${dateFrom}/${dateTo}/${division}/category-score`
+  );
+  return res.data;
+}

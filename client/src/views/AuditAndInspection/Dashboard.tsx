@@ -99,6 +99,9 @@ import EmergencyOutlinedIcon from "@mui/icons-material/EmergencyOutlined";
 import ForestOutlinedIcon from "@mui/icons-material/ForestOutlined";
 import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
 import ManageAccountsOutlinedIcon from "@mui/icons-material/ManageAccountsOutlined";
+import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
+import WorkspacePremiumOutlinedIcon from "@mui/icons-material/WorkspacePremiumOutlined";
+
 import { yearData } from "../../api/sampleData/consumptionData";
 import { auditTypeData } from "../../api/sampleData/auditData";
 import { useQuery } from "@tanstack/react-query";
@@ -111,6 +114,7 @@ import {
   fetchAuditCategoryBreakdown,
   fetchAuditCompletionsByDivision,
   fetchAuditExpiryAction,
+  fetchAuditPriorityFindings,
   fetchAuditScoreCount,
   fetchAuditStandardsByDivision,
   fetchAuditStatusCount,
@@ -553,6 +557,32 @@ function EnvironmentDashboard() {
     enabled: false,
   });
 
+  const {
+    data: auditPriorityFindingsData,
+    refetch: refetchAuditPriorityFindings,
+    isFetching: isAuditPriorityFindingsData,
+  } = useQuery({
+    queryKey: [
+      "audit-type-priority",
+      formattedDateFrom,
+      formattedDateTo,
+      division,
+      auditType,
+    ],
+    queryFn: () =>
+      fetchAuditPriorityFindings(
+        formattedDateFrom,
+        formattedDateTo,
+        division,
+        auditType
+      ),
+    enabled: false,
+  });
+
+  const auditPriorityFindingsDataMemo = useMemo(() => {
+    return auditPriorityFindingsData?.data ?? [];
+  }, [auditPriorityFindingsData]);
+
   // const announcementStatsDataMemo = useMemo(() => {
   //   return (announcementStatsData?.data ?? []).map((item: any) => ({
   //     name: item.announcement,
@@ -732,6 +762,7 @@ function EnvironmentDashboard() {
     refetchAuditCompletionsByDivision();
     refetchAuditExpiryAction();
     refetchAuditTypesByDivision();
+    refetchAuditPriorityFindings();
   };
 
   const CustomCountLabel = ({ x, y, value }: any) => {
@@ -1308,7 +1339,7 @@ function EnvironmentDashboard() {
                 textAlign: "center",
               }}
             >
-              Category And Source
+              External Audit Category Findings
             </Typography>
           </Box>
           <ResponsiveContainer
@@ -1392,9 +1423,9 @@ function EnvironmentDashboard() {
                           alignItems: "center",
                         }}
                       >
-                        <EmergencyOutlinedIcon fontSize="small" />
+                        <ThumbUpOffAltIcon fontSize="small" />
                         <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Health And Safety
+                          Quality
                         </Typography>
                       </Box>
                     }
@@ -1443,9 +1474,9 @@ function EnvironmentDashboard() {
                           alignItems: "center",
                         }}
                       >
-                        <ManageAccountsOutlinedIcon fontSize="small" />
+                        <WorkspacePremiumOutlinedIcon fontSize="small" />
                         <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Management System
+                          Certification
                         </Typography>
                       </Box>
                     }
@@ -1455,37 +1486,59 @@ function EnvironmentDashboard() {
               </AppBar>
               <TabPanel value={activeTab} index={0} dir={theme.direction}>
                 <>
-                  {socialAudit.map((item, index) => (
-                    <Box key={index}>
+                  {auditPriorityFindingsDataMemo?.map((item, index) => (
+                    <Box key={`${item.category}-${index}`}>
                       <Box
                         sx={{
                           display: "flex",
-                          direction: "row",
-                          justifyContent: "space-between",
+                          flexDirection: "column",
                           m: "1rem",
+                          gap: "0.5rem",
                         }}
                       >
-                        <Box flex={2}>
-                          <Typography>{item.label}</Typography>
-                          <Typography variant="caption">
-                            {item.description}
-                          </Typography>
-                        </Box>
-                        <Box
-                          flex={1}
-                          sx={{
-                            display: "flex",
-                            direction: "row",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <Box>
-                            <Typography>Score</Typography>
-                            <Typography variant="caption">
-                              {item.quantity}
-                            </Typography>
+                        <Box fontWeight="bold">{item.category}</Box>
+
+                        {item.priorities?.map((priorityItem, pIndex) => (
+                          <Box
+                            key={`${item.category}-${priorityItem.priority}-${pIndex}`}
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              px: "1rem",
+                              py: "0.5rem",
+                              backgroundColor: "#f5f5f5",
+                              borderRadius: "8px",
+                            }}
+                          >
+                            <Box
+                              flex={1}
+                              display={"flex"}
+                              alignItems={"center"}
+                            >
+                              {priorityItem.priority}
+                            </Box>
+                            <Box
+                              flex={1}
+                              display={"flex"}
+                              alignItems={"center"}
+                            >
+                              Count {priorityItem.count}
+                            </Box>
+                            <CircularProgressWithLabel
+                              size={50}
+                              value={priorityItem?.percentage}
+                              customColor={
+                                priorityItem?.priority === "Low"
+                                  ? "green"
+                                  : priorityItem?.priority === "Medium"
+                                  ? "orange"
+                                  : priorityItem?.priority === "High"
+                                  ? "red"
+                                  : "gray"
+                              }
+                            />
                           </Box>
-                        </Box>
+                        ))}
                       </Box>
                       <Divider />
                     </Box>
@@ -1494,197 +1547,321 @@ function EnvironmentDashboard() {
               </TabPanel>
               <TabPanel value={activeTab} index={1} dir={theme.direction}>
                 <>
-                  {socialAudit.map((item, index) => (
-                    <Box key={index}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          direction: "row",
-                          justifyContent: "space-between",
-                          m: "1rem",
-                        }}
-                      >
-                        <Box flex={2}>
-                          <Typography>{item.label}</Typography>
-                          <Typography variant="caption">
-                            {item.description}
-                          </Typography>
-                        </Box>
+                  {auditPriorityFindingsDataMemo
+                    ?.filter((item) =>
+                      item.category.toLowerCase().includes("social")
+                    )
+                    .map((item, index) => (
+                      <Box key={`${item.category}-${index}`}>
                         <Box
-                          flex={1}
                           sx={{
                             display: "flex",
-                            direction: "row",
-                            justifyContent: "space-between",
+                            flexDirection: "column",
+                            m: "1rem",
+                            gap: "0.5rem",
                           }}
                         >
-                          <Box>
-                            <Typography>Score</Typography>
-                            <Typography variant="caption">
-                              {item.quantity}
-                            </Typography>
-                          </Box>
+                          <Box fontWeight="bold">{item.category}</Box>
+
+                          {item.priorities?.map((priorityItem, pIndex) => (
+                            <Box
+                              key={`${item.category}-${priorityItem.priority}-${pIndex}`}
+                              sx={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                px: "1rem",
+                                py: "0.5rem",
+                                backgroundColor: "#f5f5f5",
+                                borderRadius: "8px",
+                              }}
+                            >
+                              <Box
+                                flex={1}
+                                display={"flex"}
+                                alignItems={"center"}
+                              >
+                                {priorityItem.priority}
+                              </Box>
+                              <Box
+                                flex={1}
+                                display={"flex"}
+                                alignItems={"center"}
+                              >
+                                Count {priorityItem.count}
+                              </Box>
+                              <CircularProgressWithLabel
+                                size={50}
+                                value={priorityItem?.percentage}
+                                customColor={
+                                  priorityItem?.priority === "Low"
+                                    ? "green"
+                                    : priorityItem?.priority === "Medium"
+                                    ? "orange"
+                                    : priorityItem?.priority === "High"
+                                    ? "red"
+                                    : "gray"
+                                }
+                              />
+                            </Box>
+                          ))}
                         </Box>
+                        <Divider />
                       </Box>
-                      <Divider />
-                    </Box>
-                  ))}
+                    ))}
                 </>
               </TabPanel>
               <TabPanel value={activeTab} index={2} dir={theme.direction}>
                 <>
-                  {healthSafetyAudit.map((item, index) => (
-                    <Box key={index}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          direction: "row",
-                          justifyContent: "space-between",
-                          m: "1rem",
-                        }}
-                      >
-                        <Box flex={2}>
-                          <Typography>{item.label}</Typography>
-                          <Typography variant="caption">
-                            {item.description}
-                          </Typography>
-                        </Box>
+                  {auditPriorityFindingsDataMemo
+                    ?.filter((item) => item.category === "Quality")
+                    .map((item, index) => (
+                      <Box key={`${item.category}-${index}`}>
                         <Box
-                          flex={1}
                           sx={{
                             display: "flex",
-                            direction: "row",
-                            justifyContent: "space-between",
+                            flexDirection: "column",
+                            m: "1rem",
+                            gap: "0.5rem",
                           }}
                         >
-                          <Box>
-                            <Typography>Score</Typography>
-                            <Typography variant="caption">
-                              {item.quantity}
-                            </Typography>
-                          </Box>
+                          <Box fontWeight="bold">{item.category}</Box>
+
+                          {item.priorities?.map((priorityItem, pIndex) => (
+                            <Box
+                              key={`${item.category}-${priorityItem.priority}-${pIndex}`}
+                              sx={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                px: "1rem",
+                                py: "0.5rem",
+                                backgroundColor: "#f5f5f5",
+                                borderRadius: "8px",
+                              }}
+                            >
+                              <Box
+                                flex={1}
+                                display={"flex"}
+                                alignItems={"center"}
+                              >
+                                {priorityItem.priority}
+                              </Box>
+                              <Box
+                                flex={1}
+                                display={"flex"}
+                                alignItems={"center"}
+                              >
+                                Count {priorityItem.count}
+                              </Box>
+                              <CircularProgressWithLabel
+                                size={50}
+                                value={priorityItem?.percentage}
+                                customColor={
+                                  priorityItem?.priority === "Low"
+                                    ? "green"
+                                    : priorityItem?.priority === "Medium"
+                                    ? "orange"
+                                    : priorityItem?.priority === "High"
+                                    ? "red"
+                                    : "gray"
+                                }
+                              />
+                            </Box>
+                          ))}
                         </Box>
+                        <Divider />
                       </Box>
-                      <Divider />
-                    </Box>
-                  ))}
+                    ))}
                 </>
               </TabPanel>
               <TabPanel value={activeTab} index={3} dir={theme.direction}>
                 <>
-                  {environmentalAudit.map((item, index) => (
-                    <Box key={index}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          direction: "row",
-                          justifyContent: "space-between",
-                          m: "1rem",
-                        }}
-                      >
-                        <Box flex={2}>
-                          <Typography>{item.label}</Typography>
-                          <Typography variant="caption">
-                            {item.description}
-                          </Typography>
-                        </Box>
+                  {auditPriorityFindingsDataMemo
+                    ?.filter((item) =>
+                      item.category.toLowerCase().includes("environment")
+                    )
+                    .map((item, index) => (
+                      <Box key={`${item.category}-${index}`}>
                         <Box
-                          flex={1}
                           sx={{
                             display: "flex",
-                            direction: "row",
-                            justifyContent: "space-between",
+                            flexDirection: "column",
+                            m: "1rem",
+                            gap: "0.5rem",
                           }}
                         >
-                          <Box>
-                            <Typography>Score</Typography>
-                            <Typography variant="caption">
-                              {item.quantity}
-                            </Typography>
-                          </Box>
+                          <Box fontWeight="bold">{item.category}</Box>
+
+                          {item.priorities?.map((priorityItem, pIndex) => (
+                            <Box
+                              key={`${item.category}-${priorityItem.priority}-${pIndex}`}
+                              sx={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                px: "1rem",
+                                py: "0.5rem",
+                                backgroundColor: "#f5f5f5",
+                                borderRadius: "8px",
+                              }}
+                            >
+                              <Box
+                                flex={1}
+                                display={"flex"}
+                                alignItems={"center"}
+                              >
+                                {priorityItem.priority}
+                              </Box>
+                              <Box
+                                flex={1}
+                                display={"flex"}
+                                alignItems={"center"}
+                              >
+                                Count {priorityItem.count}
+                              </Box>
+                              <CircularProgressWithLabel
+                                size={50}
+                                value={priorityItem?.percentage}
+                                customColor={
+                                  priorityItem?.priority === "Low"
+                                    ? "green"
+                                    : priorityItem?.priority === "Medium"
+                                    ? "orange"
+                                    : priorityItem?.priority === "High"
+                                    ? "red"
+                                    : "gray"
+                                }
+                              />
+                            </Box>
+                          ))}
                         </Box>
+                        <Divider />
                       </Box>
-                      <Divider />
-                    </Box>
-                  ))}
+                    ))}
                 </>
               </TabPanel>
               <TabPanel value={activeTab} index={4} dir={theme.direction}>
                 <>
-                  {securityAudit.map((item, index) => (
-                    <Box key={index}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          direction: "row",
-                          justifyContent: "space-between",
-                          m: "1rem",
-                        }}
-                      >
-                        <Box flex={2}>
-                          <Typography>{item.label}</Typography>
-                          <Typography variant="caption">
-                            {item.description}
-                          </Typography>
-                        </Box>
+                  {auditPriorityFindingsDataMemo
+                    ?.filter((item) => item.category === "Security")
+                    .map((item, index) => (
+                      <Box key={`${item.category}-${index}`}>
                         <Box
-                          flex={1}
                           sx={{
                             display: "flex",
-                            direction: "row",
-                            justifyContent: "space-between",
+                            flexDirection: "column",
+                            m: "1rem",
+                            gap: "0.5rem",
                           }}
                         >
-                          <Box>
-                            <Typography>Score</Typography>
-                            <Typography variant="caption">
-                              {item.quantity}
-                            </Typography>
-                          </Box>
+                          <Box fontWeight="bold">{item.category}</Box>
+
+                          {item.priorities?.map((priorityItem, pIndex) => (
+                            <Box
+                              key={`${item.category}-${priorityItem.priority}-${pIndex}`}
+                              sx={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                px: "1rem",
+                                py: "0.5rem",
+                                backgroundColor: "#f5f5f5",
+                                borderRadius: "8px",
+                              }}
+                            >
+                              <Box
+                                flex={1}
+                                display={"flex"}
+                                alignItems={"center"}
+                              >
+                                {priorityItem.priority}
+                              </Box>
+                              <Box
+                                flex={1}
+                                display={"flex"}
+                                alignItems={"center"}
+                              >
+                                Count {priorityItem.count}
+                              </Box>
+                              <CircularProgressWithLabel
+                                size={50}
+                                value={priorityItem?.percentage}
+                                customColor={
+                                  priorityItem?.priority === "Low"
+                                    ? "green"
+                                    : priorityItem?.priority === "Medium"
+                                    ? "orange"
+                                    : priorityItem?.priority === "High"
+                                    ? "red"
+                                    : "gray"
+                                }
+                              />
+                            </Box>
+                          ))}
                         </Box>
+                        <Divider />
                       </Box>
-                      <Divider />
-                    </Box>
-                  ))}
+                    ))}
                 </>
               </TabPanel>
               <TabPanel value={activeTab} index={5} dir={theme.direction}>
                 <>
-                  {managementSystemAudit.map((item, index) => (
-                    <Box key={index}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          direction: "row",
-                          justifyContent: "space-between",
-                          m: "1rem",
-                        }}
-                      >
-                        <Box flex={2}>
-                          <Typography>{item.label}</Typography>
-                          <Typography variant="caption">
-                            {item.description}
-                          </Typography>
-                        </Box>
+                  {auditPriorityFindingsDataMemo
+                    ?.filter((item) => item.category === "Certification")
+                    .map((item, index) => (
+                      <Box key={`${item.category}-${index}`}>
                         <Box
-                          flex={1}
                           sx={{
                             display: "flex",
-                            direction: "row",
-                            justifyContent: "space-between",
+                            flexDirection: "column",
+                            m: "1rem",
+                            gap: "0.5rem",
                           }}
                         >
-                          <Box>
-                            <Typography>Score</Typography>
-                            <Typography variant="caption">
-                              {item.quantity}
-                            </Typography>
-                          </Box>
+                          <Box fontWeight="bold">{item.category}</Box>
+
+                          {item.priorities?.map((priorityItem, pIndex) => (
+                            <Box
+                              key={`${item.category}-${priorityItem.priority}-${pIndex}`}
+                              sx={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                px: "1rem",
+                                py: "0.5rem",
+                                backgroundColor: "#f5f5f5",
+                                borderRadius: "8px",
+                              }}
+                            >
+                              <Box
+                                flex={1}
+                                display={"flex"}
+                                alignItems={"center"}
+                              >
+                                {priorityItem.priority}
+                              </Box>
+                              <Box
+                                flex={1}
+                                display={"flex"}
+                                alignItems={"center"}
+                              >
+                                Count {priorityItem.count}
+                              </Box>
+                              <CircularProgressWithLabel
+                                size={50}
+                                value={priorityItem?.percentage}
+                                customColor={
+                                  priorityItem?.priority === "Low"
+                                    ? "green"
+                                    : priorityItem?.priority === "Medium"
+                                    ? "orange"
+                                    : priorityItem?.priority === "High"
+                                    ? "red"
+                                    : "gray"
+                                }
+                              />
+                            </Box>
+                          ))}
                         </Box>
+                        <Divider />
                       </Box>
-                      <Divider />
-                    </Box>
-                  ))}
+                    ))}
                 </>
               </TabPanel>
             </>
@@ -1710,7 +1887,7 @@ function EnvironmentDashboard() {
                 textAlign: "center",
               }}
             >
-              Category And Source
+              Audit Score
             </Typography>
           </Box>
           <ResponsiveContainer
@@ -1880,7 +2057,7 @@ function EnvironmentDashboard() {
                 textAlign: "center",
               }}
             >
-              Other
+              Expiry Information
             </Typography>
           </Box>
           <ResponsiveContainer
@@ -1990,8 +2167,10 @@ function EnvironmentDashboard() {
                               direction: isMobile ? "column" : "row",
                             }}
                           >
-                            <BookmarkIcon sx={{ color: "red" }} />
-                            <Typography>{item?.referenceNumber}</Typography>
+                            <Box>
+                              <BookmarkIcon sx={{ color: "red" }} />
+                            </Box>
+                            <Box>{item?.referenceNumber}</Box>
                           </Stack>
 
                           <Typography variant="caption">
@@ -2003,45 +2182,39 @@ function EnvironmentDashboard() {
                           sx={{
                             display: "flex",
                             direction: "row",
-                            justifyContent: "space-between",
+                            justifyContent: isMobile
+                              ? "flex-end"
+                              : "flex-start",
+                            alignItems: "center",
                           }}
                         >
                           <Box>
-                            <Typography>Category</Typography>
+                            <Typography>Audit Date</Typography>
                             <Typography variant="caption">
-                              {item?.auditCategory}
-                            </Typography>
-                          </Box>
-                        </Box>
-                        <Box
-                          flex={1}
-                          sx={{
-                            display: "flex",
-                            direction: "row",
-                            justifyContent: isMobile ? "flex-end" : "center",
-                          }}
-                        >
-                          <Box>
-                            <Typography>Division</Typography>
-                            <Typography variant="caption">
-                              {item?.division}
-                            </Typography>
-                          </Box>
-                        </Box>
-                        <Box
-                          flex={1}
-                          sx={{
-                            display: "flex",
-                            direction: "row",
-                            justifyContent: isMobile ? "flex-end" : "center",
-                          }}
-                        >
-                          <Box>
-                            <Typography textAlign={"right"}>
-                              Audit Date
-                            </Typography>
-                            <Typography textAlign={"right"} variant="caption">
                               {format(parseISO(item?.auditDate), "dd/MM/yyyy")}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <Box
+                          flex={1}
+                          sx={{
+                            display: "flex",
+                            direction: "row",
+                            justifyContent: isMobile
+                              ? "flex-end"
+                              : "flex-start",
+                            alignItems: "center",
+                          }}
+                        >
+                          <Box justifyContent={"flex-start"}>
+                            <Typography textAlign={"left"}>
+                              Expiry Date
+                            </Typography>
+                            <Typography variant="caption">
+                              {format(
+                                parseISO(item?.auditExpiryDate),
+                                "dd/MM/yyyy"
+                              )}
                             </Typography>
                           </Box>
                         </Box>
@@ -2064,18 +2237,20 @@ function EnvironmentDashboard() {
                         }}
                       >
                         <Box flex={1}>
-                          <Box
+                          <Stack
                             sx={{
                               display: "flex",
-                              direction: "row",
+                              direction: isMobile ? "column" : "row",
                             }}
                           >
-                            <BookmarkIcon sx={{ color: "red" }} />
-                            <Typography>{item.referenceNumber}</Typography>
-                          </Box>
+                            <Box>
+                              <BookmarkIcon sx={{ color: "red" }} />
+                            </Box>
+                            <Box>{item?.referenceNumber}</Box>
+                          </Stack>
 
                           <Typography variant="caption">
-                            {item.auditType}
+                            {item?.auditType}
                           </Typography>
                         </Box>
                         <Box
@@ -2083,43 +2258,39 @@ function EnvironmentDashboard() {
                           sx={{
                             display: "flex",
                             direction: "row",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <Box>
-                            <Typography>Category</Typography>
-                            <Typography variant="caption">
-                              {item.auditCategory}
-                            </Typography>
-                          </Box>
-                        </Box>
-                        <Box
-                          flex={1}
-                          sx={{
-                            display: "flex",
-                            direction: "row",
-                            justifyContent: "center",
-                          }}
-                        >
-                          <Box>
-                            <Typography>Division</Typography>
-                            <Typography variant="caption">
-                              {item.division}
-                            </Typography>
-                          </Box>
-                        </Box>
-                        <Box
-                          flex={1}
-                          sx={{
-                            display: "flex",
-                            direction: "row",
-                            justifyContent: "center",
+                            justifyContent: isMobile
+                              ? "flex-end"
+                              : "flex-start",
+                            alignItems: "center",
                           }}
                         >
                           <Box>
                             <Typography>Audit Date</Typography>
                             <Typography variant="caption">
-                              {format(parseISO(item.auditDate), "dd/MM/yyyy")}
+                              {format(parseISO(item?.auditDate), "dd/MM/yyyy")}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <Box
+                          flex={1}
+                          sx={{
+                            display: "flex",
+                            direction: "row",
+                            justifyContent: isMobile
+                              ? "flex-end"
+                              : "flex-start",
+                            alignItems: "center",
+                          }}
+                        >
+                          <Box justifyContent={"flex-start"}>
+                            <Typography textAlign={"left"}>
+                              Expiry Date
+                            </Typography>
+                            <Typography variant="caption">
+                              {format(
+                                parseISO(item?.auditExpiryDate),
+                                "dd/MM/yyyy"
+                              )}
                             </Typography>
                           </Box>
                         </Box>
@@ -2131,7 +2302,7 @@ function EnvironmentDashboard() {
               </TabPanel>
               <TabPanel value={activeTabTwo} index={2} dir={theme.direction}>
                 <>
-                  {expiryInternalAuditDataMemo.map((item, index) => (
+                  {expiryInternalAuditDataMemo?.map((item, index) => (
                     <Box key={index}>
                       <Box
                         sx={{
@@ -2146,11 +2317,12 @@ function EnvironmentDashboard() {
                             sx={{
                               display: "flex",
                               direction: isMobile ? "column" : "row",
-                              alignContent: "center",
                             }}
                           >
-                            <BookmarkIcon sx={{ color: "red" }} />
-                            <Typography>{item?.referenceNumber}</Typography>
+                            <Box>
+                              <BookmarkIcon sx={{ color: "red" }} />
+                            </Box>
+                            <Box>{item?.referenceNumber}</Box>
                           </Stack>
 
                           <Typography variant="caption">
@@ -2161,46 +2333,17 @@ function EnvironmentDashboard() {
                           flex={1}
                           sx={{
                             display: "flex",
-                            flexDirection: "row",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <Box>
-                            <Typography>Action Plans</Typography>
-                            {item?.action_plans?.map((action) => (
-                              <Box key={action.actionPlanId} sx={{ mb: 1 }}>
-                                <Typography variant="caption">
-                                  Plan ID {action.actionPlanId}
-                                </Typography>
-                                <Typography
-                                  sx={{
-                                    color:
-                                      action.priority === "High"
-                                        ? "red"
-                                        : action.priority === "Medium"
-                                        ? "orange"
-                                        : "green",
-                                  }}
-                                >
-                                  {action.priority}
-                                </Typography>
-                              </Box>
-                            ))}
-                          </Box>
-                        </Box>
-
-                        <Box
-                          flex={1}
-                          sx={{
-                            display: "flex",
                             direction: "row",
-                            justifyContent: isMobile ? "flex-end" : "center",
+                            justifyContent: isMobile
+                              ? "flex-end"
+                              : "flex-start",
+                            alignItems: "center",
                           }}
                         >
                           <Box>
-                            <Typography>Division</Typography>
+                            <Typography>Audit Date</Typography>
                             <Typography variant="caption">
-                              {item?.division}
+                              {format(parseISO(item?.auditDate), "dd/MM/yyyy")}
                             </Typography>
                           </Box>
                         </Box>
@@ -2209,15 +2352,25 @@ function EnvironmentDashboard() {
                           sx={{
                             display: "flex",
                             direction: "row",
-                            justifyContent: isMobile ? "flex-end" : "center",
+                            justifyContent: isMobile
+                              ? "flex-end"
+                              : "flex-start",
+                            alignItems: "center",
                           }}
                         >
-                          <Box>
-                            <Typography textAlign={"right"}>
-                              Audit Date
+                          <Box justifyContent={"flex-start"}>
+                            <Typography textAlign={"left"}>
+                              Expiry Date
                             </Typography>
-                            <Typography textAlign={"right"} variant="caption">
-                              {format(parseISO(item?.auditDate), "dd/MM/yyyy")}
+                            <Typography variant="caption">
+                              {item?.action_plans?.map((plan, idx) => (
+                                <Typography variant="caption" key={idx}>
+                                  {format(
+                                    parseISO(plan?.targetCompletionDate),
+                                    "dd/MM/yyyy"
+                                  )}
+                                </Typography>
+                              ))}
                             </Typography>
                           </Box>
                         </Box>
