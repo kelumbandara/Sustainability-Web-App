@@ -28,7 +28,7 @@ export async function fetchChemicalMonthlyLatestRecord(
   division: String
 ) {
   const res = await axios.get(
-    `api/chemical-dashboard/${startDate}/${endDate}/${division}/letest-record`
+    `api/chemical-dashboard/${startDate}/${endDate}/${division}/latest-record`
   );
   return res.data;
 }
