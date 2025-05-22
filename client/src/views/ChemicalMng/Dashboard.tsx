@@ -111,7 +111,10 @@ import { format, parseISO } from "date-fns";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
-import { fetchChemicalStockAmount } from "../../api/ChemicalManagement/chemicalDashboardApi";
+import {
+  fetchChemicalMonthlyDelivery,
+  fetchChemicalStockAmount,
+} from "../../api/ChemicalManagement/chemicalDashboardApi";
 
 const breadcrumbItems = [
   { title: "Home", href: "/home" },
@@ -304,12 +307,56 @@ function EnvironmentDashboard() {
     enabled: false,
   });
 
+  const {
+    data: chemicalMonthlyDeliveryData,
+    refetch: refetchChemicalMonthlyDelivery,
+    isFetching: isChemicalMonthlyDeliveryData,
+  } = useQuery({
+    queryKey: [
+      "monthly-delivery",
+      formattedDateFrom,
+      formattedDateTo,
+      division,
+      auditType,
+    ],
+    queryFn: () =>
+      fetchChemicalMonthlyDelivery(
+        formattedDateFrom,
+        formattedDateTo,
+        division
+      ),
+    enabled: false,
+  });
+
+  const {
+    data: chemicalLatestDeliveryData,
+    refetch: refetchChemicalMonthlyLatestRecord,
+    isFetching: isChemicalLatestDeliveryData,
+  } = useQuery({
+    queryKey: [
+      "latest-record",
+      formattedDateFrom,
+      formattedDateTo,
+      division,
+      auditType,
+    ],
+    queryFn: () =>
+      fetchChemicalMonthlyDelivery(
+        formattedDateFrom,
+        formattedDateTo,
+        division
+      ),
+    enabled: false,
+  });
+
   const chemicalStockAmountDataMemo = useMemo(() => {
     return chemicalStockAmountData || {};
   }, [chemicalStockAmountData]);
 
   const handleFetch = () => {
     refetchChemicalStockAmount();
+    refetchChemicalMonthlyDelivery();
+    refetchChemicalMonthlyLatestRecord();
   };
 
   const CustomCountLabel = ({ x, y, value }: any) => {
@@ -485,7 +532,7 @@ function EnvironmentDashboard() {
           <DashboardCard
             title="In Stock"
             titleIcon={<ScienceOutlinedIcon fontSize="large" />}
-            value={20}
+            value={chemicalStockAmountDataMemo?.inStockCount || 0}
             subDescription="Chemicals in Stock"
           />
         </Box>
@@ -500,7 +547,7 @@ function EnvironmentDashboard() {
           <DashboardCard
             title="Delivered"
             titleIcon={<LocalShippingOutlinedIcon fontSize="large" />}
-            value={120}
+            value={chemicalStockAmountDataMemo?.deliveredTotal || 0}
             subDescription="Delivered Chemical Quantity"
           />
         </Box>
@@ -516,7 +563,7 @@ function EnvironmentDashboard() {
           <DashboardCard
             title="Amount"
             titleIcon={<PaidOutlinedIcon fontSize="large" />}
-            value={5000.0}
+            value={chemicalStockAmountDataMemo?.purchaseAmount || 0}
             subDescription="Amount Of the Stocked Chemicals"
           />
         </Box>
