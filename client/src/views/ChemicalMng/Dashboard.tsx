@@ -6,6 +6,7 @@ import {
     Autocomplete,
     Box,
     Button,
+    CircularProgress,
     Divider,
     Stack,
     Tab,
@@ -16,7 +17,7 @@ import {
   import theme from "../../theme";
   import PageTitle from "../../components/PageTitle";
   import Breadcrumb from "../../components/BreadCrumb";
-  import { useForm } from "react-hook-form";
+  import { Controller, useForm } from "react-hook-form";
   import {
     HazardDashboardPeriods,
     HazardOrRiskCategories,
@@ -44,6 +45,11 @@ import {
     PieChart,
     Pie,
     Cell,
+    RadarChart,
+    PolarGrid,
+    PolarAngleAxis,
+    PolarRadiusAxis,
+    Radar,
   } from "recharts";
   
   import NaturePeopleIcon from "@mui/icons-material/NaturePeople";
@@ -51,7 +57,7 @@ import {
   import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
   import ShowerOutlinedIcon from "@mui/icons-material/ShowerOutlined";
   import BatteryChargingFullOutlinedIcon from "@mui/icons-material/BatteryChargingFullOutlined";
-  import { useMemo, useState } from "react";
+  import React, { useMemo, useState } from "react";
   import CircularProgressWithLabel from "../../components/CircularProgress";
   import {
     airEmissionData,
@@ -79,32 +85,47 @@ import {
     waterUsageData,
     waterWasteData,
   } from "../../api/sampleData/sampleAuditDashboardData";
-  import CustomPieChart from "../../components/CustomPieChart";
   
   import SummarizeIcon from "@mui/icons-material/Summarize";
-  import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
-  import AcUnitOutlinedIcon from "@mui/icons-material/AcUnitOutlined";
-  import OfflineBoltIcon from "@mui/icons-material/OfflineBolt";
-  import Co2Icon from "@mui/icons-material/Co2";
-  import PieArcLabelChart from "../../components/PieChartComponent";
-  import PercentagePieChart from "../../components/PercentagePieChart";
   
   import EditCalendarIcon from "@mui/icons-material/EditCalendar";
   import CheckBoxOutlinedIcon from "@mui/icons-material/CheckBoxOutlined";
   import RotateRightOutlinedIcon from "@mui/icons-material/RotateRightOutlined";
   import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
   import PaidOutlinedIcon from "@mui/icons-material/PaidOutlined";
-  import RadialBarGraph from "../../components/RadialBarChart";
   
   import ConnectWithoutContactIcon from "@mui/icons-material/ConnectWithoutContact";
   import EmergencyOutlinedIcon from "@mui/icons-material/EmergencyOutlined";
   import ForestOutlinedIcon from "@mui/icons-material/ForestOutlined";
   import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
   import ManageAccountsOutlinedIcon from "@mui/icons-material/ManageAccountsOutlined";
+  import { yearData } from "../../api/sampleData/consumptionData";
+  import { auditTypeData } from "../../api/sampleData/auditData";
+  import { useQuery } from "@tanstack/react-query";
+  import { fetchDivision } from "../../api/divisionApi";
+  import {
+    fetchAllDivisionTRecord,
+    fetchAuditAnnouncementStats,
+    fetchAuditAssignedCompletion,
+    fetchAuditAssignedGradeStats,
+    fetchAuditCategoryBreakdown,
+    fetchAuditCompletionsByDivision,
+    fetchAuditExpiryAction,
+    fetchAuditScoreCount,
+    fetchAuditStandardsByDivision,
+    fetchAuditStatusCount,
+    fetchAuditStatusCountByMonth,
+    fetchAuditTypesByDivision,
+  } from "../../api/AuditAndInspection/auditDashboardApi";
+  import { dateFormatter, getColorForType } from "../../util/dateFormat.util";
+  import CustomPieChart from "../../components/CustomPieChart";
+  import { count } from "console";
+  import BookmarkIcon from "@mui/icons-material/Bookmark";
+  import { format, parseISO } from "date-fns";
   
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
-    { title: "Environment Management" },
+    { title: "Audit Management" },
   ];
   
   interface TabPanelProps {
@@ -173,12 +194,23 @@ import {
       register,
       handleSubmit,
       watch,
+      reset,
       control,
       formState: { errors },
       setValue,
     } = useForm();
   
-    const watchPeriod = watch("period");
+    const year = watch("year");
+  
+    const auditType = watch("auditType");
+    const division = watch("division");
+  
+    const dateRangeFrom = watch("dateRangeFrom");
+    const formattedDateFrom = dateFormatter(dateRangeFrom);
+  
+    const dateRangeTo = watch("dateRangeTo");
+    const formattedDateTo = dateFormatter(dateRangeTo);
+  
     const [activeTab, setActiveTab] = useState(0);
     const [activeTabTwo, setActiveTabTwo] = useState(0);
     const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
@@ -260,6 +292,456 @@ import {
       return airEmissionData;
     }, [airEmissionData]);
   
+    const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
+      queryKey: ["divisions"],
+      queryFn: fetchDivision,
+    });
+  
+    const {
+      data: statusCountData,
+      refetch: refetchStatusCountData,
+      isFetching: isStatusCountDataFetching,
+    } = useQuery({
+      queryKey: [
+        "audit-status-cards",
+        formattedDateFrom,
+        formattedDateTo,
+        division,
+        auditType,
+      ],
+      queryFn: () =>
+        fetchAuditStatusCount(
+          formattedDateFrom,
+          formattedDateTo,
+          division,
+          auditType
+        ),
+      enabled: false,
+    });
+  
+    const {
+      data: statusCountByMonthData,
+      refetch: refetchStatusCountByMonthData,
+      isFetching: statusCountByMonthDataFetching,
+    } = useQuery({
+      queryKey: [
+        "audit-status",
+        formattedDateFrom,
+        formattedDateTo,
+        division,
+        auditType,
+      ],
+      queryFn: () =>
+        fetchAuditStatusCountByMonth(
+          formattedDateFrom,
+          formattedDateTo,
+          division,
+          auditType
+        ),
+      enabled: false,
+    });
+  
+    const { data: scoreCountData, refetch: refetchScoreCountData } = useQuery({
+      queryKey: [
+        "audit-team-productivity",
+        formattedDateFrom,
+        formattedDateTo,
+        division,
+        auditType,
+      ],
+      queryFn: () =>
+        fetchAuditScoreCount(
+          formattedDateFrom,
+          formattedDateTo,
+          division,
+          auditType
+        ),
+      enabled: false,
+    });
+  
+    const {
+      data: assignedCompletionData,
+      refetch: refetchAssignedCompletionData,
+      isFetching: assignedCompletionDataFetching,
+    } = useQuery({
+      queryKey: [
+        "audit-score",
+        formattedDateFrom,
+        formattedDateTo,
+        division,
+        auditType,
+      ],
+      queryFn: () =>
+        fetchAuditAssignedCompletion(
+          formattedDateFrom,
+          formattedDateTo,
+          division,
+          auditType
+        ),
+      enabled: false,
+    });
+  
+    const { data: gradeStatsData, refetch: refetchAuditAssignedGradeStats } =
+      useQuery({
+        queryKey: [
+          "audit-grade-stats",
+          formattedDateFrom,
+          formattedDateTo,
+          division,
+          auditType,
+        ],
+        queryFn: () =>
+          fetchAuditAssignedGradeStats(
+            formattedDateFrom,
+            formattedDateTo,
+            division,
+            auditType
+          ),
+        enabled: false,
+      });
+  
+    const {
+      data: announcementStatsData,
+      refetch: refetchAuditAnnouncementStats,
+    } = useQuery({
+      queryKey: [
+        "audit-announcement-stats",
+        formattedDateFrom,
+        formattedDateTo,
+        division,
+        auditType,
+      ],
+      queryFn: () =>
+        fetchAuditAnnouncementStats(
+          formattedDateFrom,
+          formattedDateTo,
+          division,
+          auditType
+        ),
+      enabled: false,
+    });
+  
+    const {
+      data: divisionRecordData,
+      refetch: refetchAllDivisionTRecord,
+      isFetching: isDivisionRecordData,
+    } = useQuery({
+      queryKey: [
+        "audit-division-count",
+        formattedDateFrom,
+        formattedDateTo,
+        division,
+        auditType,
+      ],
+      queryFn: () =>
+        fetchAllDivisionTRecord(
+          formattedDateFrom,
+          formattedDateTo,
+          division,
+          auditType
+        ),
+      enabled: false,
+    });
+  
+    const {
+      data: selectDivisionRecordData,
+      refetch: refetchAllSelectDivisionTRecord,
+      isFetching: isSelectDivisionRecordData,
+    } = useQuery({
+      queryKey: [
+        "audit-division-record",
+        formattedDateFrom,
+        formattedDateTo,
+        division,
+        auditType,
+      ],
+      queryFn: () =>
+        fetchAuditCategoryBreakdown(
+          formattedDateFrom,
+          formattedDateTo,
+          division,
+          auditType
+        ),
+      enabled: false,
+    });
+  
+    const {
+      data: auditStandardData,
+      refetch: refetchAuditStandardsByDivision,
+      isFetching: auditStandardDataFetching,
+    } = useQuery({
+      queryKey: [
+        "audit-division-standard",
+        formattedDateFrom,
+        formattedDateTo,
+        division,
+        auditType,
+      ],
+      queryFn: () =>
+        fetchAuditStandardsByDivision(
+          formattedDateFrom,
+          formattedDateTo,
+          division,
+          auditType
+        ),
+      enabled: false,
+    });
+  
+    const {
+      data: auditCompletionData,
+      refetch: refetchAuditCompletionsByDivision,
+      isFetching: isAuditCompletionDataFetching,
+    } = useQuery({
+      queryKey: [
+        "audit-division-completion",
+        formattedDateFrom,
+        formattedDateTo,
+        division,
+        auditType,
+      ],
+      queryFn: () =>
+        fetchAuditCompletionsByDivision(
+          formattedDateFrom,
+          formattedDateTo,
+          division,
+          auditType
+        ),
+      enabled: false,
+    });
+  
+    const {
+      data: expiryAuditActionData,
+      refetch: refetchAuditExpiryAction,
+      isFetching: isFetchAuditExpiryAction,
+    } = useQuery({
+      queryKey: [
+        "audit-division-action",
+        formattedDateFrom,
+        formattedDateTo,
+        division,
+        auditType,
+      ],
+      queryFn: () =>
+        fetchAuditExpiryAction(
+          formattedDateFrom,
+          formattedDateTo,
+          division,
+          auditType
+        ),
+      enabled: false,
+    });
+  
+    const {
+      data: auditTypeDivisionData,
+      refetch: refetchAuditTypesByDivision,
+      isFetching: isAuditTypeDivisionData,
+    } = useQuery({
+      queryKey: [
+        "audit-type-division",
+        formattedDateFrom,
+        formattedDateTo,
+        division,
+        auditType,
+      ],
+      queryFn: () =>
+        fetchAuditTypesByDivision(
+          formattedDateFrom,
+          formattedDateTo,
+          division,
+          auditType
+        ),
+      enabled: false,
+    });
+  
+    // const announcementStatsDataMemo = useMemo(() => {
+    //   return (announcementStatsData?.data ?? []).map((item: any) => ({
+    //     name: item.announcement,
+    //     value: item.count,
+    //   }));
+    // }, [announcementStatsData]);
+  
+    const auditTypeDivisionDataMemo = useMemo(() => {
+      return (auditTypeDivisionData?.data || []).map((item: any) => ({
+        name: item.auditType, // recharts expects "name"
+        value: item.count, // recharts expects "value"
+      }));
+    }, [auditTypeDivisionData]);
+  
+    const expiryInternalAuditDataMemo = useMemo(() => {
+      return expiryAuditActionData?.internal_completed_with_action_plans ?? [];
+    }, [expiryAuditActionData]);
+  
+    console.log("expiryInternalAuditDataMemo:", expiryInternalAuditDataMemo);
+  
+    const expiryExternalAuditDataMemo = useMemo(() => {
+      return expiryAuditActionData?.external_not_completed ?? [];
+    }, [expiryAuditActionData]);
+    const expiryExternalAuditActionDataMemo = useMemo(() => {
+      return expiryAuditActionData?.external_completed_with_action_plans ?? [];
+    }, [expiryAuditActionData]);
+  
+    const auditCompletionDataMemo = useMemo(() => {
+      return auditCompletionData ?? {};
+    }, [auditCompletionData]);
+  
+    const radialChartData = [
+      {
+        name: "Total Complete Percentage",
+        value: auditCompletionDataMemo.totalCompletePercentage || 0,
+        fill: "#4caf50",
+      },
+      {
+        name: "Total Draft Percentage",
+        value: auditCompletionDataMemo.totalDraftPercentage || 0,
+        fill: "#f44336",
+      },
+      {
+        name: "Timely Complete Percentage",
+        value: auditCompletionDataMemo.timeCompletePercentage || 0,
+        fill: "#2196f3",
+      },
+      {
+        name: "Timely Draft Percentage",
+        value: auditCompletionDataMemo.timeDraftPercentage || 0,
+        fill: "#ff9800",
+      },
+    ];
+  
+    const auditStandardDataMemo = useMemo(() => {
+      return (auditStandardData?.data ?? []).map((item) => ({
+        name: item.auditStandard,
+        count: item.count,
+      }));
+    }, [auditStandardData]);
+  
+    const selectDivisionRecordDataMemo = useMemo(() => {
+      if (!Array.isArray(selectDivisionRecordData)) return [];
+      return selectDivisionRecordData.map((item) => ({
+        year: item.year,
+        totalCount: item.count,
+      }));
+    }, [selectDivisionRecordData]);
+  
+    const divisionRecordDataMemo = useMemo(() => {
+      return (divisionRecordData?.data ?? []).map((item) => ({
+        name: item.division,
+        count: item.count,
+      }));
+    }, [divisionRecordData]);
+  
+    const announcementStatsDataMemo = useMemo(() => {
+      return (announcementStatsData?.data ?? []).map((item: any) => ({
+        name: item.announcement,
+        value: item.count,
+      }));
+    }, [announcementStatsData]);
+  
+    const gradeStatsDataMemo = useMemo(() => {
+      return (gradeStatsData?.data ?? []).map((item: any) => ({
+        name: item.grade,
+        value: item.count,
+      }));
+    }, [gradeStatsData]);
+  
+    const completionDataMemo = useMemo(() => {
+      return assignedCompletionData?.data ?? [];
+    }, [assignedCompletionData]);
+  
+    const statusCountByMonthMemo = useMemo(() => {
+      if (!statusCountByMonthData?.data) return [];
+  
+      const allStatuses = new Set();
+  
+      // First pass: collect all unique statuses
+      Object.values(statusCountByMonthData.data).forEach((statusObj) => {
+        if (typeof statusObj === "object" && !Array.isArray(statusObj)) {
+          Object.keys(statusObj).forEach((status) => allStatuses.add(status));
+        }
+      });
+  
+      // Second pass: build formatted data for chart
+      return Object.entries(statusCountByMonthData.data).map(
+        ([month, statuses]) => {
+          const entry = { month };
+          allStatuses.forEach((status) => {
+            entry[status as any] = statuses?.[status as any] || 0;
+          });
+          return entry;
+        }
+      );
+    }, [statusCountByMonthData]);
+  
+    const allStatuses = useMemo(() => {
+      const statusSet = new Set();
+      if (statusCountByMonthData?.data) {
+        Object.values(statusCountByMonthData.data).forEach((statusObj) => {
+          if (typeof statusObj === "object" && !Array.isArray(statusObj)) {
+            Object.keys(statusObj).forEach((status) => statusSet.add(status));
+          }
+        });
+      }
+      return Array.from(statusSet);
+    }, [statusCountByMonthData]);
+  
+    const statusCountMemo = useMemo(() => {
+      return statusCountData?.data ?? {};
+    }, [statusCountData]);
+  
+    const { stackedData, detailedData, auditTypes } = useMemo(() => {
+      const rawData = scoreCountData?.data ?? {};
+      const stacked: any[] = [];
+      const detailed: any[] = [];
+      const auditTypeSet = new Set<string>();
+  
+      for (const [month, audits] of Object.entries(rawData)) {
+        const monthGroup: Record<string, any> = { month };
+  
+        if (Array.isArray(audits)) {
+          for (const audit of audits) {
+            const { auditType, auditScore } = audit;
+            const normalizedType = auditType?.replace(/\s+/g, "_");
+            auditTypeSet.add(normalizedType);
+  
+            monthGroup[normalizedType] =
+              (monthGroup[normalizedType] ?? 0) + auditScore;
+  
+            detailed.push({ month, ...audit });
+          }
+        }
+  
+        stacked.push(monthGroup);
+      }
+  
+      return {
+        stackedData: stacked,
+        detailedData: detailed,
+        auditTypes: Array.from(auditTypeSet),
+      };
+    }, [scoreCountData]);
+  
+    const handleFetch = () => {
+      refetchStatusCountData();
+      refetchScoreCountData();
+      refetchStatusCountByMonthData();
+      refetchAssignedCompletionData();
+      refetchAuditAssignedGradeStats();
+      refetchAuditAnnouncementStats();
+      refetchAllDivisionTRecord();
+      refetchAllSelectDivisionTRecord();
+      refetchAuditStandardsByDivision();
+      refetchAuditCompletionsByDivision();
+      refetchAuditExpiryAction();
+      refetchAuditTypesByDivision();
+    };
+  
+    const CustomCountLabel = ({ x, y, value }: any) => {
+      return (
+        <text x={x} y={y - 10} fill="#444" fontSize={12} textAnchor="middle">
+          {value}
+        </text>
+      );
+    };
+  
     return (
       <Stack>
         <Box
@@ -271,7 +753,7 @@ import {
             overflowX: "hidden",
           }}
         >
-          <PageTitle title="Environment Management Dashboard" />
+          <PageTitle title="Audit Management Dashboard" />
           <Breadcrumb breadcrumbs={breadcrumbItems} />
         </Box>
   
@@ -301,42 +783,42 @@ import {
                   minWidth: "250px",
                 }}
               >
-                <Autocomplete
-                  {...register("period", { required: true })}
-                  size="small"
-                  options={Object.values(HazardDashboardPeriods)}
-                  sx={{ flex: 1, margin: "0.5rem" }}
-                  onChange={(e, value) => {
-                    setValue("period", value);
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      required
-                      error={!!errors.period}
-                      label="Period"
-                      name="period"
+                <Controller
+                  name="year"
+                  control={control}
+                  rules={{ required: true }}
+                  defaultValue={new Date().getFullYear().toString()}
+                  render={({ field }) => (
+                    <Autocomplete
+                      {...field}
+                      onChange={(event, newValue) => field.onChange(newValue)}
+                      size="small"
+                      options={
+                        yearData?.length ? yearData.map((year) => year.year) : []
+                      }
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          error={!!errors.year}
+                          helperText={errors.year && "Required"}
+                          label="Year"
+                          name="year"
+                        />
+                      )}
                     />
                   )}
                 />
               </Box>
-              {watchPeriod === HazardDashboardPeriods.CUSTOM && (
-                <Box
-                  sx={{
-                    display: "flex",
-                    flex: 2,
-                    minWidth: "250px",
-                    borderRadius: "0.3rem",
-                  }}
-                >
-                  <DateRangePicker
-                    control={control}
-                    register={register}
-                    errors={errors}
-                    label="Enter a date Range"
-                  />
-                </Box>
-              )}
+              <DateRangePicker
+                control={control}
+                register={register}
+                errors={errors}
+                label="Enter a date Range"
+                year={year}
+              />
+  
               <Box
                 sx={{
                   display: "flex",
@@ -344,18 +826,30 @@ import {
                   minWidth: "250px",
                 }}
               >
-                <Autocomplete
-                  {...register("division", { required: true })}
-                  size="small"
-                  options={sampleDivisions?.map((division) => division.name)}
-                  sx={{ flex: 1, margin: "0.5rem" }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      required
-                      error={!!errors.division}
-                      label="Division"
-                      name="division"
+                <Controller
+                  name="division"
+                  control={control}
+                  rules={{ required: true }}
+                  render={({ field }) => (
+                    <Autocomplete
+                      {...field}
+                      onChange={(e, value) => field.onChange(value)}
+                      value={field.value || ""}
+                      options={
+                        divisionData?.map((division) => division.divisionName) ||
+                        []
+                      }
+                      size="small"
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          error={!!errors.division}
+                          helperText={errors.division && "Required"}
+                          label="Division"
+                        />
+                      )}
                     />
                   )}
                 />
@@ -367,24 +861,31 @@ import {
                   minWidth: "250px",
                 }}
               >
-                <Autocomplete
-                  {...register("category", { required: true })}
-                  size="small"
-                  options={HazardOrRiskCategories?.map(
-                    (category) => category.name
-                  )}
-                  sx={{ flex: 1, margin: "0.5rem" }}
-                  onChange={(e, value) => {
-                    console.log("e", e);
-                    setValue("category", value);
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      required
-                      error={!!errors.category}
-                      label="Category"
-                      name="category"
+                <Controller
+                  name="auditType"
+                  control={control}
+                  rules={{ required: true }}
+                  render={({ field }) => (
+                    <Autocomplete
+                      {...field}
+                      onChange={(event, newValue) => field.onChange(newValue)}
+                      size="small"
+                      options={
+                        auditTypeData?.length
+                          ? auditTypeData.map((type) => type.type)
+                          : []
+                      }
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          error={!!errors.auditType}
+                          helperText={errors.auditType && "Required"}
+                          label="Audit Type"
+                          name="auditType"
+                        />
+                      )}
                     />
                   )}
                 />
@@ -400,7 +901,7 @@ import {
             >
               <Button
                 onClick={() => {
-                  console.log("reset");
+                  reset();
                 }}
                 sx={{ color: "var(--pallet-blue)", marginRight: "0.5rem" }}
               >
@@ -413,7 +914,7 @@ import {
                 }}
                 size="medium"
                 onClick={handleSubmit((data) => {
-                  // handleCreateDocument(data);
+                  handleFetch();
                   console.log("data", data);
                 })}
               >
@@ -442,7 +943,7 @@ import {
             <DashboardCard
               title="Schedule"
               titleIcon={<EditCalendarIcon fontSize="large" />}
-              value={25}
+              value={statusCountMemo?.status?.scheduled ?? 0}
               subDescription="0% from previous period"
             />
           </Box>
@@ -457,7 +958,7 @@ import {
             <DashboardCard
               title="Approved"
               titleIcon={<CheckBoxOutlinedIcon fontSize="large" />}
-              value={10}
+              value={statusCountMemo?.status?.approved ?? 0}
               subDescription="3% From previous period"
             />
           </Box>
@@ -472,7 +973,10 @@ import {
             <DashboardCard
               title="In-Progress"
               titleIcon={<RotateRightOutlinedIcon fontSize="large" />}
-              value={10}
+              value={
+                (statusCountMemo?.status?.draft ?? 0) ||
+                (statusCountMemo?.status?.scheduled ?? 0)
+              }
               subDescription="8% From previous period"
             />
           </Box>
@@ -487,7 +991,10 @@ import {
             <DashboardCard
               title="Completed"
               titleIcon={<VerifiedOutlinedIcon fontSize="large" />}
-              value={3}
+              value={
+                (statusCountMemo?.status?.complete ?? 0) ||
+                (statusCountMemo?.status?.completed ?? 0)
+              }
               subDescription="1.5% From previous period"
             />
           </Box>
@@ -502,7 +1009,7 @@ import {
             <DashboardCard
               title="Amount"
               titleIcon={<PaidOutlinedIcon fontSize="large" />}
-              value={5254.0}
+              value={statusCountMemo?.auditFeeTotal ?? 0}
               subDescription="5% From previous period"
             />
           </Box>
@@ -533,38 +1040,46 @@ import {
                   textAlign: "center",
                 }}
               >
-                Internal Audit Status
+                {auditType} Status
               </Typography>
             </Box>
-            <ResponsiveContainer width="100%" height={500}>
-              <BarChart height={400} data={datasetMemo}>
-                <XAxis dataKey="month" />
-                <YAxis fontSize={12} />
-                <Tooltip />
-                <Legend />
-                <Bar
-                  dataKey="numberOfAuditScheduled"
-                  name="Number Of Audit Scheduled"
-                  stackId="a"
-                  fill="#4f46e5"
-                  barSize={10}
-                />
-                <Bar
-                  dataKey="numberOfAuditCompleted"
-                  name="Number Of Audit Completed"
-                  stackId="a"
-                  fill="#10b981"
-                  barSize={10}
-                />
-                <Bar
-                  dataKey="numberOfAuditPending"
-                  name="Number Of Audit Pending"
-                  stackId="a"
-                  fill="#f59e0b"
-                  barSize={10}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            {isStatusCountDataFetching ? (
+              <Box
+                width={"100%"}
+                height="400px"
+                display="flex"
+                alignItems={"center"}
+                justifyContent={"center"}
+              >
+                <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
+              </Box>
+            ) : statusCountByMonthMemo.length > 0 ? (
+              <ResponsiveContainer width="100%" height={500}>
+                <BarChart height={400} width={600} data={statusCountByMonthMemo}>
+                  <XAxis dataKey="month" />
+                  <YAxis fontSize={12} />
+                  <Tooltip />
+                  <Legend />
+                  {(allStatuses as string[]).map((status, index) => (
+                    <Bar
+                      key={String(status)}
+                      barSize={10}
+                      dataKey={String(status)}
+                      stackId="a"
+                      fill={
+                        ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#a4de6c"][
+                          index % 5
+                        ]
+                      }
+                    />
+                  ))}
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <Typography textAlign="center">
+                Please select filters to display data
+              </Typography>
+            )}
           </Box>
   
           <Box
@@ -588,154 +1103,43 @@ import {
                   textAlign: "center",
                 }}
               >
-                Internal Audit Score
+                {auditType} Status
               </Typography>
             </Box>
-            <ResponsiveContainer width={"100%"} height={500}>
-              <BarChart width={800} height={400} data={ExternalTransformedAuditScores}>
-                <XAxis dataKey="month" />
-                <YAxis fontSize={12} />
-                <Tooltip />
-                <Legend />
-                <Bar
-                  dataKey="Safety"
-                  name="Safety Audit"
-                  stackId="a"
-                  fill="#4f46e5"
-                  barSize={10}
-                />
-                <Bar
-                  dataKey="Quality"
-                  name="Quality Audit"
-                  stackId="a"
-                  fill="#10b981"
-                  barSize={10}
-                />
-                <Bar
-                  dataKey="Environmental"
-                  name="Environmental Audit"
-                  stackId="a"
-                  fill="#f59e0b"
-                  barSize={10}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </Box>
-        </Box>
-  
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: isMobile ? "column" : "row",
-            gap: "1rem",
-          }}
-        >
-          <Box
-            sx={{
-              width: "100%",
-              height: "auto",
-              marginTop: "1rem",
-              flex: 1,
-              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-              padding: "1rem",
-              borderRadius: "0.3rem",
-              border: "1px solid var(--pallet-border-blue)",
-            }}
-          >
-            <Box>
-              <Typography
-                variant="h6"
-                sx={{
-                  textAlign: "center",
-                }}
+            {statusCountByMonthDataFetching ? (
+              <Box
+                width={"100%"}
+                height="400px"
+                display="flex"
+                alignItems={"center"}
+                justifyContent={"center"}
               >
-                External Audit Status
+                <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
+              </Box>
+            ) : stackedData.length > 0 ? (
+              <ResponsiveContainer width={"100%"} height={500}>
+                <BarChart data={stackedData}>
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  {auditTypes.map((type) => (
+                    <Bar
+                      key={type}
+                      dataKey={type}
+                      name={type?.replace(/_/g, " ")}
+                      stackId="a"
+                      barSize={10}
+                      fill={getColorForType(type)}
+                    />
+                  ))}
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <Typography textAlign={"center"}>
+                Please Select filters to display data
               </Typography>
-            </Box>
-            <ResponsiveContainer width="100%" height={500}>
-              <BarChart height={400} data={ExternalDataset}>
-                <XAxis dataKey="month" />
-                <YAxis fontSize={12} />
-                <Tooltip />
-                <Legend />
-                <Bar
-                  dataKey="numberOfAuditScheduled"
-                  name="Number Of Audit Scheduled"
-                  stackId="a"
-                  fill="#4f46e5"
-                  barSize={10}
-                />
-                <Bar
-                  dataKey="numberOfAuditCompleted"
-                  name="Number Of Audit Completed"
-                  stackId="a"
-                  fill="#10b981"
-                  barSize={10}
-                />
-                <Bar
-                  dataKey="numberOfAuditPending"
-                  name="Number Of Audit Pending"
-                  stackId="a"
-                  fill="#f59e0b"
-                  barSize={10}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </Box>
-  
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              flex: 1,
-              flexDirection: "column",
-              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-              borderRadius: "0.3rem",
-              border: "1px solid var(--pallet-border-blue)",
-              padding: "1rem",
-              height: "auto",
-              marginTop: "1rem",
-            }}
-          >
-            <Box>
-              <Typography
-                variant="h6"
-                sx={{
-                  textAlign: "center",
-                }}
-              >
-                External Audit Score
-              </Typography>
-            </Box>
-            <ResponsiveContainer width={"100%"} height={500}>
-              <BarChart width={800} height={400} data={transformedAuditScores}>
-                <XAxis dataKey="month" />
-                <YAxis fontSize={12} />
-                <Tooltip />
-                <Legend />
-                <Bar
-                  dataKey="Safety"
-                  name="Safety Audit"
-                  stackId="a"
-                  fill="#4f46e5"
-                  barSize={10}
-                />
-                <Bar
-                  dataKey="Quality"
-                  name="Quality Audit"
-                  stackId="a"
-                  fill="#10b981"
-                  barSize={10}
-                />
-                <Bar
-                  dataKey="Environmental"
-                  name="Environmental Audit"
-                  stackId="a"
-                  fill="#f59e0b"
-                  barSize={10}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            )}
           </Box>
         </Box>
   
@@ -768,35 +1172,56 @@ import {
                 Audit Completion And Timeliness Metrics
               </Typography>
             </Box>
-            <ResponsiveContainer width="100%" height={500}>
-              <RadialBarChart
-                cx="50%"
-                cy="50%"
-                innerRadius="30%"
-                outerRadius="70%"
-                barSize={12}
-                data={myData}
+            {isAuditCompletionDataFetching ? (
+              <Box
+                width="100%"
+                height="400px"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
               >
-                <RadialBar
-                  label={{ position: "insideStart", fill: "#000000" }}
-                  background
-                  maxBarSize={40}
-                  dataKey="uv"
-                />
-                <Legend
-                  iconSize={10}
-                  layout="horizontal"
-                  verticalAlign="bottom"
-                  align="center"
-                />
-              </RadialBarChart>
-            </ResponsiveContainer>
+                <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
+              </Box>
+            ) : radialChartData || radialChartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={500}>
+                <RadialBarChart
+                  cx="50%"
+                  cy="50%"
+                  innerRadius="20%"
+                  outerRadius="70%"
+                  barSize={20}
+                  data={radialChartData}
+                >
+                  <RadialBar
+                    label={{
+                      position: "insideStart",
+                      fill: "white",
+                      fontSize: 15,
+                      formatter: (value: number) => `${value}%`,
+                    }}
+                    background
+                    dataKey="value"
+                  />
+                  <Legend
+                    iconSize={10}
+                    layout="horizontal"
+                    verticalAlign="bottom"
+                    align="center"
+                  />
+                </RadialBarChart>
+              </ResponsiveContainer>
+            ) : (
+              <Typography textAlign="center">
+                Please select filters to display data
+              </Typography>
+            )}
           </Box>
   
           <Box
             sx={{
               display: "flex",
-              justifyContent: "center",
+              // justifyContent: "center",
+              alignContent: "center",
               flex: 1,
               flexDirection: "column",
               boxShadow: "0 0 10px rgba(0,0,0,0.1)",
@@ -815,28 +1240,46 @@ import {
             >
               Audit Team Productivity
             </Typography>
-            <ResponsiveContainer>
-              <PieChart>
-                <Pie
-                  data={auditTeamProductivity}
-                  dataKey="completedAudits"
-                  nameKey="team"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={120}
-                  label
-                >
-                  {auditTeamProductivity.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+            {assignedCompletionDataFetching ? (
+              <Box
+                width="100%"
+                height="400px"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
+              </Box>
+            ) : completionDataMemo && completionDataMemo.length > 0 ? (
+              <Stack flexDirection="column" spacing={2} marginTop={6} p={5}>
+                {completionDataMemo.map((completionMemo: any) => (
+                  <React.Fragment key={completionMemo?.userId}>
+                    <Stack
+                      flexDirection="row"
+                      spacing={2}
+                      flex={3}
+                      alignItems="center"
+                    >
+                      <Box flex={3}>{completionMemo?.userName}</Box>
+                      <Typography flex={3}>
+                        {completionMemo?.total} Count
+                      </Typography>
+                      <Box display="flex" alignItems="center">
+                        <CircularProgressWithLabel
+                          size={50}
+                          value={completionMemo?.percentage}
+                        />
+                      </Box>
+                    </Stack>
+                    <Divider />
+                  </React.Fragment>
+                ))}
+              </Stack>
+            ) : (
+              <Typography textAlign="center">
+                Please select filters to display data
+              </Typography>
+            )}
           </Box>
         </Box>
         <Box
@@ -1282,7 +1725,7 @@ import {
             </ResponsiveContainer>
           </Box>
         </Box>
-        {/* <Box
+        <Box
           sx={{
             display: "flex",
             flexDirection: isMobile ? "column" : "row",
@@ -1308,7 +1751,136 @@ import {
                   textAlign: "center",
                 }}
               >
-                GHG Emission
+                {auditType} Count By Division
+              </Typography>
+            </Box>
+  
+            {isDivisionRecordData ? (
+              <Box
+                width="100%"
+                height="400px"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
+              </Box>
+            ) : divisionRecordDataMemo && divisionRecordDataMemo.length > 0 ? (
+              <ResponsiveContainer width="100%" height={500}>
+                <LineChart
+                  data={divisionRecordDataMemo}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 10 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" height={60} fontSize={12} angle={25} />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="count"
+                    stroke="#1e88e5"
+                    label={<CustomCountLabel />}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <Typography textAlign="center">
+                Please select filters to display data
+              </Typography>
+            )}
+          </Box>
+  
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              flex: 1,
+              flexDirection: "column",
+              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+              borderRadius: "0.3rem",
+              border: "1px solid var(--pallet-border-blue)",
+              padding: "1rem",
+              height: "auto",
+              marginTop: "1rem",
+            }}
+          >
+            <Box>
+              <Typography
+                variant="h6"
+                sx={{
+                  textAlign: "center",
+                }}
+              >
+                External Audit Grade Distribution
+              </Typography>
+            </Box>
+            {isDivisionRecordData ? (
+              <Box
+                width="100%"
+                height="400px"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
+              </Box>
+            ) : gradeStatsDataMemo && gradeStatsDataMemo.length ? (
+              <ResponsiveContainer width="100%" height={500}>
+                <RadarChart
+                  cx="50%"
+                  cy="50%"
+                  outerRadius="80%"
+                  data={gradeStatsDataMemo}
+                >
+                  <PolarGrid />
+                  <PolarAngleAxis dataKey="name" />
+                  <PolarRadiusAxis />
+                  <Tooltip />
+                  <Radar
+                    name="Grade Count"
+                    dataKey="value"
+                    stroke="var(--pallet-main-blue)"
+                    fill="var(--pallet-light-blue)"
+                    fillOpacity={0.6}
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
+            ) : (
+              <Typography textAlign="center">
+                Please select filters to display data
+              </Typography>
+            )}
+          </Box>
+        </Box>
+  
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: isMobile ? "column" : "row",
+            gap: "1rem",
+          }}
+        >
+          <Box
+            sx={{
+              width: "100%",
+              height: "auto",
+              marginTop: "1rem",
+              flex: 2,
+              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+              padding: "1rem",
+              borderRadius: "0.3rem",
+              border: "1px solid var(--pallet-border-blue)",
+            }}
+          >
+            <Box>
+              <Typography
+                variant="h6"
+                sx={{
+                  textAlign: "center",
+                }}
+              >
+                Other
               </Typography>
             </Box>
             <ResponsiveContainer
@@ -1358,9 +1930,8 @@ import {
                             alignItems: "center",
                           }}
                         >
-                          <SummarizeIcon fontSize="small" />
                           <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                            Overview
+                            External Audit Expiry
                           </Typography>
                         </Box>
                       }
@@ -1375,9 +1946,8 @@ import {
                             alignItems: "center",
                           }}
                         >
-                          <ConnectWithoutContactIcon fontSize="small" />
                           <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                            Social
+                            External Audit Action Expiry
                           </Typography>
                         </Box>
                       }
@@ -1392,74 +1962,18 @@ import {
                             alignItems: "center",
                           }}
                         >
-                          <EmergencyOutlinedIcon fontSize="small" />
                           <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                            Health And Safety
+                            Internal Audit Action Expiry
                           </Typography>
                         </Box>
                       }
                       {...a11yProps2(2)}
                     />
-                    <Tab
-                      label={
-                        <Box
-                          sx={{
-                            color: "var(--pallet-blue)",
-                            display: "flex",
-                            alignItems: "center",
-                          }}
-                        >
-                          <ForestOutlinedIcon fontSize="small" />
-                          <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                            Environmental
-                          </Typography>
-                        </Box>
-                      }
-                      {...a11yProps2(3)}
-                    />
-                    <Tab
-                      label={
-                        <Box
-                          sx={{
-                            color: "var(--pallet-blue)",
-                            display: "flex",
-                            alignItems: "center",
-                          }}
-                        >
-                          <SecurityOutlinedIcon fontSize="small" />
-                          <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                            Security
-                          </Typography>
-                        </Box>
-                      }
-                      {...a11yProps2(4)}
-                    />
-                    <Tab
-                      label={
-                        <Box
-                          sx={{
-                            color: "var(--pallet-blue)",
-                            display: "flex",
-                            alignItems: "center",
-                          }}
-                        >
-                          <ManageAccountsOutlinedIcon fontSize="small" />
-                          <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                            Management System
-                          </Typography>
-                        </Box>
-                      }
-                      {...a11yProps2(5)}
-                    />
                   </Tabs>
                 </AppBar>
-                <TabPanelTwo
-                  value={activeTabTwo}
-                  indexTwo={0}
-                  dir={theme.direction}
-                >
+                <TabPanel value={activeTabTwo} index={0} dir={theme.direction}>
                   <>
-                    {wasteWaterDataMemo.map((item, index) => (
+                    {expiryExternalAuditDataMemo.map((item, index) => (
                       <Box key={index}>
                         <Box
                           sx={{
@@ -1469,10 +1983,19 @@ import {
                             m: "1rem",
                           }}
                         >
-                          <Box flex={2}>
-                            <Typography>{item.label}</Typography>
+                          <Box flex={1}>
+                            <Stack
+                              sx={{
+                                display: "flex",
+                                direction: isMobile ? "column" : "row",
+                              }}
+                            >
+                              <BookmarkIcon sx={{ color: "red" }} />
+                              <Typography>{item?.referenceNumber}</Typography>
+                            </Stack>
+  
                             <Typography variant="caption">
-                              {item.description}
+                              {item?.auditType}
                             </Typography>
                           </Box>
                           <Box
@@ -1484,9 +2007,41 @@ import {
                             }}
                           >
                             <Box>
-                              <Typography>Quantity</Typography>
+                              <Typography>Category</Typography>
                               <Typography variant="caption">
-                                {item.quantity}
+                                {item?.auditCategory}
+                              </Typography>
+                            </Box>
+                          </Box>
+                          <Box
+                            flex={1}
+                            sx={{
+                              display: "flex",
+                              direction: "row",
+                              justifyContent: isMobile ? "flex-end" : "center",
+                            }}
+                          >
+                            <Box>
+                              <Typography>Division</Typography>
+                              <Typography variant="caption">
+                                {item?.division}
+                              </Typography>
+                            </Box>
+                          </Box>
+                          <Box
+                            flex={1}
+                            sx={{
+                              display: "flex",
+                              direction: "row",
+                              justifyContent: isMobile ? "flex-end" : "center",
+                            }}
+                          >
+                            <Box>
+                              <Typography textAlign={"right"}>
+                                Audit Date
+                              </Typography>
+                              <Typography textAlign={"right"} variant="caption">
+                                {format(parseISO(item?.auditDate), "dd/MM/yyyy")}
                               </Typography>
                             </Box>
                           </Box>
@@ -1495,14 +2050,10 @@ import {
                       </Box>
                     ))}
                   </>
-                </TabPanelTwo>
-                <TabPanelTwo
-                  value={activeTabTwo}
-                  indexTwo={1}
-                  dir={theme.direction}
-                >
+                </TabPanel>
+                <TabPanel value={activeTabTwo} index={1} dir={theme.direction}>
                   <>
-                    {energyConsumptionDataMemo.map((item, index) => (
+                    {expiryExternalAuditActionDataMemo.map((item, index) => (
                       <Box key={index}>
                         <Box
                           sx={{
@@ -1512,10 +2063,19 @@ import {
                             m: "1rem",
                           }}
                         >
-                          <Box flex={2}>
-                            <Typography>{item.label}</Typography>
+                          <Box flex={1}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                direction: "row",
+                              }}
+                            >
+                              <BookmarkIcon sx={{ color: "red" }} />
+                              <Typography>{item.referenceNumber}</Typography>
+                            </Box>
+  
                             <Typography variant="caption">
-                              {item.description}
+                              {item.auditType}
                             </Typography>
                           </Box>
                           <Box
@@ -1527,9 +2087,39 @@ import {
                             }}
                           >
                             <Box>
-                              <Typography>Quantity</Typography>
+                              <Typography>Category</Typography>
                               <Typography variant="caption">
-                                {item.quantity}
+                                {item.auditCategory}
+                              </Typography>
+                            </Box>
+                          </Box>
+                          <Box
+                            flex={1}
+                            sx={{
+                              display: "flex",
+                              direction: "row",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <Box>
+                              <Typography>Division</Typography>
+                              <Typography variant="caption">
+                                {item.division}
+                              </Typography>
+                            </Box>
+                          </Box>
+                          <Box
+                            flex={1}
+                            sx={{
+                              display: "flex",
+                              direction: "row",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <Box>
+                              <Typography>Audit Date</Typography>
+                              <Typography variant="caption">
+                                {format(parseISO(item.auditDate), "dd/MM/yyyy")}
                               </Typography>
                             </Box>
                           </Box>
@@ -1538,14 +2128,10 @@ import {
                       </Box>
                     ))}
                   </>
-                </TabPanelTwo>
-                <TabPanelTwo
-                  value={activeTabTwo}
-                  indexTwo={2}
-                  dir={theme.direction}
-                >
+                </TabPanel>
+                <TabPanel value={activeTabTwo} index={2} dir={theme.direction}>
                   <>
-                    {waterUsageDataMemo.map((item, index) => (
+                    {expiryInternalAuditDataMemo.map((item, index) => (
                       <Box key={index}>
                         <Box
                           sx={{
@@ -1555,24 +2141,83 @@ import {
                             m: "1rem",
                           }}
                         >
-                          <Box flex={2}>
-                            <Typography>{item.label}</Typography>
+                          <Box flex={1}>
+                            <Stack
+                              sx={{
+                                display: "flex",
+                                direction: isMobile ? "column" : "row",
+                                alignContent: "center",
+                              }}
+                            >
+                              <BookmarkIcon sx={{ color: "red" }} />
+                              <Typography>{item?.referenceNumber}</Typography>
+                            </Stack>
+  
                             <Typography variant="caption">
-                              {item.description}
+                              {item?.auditType}
                             </Typography>
                           </Box>
                           <Box
                             flex={1}
                             sx={{
                               display: "flex",
-                              direction: "row",
+                              flexDirection: "row",
                               justifyContent: "space-between",
                             }}
                           >
                             <Box>
-                              <Typography>Quantity</Typography>
+                              <Typography>Action Plans</Typography>
+                              {item?.action_plans?.map((action) => (
+                                <Box key={action.actionPlanId} sx={{ mb: 1 }}>
+                                  <Typography variant="caption">
+                                    Plan ID {action.actionPlanId}
+                                  </Typography>
+                                  <Typography
+                                    sx={{
+                                      color:
+                                        action.priority === "High"
+                                          ? "red"
+                                          : action.priority === "Medium"
+                                          ? "orange"
+                                          : "green",
+                                    }}
+                                  >
+                                    {action.priority}
+                                  </Typography>
+                                </Box>
+                              ))}
+                            </Box>
+                          </Box>
+  
+                          <Box
+                            flex={1}
+                            sx={{
+                              display: "flex",
+                              direction: "row",
+                              justifyContent: isMobile ? "flex-end" : "center",
+                            }}
+                          >
+                            <Box>
+                              <Typography>Division</Typography>
                               <Typography variant="caption">
-                                {item.quantity}
+                                {item?.division}
+                              </Typography>
+                            </Box>
+                          </Box>
+                          <Box
+                            flex={1}
+                            sx={{
+                              display: "flex",
+                              direction: "row",
+                              justifyContent: isMobile ? "flex-end" : "center",
+                            }}
+                          >
+                            <Box>
+                              <Typography textAlign={"right"}>
+                                Audit Date
+                              </Typography>
+                              <Typography textAlign={"right"} variant="caption">
+                                {format(parseISO(item?.auditDate), "dd/MM/yyyy")}
                               </Typography>
                             </Box>
                           </Box>
@@ -1581,169 +2226,45 @@ import {
                       </Box>
                     ))}
                   </>
-                </TabPanelTwo>
-                <TabPanelTwo
-                  value={activeTabTwo}
-                  indexTwo={3}
-                  dir={theme.direction}
-                >
-                  <>
-                    {waterWasteDataMemo.map((item, index) => (
-                      <Box key={index}>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            direction: "row",
-                            justifyContent: "space-between",
-                            m: "1rem",
-                          }}
-                        >
-                          <Box flex={2}>
-                            <Typography>{item.label}</Typography>
-                            <Typography variant="caption">
-                              {item.description}
-                            </Typography>
-                          </Box>
-                          <Box
-                            flex={1}
-                            sx={{
-                              display: "flex",
-                              direction: "row",
-                              justifyContent: "space-between",
-                            }}
-                          >
-                            <Box>
-                              <Typography>Quantity</Typography>
-                              <Typography variant="caption">
-                                {item.quantity}
-                              </Typography>
-                            </Box>
-                          </Box>
-                        </Box>
-                        <Divider />
-                      </Box>
-                    ))}
-                  </>
-                </TabPanelTwo>
-                <TabPanelTwo
-                  value={activeTabTwo}
-                  indexTwo={4}
-                  dir={theme.direction}
-                >
-                  <>
-                    {airEmissionDataMemo.map((item, index) => (
-                      <Box key={index}>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            direction: "row",
-                            justifyContent: "space-between",
-                            m: "1rem",
-                          }}
-                        >
-                          <Box flex={2}>
-                            <Typography>{item.label}</Typography>
-                            <Typography variant="caption">
-                              {item.description}
-                            </Typography>
-                          </Box>
-                          <Box
-                            flex={1}
-                            sx={{
-                              display: "flex",
-                              direction: "row",
-                              justifyContent: "space-between",
-                            }}
-                          >
-                            <Box>
-                              <Typography>Quantity</Typography>
-                              <Typography variant="caption">
-                                {item.quantity}
-                              </Typography>
-                            </Box>
-                          </Box>
-                        </Box>
-                        <Divider />
-                      </Box>
-                    ))}
-                  </>
-                </TabPanelTwo>
-                <TabPanelTwo
-                  value={activeTabTwo}
-                  indexTwo={5}
-                  dir={theme.direction}
-                >
-                  <>
-                    {wasteWaterDataMemo.map((item, index) => (
-                      <Box key={index}>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            direction: "row",
-                            justifyContent: "space-between",
-                            m: "1rem",
-                          }}
-                        >
-                          <Box flex={2}>
-                            <Typography>{item.label}</Typography>
-                            <Typography variant="caption">
-                              {item.description}
-                            </Typography>
-                          </Box>
-                          <Box
-                            flex={1}
-                            sx={{
-                              display: "flex",
-                              direction: "row",
-                              justifyContent: "space-between",
-                            }}
-                          >
-                            <Box>
-                              <Typography>Quantity</Typography>
-                              <Typography variant="caption">
-                                {item.quantity}
-                              </Typography>
-                            </Box>
-                          </Box>
-                        </Box>
-                        <Divider />
-                      </Box>
-                    ))}
-                  </>
-                </TabPanelTwo>
+                </TabPanel>
               </>
             </ResponsiveContainer>
           </Box>
   
           <Box
             sx={{
-              display: "flex",
-              justifyContent: "center",
-              flex: 1,
-              flexDirection: "column",
-              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-              borderRadius: "0.3rem",
-              border: "1px solid var(--pallet-border-blue)",
-              padding: "1rem",
+              width: "100%",
               height: "auto",
               marginTop: "1rem",
+              flex: 1,
+              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+              padding: "1rem",
+              borderRadius: "0.3rem",
+              border: "1px solid var(--pallet-border-blue)",
             }}
           >
-            <ResponsiveContainer width="100%" height={500}>
+            <ResponsiveContainer
+              width="100%"
+              height={500}
+              style={{
+                overflowY: "scroll",
+                scrollbarWidth: "none",
+              }}
+            >
               <>
                 <Box display={"flex"} justifyContent={"center"}>
                   <Box display={"flex"} justifyContent={"center"}>
                     <CustomPieChart
-                      data={pieChartDataWaterTreatmentMemo}
-                      title="Waste Water Treatment"
+                      data={auditTypeDivisionDataMemo}
+                      title={`Audit Type Distribution`}
                     />
                   </Box>
                 </Box>
               </>
             </ResponsiveContainer>
           </Box>
-        </Box> */}
-        {/* <Box
+        </Box>
+        <Box
           sx={{
             display: "flex",
             flexDirection: isMobile ? "column" : "row",
@@ -1752,32 +2273,68 @@ import {
         >
           <Box
             sx={{
-              display: "flex",
-              justifyContent: "center",
-              flex: 1,
-              flexDirection: "column",
-              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-              borderRadius: "0.3rem",
-              border: "1px solid var(--pallet-border-blue)",
-              padding: "1rem",
+              width: "100%",
               height: "auto",
               marginTop: "1rem",
+              flex: 2,
+              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+              padding: "1rem",
+              borderRadius: "0.3rem",
+              border: "1px solid var(--pallet-border-blue)",
             }}
           >
-            <ResponsiveContainer width="100%" height={500}>
-              <>
-                <Box display={"flex"} justifyContent={"center"}>
-                  <Box display={"flex"} justifyContent={"center"}>
-                    <PieArcLabelChart
-                      data={pieChartEmissionBreakDownDataMemo}
-                      width={400}
-                      height={400}
-                      title="Emission Breakdown"
-                    />
-                  </Box>
-                </Box>
-              </>
-            </ResponsiveContainer>
+            <Box>
+              <Typography
+                variant="h6"
+                sx={{
+                  textAlign: "center",
+                }}
+              >
+                {division} Division {auditType} Count By Years
+              </Typography>
+            </Box>
+            {isSelectDivisionRecordData ? (
+              <Box
+                width="100%"
+                height="400px"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
+              </Box>
+            ) : selectDivisionRecordDataMemo &&
+              selectDivisionRecordDataMemo.length > 0 ? (
+              <ResponsiveContainer
+                width="100%"
+                height={500}
+                style={{
+                  overflowY: "scroll",
+                  scrollbarWidth: "none",
+                }}
+              >
+                <BarChart
+                  height={400}
+                  width={600}
+                  data={selectDivisionRecordDataMemo}
+                >
+                  <XAxis dataKey="year" />
+                  <YAxis fontSize={12} />
+                  <Tooltip />
+                  <Legend />
+                  <Bar
+                    dataKey="totalCount"
+                    fill="red"
+                    name="Total Count"
+                    barSize={25}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <Typography textAlign="center">
+                Please select filters to display data
+              </Typography>
+            )}
           </Box>
   
           <Box
@@ -1794,63 +2351,105 @@ import {
               marginTop: "1rem",
             }}
           >
-            <ResponsiveContainer width="100%" height={500}>
-              <>
-                <Box display={"flex"} justifyContent={"center"}>
+            {isDivisionRecordData ? (
+              <Box
+                width="100%"
+                height="400px"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
+              </Box>
+            ) : announcementStatsDataMemo &&
+              announcementStatsDataMemo.length > 0 ? (
+              <ResponsiveContainer width="100%" height={500}>
+                <>
                   <Box display={"flex"} justifyContent={"center"}>
-                    <PercentagePieChart
-                      data={pieChartRecycledWaterDownDataMemo}
-                      title={"Waste Water Reused Or Recycled"}
-                      width={350}
-                      height={350}
-                    />
+                    <Box display={"flex"} justifyContent={"center"}>
+                      <CustomPieChart
+                        data={announcementStatsDataMemo}
+                        title={`External Announcement Stats`}
+                      />
+                    </Box>
                   </Box>
-                </Box>
-              </>
-            </ResponsiveContainer>
+                </>
+              </ResponsiveContainer>
+            ) : (
+              <Typography textAlign="center">
+                Please select filters to display data
+              </Typography>
+            )}
           </Box>
+        </Box>
+        {auditType === "External Audit" && (
           <Box
             sx={{
               display: "flex",
-              justifyContent: "center",
-              flex: 1,
-              flexDirection: "column",
-              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-              borderRadius: "0.3rem",
-              border: "1px solid var(--pallet-border-blue)",
-              padding: "1rem",
-              height: "auto",
-              marginTop: "1rem",
+              flexDirection: isMobile ? "column" : "row",
+              gap: "1rem",
             }}
           >
-            <Typography
-              variant="h6"
+            <Box
               sx={{
-                textAlign: "center",
+                width: "100%",
+                height: "auto",
+                marginTop: "1rem",
+                flex: 2,
+                boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+                padding: "1rem",
+                borderRadius: "0.3rem",
+                border: "1px solid var(--pallet-border-blue)",
               }}
             >
-              Total Water Vs Waste Water
-            </Typography>
-            <ResponsiveContainer width="100%" height={500}>
-              <>
+              <Box>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    textAlign: "center",
+                  }}
+                >
+                  {auditType} Count By Audit Standard
+                </Typography>
+              </Box>
+  
+              {auditStandardDataFetching ? (
                 <Box
                   width="100%"
-                  height="100%"
+                  height="400px"
                   display="flex"
-                  justifyContent="center"
                   alignItems="center"
+                  justifyContent="center"
                 >
-                  <CircularProgressWithLabel
-                    size={300}
-                    value={135}
-                    textSize={25}
-                    textLabel="Waste Water"
-                  />
+                  <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
                 </Box>
-              </>
-            </ResponsiveContainer>
+              ) : auditStandardDataMemo && auditStandardDataMemo.length > 0 ? (
+                <ResponsiveContainer width="100%" height={500}>
+                  <LineChart
+                    data={auditStandardDataMemo}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 10 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" height={60} fontSize={12} angle={25} />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="count"
+                      stroke="#1e88e5"
+                      label={<CustomCountLabel />}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <Typography textAlign="center">
+                  Please select filters to display data
+                </Typography>
+              )}
+            </Box>
           </Box>
-        </Box> */}
+        )}
       </Stack>
     );
   }
