@@ -38,6 +38,9 @@ const ChemicalPurchaseInventoryTable = React.lazy(
 const ChemicalTransactionTable = React.lazy(
   () => import("./views/ChemicalMng/TransactionTable")
 );
+const ChemicalDashboard = React.lazy(
+  () => import("./views/ChemicalMng/Dashboard")
+);
 
 //health and safety apps
 //document
@@ -301,9 +304,13 @@ const AppRoutes = () => {
         {/* chemical management */}
         <Route
           path="/chemical-mng/dashboard"
-          element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="Chemical Management > Dashboard" />
-          ))}
+          element={withLayout(
+            MainLayout,
+            ChemicalDashboard,
+            !userPermissionObject?.[
+              PermissionKeys.CHEMICAL_MNG_DASHBOARD_VIEW
+            ]
+          )}
         />
         <Route
           path="/chemical-mng/chemical-requests"
