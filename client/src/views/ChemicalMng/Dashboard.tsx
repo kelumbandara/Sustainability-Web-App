@@ -100,23 +100,8 @@ import {
   import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
   import ManageAccountsOutlinedIcon from "@mui/icons-material/ManageAccountsOutlined";
   import { yearData } from "../../api/sampleData/consumptionData";
-  import { auditTypeData } from "../../api/sampleData/auditData";
   import { useQuery } from "@tanstack/react-query";
   import { fetchDivision } from "../../api/divisionApi";
-  import {
-    fetchAllDivisionTRecord,
-    fetchAuditAnnouncementStats,
-    fetchAuditAssignedCompletion,
-    fetchAuditAssignedGradeStats,
-    fetchAuditCategoryBreakdown,
-    fetchAuditCompletionsByDivision,
-    fetchAuditExpiryAction,
-    fetchAuditScoreCount,
-    fetchAuditStandardsByDivision,
-    fetchAuditStatusCount,
-    fetchAuditStatusCountByMonth,
-    fetchAuditTypesByDivision,
-  } from "../../api/AuditAndInspection/auditDashboardApi";
   import { dateFormatter, getColorForType } from "../../util/dateFormat.util";
   import CustomPieChart from "../../components/CustomPieChart";
   import { count } from "console";
@@ -297,441 +282,67 @@ import {
       queryFn: fetchDivision,
     });
   
-    const {
-      data: statusCountData,
-      refetch: refetchStatusCountData,
-      isFetching: isStatusCountDataFetching,
-    } = useQuery({
-      queryKey: [
-        "audit-status-cards",
-        formattedDateFrom,
-        formattedDateTo,
-        division,
-        auditType,
-      ],
-      queryFn: () =>
-        fetchAuditStatusCount(
-          formattedDateFrom,
-          formattedDateTo,
-          division,
-          auditType
-        ),
-      enabled: false,
-    });
+    // const {
+    //   data: statusCountData,
+    //   refetch: refetchStatusCountData,
+    //   isFetching: isStatusCountDataFetching,
+    // } = useQuery({
+    //   queryKey: [
+    //     "audit-status-cards",
+    //     formattedDateFrom,
+    //     formattedDateTo,
+    //     division,
+    //     auditType,
+    //   ],
+    //   queryFn: () =>
+    //     fetchAuditStatusCount(
+    //       formattedDateFrom,
+    //       formattedDateTo,
+    //       division,
+    //       auditType
+    //     ),
+    //   enabled: false,
+    // });
   
-    const {
-      data: statusCountByMonthData,
-      refetch: refetchStatusCountByMonthData,
-      isFetching: statusCountByMonthDataFetching,
-    } = useQuery({
-      queryKey: [
-        "audit-status",
-        formattedDateFrom,
-        formattedDateTo,
-        division,
-        auditType,
-      ],
-      queryFn: () =>
-        fetchAuditStatusCountByMonth(
-          formattedDateFrom,
-          formattedDateTo,
-          division,
-          auditType
-        ),
-      enabled: false,
-    });
+    
   
-    const { data: scoreCountData, refetch: refetchScoreCountData } = useQuery({
-      queryKey: [
-        "audit-team-productivity",
-        formattedDateFrom,
-        formattedDateTo,
-        division,
-        auditType,
-      ],
-      queryFn: () =>
-        fetchAuditScoreCount(
-          formattedDateFrom,
-          formattedDateTo,
-          division,
-          auditType
-        ),
-      enabled: false,
-    });
+    
   
-    const {
-      data: assignedCompletionData,
-      refetch: refetchAssignedCompletionData,
-      isFetching: assignedCompletionDataFetching,
-    } = useQuery({
-      queryKey: [
-        "audit-score",
-        formattedDateFrom,
-        formattedDateTo,
-        division,
-        auditType,
-      ],
-      queryFn: () =>
-        fetchAuditAssignedCompletion(
-          formattedDateFrom,
-          formattedDateTo,
-          division,
-          auditType
-        ),
-      enabled: false,
-    });
+    
   
-    const { data: gradeStatsData, refetch: refetchAuditAssignedGradeStats } =
-      useQuery({
-        queryKey: [
-          "audit-grade-stats",
-          formattedDateFrom,
-          formattedDateTo,
-          division,
-          auditType,
-        ],
-        queryFn: () =>
-          fetchAuditAssignedGradeStats(
-            formattedDateFrom,
-            formattedDateTo,
-            division,
-            auditType
-          ),
-        enabled: false,
-      });
+    
   
-    const {
-      data: announcementStatsData,
-      refetch: refetchAuditAnnouncementStats,
-    } = useQuery({
-      queryKey: [
-        "audit-announcement-stats",
-        formattedDateFrom,
-        formattedDateTo,
-        division,
-        auditType,
-      ],
-      queryFn: () =>
-        fetchAuditAnnouncementStats(
-          formattedDateFrom,
-          formattedDateTo,
-          division,
-          auditType
-        ),
-      enabled: false,
-    });
+    
   
-    const {
-      data: divisionRecordData,
-      refetch: refetchAllDivisionTRecord,
-      isFetching: isDivisionRecordData,
-    } = useQuery({
-      queryKey: [
-        "audit-division-count",
-        formattedDateFrom,
-        formattedDateTo,
-        division,
-        auditType,
-      ],
-      queryFn: () =>
-        fetchAllDivisionTRecord(
-          formattedDateFrom,
-          formattedDateTo,
-          division,
-          auditType
-        ),
-      enabled: false,
-    });
+    
   
-    const {
-      data: selectDivisionRecordData,
-      refetch: refetchAllSelectDivisionTRecord,
-      isFetching: isSelectDivisionRecordData,
-    } = useQuery({
-      queryKey: [
-        "audit-division-record",
-        formattedDateFrom,
-        formattedDateTo,
-        division,
-        auditType,
-      ],
-      queryFn: () =>
-        fetchAuditCategoryBreakdown(
-          formattedDateFrom,
-          formattedDateTo,
-          division,
-          auditType
-        ),
-      enabled: false,
-    });
+    
   
-    const {
-      data: auditStandardData,
-      refetch: refetchAuditStandardsByDivision,
-      isFetching: auditStandardDataFetching,
-    } = useQuery({
-      queryKey: [
-        "audit-division-standard",
-        formattedDateFrom,
-        formattedDateTo,
-        division,
-        auditType,
-      ],
-      queryFn: () =>
-        fetchAuditStandardsByDivision(
-          formattedDateFrom,
-          formattedDateTo,
-          division,
-          auditType
-        ),
-      enabled: false,
-    });
+    
   
-    const {
-      data: auditCompletionData,
-      refetch: refetchAuditCompletionsByDivision,
-      isFetching: isAuditCompletionDataFetching,
-    } = useQuery({
-      queryKey: [
-        "audit-division-completion",
-        formattedDateFrom,
-        formattedDateTo,
-        division,
-        auditType,
-      ],
-      queryFn: () =>
-        fetchAuditCompletionsByDivision(
-          formattedDateFrom,
-          formattedDateTo,
-          division,
-          auditType
-        ),
-      enabled: false,
-    });
+    
   
-    const {
-      data: expiryAuditActionData,
-      refetch: refetchAuditExpiryAction,
-      isFetching: isFetchAuditExpiryAction,
-    } = useQuery({
-      queryKey: [
-        "audit-division-action",
-        formattedDateFrom,
-        formattedDateTo,
-        division,
-        auditType,
-      ],
-      queryFn: () =>
-        fetchAuditExpiryAction(
-          formattedDateFrom,
-          formattedDateTo,
-          division,
-          auditType
-        ),
-      enabled: false,
-    });
+    
   
-    const {
-      data: auditTypeDivisionData,
-      refetch: refetchAuditTypesByDivision,
-      isFetching: isAuditTypeDivisionData,
-    } = useQuery({
-      queryKey: [
-        "audit-type-division",
-        formattedDateFrom,
-        formattedDateTo,
-        division,
-        auditType,
-      ],
-      queryFn: () =>
-        fetchAuditTypesByDivision(
-          formattedDateFrom,
-          formattedDateTo,
-          division,
-          auditType
-        ),
-      enabled: false,
-    });
+    
   
-    // const announcementStatsDataMemo = useMemo(() => {
-    //   return (announcementStatsData?.data ?? []).map((item: any) => ({
-    //     name: item.announcement,
-    //     value: item.count,
+    
+  
+    // const auditTypeDivisionDataMemo = useMemo(() => {
+    //   return (auditTypeDivisionData?.data || []).map((item: any) => ({
+    //     name: item.auditType, // recharts expects "name"
+    //     value: item.count, // recharts expects "value"
     //   }));
-    // }, [announcementStatsData]);
+    // }, [auditTypeDivisionData]);
   
-    const auditTypeDivisionDataMemo = useMemo(() => {
-      return (auditTypeDivisionData?.data || []).map((item: any) => ({
-        name: item.auditType, // recharts expects "name"
-        value: item.count, // recharts expects "value"
-      }));
-    }, [auditTypeDivisionData]);
+    
   
-    const expiryInternalAuditDataMemo = useMemo(() => {
-      return expiryAuditActionData?.internal_completed_with_action_plans ?? [];
-    }, [expiryAuditActionData]);
+    
   
-    console.log("expiryInternalAuditDataMemo:", expiryInternalAuditDataMemo);
-  
-    const expiryExternalAuditDataMemo = useMemo(() => {
-      return expiryAuditActionData?.external_not_completed ?? [];
-    }, [expiryAuditActionData]);
-    const expiryExternalAuditActionDataMemo = useMemo(() => {
-      return expiryAuditActionData?.external_completed_with_action_plans ?? [];
-    }, [expiryAuditActionData]);
-  
-    const auditCompletionDataMemo = useMemo(() => {
-      return auditCompletionData ?? {};
-    }, [auditCompletionData]);
-  
-    const radialChartData = [
-      {
-        name: "Total Complete Percentage",
-        value: auditCompletionDataMemo.totalCompletePercentage || 0,
-        fill: "#4caf50",
-      },
-      {
-        name: "Total Draft Percentage",
-        value: auditCompletionDataMemo.totalDraftPercentage || 0,
-        fill: "#f44336",
-      },
-      {
-        name: "Timely Complete Percentage",
-        value: auditCompletionDataMemo.timeCompletePercentage || 0,
-        fill: "#2196f3",
-      },
-      {
-        name: "Timely Draft Percentage",
-        value: auditCompletionDataMemo.timeDraftPercentage || 0,
-        fill: "#ff9800",
-      },
-    ];
-  
-    const auditStandardDataMemo = useMemo(() => {
-      return (auditStandardData?.data ?? []).map((item) => ({
-        name: item.auditStandard,
-        count: item.count,
-      }));
-    }, [auditStandardData]);
-  
-    const selectDivisionRecordDataMemo = useMemo(() => {
-      if (!Array.isArray(selectDivisionRecordData)) return [];
-      return selectDivisionRecordData.map((item) => ({
-        year: item.year,
-        totalCount: item.count,
-      }));
-    }, [selectDivisionRecordData]);
-  
-    const divisionRecordDataMemo = useMemo(() => {
-      return (divisionRecordData?.data ?? []).map((item) => ({
-        name: item.division,
-        count: item.count,
-      }));
-    }, [divisionRecordData]);
-  
-    const announcementStatsDataMemo = useMemo(() => {
-      return (announcementStatsData?.data ?? []).map((item: any) => ({
-        name: item.announcement,
-        value: item.count,
-      }));
-    }, [announcementStatsData]);
-  
-    const gradeStatsDataMemo = useMemo(() => {
-      return (gradeStatsData?.data ?? []).map((item: any) => ({
-        name: item.grade,
-        value: item.count,
-      }));
-    }, [gradeStatsData]);
-  
-    const completionDataMemo = useMemo(() => {
-      return assignedCompletionData?.data ?? [];
-    }, [assignedCompletionData]);
-  
-    const statusCountByMonthMemo = useMemo(() => {
-      if (!statusCountByMonthData?.data) return [];
-  
-      const allStatuses = new Set();
-  
-      // First pass: collect all unique statuses
-      Object.values(statusCountByMonthData.data).forEach((statusObj) => {
-        if (typeof statusObj === "object" && !Array.isArray(statusObj)) {
-          Object.keys(statusObj).forEach((status) => allStatuses.add(status));
-        }
-      });
-  
-      // Second pass: build formatted data for chart
-      return Object.entries(statusCountByMonthData.data).map(
-        ([month, statuses]) => {
-          const entry = { month };
-          allStatuses.forEach((status) => {
-            entry[status as any] = statuses?.[status as any] || 0;
-          });
-          return entry;
-        }
-      );
-    }, [statusCountByMonthData]);
-  
-    const allStatuses = useMemo(() => {
-      const statusSet = new Set();
-      if (statusCountByMonthData?.data) {
-        Object.values(statusCountByMonthData.data).forEach((statusObj) => {
-          if (typeof statusObj === "object" && !Array.isArray(statusObj)) {
-            Object.keys(statusObj).forEach((status) => statusSet.add(status));
-          }
-        });
-      }
-      return Array.from(statusSet);
-    }, [statusCountByMonthData]);
-  
-    const statusCountMemo = useMemo(() => {
-      return statusCountData?.data ?? {};
-    }, [statusCountData]);
-  
-    const { stackedData, detailedData, auditTypes } = useMemo(() => {
-      const rawData = scoreCountData?.data ?? {};
-      const stacked: any[] = [];
-      const detailed: any[] = [];
-      const auditTypeSet = new Set<string>();
-  
-      for (const [month, audits] of Object.entries(rawData)) {
-        const monthGroup: Record<string, any> = { month };
-  
-        if (Array.isArray(audits)) {
-          for (const audit of audits) {
-            const { auditType, auditScore } = audit;
-            const normalizedType = auditType?.replace(/\s+/g, "_");
-            auditTypeSet.add(normalizedType);
-  
-            monthGroup[normalizedType] =
-              (monthGroup[normalizedType] ?? 0) + auditScore;
-  
-            detailed.push({ month, ...audit });
-          }
-        }
-  
-        stacked.push(monthGroup);
-      }
-  
-      return {
-        stackedData: stacked,
-        detailedData: detailed,
-        auditTypes: Array.from(auditTypeSet),
-      };
-    }, [scoreCountData]);
+    
   
     const handleFetch = () => {
-      refetchStatusCountData();
-      refetchScoreCountData();
-      refetchStatusCountByMonthData();
-      refetchAssignedCompletionData();
-      refetchAuditAssignedGradeStats();
-      refetchAuditAnnouncementStats();
-      refetchAllDivisionTRecord();
-      refetchAllSelectDivisionTRecord();
-      refetchAuditStandardsByDivision();
-      refetchAuditCompletionsByDivision();
-      refetchAuditExpiryAction();
-      refetchAuditTypesByDivision();
+      
     };
   
     const CustomCountLabel = ({ x, y, value }: any) => {
@@ -861,34 +472,7 @@ import {
                   minWidth: "250px",
                 }}
               >
-                <Controller
-                  name="auditType"
-                  control={control}
-                  rules={{ required: true }}
-                  render={({ field }) => (
-                    <Autocomplete
-                      {...field}
-                      onChange={(event, newValue) => field.onChange(newValue)}
-                      size="small"
-                      options={
-                        auditTypeData?.length
-                          ? auditTypeData.map((type) => type.type)
-                          : []
-                      }
-                      sx={{ flex: 1, margin: "0.5rem" }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          required
-                          error={!!errors.auditType}
-                          helperText={errors.auditType && "Required"}
-                          label="Audit Type"
-                          name="auditType"
-                        />
-                      )}
-                    />
-                  )}
-                />
+                
               </Box>
             </Box>
             <Box
@@ -943,7 +527,7 @@ import {
             <DashboardCard
               title="Schedule"
               titleIcon={<EditCalendarIcon fontSize="large" />}
-              value={statusCountMemo?.status?.scheduled ?? 0}
+              value={null}
               subDescription="0% from previous period"
             />
           </Box>
@@ -958,7 +542,7 @@ import {
             <DashboardCard
               title="Approved"
               titleIcon={<CheckBoxOutlinedIcon fontSize="large" />}
-              value={statusCountMemo?.status?.approved ?? 0}
+              value={null}
               subDescription="3% From previous period"
             />
           </Box>
@@ -973,9 +557,7 @@ import {
             <DashboardCard
               title="In-Progress"
               titleIcon={<RotateRightOutlinedIcon fontSize="large" />}
-              value={
-                (statusCountMemo?.status?.draft ?? 0) ||
-                (statusCountMemo?.status?.scheduled ?? 0)
+              value={null
               }
               subDescription="8% From previous period"
             />
@@ -991,9 +573,7 @@ import {
             <DashboardCard
               title="Completed"
               titleIcon={<VerifiedOutlinedIcon fontSize="large" />}
-              value={
-                (statusCountMemo?.status?.complete ?? 0) ||
-                (statusCountMemo?.status?.completed ?? 0)
+              value={null
               }
               subDescription="1.5% From previous period"
             />
@@ -1009,7 +589,7 @@ import {
             <DashboardCard
               title="Amount"
               titleIcon={<PaidOutlinedIcon fontSize="large" />}
-              value={statusCountMemo?.auditFeeTotal ?? 0}
+              value={null}
               subDescription="5% From previous period"
             />
           </Box>
@@ -1043,7 +623,7 @@ import {
                 {auditType} Status
               </Typography>
             </Box>
-            {isStatusCountDataFetching ? (
+            {false ? (
               <Box
                 width={"100%"}
                 height="400px"
@@ -1053,14 +633,14 @@ import {
               >
                 <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
               </Box>
-            ) : statusCountByMonthMemo.length > 0 ? (
+            ) : 1 > 0 ? (
               <ResponsiveContainer width="100%" height={500}>
-                <BarChart height={400} width={600} data={statusCountByMonthMemo}>
+                <BarChart height={400} width={600} data={null}>
                   <XAxis dataKey="month" />
                   <YAxis fontSize={12} />
                   <Tooltip />
                   <Legend />
-                  {(allStatuses as string[]).map((status, index) => (
+                  {(null as string[]).map((status, index) => (
                     <Bar
                       key={String(status)}
                       barSize={10}
@@ -1106,7 +686,7 @@ import {
                 {auditType} Status
               </Typography>
             </Box>
-            {statusCountByMonthDataFetching ? (
+            {false ? (
               <Box
                 width={"100%"}
                 height="400px"
@@ -1116,23 +696,14 @@ import {
               >
                 <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
               </Box>
-            ) : stackedData.length > 0 ? (
+            ) : 1 > 0 ? (
               <ResponsiveContainer width={"100%"} height={500}>
-                <BarChart data={stackedData}>
+                <BarChart data={null}>
                   <XAxis dataKey="month" />
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  {auditTypes.map((type) => (
-                    <Bar
-                      key={type}
-                      dataKey={type}
-                      name={type?.replace(/_/g, " ")}
-                      stackId="a"
-                      barSize={10}
-                      fill={getColorForType(type)}
-                    />
-                  ))}
+                  
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -1143,146 +714,8 @@ import {
           </Box>
         </Box>
   
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: isMobile ? "column" : "row",
-            gap: "1rem",
-          }}
-        >
-          <Box
-            sx={{
-              width: "100%",
-              height: "auto",
-              marginTop: "1rem",
-              flex: 1,
-              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-              padding: "1rem",
-              borderRadius: "0.3rem",
-              border: "1px solid var(--pallet-border-blue)",
-            }}
-          >
-            <Box>
-              <Typography
-                variant="h6"
-                sx={{
-                  textAlign: "center",
-                }}
-              >
-                Audit Completion And Timeliness Metrics
-              </Typography>
-            </Box>
-            {isAuditCompletionDataFetching ? (
-              <Box
-                width="100%"
-                height="400px"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
-              </Box>
-            ) : radialChartData || radialChartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={500}>
-                <RadialBarChart
-                  cx="50%"
-                  cy="50%"
-                  innerRadius="20%"
-                  outerRadius="70%"
-                  barSize={20}
-                  data={radialChartData}
-                >
-                  <RadialBar
-                    label={{
-                      position: "insideStart",
-                      fill: "white",
-                      fontSize: 15,
-                      formatter: (value: number) => `${value}%`,
-                    }}
-                    background
-                    dataKey="value"
-                  />
-                  <Legend
-                    iconSize={10}
-                    layout="horizontal"
-                    verticalAlign="bottom"
-                    align="center"
-                  />
-                </RadialBarChart>
-              </ResponsiveContainer>
-            ) : (
-              <Typography textAlign="center">
-                Please select filters to display data
-              </Typography>
-            )}
-          </Box>
-  
-          <Box
-            sx={{
-              display: "flex",
-              // justifyContent: "center",
-              alignContent: "center",
-              flex: 1,
-              flexDirection: "column",
-              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-              borderRadius: "0.3rem",
-              border: "1px solid var(--pallet-border-blue)",
-              padding: "1rem",
-              height: "auto",
-              marginTop: "1rem",
-            }}
-          >
-            <Typography
-              variant="h6"
-              sx={{
-                textAlign: "center",
-              }}
-            >
-              Audit Team Productivity
-            </Typography>
-            {assignedCompletionDataFetching ? (
-              <Box
-                width="100%"
-                height="400px"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
-              </Box>
-            ) : completionDataMemo && completionDataMemo.length > 0 ? (
-              <Stack flexDirection="column" spacing={2} marginTop={6} p={5}>
-                {completionDataMemo.map((completionMemo: any) => (
-                  <React.Fragment key={completionMemo?.userId}>
-                    <Stack
-                      flexDirection="row"
-                      spacing={2}
-                      flex={3}
-                      alignItems="center"
-                    >
-                      <Box flex={3}>{completionMemo?.userName}</Box>
-                      <Typography flex={3}>
-                        {completionMemo?.total} Count
-                      </Typography>
-                      <Box display="flex" alignItems="center">
-                        <CircularProgressWithLabel
-                          size={50}
-                          value={completionMemo?.percentage}
-                        />
-                      </Box>
-                    </Stack>
-                    <Divider />
-                  </React.Fragment>
-                ))}
-              </Stack>
-            ) : (
-              <Typography textAlign="center">
-                Please select filters to display data
-              </Typography>
-            )}
-          </Box>
-        </Box>
-        <Box
+        
+        {/* <Box
           sx={{
             display: "flex",
             flexDirection: isMobile ? "column" : "row",
@@ -1724,732 +1157,7 @@ import {
               <></>
             </ResponsiveContainer>
           </Box>
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: isMobile ? "column" : "row",
-            gap: "1rem",
-          }}
-        >
-          <Box
-            sx={{
-              width: "100%",
-              height: "auto",
-              marginTop: "1rem",
-              flex: 2,
-              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-              padding: "1rem",
-              borderRadius: "0.3rem",
-              border: "1px solid var(--pallet-border-blue)",
-            }}
-          >
-            <Box>
-              <Typography
-                variant="h6"
-                sx={{
-                  textAlign: "center",
-                }}
-              >
-                {auditType} Count By Division
-              </Typography>
-            </Box>
-  
-            {isDivisionRecordData ? (
-              <Box
-                width="100%"
-                height="400px"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
-              </Box>
-            ) : divisionRecordDataMemo && divisionRecordDataMemo.length > 0 ? (
-              <ResponsiveContainer width="100%" height={500}>
-                <LineChart
-                  data={divisionRecordDataMemo}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 10 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" height={60} fontSize={12} angle={25} />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="count"
-                    stroke="#1e88e5"
-                    label={<CustomCountLabel />}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <Typography textAlign="center">
-                Please select filters to display data
-              </Typography>
-            )}
-          </Box>
-  
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              flex: 1,
-              flexDirection: "column",
-              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-              borderRadius: "0.3rem",
-              border: "1px solid var(--pallet-border-blue)",
-              padding: "1rem",
-              height: "auto",
-              marginTop: "1rem",
-            }}
-          >
-            <Box>
-              <Typography
-                variant="h6"
-                sx={{
-                  textAlign: "center",
-                }}
-              >
-                External Audit Grade Distribution
-              </Typography>
-            </Box>
-            {isDivisionRecordData ? (
-              <Box
-                width="100%"
-                height="400px"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
-              </Box>
-            ) : gradeStatsDataMemo && gradeStatsDataMemo.length ? (
-              <ResponsiveContainer width="100%" height={500}>
-                <RadarChart
-                  cx="50%"
-                  cy="50%"
-                  outerRadius="80%"
-                  data={gradeStatsDataMemo}
-                >
-                  <PolarGrid />
-                  <PolarAngleAxis dataKey="name" />
-                  <PolarRadiusAxis />
-                  <Tooltip />
-                  <Radar
-                    name="Grade Count"
-                    dataKey="value"
-                    stroke="var(--pallet-main-blue)"
-                    fill="var(--pallet-light-blue)"
-                    fillOpacity={0.6}
-                  />
-                </RadarChart>
-              </ResponsiveContainer>
-            ) : (
-              <Typography textAlign="center">
-                Please select filters to display data
-              </Typography>
-            )}
-          </Box>
-        </Box>
-  
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: isMobile ? "column" : "row",
-            gap: "1rem",
-          }}
-        >
-          <Box
-            sx={{
-              width: "100%",
-              height: "auto",
-              marginTop: "1rem",
-              flex: 2,
-              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-              padding: "1rem",
-              borderRadius: "0.3rem",
-              border: "1px solid var(--pallet-border-blue)",
-            }}
-          >
-            <Box>
-              <Typography
-                variant="h6"
-                sx={{
-                  textAlign: "center",
-                }}
-              >
-                Other
-              </Typography>
-            </Box>
-            <ResponsiveContainer
-              width="100%"
-              height={500}
-              style={{
-                overflowY: "scroll",
-                scrollbarWidth: "none",
-              }}
-            >
-              <>
-                <AppBar
-                  position="sticky"
-                  sx={{
-                    display: "flex",
-                    mt: "1rem",
-                    maxWidth: isMobile ? 400 : "auto",
-                  }}
-                >
-                  <Tabs
-                    value={activeTabTwo}
-                    onChange={handleChangeTabTwo}
-                    indicatorColor="secondary"
-                    TabIndicatorProps={{
-                      style: {
-                        backgroundColor: "var(--pallet-blue)",
-                        height: "3px",
-                        justifyContent: "center",
-                        alignItems: "center",
-                      },
-                    }}
-                    sx={{
-                      backgroundColor: "var(--pallet-lighter-grey)",
-                      color: "var(--pallet-blue)",
-                      display: "flex",
-                    }}
-                    textColor="inherit"
-                    variant="scrollable"
-                    scrollButtons={true}
-                  >
-                    <Tab
-                      label={
-                        <Box
-                          sx={{
-                            color: "var(--pallet-blue)",
-                            display: "flex",
-                            alignItems: "center",
-                          }}
-                        >
-                          <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                            External Audit Expiry
-                          </Typography>
-                        </Box>
-                      }
-                      {...a11yProps2(0)}
-                    />
-                    <Tab
-                      label={
-                        <Box
-                          sx={{
-                            color: "var(--pallet-blue)",
-                            display: "flex",
-                            alignItems: "center",
-                          }}
-                        >
-                          <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                            External Audit Action Expiry
-                          </Typography>
-                        </Box>
-                      }
-                      {...a11yProps2(1)}
-                    />
-                    <Tab
-                      label={
-                        <Box
-                          sx={{
-                            color: "var(--pallet-blue)",
-                            display: "flex",
-                            alignItems: "center",
-                          }}
-                        >
-                          <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                            Internal Audit Action Expiry
-                          </Typography>
-                        </Box>
-                      }
-                      {...a11yProps2(2)}
-                    />
-                  </Tabs>
-                </AppBar>
-                <TabPanel value={activeTabTwo} index={0} dir={theme.direction}>
-                  <>
-                    {expiryExternalAuditDataMemo.map((item, index) => (
-                      <Box key={index}>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            direction: "row",
-                            justifyContent: "space-between",
-                            m: "1rem",
-                          }}
-                        >
-                          <Box flex={1}>
-                            <Stack
-                              sx={{
-                                display: "flex",
-                                direction: isMobile ? "column" : "row",
-                              }}
-                            >
-                              <BookmarkIcon sx={{ color: "red" }} />
-                              <Typography>{item?.referenceNumber}</Typography>
-                            </Stack>
-  
-                            <Typography variant="caption">
-                              {item?.auditType}
-                            </Typography>
-                          </Box>
-                          <Box
-                            flex={1}
-                            sx={{
-                              display: "flex",
-                              direction: "row",
-                              justifyContent: "space-between",
-                            }}
-                          >
-                            <Box>
-                              <Typography>Category</Typography>
-                              <Typography variant="caption">
-                                {item?.auditCategory}
-                              </Typography>
-                            </Box>
-                          </Box>
-                          <Box
-                            flex={1}
-                            sx={{
-                              display: "flex",
-                              direction: "row",
-                              justifyContent: isMobile ? "flex-end" : "center",
-                            }}
-                          >
-                            <Box>
-                              <Typography>Division</Typography>
-                              <Typography variant="caption">
-                                {item?.division}
-                              </Typography>
-                            </Box>
-                          </Box>
-                          <Box
-                            flex={1}
-                            sx={{
-                              display: "flex",
-                              direction: "row",
-                              justifyContent: isMobile ? "flex-end" : "center",
-                            }}
-                          >
-                            <Box>
-                              <Typography textAlign={"right"}>
-                                Audit Date
-                              </Typography>
-                              <Typography textAlign={"right"} variant="caption">
-                                {format(parseISO(item?.auditDate), "dd/MM/yyyy")}
-                              </Typography>
-                            </Box>
-                          </Box>
-                        </Box>
-                        <Divider />
-                      </Box>
-                    ))}
-                  </>
-                </TabPanel>
-                <TabPanel value={activeTabTwo} index={1} dir={theme.direction}>
-                  <>
-                    {expiryExternalAuditActionDataMemo.map((item, index) => (
-                      <Box key={index}>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            direction: "row",
-                            justifyContent: "space-between",
-                            m: "1rem",
-                          }}
-                        >
-                          <Box flex={1}>
-                            <Box
-                              sx={{
-                                display: "flex",
-                                direction: "row",
-                              }}
-                            >
-                              <BookmarkIcon sx={{ color: "red" }} />
-                              <Typography>{item.referenceNumber}</Typography>
-                            </Box>
-  
-                            <Typography variant="caption">
-                              {item.auditType}
-                            </Typography>
-                          </Box>
-                          <Box
-                            flex={1}
-                            sx={{
-                              display: "flex",
-                              direction: "row",
-                              justifyContent: "space-between",
-                            }}
-                          >
-                            <Box>
-                              <Typography>Category</Typography>
-                              <Typography variant="caption">
-                                {item.auditCategory}
-                              </Typography>
-                            </Box>
-                          </Box>
-                          <Box
-                            flex={1}
-                            sx={{
-                              display: "flex",
-                              direction: "row",
-                              justifyContent: "center",
-                            }}
-                          >
-                            <Box>
-                              <Typography>Division</Typography>
-                              <Typography variant="caption">
-                                {item.division}
-                              </Typography>
-                            </Box>
-                          </Box>
-                          <Box
-                            flex={1}
-                            sx={{
-                              display: "flex",
-                              direction: "row",
-                              justifyContent: "center",
-                            }}
-                          >
-                            <Box>
-                              <Typography>Audit Date</Typography>
-                              <Typography variant="caption">
-                                {format(parseISO(item.auditDate), "dd/MM/yyyy")}
-                              </Typography>
-                            </Box>
-                          </Box>
-                        </Box>
-                        <Divider />
-                      </Box>
-                    ))}
-                  </>
-                </TabPanel>
-                <TabPanel value={activeTabTwo} index={2} dir={theme.direction}>
-                  <>
-                    {expiryInternalAuditDataMemo.map((item, index) => (
-                      <Box key={index}>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            direction: "row",
-                            justifyContent: "space-between",
-                            m: "1rem",
-                          }}
-                        >
-                          <Box flex={1}>
-                            <Stack
-                              sx={{
-                                display: "flex",
-                                direction: isMobile ? "column" : "row",
-                                alignContent: "center",
-                              }}
-                            >
-                              <BookmarkIcon sx={{ color: "red" }} />
-                              <Typography>{item?.referenceNumber}</Typography>
-                            </Stack>
-  
-                            <Typography variant="caption">
-                              {item?.auditType}
-                            </Typography>
-                          </Box>
-                          <Box
-                            flex={1}
-                            sx={{
-                              display: "flex",
-                              flexDirection: "row",
-                              justifyContent: "space-between",
-                            }}
-                          >
-                            <Box>
-                              <Typography>Action Plans</Typography>
-                              {item?.action_plans?.map((action) => (
-                                <Box key={action.actionPlanId} sx={{ mb: 1 }}>
-                                  <Typography variant="caption">
-                                    Plan ID {action.actionPlanId}
-                                  </Typography>
-                                  <Typography
-                                    sx={{
-                                      color:
-                                        action.priority === "High"
-                                          ? "red"
-                                          : action.priority === "Medium"
-                                          ? "orange"
-                                          : "green",
-                                    }}
-                                  >
-                                    {action.priority}
-                                  </Typography>
-                                </Box>
-                              ))}
-                            </Box>
-                          </Box>
-  
-                          <Box
-                            flex={1}
-                            sx={{
-                              display: "flex",
-                              direction: "row",
-                              justifyContent: isMobile ? "flex-end" : "center",
-                            }}
-                          >
-                            <Box>
-                              <Typography>Division</Typography>
-                              <Typography variant="caption">
-                                {item?.division}
-                              </Typography>
-                            </Box>
-                          </Box>
-                          <Box
-                            flex={1}
-                            sx={{
-                              display: "flex",
-                              direction: "row",
-                              justifyContent: isMobile ? "flex-end" : "center",
-                            }}
-                          >
-                            <Box>
-                              <Typography textAlign={"right"}>
-                                Audit Date
-                              </Typography>
-                              <Typography textAlign={"right"} variant="caption">
-                                {format(parseISO(item?.auditDate), "dd/MM/yyyy")}
-                              </Typography>
-                            </Box>
-                          </Box>
-                        </Box>
-                        <Divider />
-                      </Box>
-                    ))}
-                  </>
-                </TabPanel>
-              </>
-            </ResponsiveContainer>
-          </Box>
-  
-          <Box
-            sx={{
-              width: "100%",
-              height: "auto",
-              marginTop: "1rem",
-              flex: 1,
-              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-              padding: "1rem",
-              borderRadius: "0.3rem",
-              border: "1px solid var(--pallet-border-blue)",
-            }}
-          >
-            <ResponsiveContainer
-              width="100%"
-              height={500}
-              style={{
-                overflowY: "scroll",
-                scrollbarWidth: "none",
-              }}
-            >
-              <>
-                <Box display={"flex"} justifyContent={"center"}>
-                  <Box display={"flex"} justifyContent={"center"}>
-                    <CustomPieChart
-                      data={auditTypeDivisionDataMemo}
-                      title={`Audit Type Distribution`}
-                    />
-                  </Box>
-                </Box>
-              </>
-            </ResponsiveContainer>
-          </Box>
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: isMobile ? "column" : "row",
-            gap: "1rem",
-          }}
-        >
-          <Box
-            sx={{
-              width: "100%",
-              height: "auto",
-              marginTop: "1rem",
-              flex: 2,
-              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-              padding: "1rem",
-              borderRadius: "0.3rem",
-              border: "1px solid var(--pallet-border-blue)",
-            }}
-          >
-            <Box>
-              <Typography
-                variant="h6"
-                sx={{
-                  textAlign: "center",
-                }}
-              >
-                {division} Division {auditType} Count By Years
-              </Typography>
-            </Box>
-            {isSelectDivisionRecordData ? (
-              <Box
-                width="100%"
-                height="400px"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
-              </Box>
-            ) : selectDivisionRecordDataMemo &&
-              selectDivisionRecordDataMemo.length > 0 ? (
-              <ResponsiveContainer
-                width="100%"
-                height={500}
-                style={{
-                  overflowY: "scroll",
-                  scrollbarWidth: "none",
-                }}
-              >
-                <BarChart
-                  height={400}
-                  width={600}
-                  data={selectDivisionRecordDataMemo}
-                >
-                  <XAxis dataKey="year" />
-                  <YAxis fontSize={12} />
-                  <Tooltip />
-                  <Legend />
-                  <Bar
-                    dataKey="totalCount"
-                    fill="red"
-                    name="Total Count"
-                    barSize={25}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <Typography textAlign="center">
-                Please select filters to display data
-              </Typography>
-            )}
-          </Box>
-  
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              flex: 1,
-              flexDirection: "column",
-              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-              borderRadius: "0.3rem",
-              border: "1px solid var(--pallet-border-blue)",
-              padding: "1rem",
-              height: "auto",
-              marginTop: "1rem",
-            }}
-          >
-            {isDivisionRecordData ? (
-              <Box
-                width="100%"
-                height="400px"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
-              </Box>
-            ) : announcementStatsDataMemo &&
-              announcementStatsDataMemo.length > 0 ? (
-              <ResponsiveContainer width="100%" height={500}>
-                <>
-                  <Box display={"flex"} justifyContent={"center"}>
-                    <Box display={"flex"} justifyContent={"center"}>
-                      <CustomPieChart
-                        data={announcementStatsDataMemo}
-                        title={`External Announcement Stats`}
-                      />
-                    </Box>
-                  </Box>
-                </>
-              </ResponsiveContainer>
-            ) : (
-              <Typography textAlign="center">
-                Please select filters to display data
-              </Typography>
-            )}
-          </Box>
-        </Box>
-        {auditType === "External Audit" && (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: isMobile ? "column" : "row",
-              gap: "1rem",
-            }}
-          >
-            <Box
-              sx={{
-                width: "100%",
-                height: "auto",
-                marginTop: "1rem",
-                flex: 2,
-                boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-                padding: "1rem",
-                borderRadius: "0.3rem",
-                border: "1px solid var(--pallet-border-blue)",
-              }}
-            >
-              <Box>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    textAlign: "center",
-                  }}
-                >
-                  {auditType} Count By Audit Standard
-                </Typography>
-              </Box>
-  
-              {auditStandardDataFetching ? (
-                <Box
-                  width="100%"
-                  height="400px"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
-                </Box>
-              ) : auditStandardDataMemo && auditStandardDataMemo.length > 0 ? (
-                <ResponsiveContainer width="100%" height={500}>
-                  <LineChart
-                    data={auditStandardDataMemo}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 10 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" height={60} fontSize={12} angle={25} />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="count"
-                      stroke="#1e88e5"
-                      label={<CustomCountLabel />}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              ) : (
-                <Typography textAlign="center">
-                  Please select filters to display data
-                </Typography>
-              )}
-            </Box>
-          </Box>
-        )}
+        </Box> */}
       </Stack>
     );
   }
