@@ -1247,11 +1247,7 @@ function EnvironmentDashboard() {
             </Box>
           ) : stackedDataMemo.length > 0 ? (
             <ResponsiveContainer width="100%" height={500}>
-              <BarChart
-                data={stackedDataMemo}
-                height={400}
-                width={600}
-              >
+              <BarChart data={stackedDataMemo} height={400} width={600}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis
