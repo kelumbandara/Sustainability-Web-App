@@ -121,6 +121,7 @@ import {
   fetchChemicalMonthlyLatestRecord,
   fetchChemicalStockAmount,
 } from "../../api/ChemicalManagement/chemicalDashboardApi";
+import UpcomingOutlinedIcon from "@mui/icons-material/UpcomingOutlined";
 
 const breadcrumbItems = [
   { title: "Home", href: "/home" },
@@ -701,29 +702,76 @@ function EnvironmentDashboard() {
 
         <Box
           sx={{
-            display: "flex",
-            justifyContent: "center",
+            width: "100%",
+            height: "600px",
+            overflowY: "auto",
+            marginTop: "1rem",
             flex: 1,
-            flexDirection: "column",
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+            padding: "1rem",
             borderRadius: "0.3rem",
             border: "1px solid var(--pallet-border-blue)",
-            padding: "1rem",
-            height: "auto",
-            marginTop: "1rem",
           }}
         >
-          <Box>
+          <Box position="static" mb={3}>
             <Typography
               variant="h6"
               sx={{
                 textAlign: "center",
               }}
             >
-              Latest Inventory
+              Latest Inventory Delivery
             </Typography>
           </Box>
-          
+
+          {isChemicalLatestDeliveryData ? (
+            <Box
+              width="100%"
+              height="400px"
+              mt={5}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
+            </Box>
+          ) : chemicalLatestDeliveryDataMemo &&
+            chemicalLatestDeliveryDataMemo.length > 0 ? (
+            <Table>
+              <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
+                <TableRow>
+                  <TableCell align="left"></TableCell>
+                  <TableCell align="left">Reference Number</TableCell>
+                  <TableCell align="left">Delivered Date</TableCell>
+                  <TableCell align="left">Commercial Name</TableCell>
+                  <TableCell align="left">ZDHC level</TableCell>
+                  <TableCell align="left">Delivered</TableCell>
+                  <TableCell align="left">Status</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {chemicalLatestDeliveryDataMemo?.map((item, index) => (
+                  <TableRow key={index}>
+                    <TableCell align="left">
+                      <UpcomingOutlinedIcon fontSize="small" color="error" />
+                    </TableCell>
+                    <TableCell align="left">{item.referenceNumber}</TableCell>
+                    <TableCell align="left">
+                      {new Date(item.deliveryDate).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell align="left">{item.commercialName}</TableCell>
+                    <TableCell align="left">{item.zdhcLevel}</TableCell>
+                    <TableCell align="left">{item.deliveryQuantity}</TableCell>
+                    <TableCell align="left">{item.status}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <Typography textAlign="center">
+              Please select filters to display data
+            </Typography>
+          )}
         </Box>
       </Box>
     </Stack>
@@ -731,33 +779,3 @@ function EnvironmentDashboard() {
 }
 
 export default EnvironmentDashboard;
-
-
-<Table>
-            <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
-              <TableRow>
-                <TableCell align="left"></TableCell>
-                <TableCell align="left">Reference Number</TableCell>
-                <TableCell align="left">Delivered Date</TableCell>
-                <TableCell align="left">Commercial Name</TableCell>
-                <TableCell align="left">ZDHC level</TableCell>
-                <TableCell align="left">Delivered</TableCell>
-                <TableCell align="left">Status</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {chemicalLatestDeliveryDataMemo?.map((item, index) => (
-                <TableRow key={index}>
-                  <TableCell align="left"></TableCell>
-                  <TableCell align="left">{item.referenceNumber}</TableCell>
-                  <TableCell align="left">
-                    {new Date(item.deliveryDate).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell align="left">{item.commercialName}</TableCell>
-                  <TableCell align="left">{item.zdhcLevel}</TableCell>
-                  <TableCell align="left">{item.deliveryQuantity}</TableCell>
-                  <TableCell align="left">{item.status}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
