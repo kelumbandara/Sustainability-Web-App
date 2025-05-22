@@ -172,3 +172,15 @@ export async function fetchAuditScore(
   );
   return res.data;
 }
+
+export async function fetchUpcomingAuditExpiry(
+  dateFrom: String,
+  dateTo: String,
+  division: String,
+  auditType: String
+) {
+  const res = await axios.get(
+    `api/audit-status-count/${dateFrom}/${dateTo}/${division}/upcoming-expiry-audit`
+  );
+  return res.data;
+}

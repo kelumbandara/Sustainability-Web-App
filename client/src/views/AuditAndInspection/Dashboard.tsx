@@ -10,6 +10,11 @@ import {
   Divider,
   Stack,
   Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
   Tabs,
   TextField,
   Typography,
@@ -115,17 +120,20 @@ import {
   fetchAuditCompletionsByDivision,
   fetchAuditExpiryAction,
   fetchAuditPriorityFindings,
+  fetchAuditScore,
   fetchAuditScoreCount,
   fetchAuditStandardsByDivision,
   fetchAuditStatusCount,
   fetchAuditStatusCountByMonth,
   fetchAuditTypesByDivision,
+  fetchUpcomingAuditExpiry,
 } from "../../api/AuditAndInspection/auditDashboardApi";
 import { dateFormatter, getColorForType } from "../../util/dateFormat.util";
 import CustomPieChart from "../../components/CustomPieChart";
 import { count } from "console";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { format, parseISO } from "date-fns";
+import UpcomingOutlinedIcon from "@mui/icons-material/UpcomingOutlined";
 
 const breadcrumbItems = [
   { title: "Home", href: "/home" },
@@ -218,6 +226,7 @@ function EnvironmentDashboard() {
   const [activeTab, setActiveTab] = useState(0);
   const [activeTabTwo, setActiveTabTwo] = useState(0);
   const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
+  const COLORS2 = ["#3498db", "#2ecc71", "#f1c40f", "#e67e22", "#e74c3c"];
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     console.log("event", event);
@@ -579,6 +588,67 @@ function EnvironmentDashboard() {
     enabled: false,
   });
 
+  const {
+    data: auditCategoryScoreData,
+    refetch: refetchAuditScore,
+    isFetching: isAuditCategoryScoreData,
+  } = useQuery({
+    queryKey: [
+      "audit-category-score",
+      formattedDateFrom,
+      formattedDateTo,
+      division,
+      auditType,
+    ],
+    queryFn: () =>
+      fetchAuditScore(formattedDateFrom, formattedDateTo, division, auditType),
+    enabled: false,
+  });
+
+  const {
+    data: auditExpiryUpcomingData,
+    refetch: refetchUpcomingAuditExpiry,
+    isFetching: isAuditExpiryUpcomingData,
+  } = useQuery({
+    queryKey: [
+      "audit-expiry-upcoming",
+      formattedDateFrom,
+      formattedDateTo,
+      division,
+      auditType,
+    ],
+    queryFn: () =>
+      fetchUpcomingAuditExpiry(
+        formattedDateFrom,
+        formattedDateTo,
+        division,
+        auditType
+      ),
+    enabled: false,
+  });
+
+  const auditExpiryUpcomingDataMemo = useMemo(() => {
+    return auditExpiryUpcomingData ?? [];
+  }, [auditExpiryUpcomingData]);
+
+  const auditCategoryScoreDataMemo = useMemo(() => {
+    return auditCategoryScoreData?.data ?? [];
+  }, [auditCategoryScoreData]);
+
+  const categoryCountData = useMemo(() => {
+    return auditCategoryScoreDataMemo.map((item) => ({
+      name: item.category,
+      value: item.totalScore,
+    }));
+  }, [auditCategoryScoreDataMemo]);
+
+  const categoryPercentageData = useMemo(() => {
+    return auditCategoryScoreDataMemo.map((item) => ({
+      name: item.category,
+      value: item.percentage,
+    }));
+  }, [auditCategoryScoreDataMemo]);
+
   const auditPriorityFindingsDataMemo = useMemo(() => {
     return auditPriorityFindingsData?.data ?? [];
   }, [auditPriorityFindingsData]);
@@ -717,6 +787,32 @@ function EnvironmentDashboard() {
     return statusCountData?.data ?? {};
   }, [statusCountData]);
 
+  const stackedDataMemo = useMemo(() => {
+    if (!scoreCountData?.data) return [];
+
+    // Group by month and calculate average score per audit type
+    const monthGroups = {};
+
+    scoreCountData.data.forEach((item) => {
+      if (!monthGroups[item.month]) {
+        monthGroups[item.month] = { month: item.month };
+      }
+      // Calculate average score (totalScore / count)
+      const avgScore = item.count > 0 ? item.totalScore / item.count : 0;
+      monthGroups[item.month][item.auditType] = avgScore;
+    });
+
+    return Object.values(monthGroups);
+  }, [scoreCountData]);
+
+  // Get unique audit types for dynamic bars
+  const auditTypesMemo = useMemo<string[]>(() => {
+    if (!scoreCountData?.data) return [];
+    const types = new Set<string>();
+    scoreCountData.data.forEach((item) => types.add(item.auditType));
+    return Array.from(types);
+  }, [scoreCountData]);
+
   const { stackedData, detailedData, auditTypes } = useMemo(() => {
     const rawData = scoreCountData?.data ?? {};
     const stacked: any[] = [];
@@ -763,6 +859,8 @@ function EnvironmentDashboard() {
     refetchAuditExpiryAction();
     refetchAuditTypesByDivision();
     refetchAuditPriorityFindings();
+    refetchAuditScore();
+    refetchUpcomingAuditExpiry();
   };
 
   const CustomCountLabel = ({ x, y, value }: any) => {
@@ -1147,21 +1245,37 @@ function EnvironmentDashboard() {
             >
               <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
             </Box>
-          ) : stackedData.length > 0 ? (
-            <ResponsiveContainer width={"100%"} height={500}>
-              <BarChart data={stackedData}>
+          ) : stackedDataMemo.length > 0 ? (
+            <ResponsiveContainer width="100%" height={500}>
+              <BarChart
+                data={stackedDataMemo}
+                height={400}
+                width={600}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
-                <YAxis />
+                <YAxis
+                  label={{
+                    value: "Score",
+                    angle: -90,
+                    position: "insideLeft",
+                  }}
+                  fontSize={12}
+                />
                 <Tooltip />
                 <Legend />
-                {auditTypes.map((type) => (
+                {auditTypesMemo.map((type, index) => (
                   <Bar
                     key={type}
                     dataKey={type}
-                    name={type?.replace(/_/g, " ")}
                     stackId="a"
+                    fill={
+                      ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#a4de6c"][
+                        index % 5
+                      ]
+                    }
                     barSize={10}
-                    fill={getColorForType(type)}
+                    name={type}
                   />
                 ))}
               </BarChart>
@@ -1887,7 +2001,7 @@ function EnvironmentDashboard() {
                 textAlign: "center",
               }}
             >
-              Audit Score
+              External Audit Score
             </Typography>
           </Box>
           <ResponsiveContainer
@@ -1898,7 +2012,44 @@ function EnvironmentDashboard() {
               scrollbarWidth: "none",
             }}
           >
-            <></>
+            <PieChart width={400} height={400}>
+              <Pie
+                dataKey="value"
+                data={categoryCountData}
+                cx={"50%"}
+                cy={"50%"}
+                outerRadius={130}
+                label
+              >
+                {categoryCountData?.map((_, index) => (
+                  <Cell
+                    key={`count-cell-${index}`}
+                    fill={COLORS2[index % COLORS.length]}
+                  />
+                ))}
+              </Pie>
+              <Pie
+                dataKey="value"
+                data={categoryPercentageData}
+                cx={isMobile ? 300 : 360}
+                cy={isMobile ? 90 : 100}
+                innerRadius={40}
+                outerRadius={80}
+                legendType="none"
+                fill="#82ca9d"
+                label={({ value, percent }) => `${(percent * 100).toFixed(0)}%`}
+              >
+                {categoryPercentageData?.map((_, index) => (
+                  <Cell
+                    key={`count-cell-${index}`}
+                    fill={COLORS2[index % COLORS.length]}
+                  />
+                ))}
+              </Pie>
+
+              <Tooltip />
+              <Legend />
+            </PieChart>
           </ResponsiveContainer>
         </Box>
       </Box>
@@ -2595,6 +2746,81 @@ function EnvironmentDashboard() {
                   />
                 </LineChart>
               </ResponsiveContainer>
+            ) : (
+              <Typography textAlign="center">
+                Please select filters to display data
+              </Typography>
+            )}
+          </Box>
+          <Box
+            sx={{
+              width: "100%",
+              height: "600px",
+              overflowY: "auto",
+              marginTop: "1rem",
+              flex: 2,
+              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+              padding: "1rem",
+              borderRadius: "0.3rem",
+              border: "1px solid var(--pallet-border-blue)",
+            }}
+          >
+            <Box position="static" mb={3}>
+              <Typography
+                variant="h6"
+                sx={{
+                  textAlign: "center",
+                }}
+              >
+                {auditType} Upcoming Expiry
+              </Typography>
+            </Box>
+
+            {auditStandardDataFetching ? (
+              <Box
+                width="100%"
+                height="400px"
+                mt={5}
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
+              </Box>
+            ) : auditExpiryUpcomingDataMemo &&
+              auditExpiryUpcomingDataMemo.length > 0 ? (
+              <Table>
+                <TableHead
+                  sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}
+                >
+                  <TableRow>
+                    <TableCell align="left"></TableCell>
+                    <TableCell align="left">Reference Number</TableCell>
+                    <TableCell align="left">Expiry Date</TableCell>
+                    <TableCell align="left">Division</TableCell>
+                    <TableCell align="left">Category</TableCell>
+                    <TableCell align="left">Standard</TableCell>
+                    <TableCell align="left">Status</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {auditExpiryUpcomingDataMemo.map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell align="left">
+                        <UpcomingOutlinedIcon fontSize="small" color="error" />
+                      </TableCell>
+                      <TableCell align="left">{item.referenceNumber}</TableCell>
+                      <TableCell align="left">
+                        {new Date(item.auditExpiryDate).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell align="left">{item.division}</TableCell>
+                      <TableCell align="left">{item.auditCategory}</TableCell>
+                      <TableCell align="left">{item.auditStandard}</TableCell>
+                      <TableCell align="left">{item.status}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             ) : (
               <Typography textAlign="center">
                 Please select filters to display data
