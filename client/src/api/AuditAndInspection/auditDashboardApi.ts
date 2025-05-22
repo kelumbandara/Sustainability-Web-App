@@ -132,7 +132,7 @@ export async function fetchAuditExpiryAction(
   auditType: String
 ) {
   const res = await axios.get(
-    `api/audit-status-count/${dateFrom}/${dateTo}/${division}/${auditType}/expiry-acction`
+    `api/audit-status-count/${dateFrom}/${dateTo}/${division}/${auditType}/expiry-action`
   );
   return res.data;
 }
