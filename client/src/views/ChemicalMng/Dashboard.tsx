@@ -10,6 +10,11 @@ import {
   Divider,
   Stack,
   Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
   Tabs,
   TextField,
   Typography,
@@ -350,6 +355,10 @@ function EnvironmentDashboard() {
     enabled: false,
   });
 
+  const chemicalLatestDeliveryDataMemo = useMemo(() => {
+    return chemicalLatestDeliveryData || [];
+  }, [chemicalLatestDeliveryData]);
+
   const chemicalStockAmountDataMemo = useMemo(() => {
     return chemicalStockAmountData || {};
   }, [chemicalStockAmountData]);
@@ -654,8 +663,101 @@ function EnvironmentDashboard() {
           )}
         </Box>
       </Box>
+
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+          gap: "1rem",
+        }}
+      >
+        <Box
+          sx={{
+            width: "100%",
+            height: "auto",
+            marginTop: "1rem",
+            flex: 1,
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+            padding: "1rem",
+            borderRadius: "0.3rem",
+            border: "1px solid var(--pallet-border-blue)",
+          }}
+        >
+          <Box>
+            <Typography
+              variant="h6"
+              sx={{
+                textAlign: "center",
+              }}
+            >
+              {auditType} Status
+            </Typography>
+          </Box>
+
+          <ResponsiveContainer width="100%" height={500}>
+            <></>
+          </ResponsiveContainer>
+        </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            flex: 1,
+            flexDirection: "column",
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+            borderRadius: "0.3rem",
+            border: "1px solid var(--pallet-border-blue)",
+            padding: "1rem",
+            height: "auto",
+            marginTop: "1rem",
+          }}
+        >
+          <Box>
+            <Typography
+              variant="h6"
+              sx={{
+                textAlign: "center",
+              }}
+            >
+              Latest Inventory
+            </Typography>
+          </Box>
+          
+        </Box>
+      </Box>
     </Stack>
   );
 }
 
 export default EnvironmentDashboard;
+
+
+<Table>
+            <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
+              <TableRow>
+                <TableCell align="left"></TableCell>
+                <TableCell align="left">Reference Number</TableCell>
+                <TableCell align="left">Delivered Date</TableCell>
+                <TableCell align="left">Commercial Name</TableCell>
+                <TableCell align="left">ZDHC level</TableCell>
+                <TableCell align="left">Delivered</TableCell>
+                <TableCell align="left">Status</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {chemicalLatestDeliveryDataMemo?.map((item, index) => (
+                <TableRow key={index}>
+                  <TableCell align="left"></TableCell>
+                  <TableCell align="left">{item.referenceNumber}</TableCell>
+                  <TableCell align="left">
+                    {new Date(item.deliveryDate).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell align="left">{item.commercialName}</TableCell>
+                  <TableCell align="left">{item.zdhcLevel}</TableCell>
+                  <TableCell align="left">{item.deliveryQuantity}</TableCell>
+                  <TableCell align="left">{item.status}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
