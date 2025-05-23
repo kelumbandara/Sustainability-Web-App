@@ -117,11 +117,17 @@ import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import {
+  fetchChemicalHighestStock,
   fetchChemicalMonthlyDelivery,
   fetchChemicalMonthlyLatestRecord,
+  fetchChemicalStatusSummery,
   fetchChemicalStockAmount,
+  fetchChemicalThreshold,
+  fetchChemicalTransactionLatestRecord,
 } from "../../api/ChemicalManagement/chemicalDashboardApi";
 import UpcomingOutlinedIcon from "@mui/icons-material/UpcomingOutlined";
+import FilterListOutlinedIcon from "@mui/icons-material/FilterListOutlined";
+import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
 
 const breadcrumbItems = [
   { title: "Home", href: "/home" },
@@ -356,6 +362,132 @@ function EnvironmentDashboard() {
     enabled: false,
   });
 
+  const {
+    data: chemicalLatestTransactionData,
+    refetch: refetchChemicalTransactionLatestRecord,
+    isFetching: isChemicalLatestTransactionData,
+  } = useQuery({
+    queryKey: [
+      "latest-transaction-record",
+      formattedDateFrom,
+      formattedDateTo,
+      division,
+      auditType,
+    ],
+    queryFn: () =>
+      fetchChemicalTransactionLatestRecord(
+        formattedDateFrom,
+        formattedDateTo,
+        division
+      ),
+    enabled: false,
+  });
+
+  const {
+    data: chemicalThresholdData,
+    refetch: refetchChemicalThreshold,
+    isFetching: isChemicalThresholdData,
+  } = useQuery({
+    queryKey: [
+      "chemical-threshold",
+      formattedDateFrom,
+      formattedDateTo,
+      division,
+      auditType,
+    ],
+    queryFn: () =>
+      fetchChemicalThreshold(formattedDateFrom, formattedDateTo, division),
+    enabled: false,
+  });
+
+  const {
+    data: chemicalHighestData,
+    refetch: refetchChemicalHighestStock,
+    isFetching: isChemicalHighestData,
+  } = useQuery({
+    queryKey: [
+      "highest-chemical",
+      formattedDateFrom,
+      formattedDateTo,
+      division,
+      auditType,
+    ],
+    queryFn: () =>
+      fetchChemicalHighestStock(formattedDateFrom, formattedDateTo, division),
+    enabled: false,
+  });
+
+  const {
+    data: chemicalStatusSummeryData,
+    refetch: refetchChemicalStatusSummery,
+    isFetching: isChemicalStatusSummeryData,
+  } = useQuery({
+    queryKey: [
+      "chemical-status-summery",
+      formattedDateFrom,
+      formattedDateTo,
+      division,
+      auditType,
+    ],
+    queryFn: () =>
+      fetchChemicalStatusSummery(formattedDateFrom, formattedDateTo, division),
+    enabled: false,
+  });
+
+  const chemicalStatusSummeryDataMemo = useMemo(() => {
+    return (
+      chemicalStatusSummeryData?.data?.map(
+        (item: { status: string; count: number }) => ({
+          name: item.status,
+          value: item.count,
+        })
+      ) || []
+    );
+  }, [chemicalStatusSummeryData]);
+
+  const chemicalHighestDataMemo = useMemo(() => {
+    return chemicalHighestData || [];
+  }, [chemicalHighestData]);
+
+  const chemicalThresholdDataMemo = useMemo(() => {
+    return chemicalThresholdData || [];
+  }, [chemicalThresholdData]);
+
+  const chemicalMonthlyDeliveryDataMemo = useMemo(() => {
+    if (
+      !chemicalMonthlyDeliveryData ||
+      !Array.isArray(chemicalMonthlyDeliveryData.data)
+    ) {
+      return [];
+    }
+
+    const groupedByMonth: Record<string, Record<string, any>> = {};
+
+    chemicalMonthlyDeliveryData.data.forEach((entry) => {
+      const { month, chemical, quantity } = entry;
+
+      if (!groupedByMonth[month]) {
+        groupedByMonth[month] = { month };
+      }
+
+      groupedByMonth[month][chemical] = quantity;
+    });
+
+    return Object.values(groupedByMonth);
+  }, [chemicalMonthlyDeliveryData]);
+
+  const chemicalKeys = useMemo(() => {
+    const set = new Set<string>();
+    chemicalMonthlyDeliveryData?.data?.forEach((entry) =>
+      set.add(entry.chemical)
+    );
+    return Array.from(set);
+  }, [chemicalMonthlyDeliveryData]);
+
+  const chemicalLatestTransactionDataMemo = useMemo(() => {
+    return chemicalLatestTransactionData || [];
+  }, [chemicalLatestTransactionData]);
+
   const chemicalLatestDeliveryDataMemo = useMemo(() => {
     return chemicalLatestDeliveryData || [];
   }, [chemicalLatestDeliveryData]);
@@ -368,6 +500,10 @@ function EnvironmentDashboard() {
     refetchChemicalStockAmount();
     refetchChemicalMonthlyDelivery();
     refetchChemicalMonthlyLatestRecord();
+    refetchChemicalTransactionLatestRecord();
+    refetchChemicalThreshold();
+    refetchChemicalHighestStock();
+    refetchChemicalStatusSummery();
   };
 
   const CustomCountLabel = ({ x, y, value }: any) => {
@@ -591,7 +727,7 @@ function EnvironmentDashboard() {
             width: "100%",
             height: "auto",
             marginTop: "1rem",
-            flex: 1,
+            flex: 2,
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
             padding: "1rem",
             borderRadius: "0.3rem",
@@ -610,7 +746,25 @@ function EnvironmentDashboard() {
           </Box>
 
           <ResponsiveContainer width="100%" height={500}>
-            <></>
+            <BarChart height={400} data={chemicalMonthlyDeliveryDataMemo}>
+              <XAxis dataKey="month" />
+              <YAxis fontSize={12} />
+              <Tooltip />
+              <Legend />
+              {chemicalKeys.map((chemical, index) => (
+                <Bar
+                  key={chemical}
+                  dataKey={chemical}
+                  barSize={15}
+                  stackId="a"
+                  fill={
+                    ["#8884d8", "#82ca9d", "#ffc658", "#ff7f50", "#a0522d"][
+                      index % 5
+                    ]
+                  }
+                />
+              ))}
+            </BarChart>
           </ResponsiveContainer>
         </Box>
 
@@ -638,30 +792,182 @@ function EnvironmentDashboard() {
               {auditType} Status
             </Typography>
           </Box>
-          {false ? (
-            <Box
-              width={"100%"}
-              height="400px"
-              display="flex"
-              alignItems={"center"}
-              justifyContent={"center"}
-            >
-              <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
-            </Box>
-          ) : 1 > 0 ? (
-            <ResponsiveContainer width={"100%"} height={500}>
-              <BarChart data={null}>
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <Typography textAlign={"center"}>
-              Please Select filters to display data
-            </Typography>
-          )}
+          <ResponsiveContainer
+            width="100%"
+            height={500}
+            style={{
+              overflowY: "scroll",
+              scrollbarWidth: "none",
+            }}
+          >
+            <>
+              <AppBar
+                position="sticky"
+                sx={{
+                  display: "flex",
+                  mt: "1rem",
+                }}
+              >
+                <Tabs
+                  value={activeTab}
+                  onChange={handleChange}
+                  indicatorColor="secondary"
+                  TabIndicatorProps={{
+                    style: {
+                      backgroundColor: "var(--pallet-blue)",
+                      height: "3px",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    },
+                  }}
+                  sx={{
+                    backgroundColor: "var(--pallet-lighter-grey)",
+                    color: "var(--pallet-blue)",
+                    display: "flex",
+                  }}
+                  textColor="inherit"
+                  variant="scrollable"
+                  scrollButtons={true}
+                >
+                  <Tab
+                    label={
+                      <Box
+                        sx={{
+                          color: "var(--pallet-blue)",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <FilterListOutlinedIcon fontSize="small" />
+                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                          Threshold
+                        </Typography>
+                      </Box>
+                    }
+                    {...a11yProps(0)}
+                  />
+                  <Tab
+                    label={
+                      <Box
+                        sx={{
+                          color: "var(--pallet-blue)",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <TrendingUpOutlinedIcon fontSize="small" />
+                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                          Highest Stock
+                        </Typography>
+                      </Box>
+                    }
+                    {...a11yProps(1)}
+                  />
+                </Tabs>
+              </AppBar>
+              <TabPanel value={activeTab} index={0} dir={theme.direction}>
+                <Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      m: "1rem",
+                    }}
+                  >
+                    <Box
+                      display="flex"
+                      flexDirection="column"
+                      gap={4}
+                      width={"100%"}
+                    >
+                      {chemicalThresholdDataMemo?.data?.map((item, index) => (
+                        <>
+                          <Box
+                            key={index}
+                            display="flex"
+                            justifyContent="space-between"
+                          >
+                            <Box flex={2}>
+                              <Typography variant="button" fontSize="1.2rem">
+                                {item.chemicalName}
+                              </Typography>
+                              <Box>
+                                <Typography variant="caption" color="gray">
+                                  LIMIT: {item.totalLimit}
+                                </Typography>
+                              </Box>
+                            </Box>
+                            <Box flex={1}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  gap: "3rem",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <CircularProgressWithLabel
+                                  size={60}
+                                  value={item.percentage}
+                                />
+                              </Box>
+                            </Box>
+                          </Box>
+                          <Divider />
+                        </>
+                      ))}
+                    </Box>
+                  </Box>
+                </Box>
+              </TabPanel>
+              <TabPanel value={activeTab} index={1} dir={theme.direction}>
+                <Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      m: "1rem",
+                    }}
+                  >
+                    <Box
+                      display="flex"
+                      flexDirection="column"
+                      gap={4}
+                      width={"100%"}
+                    >
+                      {chemicalHighestDataMemo?.data?.map((item, index) => (
+                        <>
+                          <Box
+                            key={index}
+                            display="flex"
+                            justifyContent="space-between"
+                            alignItems={"center"}
+                          >
+                            <Box flex={2}>
+                              <Typography variant="button" fontSize="1.2rem">
+                                {item.chemicalName}
+                              </Typography>
+                            </Box>
+                            <Box flex={1}>
+                              <Typography
+                                variant="caption"
+                                fontSize="1.2rem"
+                                color="gray"
+                              >
+                                {" "}
+                                Total Quantity: {item.totalQuantity}
+                              </Typography>
+                            </Box>
+                          </Box>
+                          <Divider />
+                        </>
+                      ))}
+                    </Box>
+                  </Box>
+                </Box>
+              </TabPanel>
+            </>
+          </ResponsiveContainer>
         </Box>
       </Box>
 
@@ -675,7 +981,8 @@ function EnvironmentDashboard() {
         <Box
           sx={{
             width: "100%",
-            height: "auto",
+            height: "600px",
+            overflowY: "auto",
             marginTop: "1rem",
             flex: 1,
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
@@ -684,20 +991,67 @@ function EnvironmentDashboard() {
             border: "1px solid var(--pallet-border-blue)",
           }}
         >
-          <Box>
+          <Box position="static" mb={3}>
             <Typography
               variant="h6"
               sx={{
                 textAlign: "center",
               }}
             >
-              {auditType} Status
+              Latest Inventory Transaction
             </Typography>
           </Box>
 
-          <ResponsiveContainer width="100%" height={500}>
-            <></>
-          </ResponsiveContainer>
+          {isChemicalLatestDeliveryData ? (
+            <Box
+              width="100%"
+              height="400px"
+              mt={5}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
+            </Box>
+          ) : chemicalLatestDeliveryDataMemo &&
+            chemicalLatestDeliveryDataMemo.length > 0 ? (
+            <Table>
+              <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
+                <TableRow>
+                  <TableCell align="left"></TableCell>
+                  <TableCell align="left">Reference Number</TableCell>
+                  <TableCell align="left">Delivered Date</TableCell>
+                  <TableCell align="left">Commercial Name</TableCell>
+                  <TableCell align="left">ZDHC level</TableCell>
+                  <TableCell align="left">Delivered</TableCell>
+                  <TableCell align="left">Status</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {chemicalLatestDeliveryDataMemo?.map((item, index) => (
+                  <TableRow key={index}>
+                    <TableCell align="left">
+                      <UpcomingOutlinedIcon fontSize="small" color="error" />
+                    </TableCell>
+                    <TableCell align="left">
+                      {item.transactionsRefferenceNumber}
+                    </TableCell>
+                    <TableCell align="left">
+                      {new Date(item.deliveryDate).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell align="left">{item.commercialName}</TableCell>
+                    <TableCell align="left">{item.zdhcLevel}</TableCell>
+                    <TableCell align="left">{item.deliveryQuantity}</TableCell>
+                    <TableCell align="left">{item.status}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <Typography textAlign="center">
+              Please select filters to display data
+            </Typography>
+          )}
         </Box>
 
         <Box
@@ -773,6 +1127,82 @@ function EnvironmentDashboard() {
             </Typography>
           )}
         </Box>
+      </Box>
+
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+          gap: "1rem",
+        }}
+      >
+        <Box
+          sx={{
+            width: "100%",
+            height: "auto",
+            marginTop: "1rem",
+            flex: 2,
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+            padding: "1rem",
+            borderRadius: "0.3rem",
+            border: "1px solid var(--pallet-border-blue)",
+          }}
+        >
+          <Box>
+            <Typography
+              variant="h6"
+              sx={{
+                textAlign: "center",
+              }}
+            >
+              {auditType} Status
+            </Typography>
+          </Box>
+
+          <ResponsiveContainer width="100%" height={500}>
+            <CustomPieChart
+              data={chemicalStatusSummeryDataMemo}
+              title="Chemical Status Summary"
+              centerLabel="Status"
+            />
+          </ResponsiveContainer>
+        </Box>
+
+        {/* <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            flex: 1,
+            flexDirection: "column",
+            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+            borderRadius: "0.3rem",
+            border: "1px solid var(--pallet-border-blue)",
+            padding: "1rem",
+            height: "auto",
+            marginTop: "1rem",
+          }}
+        >
+          <Box>
+            <Typography
+              variant="h6"
+              sx={{
+                textAlign: "center",
+              }}
+            >
+              {auditType} Status
+            </Typography>
+          </Box>
+          <ResponsiveContainer
+            width="100%"
+            height={500}
+            style={{
+              overflowY: "scroll",
+              scrollbarWidth: "none",
+            }}
+          >
+            <></>
+          </ResponsiveContainer>
+        </Box> */}
       </Box>
     </Stack>
   );

@@ -22,7 +22,7 @@ export async function fetchChemicalMonthlyDelivery(
   return res.data;
 }
 
-export async function fetchChemicalMonthlyLatestRecord(
+export async function fetchChemicalTransactionLatestRecord(
   startDate: String,
   endDate: String,
   division: String
@@ -32,3 +32,53 @@ export async function fetchChemicalMonthlyLatestRecord(
   );
   return res.data;
 }
+
+export async function fetchChemicalMonthlyLatestRecord(
+  startDate: String,
+  endDate: String,
+  division: String
+) {
+  const res = await axios.get(
+    `api/chemical-dashboard/${startDate}/${endDate}/${division}/transaction-latest-record`
+  );
+  return res.data;
+}
+
+export async function fetchChemicalThreshold(
+  startDate: String,
+  endDate: String,
+  division: String
+) {
+  const res = await axios.get(
+    `api/chemical-dashboard/${startDate}/${endDate}/${division}/stock-threshold`
+  );
+  return res.data;
+}
+
+export async function fetchChemicalHighestStock(
+  startDate: String,
+  endDate: String,
+  division: String
+) {
+  const res = await axios.get(
+    `api/chemical-dashboard/${startDate}/${endDate}/${division}/highest-stock`
+  );
+  return res.data;
+}
+
+export async function fetchChemicalStatusSummery(
+  startDate: String,
+  endDate: String,
+  division: String
+) {
+  const res = await axios.get(
+    `api/chemical-dashboard/${startDate}/${endDate}/${division}/status-summary`
+  );
+  return res.data;
+}
+
+export async function fetchChemicalDashboardAllSummary(year: string) {
+  const res = await axios.get(`api/chemical-dashboard/${year}/All-summary`);
+  return res.data;
+}
+
