@@ -120,7 +120,9 @@ export function DrawerEditAndDeleteButtons({
             >
               <EditIcon
                 sx={{
-                  color: "var(--pallet-blue)",
+                  color: disableEdit
+                    ? "var(--pallet-grey)"
+                    : "var(--pallet-blue)",
                 }}
               />
             </IconButton>

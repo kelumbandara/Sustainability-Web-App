@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   Drawer,
   IconButton,
@@ -19,7 +20,10 @@ import { User } from "../api/userApi";
 import LockIcon from "@mui/icons-material/Lock";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import LogoutIcon from "@mui/icons-material/Logout";
+import { enqueueSnackbar } from "notistack";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import { useNavigate } from "react-router";
 
 function ViewProfileDataDrawer({
   open,
@@ -94,100 +98,122 @@ export function DrawerProfileHeader({
 }
 
 export function DrawerUpdateButtons({
-  onEdit,
   onResetEmail,
   onResetPassword,
   disableEdit,
 }: {
-  onEdit: () => void;
   onResetEmail: () => void;
   onResetPassword: () => void;
   disableEdit?: boolean;
-  disableDelete?: boolean;
 }) {
   const { isTablet } = useIsMobile();
-  const [openPasswordDialog, setOpenPasswordDialog] = useState(false);
-  const [openEmailDialog, setOpenEmailDialog] = useState(false);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <>
       <Box
         sx={{
           display: "flex",
-          justifyContent: isTablet ? "space-between" :"flex-end",
-          gap: 3,
+          justifyContent: isTablet ? "space-between" : "flex-end",
+          gap: 1,
           flexWrap: "wrap",
-
+          marginTop: 2,
         }}
       >
-        {/* Edit Button */}
-        {onEdit && (
-          <>
-            {isTablet ? (
+        {onResetPassword &&
+          (isTablet ? (
+            <Box>
               <IconButton
                 aria-label="edit"
-                onClick={onEdit}
+                onClick={onResetPassword}
                 disabled={disableEdit}
               >
-                <EditOutlinedIcon sx={{ color: "var(--pallet-blue)" }} />
+                <VpnKeyOutlinedIcon sx={{ color: "var(--pallet-blue)" }} />
               </IconButton>
-            ) : (
+            </Box>
+          ) : (
+            <Box>
               <CustomButton
                 variant="contained"
                 sx={{ backgroundColor: "var(--pallet-blue)" }}
                 size="medium"
-                onClick={onEdit}
-                startIcon={<EditOutlinedIcon />}
-                disabled={disableEdit}
+                startIcon={<VpnKeyOutlinedIcon />}
+                onClick={onResetPassword}
               >
-                Edit My Profile
+                Reset Password
               </CustomButton>
-            )}
-          </>
-        )}
-
-        {onResetPassword &&
-          (isTablet ? (
-            <IconButton
-              aria-label="edit"
-              onClick={onResetPassword}
-              disabled={disableEdit}
-            >
-              <VpnKeyOutlinedIcon sx={{ color: "var(--pallet-blue)" }} />
-            </IconButton>
-          ) : (
-            <CustomButton
-              variant="contained"
-              sx={{ backgroundColor: "var(--pallet-blue)" }}
-              size="medium"
-              startIcon={<VpnKeyOutlinedIcon />}
-              onClick={onResetPassword}
-            >
-              Reset Password
-            </CustomButton>
+            </Box>
           ))}
 
         {onResetEmail &&
           (isTablet ? (
-            <IconButton
-              aria-label="reset-email"
-              onClick={onResetEmail}
-              disabled={disableEdit}
-            >
-              <EmailOutlinedIcon sx={{ color: "var(--pallet-blue)" }} />
-            </IconButton>
+            <Box>
+              <IconButton
+                aria-label="reset-email"
+                onClick={onResetEmail}
+                disabled={disableEdit}
+              >
+                <EmailOutlinedIcon sx={{ color: "var(--pallet-blue)" }} />
+              </IconButton>
+            </Box>
           ) : (
-            <CustomButton
-              variant="contained"
-              sx={{ backgroundColor: "var(--pallet-blue)" }}
-              size="medium"
-              onClick={onResetEmail}
-              startIcon={<EmailOutlinedIcon />}
-            >
-              Reset Email
-            </CustomButton>
+            <Box>
+              <CustomButton
+                variant="contained"
+                sx={{ backgroundColor: "var(--pallet-blue)" }}
+                size="medium"
+                onClick={onResetEmail}
+                startIcon={<EmailOutlinedIcon />}
+              >
+                Reset Email
+              </CustomButton>
+            </Box>
           ))}
+        <CustomButton
+          variant="contained"
+          sx={{
+            backgroundColor: "var(--pallet-orange)",
+            width: "10rem",
+          }}
+          size="medium"
+          startIcon={<LogoutIcon />}
+          onClick={() => setLogoutDialogOpen(true)}
+        >
+          Log out
+        </CustomButton>
       </Box>
+      {logoutDialogOpen && (
+        <DeleteConfirmationModal
+          open={logoutDialogOpen}
+          title="Log Out Confirmation"
+          customDeleteButtonText="Log Out Now"
+          customDeleteButtonIon={<LogoutIcon />}
+          content={
+            <>
+              Are you sure you want to log out of the application?
+              <Alert severity="warning" style={{ marginTop: "1rem" }}>
+                You will be logged out of the application and will need to log
+                in with credentials again to access your account.
+              </Alert>
+            </>
+          }
+          handleClose={() => setLogoutDialogOpen(false)}
+          deleteFunc={async () => {
+            localStorage.removeItem("token");
+            navigate("/");
+          }}
+          onSuccess={() => {
+            setLogoutDialogOpen(false);
+            enqueueSnackbar("Logged Out Successfully!", {
+              variant: "success",
+            });
+          }}
+          handleReject={() => {
+            setLogoutDialogOpen(false);
+          }}
+        />
+      )}
     </>
   );
 }

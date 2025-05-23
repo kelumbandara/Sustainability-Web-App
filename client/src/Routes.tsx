@@ -20,6 +20,9 @@ const UserTable = React.lazy(() => import("./views/Administration/UserTable"));
 const AccessManagementTable = React.lazy(
   () => import("./views/Administration/AccessManagementTable")
 );
+const OrganizationTable = React.lazy(
+  () => import("./views/Administration/OrganizationSettings/OrganizationSettingsTable")
+);
 
 const UnderDevelopment = React.lazy(
   () => import("./components/UnderDevelopment")
@@ -198,6 +201,15 @@ const AppRoutes = () => {
 
         {/* Administration */}
         <Route
+          path="/admin/organization-settings"
+          element={withLayout(
+            MainLayout,
+            OrganizationTable,
+            !userPermissionObject?.[PermissionKeys.ADMIN_USERS_VIEW]
+          )}
+        />
+
+        <Route
           path="/admin/users"
           element={withLayout(
             MainLayout,
@@ -213,7 +225,7 @@ const AppRoutes = () => {
             !userPermissionObject?.[PermissionKeys.ADMIN_ACCESS_MNG_VIEW]
           )}
         />
-
+        
         {/* Audit & Inspection */}
         <Route
           path="/audit-inspection/dashboard"
