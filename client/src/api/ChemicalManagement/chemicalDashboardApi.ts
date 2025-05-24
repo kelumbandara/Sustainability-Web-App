@@ -77,8 +77,19 @@ export async function fetchChemicalStatusSummery(
   return res.data;
 }
 
-export async function fetchChemicalDashboardAllSummary(year: string) {
-  const res = await axios.get(`api/chemical-dashboard/${year}/All-summary`);
+export async function fetchChemicalInventoryInsights(
+  startDate: String,
+  endDate: String,
+  division: String
+) {
+  const res = await axios.get(
+    `api/chemical-dashboard/${startDate}/${endDate}/${division}/chemical-inventory-insights`
+  );
+  return res.data;
+}
+
+export async function fetchChemicalDashboardAllSummary(year: number) {
+  const res = await axios.get(`api/chemical-dashboard/${year}/all-summary`);
   return res.data;
 }
 
