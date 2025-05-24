@@ -119,6 +119,7 @@ import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import {
+  fetchChemicalClassification,
   fetchChemicalDashboardAllSummary,
   fetchChemicalHighestStock,
   fetchChemicalInventoryInsights,
@@ -466,11 +467,53 @@ function EnvironmentDashboard() {
       ),
     enabled: false,
   });
+
+  const {
+    data: chemicalClassificationData,
+    refetch: refetchChemicalClassification,
+    isFetching: isChemicalClassificationData,
+  } = useQuery({
+    queryKey: [
+      "chemical-classification",
+      formattedDateFrom,
+      formattedDateTo,
+      division,
+      auditType,
+    ],
+    queryFn: () =>
+      fetchChemicalClassification(
+        formattedDateFrom,
+        formattedDateTo,
+        division
+      ),
+    enabled: false,
+  });
+  const chemicalClassificationHazardTypeSummaryMemo = useMemo(() => {
+    return chemicalClassificationData?.hazardTypeSummary || [];
+  }, [chemicalClassificationData]);
+
+  const chemicalGhsClassificationHazardTypeSummaryMemo = useMemo(() => {
+    return chemicalClassificationData?.ghsClassificationSummary || [];
+  }, [chemicalClassificationData]);
+
+  const chemicalZdhcClassificationHazardTypeSummaryMemo = useMemo(() => {
+    return chemicalClassificationData?.zdhcLevelSummary || [];
+  }, [chemicalClassificationData]);
+
   const chemicalInsightTopSuppliersDataMemo = useMemo(() => {
     return chemicalInsightData?.topSuppliers || [];
   }, [chemicalInsightData]);
   const chemicalInsightPositiveListDataMemo = useMemo(() => {
     return chemicalInsightData?.positiveList || [];
+  }, [chemicalInsightData]);
+  const chemicalInsightMsdsListDataMemo = useMemo(() => {
+    return chemicalInsightData?.msdsExpiries || [];
+  }, [chemicalInsightData]);
+  const chemicalInsightChemicalExpiryListDataMemo = useMemo(() => {
+    return chemicalInsightData?.chemicalExpiry || [];
+  }, [chemicalInsightData]);
+  const chemicalInsightCertificateExpiryListDataMemo = useMemo(() => {
+    return chemicalInsightData?.certificateExpiry || [];
   }, [chemicalInsightData]);
 
   const chemicalStatusSummeryDataMemo = useMemo(() => {
@@ -583,6 +626,10 @@ function EnvironmentDashboard() {
     return chemicalDashboardSummeryData?.latestRecords || [];
   }, [chemicalDashboardSummeryData]);
 
+  const chemicalAllLatestTransactionDataMemo = useMemo(() => {
+    return chemicalDashboardSummeryData?.latestTransactions || [];
+  }, [chemicalDashboardSummeryData]);
+
   const handleFetch = () => {
     refetchChemicalStockAmount();
     refetchChemicalMonthlyDelivery();
@@ -592,6 +639,7 @@ function EnvironmentDashboard() {
     refetchChemicalHighestStock();
     refetchChemicalStatusSummery();
     refetchChemicalInventoryInsights();
+    refetchChemicalClassification();
   };
 
   const CustomCountLabel = ({ x, y, value }: any) => {
@@ -1222,8 +1270,8 @@ function EnvironmentDashboard() {
               >
                 <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
               </Box>
-            ) : chemicalLatestDeliveryDataMemo ||
-              chemicalAllLatestDeliveryDataMemo ? (
+            ) : chemicalLatestTransactionDataMemo ||
+              chemicalAllLatestTransactionDataMemo ? (
               <Table>
                 <TableHead
                   sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}
@@ -1240,8 +1288,8 @@ function EnvironmentDashboard() {
                 </TableHead>
                 <TableBody>
                   {(dateRangeFrom && dateRangeTo && division
-                    ? chemicalLatestDeliveryDataMemo
-                    : chemicalAllLatestDeliveryDataMemo || []
+                    ? chemicalLatestTransactionDataMemo
+                    : chemicalAllLatestTransactionDataMemo || []
                   ).map((item, index) => (
                     <TableRow key={index}>
                       <TableCell align="left">
@@ -1313,8 +1361,8 @@ function EnvironmentDashboard() {
               >
                 <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
               </Box>
-            ) : chemicalLatestDeliveryDataMemo &&
-              chemicalLatestDeliveryDataMemo.length > 0 ? (
+            ) : chemicalLatestDeliveryDataMemo ||
+              chemicalAllLatestDeliveryDataMemo ? (
               <Table>
                 <TableHead
                   sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}
@@ -1330,7 +1378,10 @@ function EnvironmentDashboard() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {chemicalLatestDeliveryDataMemo?.map((item, index) => (
+                  {(dateRangeFrom && dateRangeTo && division
+                    ? chemicalLatestDeliveryDataMemo
+                    : chemicalAllLatestDeliveryDataMemo || []
+                  ).map((item, index) => (
                     <TableRow key={index}>
                       <TableCell align="left">
                         <UpcomingOutlinedIcon fontSize="small" color="error" />
@@ -1622,6 +1673,166 @@ function EnvironmentDashboard() {
                   </Box>
                 </Box>
               </TabPanel>
+              <TabPanel value={activeTab} index={2} dir={theme.direction}>
+                <Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      m: "1rem",
+                    }}
+                  >
+                    <Box
+                      display="flex"
+                      flexDirection="column"
+                      gap={4}
+                      width={"100%"}
+                    >
+                      {chemicalInsightMsdsListDataMemo?.map((item, index) => (
+                        <>
+                          <Box
+                            key={index}
+                            display="flex"
+                            justifyContent="space-between"
+                          >
+                            <Box flex={2}>
+                              <Typography variant="button" fontSize="1.2rem">
+                                {item.referenceNumber}
+                              </Typography>
+                              <Box>
+                                <Typography variant="caption" color="gray">
+                                  Inventory Number: {item.inventoryNumber}
+                                </Typography>
+                              </Box>
+                            </Box>
+                            <Box flex={1}>
+                              <Typography variant="button" fontSize="1.2rem">
+                                {item.commercialName}
+                              </Typography>
+                              <Box>
+                                <Typography variant="caption" color="gray">
+                                  MSDS Expiry Date:{" "}
+                                  {format(
+                                    new Date(item.msdsorsdsExpiryDate),
+                                    "dd-MMM-yyyy"
+                                  )}
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </Box>
+                          <Divider />
+                        </>
+                      ))}
+                    </Box>
+                  </Box>
+                </Box>
+              </TabPanel>
+              <TabPanel value={activeTab} index={3} dir={theme.direction}>
+                <Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      m: "1rem",
+                    }}
+                  >
+                    <Box
+                      display="flex"
+                      flexDirection="column"
+                      gap={4}
+                      width={"100%"}
+                    >
+                      {chemicalInsightChemicalExpiryListDataMemo?.map((item, index) => (
+                        <>
+                          <Box
+                            key={index}
+                            display="flex"
+                            justifyContent="space-between"
+                          >
+                            <Box flex={2}>
+                              <Typography variant="button" fontSize="1.2rem">
+                                Chemical Name
+                              </Typography>
+                              <Box>
+                                <Typography variant="caption" color="gray">
+                                  {item.molecularFormula}
+                                </Typography>
+                              </Box>
+                            </Box>
+                            <Box flex={1}>
+                              <Typography variant="button" fontSize="1.2rem">
+                                Expiry Date
+                              </Typography>
+                              <Box>
+                                <Typography variant="caption" color="gray">
+                                  {format(
+                                    new Date(item.expiryDate),
+                                    "dd-MMM-yyyy"
+                                  )}
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </Box>
+                          <Divider />
+                        </>
+                      ))}
+                    </Box>
+                  </Box>
+                </Box>
+              </TabPanel>
+              <TabPanel value={activeTab} index={4} dir={theme.direction}>
+                <Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      m: "1rem",
+                    }}
+                  >
+                    <Box
+                      display="flex"
+                      flexDirection="column"
+                      gap={4}
+                      width={"100%"}
+                    >
+                      {chemicalInsightCertificateExpiryListDataMemo?.map((item, index) => (
+                        <>
+                          <Box
+                            key={index}
+                            display="flex"
+                            justifyContent="space-between"
+                          >
+                            <Box flex={2}>
+                              <Typography variant="button" fontSize="1.2rem">
+                                INV ID: {item.inventoryId}
+                              </Typography>
+                              <Box>
+                                <Typography variant="caption" color="gray">
+                                  {item.testName}
+                                </Typography>
+                              </Box>
+                            </Box>
+                            <Box flex={1}>
+                              <Typography variant="button" fontSize="1.2rem">
+                              {item.positiveList}
+                              </Typography>
+                              <Box>
+                                <Typography variant="caption" color="gray">
+                                  {format(
+                                    new Date(item.expiryDate),
+                                    "dd-MMM-yyyy"
+                                  )}
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </Box>
+                          <Divider />
+                        </>
+                      ))}
+                    </Box>
+                  </Box>
+                </Box>
+              </TabPanel>
             </>
           </ResponsiveContainer>
         </Box>
@@ -1739,7 +1950,7 @@ function EnvironmentDashboard() {
                         }}
                       >
                         <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Top Suppliers
+                          Hazards
                         </Typography>
                       </Box>
                     }
@@ -1755,7 +1966,7 @@ function EnvironmentDashboard() {
                         }}
                       >
                         <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Positive List
+                          GHS
                         </Typography>
                       </Box>
                     }
@@ -1771,43 +1982,11 @@ function EnvironmentDashboard() {
                         }}
                       >
                         <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          MSDS EXpiry
+                          GHS ZDHC Level
                         </Typography>
                       </Box>
                     }
                     {...a11yProps(2)}
-                  />
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Chemical Expiry
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps(3)}
-                  />
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Certificate Expiry
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps(4)}
                   />
                 </Tabs>
               </AppBar>
@@ -1826,7 +2005,7 @@ function EnvironmentDashboard() {
                       gap={4}
                       width={"100%"}
                     >
-                      {chemicalInsightTopSuppliersDataMemo?.map(
+                      {chemicalClassificationHazardTypeSummaryMemo?.map(
                         (item, index) => (
                           <>
                             <Box
@@ -1836,11 +2015,11 @@ function EnvironmentDashboard() {
                             >
                               <Box flex={2}>
                                 <Typography variant="button" fontSize="1.2rem">
-                                  {item.name}
+                                  {item.hazardType}
                                 </Typography>
                                 <Box>
                                   <Typography variant="caption" color="gray">
-                                    Quantity: {item.totalQuantity}
+                                    Count: {item.count}
                                   </Typography>
                                 </Box>
                               </Box>
@@ -1855,7 +2034,7 @@ function EnvironmentDashboard() {
                                 >
                                   <CircularProgressWithLabel
                                     size={60}
-                                    value={item.percentageOfTotalRecords}
+                                    value={item.percentage}
                                   />
                                 </Box>
                               </Box>
@@ -1883,7 +2062,7 @@ function EnvironmentDashboard() {
                       gap={4}
                       width={"100%"}
                     >
-                      {chemicalInsightPositiveListDataMemo?.map(
+                      {chemicalGhsClassificationHazardTypeSummaryMemo?.map(
                         (item, index) => (
                           <>
                             <Box
@@ -1893,7 +2072,7 @@ function EnvironmentDashboard() {
                             >
                               <Box flex={2}>
                                 <Typography variant="button" fontSize="1.2rem">
-                                  {item.positiveList}
+                                  {item.ghsClassification}
                                 </Typography>
                                 <Box>
                                   <Typography variant="caption" color="gray">
@@ -1912,7 +2091,64 @@ function EnvironmentDashboard() {
                                 >
                                   <CircularProgressWithLabel
                                     size={60}
-                                    value={item.percentageOfTotalCertificates}
+                                    value={item.percentage}
+                                  />
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Divider />
+                          </>
+                        )
+                      )}
+                    </Box>
+                  </Box>
+                </Box>
+              </TabPanel>
+              <TabPanel value={activeTab} index={2} dir={theme.direction}>
+                <Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      m: "1rem",
+                    }}
+                  >
+                    <Box
+                      display="flex"
+                      flexDirection="column"
+                      gap={4}
+                      width={"100%"}
+                    >
+                      {chemicalZdhcClassificationHazardTypeSummaryMemo?.map(
+                        (item, index) => (
+                          <>
+                            <Box
+                              key={index}
+                              display="flex"
+                              justifyContent="space-between"
+                            >
+                              <Box flex={2}>
+                                <Typography variant="button" fontSize="1.2rem">
+                                  {item.zdhcLevel}
+                                </Typography>
+                                <Box>
+                                  <Typography variant="caption" color="gray">
+                                    Count: {item.count}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                              <Box flex={1}>
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    flexDirection: "row",
+                                    gap: "3rem",
+                                    justifyContent: "space-between",
+                                  }}
+                                >
+                                  <CircularProgressWithLabel
+                                    size={60}
+                                    value={item.percentage}
                                   />
                                 </Box>
                               </Box>

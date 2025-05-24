@@ -88,8 +88,21 @@ export async function fetchChemicalInventoryInsights(
   return res.data;
 }
 
+export async function fetchChemicalClassification(
+  startDate: String,
+  endDate: String,
+  division: String
+) {
+  const res = await axios.get(
+    `api/chemical-dashboard/${startDate}/${endDate}/${division}/category-and-classification
+    `
+  );
+  return res.data;
+}
+
 export async function fetchChemicalDashboardAllSummary(year: number) {
   const res = await axios.get(`api/chemical-dashboard/${year}/all-summary`);
   return res.data;
 }
+
 
