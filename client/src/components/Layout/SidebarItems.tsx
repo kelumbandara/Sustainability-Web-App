@@ -232,7 +232,6 @@ export const sidebarItems: Array<SidebarItem> = [
     title: "Chemical MNG",
     href: "/chemical-mng",
     icon: <ScienceIcon fontSize="small" />,
-    disabled: true,
     nestedItems: [
       {
         title: "Dashboard",
@@ -241,10 +240,9 @@ export const sidebarItems: Array<SidebarItem> = [
         accessKey: PermissionKeys.CHEMICAL_MNG_DASHBOARD_VIEW,
       },
       {
-        title: "Request History",
-        href: "/chemical-mng/request-history",
+        title: "Chemical Requests",
+        href: "/chemical-mng/chemical-requests",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-        accessKey: PermissionKeys.CHEMICAL_MNG_REQUEST_REGISTER_VIEW,
       },
       {
         title: "Purchase & Inventory",

@@ -5,45 +5,62 @@ import {
   IconButton,
   Divider,
   DialogContent,
-  Stack,
+  Box,
   TextField,
   DialogActions,
   Button,
   CircularProgress,
 } from "@mui/material";
 import { grey } from "@mui/material/colors";
+import { useForm } from "react-hook-form";
+import {
+  createProductStandard,
+  ProductStandard,
+} from "../../api/ChemicalManagement/ChemicalRequestApi";
+import CustomButton from "../../components/CustomButton";
+import useIsMobile from "../../customHooks/useIsMobile";
+import CloseIcon from "@mui/icons-material/Close";
+import queryClient from "../../state/queryClient";
 import { useMutation } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
-import { useForm } from "react-hook-form";
-import { createProcessType } from "../../../api/AuditAndInspection/internalAudit";
-import CustomButton from "../../../components/CustomButton";
-import useIsMobile from "../../../customHooks/useIsMobile";
-import queryClient from "../../../state/queryClient";
-import CloseIcon from "@mui/icons-material/Close";
-import AddIcon from "@mui/icons-material/Add";
 
-export const AddNewProcessTypeDialog = ({
+export const AddNewStandardDialog = ({
   open,
   setOpen,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
-  const { register, handleSubmit } = useForm();
-  const { isMobile } = useIsMobile();
   const { enqueueSnackbar } = useSnackbar();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<ProductStandard>();
+  const { isMobile } = useIsMobile();
 
-  const { mutate: createProcessTypeMutation, isPending } = useMutation({
-    mutationFn: createProcessType,
+  const handleCreateProductStandard = (data) => {
+    createProductStandardMutation(data);
+  };
+
+  const {
+    mutate: createProductStandardMutation,
+    isPending: isProductStandardCreating,
+  } = useMutation({
+    mutationFn: createProductStandard,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["process-types"] });
-      enqueueSnackbar("Process Type Created Successfully!", {
+      queryClient.invalidateQueries({
+        queryKey: ["product-standards"],
+      });
+      enqueueSnackbar("Product Standard Create Successfully!", {
         variant: "success",
       });
+      reset();
       setOpen(false);
     },
     onError: () => {
-      enqueueSnackbar(`Process Type Create Failed`, {
+      enqueueSnackbar(`Product Standard Create Failed`, {
         variant: "error",
       });
     },
@@ -72,7 +89,7 @@ export const AddNewProcessTypeDialog = ({
         }}
       >
         <Typography variant="h6" component="div">
-          Add New Process Type
+          Add New Product Standard
         </Typography>
         <IconButton
           aria-label="open drawer"
@@ -87,22 +104,24 @@ export const AddNewProcessTypeDialog = ({
       </DialogTitle>
       <Divider />
       <DialogContent>
-        <Stack
+        <Box
           sx={{
             display: "flex",
-            flexDirection: "column",
+            flexDirection: isMobile ? "column" : "row",
           }}
         >
           <TextField
-            {...register("processType", { required: true })}
+            {...register("productStandard", { required: true })}
             required
-            id="processType"
-            label="Process Type"
+            error={!!errors.productStandard}
+            helperText={errors.productStandard ? "Name is required" : ""}
+            id="productStandard	"
+            label="Name"
             size="small"
             fullWidth
-            sx={{ marginBottom: "0.5rem" }}
+            sx={{ margin: "0.5rem", flex: 1 }}
           />
-        </Stack>
+        </Box>
       </DialogContent>
       <DialogActions sx={{ padding: "1rem" }}>
         <Button
@@ -117,39 +136,15 @@ export const AddNewProcessTypeDialog = ({
             backgroundColor: "var(--pallet-blue)",
           }}
           size="medium"
-          disabled={isPending}
-          endIcon={isPending ? <CircularProgress size={20} /> : null}
-          onClick={handleSubmit((data) => createProcessTypeMutation(data))}
+          disabled={isProductStandardCreating}
+          endIcon={
+            isProductStandardCreating ? <CircularProgress size={20} /> : null
+          }
+          onClick={handleSubmit(handleCreateProductStandard)}
         >
-          Add Process Type
+          Add Standard
         </CustomButton>
       </DialogActions>
     </Dialog>
   );
 };
-
-export const AddNewProcessTypeButton = (props) => (
-  <li
-    {...props}
-    variant="contained"
-    style={{
-      backgroundColor: "var(--pallet-lighter-blue)",
-      color: "var(--pallet-blue)",
-      textTransform: "none",
-      margin: "0.5rem",
-      borderRadius: "0.3rem",
-      display: "flex",
-      flexDirection: "row",
-    }}
-    size="small"
-    // onClick closes the menu
-    onMouseDown={() => {
-      props.onMouseDown();
-    }}
-  >
-    <AddIcon />
-    <Typography variant="body2" component="div">
-      Add a new process type
-    </Typography>
-  </li>
-);
