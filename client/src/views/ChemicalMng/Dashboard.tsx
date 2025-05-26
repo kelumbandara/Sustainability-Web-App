@@ -173,7 +173,7 @@ function ChemicalDashboard() {
     queryFn: fetchDivision,
   });
 
-  //Dashboard API 
+  //Dashboard API
   const {
     data: chemicalStockAmountData,
     refetch: refetchChemicalStockAmount,
@@ -1187,7 +1187,7 @@ function ChemicalDashboard() {
             height: "600px",
             overflowY: "auto",
             marginTop: "1rem",
-            flex: 1,
+            flex: 2,
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
             padding: "1rem",
             borderRadius: "0.3rem",
@@ -1271,12 +1271,10 @@ function ChemicalDashboard() {
             )}
           </TableContainer>
         </Box>
-
         <Box
           sx={{
             width: "100%",
-            height: "600px",
-            overflowY: "auto",
+            height: "auto",
             marginTop: "1rem",
             flex: 1,
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
@@ -1285,80 +1283,280 @@ function ChemicalDashboard() {
             border: "1px solid var(--pallet-border-blue)",
           }}
         >
-          <Box position="static" mb={3}>
+          <Box>
             <Typography
               variant="h6"
               sx={{
                 textAlign: "center",
               }}
             >
-              Latest Inventory Delivery
+              Category & Classification
             </Typography>
           </Box>
-          <TableContainer
-            component={Paper}
-            elevation={2}
-            sx={{
-              overflowX: "auto",
-              maxWidth: isMobile ? "80vw" : "100%",
+
+          <ResponsiveContainer
+            width="100%"
+            height={500}
+            style={{
+              overflowY: "scroll",
+              scrollbarWidth: "none",
             }}
           >
-            {isChemicalLatestDeliveryData ? (
-              <Box
-                width="100%"
-                height="400px"
-                mt={5}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
+            <>
+              <AppBar
+                position="sticky"
+                sx={{
+                  display: "flex",
+                  mt: "1rem",
+                }}
               >
-                <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
-              </Box>
-            ) : chemicalLatestDeliveryDataMemo ||
-              chemicalAllLatestDeliveryDataMemo ? (
-              <Table>
-                <TableHead
-                  sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}
+                <Tabs
+                  value={activeTabThree}
+                  onChange={handleChangeTabThree}
+                  indicatorColor="secondary"
+                  TabIndicatorProps={{
+                    style: {
+                      backgroundColor: "var(--pallet-blue)",
+                      height: "3px",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    },
+                  }}
+                  sx={{
+                    backgroundColor: "var(--pallet-lighter-grey)",
+                    color: "var(--pallet-blue)",
+                    display: "flex",
+                  }}
+                  textColor="inherit"
+                  variant="scrollable"
+                  scrollButtons={true}
                 >
-                  <TableRow>
-                    <TableCell align="left"></TableCell>
-                    <TableCell align="left">Reference Number</TableCell>
-                    <TableCell align="left">Delivered Date</TableCell>
-                    <TableCell align="left">Commercial Name</TableCell>
-                    <TableCell align="left">ZDHC level</TableCell>
-                    <TableCell align="left">Delivered</TableCell>
-                    <TableCell align="left">Status</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {(dateRangeFrom && dateRangeTo && division
-                    ? chemicalLatestDeliveryDataMemo
-                    : chemicalAllLatestDeliveryDataMemo || []
-                  ).map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell align="left">
-                        <UpcomingOutlinedIcon fontSize="small" color="error" />
-                      </TableCell>
-                      <TableCell align="left">{item.referenceNumber}</TableCell>
-                      <TableCell align="left">
-                        {new Date(item.deliveryDate).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell align="left">{item.commercialName}</TableCell>
-                      <TableCell align="left">{item.zdhcLevel}</TableCell>
-                      <TableCell align="left">
-                        {item.deliveryQuantity}
-                      </TableCell>
-                      <TableCell align="left">{item.status}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <Typography textAlign="center">
-                Please select filters to display data
-              </Typography>
-            )}
-          </TableContainer>
+                  <Tab
+                    label={
+                      <Box
+                        sx={{
+                          color: "var(--pallet-blue)",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                          Hazards
+                        </Typography>
+                      </Box>
+                    }
+                    {...a11yProps3(0)}
+                  />
+                  <Tab
+                    label={
+                      <Box
+                        sx={{
+                          color: "var(--pallet-blue)",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                          GHS
+                        </Typography>
+                      </Box>
+                    }
+                    {...a11yProps3(1)}
+                  />
+                  <Tab
+                    label={
+                      <Box
+                        sx={{
+                          color: "var(--pallet-blue)",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                          GHS ZDHC Level
+                        </Typography>
+                      </Box>
+                    }
+                    {...a11yProps3(2)}
+                  />
+                </Tabs>
+              </AppBar>
+              <TabPanel value={activeTabThree} index={0} dir={theme.direction}>
+                <Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      m: "1rem",
+                    }}
+                  >
+                    <Box
+                      display="flex"
+                      flexDirection="column"
+                      gap={4}
+                      width={"100%"}
+                    >
+                      {(dateRangeFrom && dateRangeTo && division
+                        ? chemicalClassificationHazardTypeSummaryMemo
+                        : chemicalAllClassificationHazardTypeSummaryMemo
+                      )?.map((item, index) => (
+                        <>
+                          <Box
+                            key={index}
+                            display="flex"
+                            justifyContent="space-between"
+                          >
+                            <Box flex={2}>
+                              <Typography variant="button" fontSize="1.2rem">
+                                {item.hazardType}
+                              </Typography>
+                              <Box>
+                                <Typography variant="caption" color="gray">
+                                  Count: {item.count}
+                                </Typography>
+                              </Box>
+                            </Box>
+                            <Box flex={1}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  gap: "3rem",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <CircularProgressWithLabel
+                                  size={60}
+                                  value={item.percentage}
+                                />
+                              </Box>
+                            </Box>
+                          </Box>
+                          <Divider />
+                        </>
+                      ))}
+                    </Box>
+                  </Box>
+                </Box>
+              </TabPanel>
+              <TabPanel value={activeTabThree} index={1} dir={theme.direction}>
+                <Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      m: "1rem",
+                    }}
+                  >
+                    <Box
+                      display="flex"
+                      flexDirection="column"
+                      gap={4}
+                      width={"100%"}
+                    >
+                      {(dateRangeFrom && dateRangeTo && division
+                        ? chemicalGhsClassificationHazardTypeSummaryMemo
+                        : chemicalAllGhsClassificationHazardTypeSummaryMemo
+                      )?.map((item, index) => (
+                        <>
+                          <Box
+                            key={index}
+                            display="flex"
+                            justifyContent="space-between"
+                          >
+                            <Box flex={2}>
+                              <Typography variant="button" fontSize="1.2rem">
+                                {item.ghsClassification}
+                              </Typography>
+                              <Box>
+                                <Typography variant="caption" color="gray">
+                                  Count: {item.count}
+                                </Typography>
+                              </Box>
+                            </Box>
+                            <Box flex={1}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  gap: "3rem",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <CircularProgressWithLabel
+                                  size={60}
+                                  value={item.percentage}
+                                />
+                              </Box>
+                            </Box>
+                          </Box>
+                          <Divider />
+                        </>
+                      ))}
+                    </Box>
+                  </Box>
+                </Box>
+              </TabPanel>
+              <TabPanel value={activeTabThree} index={2} dir={theme.direction}>
+                <Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      direction: "row",
+                      m: "1rem",
+                    }}
+                  >
+                    <Box
+                      display="flex"
+                      flexDirection="column"
+                      gap={4}
+                      width={"100%"}
+                    >
+                      {(dateRangeFrom && dateRangeTo && division
+                        ? chemicalZdhcClassificationHazardTypeSummaryMemo
+                        : chemicalAllZdhcClassificationHazardTypeSummaryMemo
+                      )?.map((item, index) => (
+                        <>
+                          <Box
+                            key={index}
+                            display="flex"
+                            justifyContent="space-between"
+                          >
+                            <Box flex={2}>
+                              <Typography variant="button" fontSize="1.2rem">
+                                {item.zdhcLevel}
+                              </Typography>
+                              <Box>
+                                <Typography variant="caption" color="gray">
+                                  Count: {item.count}
+                                </Typography>
+                              </Box>
+                            </Box>
+                            <Box flex={1}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  gap: "3rem",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <CircularProgressWithLabel
+                                  size={60}
+                                  value={item.percentage}
+                                />
+                              </Box>
+                            </Box>
+                          </Box>
+                          <Divider />
+                        </>
+                      ))}
+                    </Box>
+                  </Box>
+                </Box>
+              </TabPanel>
+            </>
+          </ResponsiveContainer>
         </Box>
       </Box>
 
@@ -1830,6 +2028,7 @@ function ChemicalDashboard() {
           </ResponsiveContainer>
         </Box>
       </Box>
+
       <Box
         sx={{
           display: "flex",
@@ -1840,7 +2039,8 @@ function ChemicalDashboard() {
         <Box
           sx={{
             width: "100%",
-            height: "auto",
+            height: "600px",
+            overflowY: "auto",
             marginTop: "1rem",
             flex: 2,
             boxShadow: "0 0 10px rgba(0,0,0,0.1)",
@@ -1849,281 +2049,80 @@ function ChemicalDashboard() {
             border: "1px solid var(--pallet-border-blue)",
           }}
         >
-          <Box>
+          <Box position="static" mb={3}>
             <Typography
               variant="h6"
               sx={{
                 textAlign: "center",
               }}
             >
-              Category & Classification
+              Latest Inventory Delivery
             </Typography>
           </Box>
-
-          <ResponsiveContainer
-            width="100%"
-            height={500}
-            style={{
-              overflowY: "scroll",
-              scrollbarWidth: "none",
+          <TableContainer
+            component={Paper}
+            elevation={2}
+            sx={{
+              overflowX: "auto",
+              maxWidth: isMobile ? "80vw" : "100%",
             }}
           >
-            <>
-              <AppBar
-                position="sticky"
-                sx={{
-                  display: "flex",
-                  mt: "1rem",
-                  maxWidth: isMobile ? 400 : "auto",
-                }}
+            {isChemicalLatestDeliveryData ? (
+              <Box
+                width="100%"
+                height="400px"
+                mt={5}
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
               >
-                <Tabs
-                  value={activeTabThree}
-                  onChange={handleChangeTabThree}
-                  indicatorColor="secondary"
-                  TabIndicatorProps={{
-                    style: {
-                      backgroundColor: "var(--pallet-blue)",
-                      height: "3px",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    },
-                  }}
-                  sx={{
-                    backgroundColor: "var(--pallet-lighter-grey)",
-                    color: "var(--pallet-blue)",
-                    display: "flex",
-                  }}
-                  textColor="inherit"
-                  variant="scrollable"
-                  scrollButtons={true}
+                <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
+              </Box>
+            ) : chemicalLatestDeliveryDataMemo ||
+              chemicalAllLatestDeliveryDataMemo ? (
+              <Table>
+                <TableHead
+                  sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}
                 >
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Hazards
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps3(0)}
-                  />
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          GHS
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps3(1)}
-                  />
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          GHS ZDHC Level
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps3(2)}
-                  />
-                </Tabs>
-              </AppBar>
-              <TabPanel value={activeTabThree} index={0} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      gap={4}
-                      width={"100%"}
-                    >
-                      {(dateRangeFrom && dateRangeTo && division
-                        ? chemicalClassificationHazardTypeSummaryMemo
-                        : chemicalAllClassificationHazardTypeSummaryMemo
-                      )?.map((item, index) => (
-                        <>
-                          <Box
-                            key={index}
-                            display="flex"
-                            justifyContent="space-between"
-                          >
-                            <Box flex={2}>
-                              <Typography variant="button" fontSize="1.2rem">
-                                {item.hazardType}
-                              </Typography>
-                              <Box>
-                                <Typography variant="caption" color="gray">
-                                  Count: {item.count}
-                                </Typography>
-                              </Box>
-                            </Box>
-                            <Box flex={1}>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  flexDirection: "row",
-                                  gap: "3rem",
-                                  justifyContent: "space-between",
-                                }}
-                              >
-                                <CircularProgressWithLabel
-                                  size={60}
-                                  value={item.percentage}
-                                />
-                              </Box>
-                            </Box>
-                          </Box>
-                          <Divider />
-                        </>
-                      ))}
-                    </Box>
-                  </Box>
-                </Box>
-              </TabPanel>
-              <TabPanel value={activeTabThree} index={1} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      gap={4}
-                      width={"100%"}
-                    >
-                      {(dateRangeFrom && dateRangeTo && division
-                        ? chemicalGhsClassificationHazardTypeSummaryMemo
-                        : chemicalAllGhsClassificationHazardTypeSummaryMemo
-                      )?.map((item, index) => (
-                        <>
-                          <Box
-                            key={index}
-                            display="flex"
-                            justifyContent="space-between"
-                          >
-                            <Box flex={2}>
-                              <Typography variant="button" fontSize="1.2rem">
-                                {item.ghsClassification}
-                              </Typography>
-                              <Box>
-                                <Typography variant="caption" color="gray">
-                                  Count: {item.count}
-                                </Typography>
-                              </Box>
-                            </Box>
-                            <Box flex={1}>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  flexDirection: "row",
-                                  gap: "3rem",
-                                  justifyContent: "space-between",
-                                }}
-                              >
-                                <CircularProgressWithLabel
-                                  size={60}
-                                  value={item.percentage}
-                                />
-                              </Box>
-                            </Box>
-                          </Box>
-                          <Divider />
-                        </>
-                      ))}
-                    </Box>
-                  </Box>
-                </Box>
-              </TabPanel>
-              <TabPanel value={activeTabThree} index={2} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      gap={4}
-                      width={"100%"}
-                    >
-                      {(dateRangeFrom && dateRangeTo && division
-                        ? chemicalZdhcClassificationHazardTypeSummaryMemo
-                        : chemicalAllZdhcClassificationHazardTypeSummaryMemo
-                      )?.map((item, index) => (
-                        <>
-                          <Box
-                            key={index}
-                            display="flex"
-                            justifyContent="space-between"
-                          >
-                            <Box flex={2}>
-                              <Typography variant="button" fontSize="1.2rem">
-                                {item.zdhcLevel}
-                              </Typography>
-                              <Box>
-                                <Typography variant="caption" color="gray">
-                                  Count: {item.count}
-                                </Typography>
-                              </Box>
-                            </Box>
-                            <Box flex={1}>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  flexDirection: "row",
-                                  gap: "3rem",
-                                  justifyContent: "space-between",
-                                }}
-                              >
-                                <CircularProgressWithLabel
-                                  size={60}
-                                  value={item.percentage}
-                                />
-                              </Box>
-                            </Box>
-                          </Box>
-                          <Divider />
-                        </>
-                      ))}
-                    </Box>
-                  </Box>
-                </Box>
-              </TabPanel>
-            </>
-          </ResponsiveContainer>
+                  <TableRow>
+                    <TableCell align="left"></TableCell>
+                    <TableCell align="left">Reference Number</TableCell>
+                    <TableCell align="left">Delivered Date</TableCell>
+                    <TableCell align="left">Commercial Name</TableCell>
+                    <TableCell align="left">ZDHC level</TableCell>
+                    <TableCell align="left">Delivered</TableCell>
+                    <TableCell align="left">Status</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {(dateRangeFrom && dateRangeTo && division
+                    ? chemicalLatestDeliveryDataMemo
+                    : chemicalAllLatestDeliveryDataMemo || []
+                  ).map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell align="left">
+                        <UpcomingOutlinedIcon fontSize="small" color="error" />
+                      </TableCell>
+                      <TableCell align="left">{item.referenceNumber}</TableCell>
+                      <TableCell align="left">
+                        {new Date(item.deliveryDate).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell align="left">{item.commercialName}</TableCell>
+                      <TableCell align="left">{item.zdhcLevel}</TableCell>
+                      <TableCell align="left">
+                        {item.deliveryQuantity}
+                      </TableCell>
+                      <TableCell align="left">{item.status}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <Typography textAlign="center">
+                Please select filters to display data
+              </Typography>
+            )}
+          </TableContainer>
         </Box>
 
         <Box
