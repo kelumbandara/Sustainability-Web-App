@@ -3,14 +3,14 @@ import { useQuery } from '@tanstack/react-query';
 import { getOrganization } from '../api/OrganizationSettings/organizationSettingsApi';
 
 export function useCurrentOrganization() {
-  const { data } = useQuery<any[]>({
+  const { data } = useQuery({
     queryKey: ['organization'],
     queryFn: getOrganization,
   });
 
   return {
-    organizationName: data?.[0]?.organizationName ?? 'Dhara Soft',
-    organizationLogo: data?.[0]?.logoUrl?.signedUrl,
+    organizationName: data?.organizationName ?? 'Loading...',
+    organizationLogo: data?.logoUrl?.signedUrl,
   };
 }
 
