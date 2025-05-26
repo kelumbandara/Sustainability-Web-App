@@ -5,33 +5,40 @@ import CircularProgress, {
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
-function CircularProgressWithLabel(
+function ColoredCircularProgressWithLabel(
   props: CircularProgressProps & {
     value: number;
     size?: number;
     textSize?: number;
     textLabel?: string;
+    customColor?: string; // New prop for progress color
   }
 ) {
-  const { value, size = 40, textSize = 12, textLabel } = props;
+  const {
+    value,
+    size = 40,
+    textSize = 12,
+    textLabel,
+    customColor = "var(--pallet-blue)", // Default color if not provided
+  } = props;
 
   return (
     <Box sx={{ position: "relative", display: "inline-flex" }}>
       <CircularProgress
         variant="determinate"
-        value={100} // Full circle for the background
+        value={100}
         size={size}
         sx={{
-          color: "lightgray", // Track color (gray outline)
+          color: "lightgray",
         }}
       />
       <CircularProgress
         variant="determinate"
-        value={value} // Actual progress value
+        value={value}
         size={size}
         sx={{
-          color: value > 0 ? "var(--pallet-blue)" : "transparent", // Filled with blue for > 0%
-          position: "absolute", // Place the progress over the background
+          color: value > 0 ? customColor : "transparent", // Use provided color
+          position: "absolute",
         }}
       />
       <Box
@@ -55,17 +62,15 @@ function CircularProgressWithLabel(
           sx={{
             color: "text.secondary",
             whiteSpace: "nowrap",
-            fontSize: `${textSize}px`, // Apply dynamic font size
+            fontSize: `${textSize}px`,
           }}
         >
           {`${Math.round(value)}%`}
         </Typography>
-        <Typography>
-          {textLabel}
-        </Typography>
+        <Typography>{textLabel}</Typography>
       </Box>
     </Box>
   );
 }
 
-export default CircularProgressWithLabel;
+export default ColoredCircularProgressWithLabel;
