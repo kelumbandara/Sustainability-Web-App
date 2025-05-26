@@ -110,6 +110,11 @@ function OrganizationGeneralDetails({
           label="Organization Name"
           value={organizationSettings?.organizationName}
         />
+
+        <DrawerContentItem
+          label="Organization Factory Name"
+          value={organizationSettings?.organizationFactoryName}
+        />
         <Box m={"0.5rem"}>
           <Box
             sx={{

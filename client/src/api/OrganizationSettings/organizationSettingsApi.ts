@@ -13,6 +13,7 @@ export type ColorPallet = z.infer<typeof ColorPalletSchema>;
 export const OrganizationSchema = z.object({
   id: z.number(),
   organizationName: z.string(),
+  organizationFactoryName: z.string(),
   logoUrl: z.array(z.union([z.instanceof(File), StorageFileSchema])).optional(),
   insightDescription: z.string(),
   colorPallet: z.array(ColorPalletSchema),

@@ -274,7 +274,7 @@ const EditOrganizationDialog = ({
           </CustomButton>
         </Stack>
 
-        <Stack m={4}>
+        <Stack m={4} gap={4}>
           <TextField
             required
             id="organizationName"
@@ -284,6 +284,17 @@ const EditOrganizationDialog = ({
             size="small"
             sx={{ flex: 1 }}
             {...register("organizationName", { required: true })}
+          />
+
+          <TextField
+            required
+            id="organizationFactoryName"
+            label="Factory Name"
+            error={!!errors.organizationFactoryName}
+            helperText={errors.organizationFactoryName && "Required"}
+            size="small"
+            sx={{ flex: 1 }}
+            {...register("organizationFactoryName", { required: true })}
           />
 
           <Box mt={4}>
@@ -345,69 +356,69 @@ const EditOrganizationDialog = ({
           </Box>
         </Stack>
         {/* <TabPanel value={activeTab} index={1} dir={theme.direction}> */}
-          <Stack
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            alignContent="center"
-          >
-            <Box>
-              <SingleImagePreview
-                image={insightUrl}
-                onRemove={(fileToRemove) => {
-                  setInsightUrl((prev) =>
-                    prev.filter(
-                      (file) =>
-                        !(
-                          (file instanceof File && file === fileToRemove) ||
-                          ("gsutil_uri" in file &&
-                            file.gsutil_uri ===
-                              (fileToRemove as any).gsutil_uri) ||
-                          ("fileName" in file &&
-                            file.fileName === (fileToRemove as any).fileName)
-                        )
-                    )
-                  );
-                }}
-              />
-            </Box>
-            <CustomButton variant="outlined" component="label" sx={{ mt: 2 }}>
-              Change Insight Image
-              <input
-                type="file"
-                hidden
-                accept="image/*"
-                onChange={(e) => {
-                  const files = e.target.files;
-                  if (files && files.length > 0) {
-                    setInsightUrl([files[0]]);
-                  }
-                }}
-              />
-            </CustomButton>
-          </Stack>
-          <Stack>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-                margin: "0.5rem",
+        <Stack
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          alignContent="center"
+        >
+          <Box>
+            <SingleImagePreview
+              image={insightUrl}
+              onRemove={(fileToRemove) => {
+                setInsightUrl((prev) =>
+                  prev.filter(
+                    (file) =>
+                      !(
+                        (file instanceof File && file === fileToRemove) ||
+                        ("gsutil_uri" in file &&
+                          file.gsutil_uri ===
+                            (fileToRemove as any).gsutil_uri) ||
+                        ("fileName" in file &&
+                          file.fileName === (fileToRemove as any).fileName)
+                      )
+                  )
+                );
               }}
-            >
-              <Controller
-                control={control}
-                name={"insightDescription"}
-                render={({ field }) => {
-                  return (
-                    <RichTextComponent
-                      onChange={(e) => field.onChange(e)}
-                      placeholder={field.value ?? "insightDescription"}
-                    />
-                  );
-                }}
-              />
-            </Box>
-          </Stack>
+            />
+          </Box>
+          <CustomButton variant="outlined" component="label" sx={{ mt: 2 }}>
+            Change Insight Image
+            <input
+              type="file"
+              hidden
+              accept="image/*"
+              onChange={(e) => {
+                const files = e.target.files;
+                if (files && files.length > 0) {
+                  setInsightUrl([files[0]]);
+                }
+              }}
+            />
+          </CustomButton>
+        </Stack>
+        <Stack>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              margin: "0.5rem",
+            }}
+          >
+            <Controller
+              control={control}
+              name={"insightDescription"}
+              render={({ field }) => {
+                return (
+                  <RichTextComponent
+                    onChange={(e) => field.onChange(e)}
+                    placeholder={field.value ?? "insightDescription"}
+                  />
+                );
+              }}
+            />
+          </Box>
+        </Stack>
         {/* </TabPanel> */}
       </DialogContent>
       <DialogActions sx={{ padding: "1rem" }}>
