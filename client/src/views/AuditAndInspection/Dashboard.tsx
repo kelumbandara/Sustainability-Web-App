@@ -23,17 +23,12 @@ import theme from "../../theme";
 import PageTitle from "../../components/PageTitle";
 import Breadcrumb from "../../components/BreadCrumb";
 import { Controller, useForm } from "react-hook-form";
-import {
-  HazardDashboardPeriods,
-  HazardOrRiskCategories,
-} from "../../api/hazardRiskApi";
 import useIsMobile from "../../customHooks/useIsMobile";
 import { sampleDivisions } from "../../api/sampleData/documentData";
 import DateRangePicker from "../../components/DateRangePicker";
 import CustomButton from "../../components/CustomButton";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DashboardCard from "../../components/DashboardCard";
-import CreditCardIcon from "@mui/icons-material/CreditCard";
 import {
   LineChart,
   Line,
@@ -56,40 +51,8 @@ import {
   PolarRadiusAxis,
   Radar,
 } from "recharts";
-
-import NaturePeopleIcon from "@mui/icons-material/NaturePeople";
-import WaterDropOutlinedIcon from "@mui/icons-material/WaterDropOutlined";
-import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import ShowerOutlinedIcon from "@mui/icons-material/ShowerOutlined";
-import BatteryChargingFullOutlinedIcon from "@mui/icons-material/BatteryChargingFullOutlined";
 import React, { useMemo, useState } from "react";
 import CircularProgressWithLabel from "../../components/CircularProgress";
-import {
-  airEmissionData,
-  auditTeamProductivity,
-  dataset,
-  energyConsumptionData,
-  environmentalAudit,
-  ExternalDataset,
-  ExternalTransformedAuditScores,
-  fabricCutData,
-  ghgDataset,
-  healthSafetyAudit,
-  lineData,
-  managementSystemAudit,
-  myData,
-  pieChartData,
-  pieChartDataWaterTreatment,
-  pieChartEmissionBreakDownData,
-  pieChartRecycledWaterDownData,
-  scopeColors,
-  securityAudit,
-  socialAudit,
-  transformedAuditScores,
-  wasteWaterData,
-  waterUsageData,
-  waterWasteData,
-} from "../../api/sampleData/sampleAuditDashboardData";
 
 import SummarizeIcon from "@mui/icons-material/Summarize";
 
@@ -239,71 +202,6 @@ function EnvironmentDashboard() {
     console.log("event", eventTwo);
     setActiveTabTwo(newValueTwo);
   };
-
-  const pieChartDataMemo = useMemo(() => {
-    if (!pieChartData?.length) return [];
-    return pieChartData;
-  }, [pieChartData]);
-
-  const datasetMemo = useMemo(() => {
-    if (!dataset?.length) return [];
-    return dataset;
-  }, [dataset]);
-
-  const energyConsumptionDataMemo = useMemo(() => {
-    if (!energyConsumptionData?.length) return [];
-    return energyConsumptionData;
-  }, [energyConsumptionData]);
-
-  const fabricCutDataMemo = useMemo(() => {
-    if (!fabricCutData?.length) return [];
-    return fabricCutData;
-  }, [fabricCutData]);
-
-  const ghgDatasetMemo = useMemo(() => {
-    if (!ghgDataset?.length) return [];
-    return ghgDataset;
-  }, [ghgDataset]);
-
-  const lineDataMemo = useMemo(() => {
-    if (!lineData?.length) return [];
-    return lineData;
-  }, [lineData]);
-
-  const pieChartDataWaterTreatmentMemo = useMemo(() => {
-    if (!pieChartDataWaterTreatment?.length) return [];
-    return pieChartDataWaterTreatment;
-  }, [pieChartDataWaterTreatment]);
-
-  const pieChartEmissionBreakDownDataMemo = useMemo(() => {
-    if (!pieChartEmissionBreakDownData?.length) return [];
-    return pieChartEmissionBreakDownData;
-  }, [pieChartEmissionBreakDownData]);
-
-  const pieChartRecycledWaterDownDataMemo = useMemo(() => {
-    if (!pieChartRecycledWaterDownData?.length) return [];
-    return pieChartRecycledWaterDownData;
-  }, [pieChartRecycledWaterDownData]);
-
-  const waterWasteDataMemo = useMemo(() => {
-    if (!waterWasteData?.length) return [];
-    return waterWasteData;
-  }, [waterWasteData]);
-
-  const wasteWaterDataMemo = useMemo(() => {
-    if (!wasteWaterData?.length) return [];
-    return wasteWaterData;
-  }, [wasteWaterData]);
-
-  const waterUsageDataMemo = useMemo(() => {
-    if (!waterUsageData?.length) return [];
-    return waterUsageData;
-  }, [waterUsageData]);
-
-  const airEmissionDataMemo = useMemo(() => {
-    if (!airEmissionData?.length) return [];
-    return airEmissionData;
-  }, [airEmissionData]);
 
   const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
     queryKey: ["divisions"],
