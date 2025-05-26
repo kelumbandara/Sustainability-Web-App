@@ -105,4 +105,14 @@ export async function fetchChemicalDashboardAllSummary(year: number) {
   return res.data;
 }
 
-
+export async function fetchMsdsCount(
+  startDate: String,
+  endDate: String,
+  division: String
+) {
+  const res = await axios.get(
+    `api/chemical-dashboard/${startDate}/${endDate}/${division}/do-you-have-msds
+    `
+  );
+  return res.data;
+}

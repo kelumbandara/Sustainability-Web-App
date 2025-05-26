@@ -25,97 +25,32 @@ import theme from "../../theme";
 import PageTitle from "../../components/PageTitle";
 import Breadcrumb from "../../components/BreadCrumb";
 import { Controller, useForm } from "react-hook-form";
-import {
-  HazardDashboardPeriods,
-  HazardOrRiskCategories,
-} from "../../api/hazardRiskApi";
 import useIsMobile from "../../customHooks/useIsMobile";
-import { sampleDivisions } from "../../api/sampleData/documentData";
 import DateRangePicker from "../../components/DateRangePicker";
 import CustomButton from "../../components/CustomButton";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DashboardCard from "../../components/DashboardCard";
-import CreditCardIcon from "@mui/icons-material/CreditCard";
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
   Legend,
   ResponsiveContainer,
   BarChart,
   Bar,
-  RadialBarChart,
-  RadialBar,
-  PieChart,
-  Pie,
-  Cell,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
 } from "recharts";
-
-import NaturePeopleIcon from "@mui/icons-material/NaturePeople";
-import WaterDropOutlinedIcon from "@mui/icons-material/WaterDropOutlined";
-import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import ShowerOutlinedIcon from "@mui/icons-material/ShowerOutlined";
-import BatteryChargingFullOutlinedIcon from "@mui/icons-material/BatteryChargingFullOutlined";
 import React, { useMemo, useState } from "react";
 import CircularProgressWithLabel from "../../components/CircularProgress";
-import {
-  airEmissionData,
-  auditTeamProductivity,
-  dataset,
-  energyConsumptionData,
-  environmentalAudit,
-  ExternalDataset,
-  ExternalTransformedAuditScores,
-  fabricCutData,
-  ghgDataset,
-  healthSafetyAudit,
-  lineData,
-  managementSystemAudit,
-  myData,
-  pieChartData,
-  pieChartDataWaterTreatment,
-  pieChartEmissionBreakDownData,
-  pieChartRecycledWaterDownData,
-  scopeColors,
-  securityAudit,
-  socialAudit,
-  transformedAuditScores,
-  wasteWaterData,
-  waterUsageData,
-  waterWasteData,
-} from "../../api/sampleData/sampleAuditDashboardData";
 
-import SummarizeIcon from "@mui/icons-material/Summarize";
-
-import EditCalendarIcon from "@mui/icons-material/EditCalendar";
-import CheckBoxOutlinedIcon from "@mui/icons-material/CheckBoxOutlined";
-import RotateRightOutlinedIcon from "@mui/icons-material/RotateRightOutlined";
-import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import PaidOutlinedIcon from "@mui/icons-material/PaidOutlined";
 
-import ConnectWithoutContactIcon from "@mui/icons-material/ConnectWithoutContact";
-import EmergencyOutlinedIcon from "@mui/icons-material/EmergencyOutlined";
-import ForestOutlinedIcon from "@mui/icons-material/ForestOutlined";
-import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
-import ManageAccountsOutlinedIcon from "@mui/icons-material/ManageAccountsOutlined";
 import { yearData } from "../../api/sampleData/consumptionData";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../api/divisionApi";
-import { dateFormatter, getColorForType } from "../../util/dateFormat.util";
+import { dateFormatter } from "../../util/dateFormat.util";
 import CustomPieChart from "../../components/CustomPieChart";
-import { count } from "console";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 
-import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import {
@@ -129,10 +64,12 @@ import {
   fetchChemicalStockAmount,
   fetchChemicalThreshold,
   fetchChemicalTransactionLatestRecord,
+  fetchMsdsCount,
 } from "../../api/ChemicalManagement/chemicalDashboardApi";
 import UpcomingOutlinedIcon from "@mui/icons-material/UpcomingOutlined";
 import FilterListOutlinedIcon from "@mui/icons-material/FilterListOutlined";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
+import RadialStrokeBarChart from "../../components/RadialStrokedBarChart";
 
 const breadcrumbItems = [
   { title: "Home", href: "/home" },
@@ -143,13 +80,6 @@ interface TabPanelProps {
   children?: React.ReactNode;
   dir?: string;
   index: number;
-  value: number;
-}
-
-interface TabPanelPropsTwo {
-  children?: React.ReactNode;
-  dir?: string;
-  indexTwo: number;
   value: number;
 }
 
@@ -169,22 +99,6 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-function TabPanelTwo(props: TabPanelPropsTwo) {
-  const { children, value, indexTwo, ...other } = props;
-
-  return (
-    <div
-      role="TabPanelTwo"
-      hidden={value !== indexTwo}
-      id={`full-width-TabPanelTwo-${indexTwo}`}
-      aria-labelledby={`full-width-tab-${indexTwo}`}
-      {...other}
-    >
-      {value === indexTwo && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-}
-
 function a11yProps(index: number) {
   return {
     id: `full-width-tab-${index}`,
@@ -199,7 +113,14 @@ function a11yProps2(indexTwo: number) {
   };
 }
 
-function EnvironmentDashboard() {
+function a11yProps3(indexTwo: number) {
+  return {
+    id: `full-width-tab-${indexTwo}`,
+    "aria-controls": `full-width-TabPanelTwo-${indexTwo}`,
+  };
+}
+
+function ChemicalDashboard() {
   const { isMobile, isTablet } = useIsMobile();
   const {
     register,
@@ -224,12 +145,13 @@ function EnvironmentDashboard() {
 
   const [activeTab, setActiveTab] = useState(0);
   const [activeTabTwo, setActiveTabTwo] = useState(0);
-  const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
+  const [activeTabThree, setActiveTabThree] = useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     console.log("event", event);
     setActiveTab(newValue);
   };
+
   const handleChangeTabTwo = (
     eventTwo: React.SyntheticEvent,
     newValueTwo: number
@@ -238,76 +160,20 @@ function EnvironmentDashboard() {
     setActiveTabTwo(newValueTwo);
   };
 
-  const pieChartDataMemo = useMemo(() => {
-    if (!pieChartData?.length) return [];
-    return pieChartData;
-  }, [pieChartData]);
-
-  const datasetMemo = useMemo(() => {
-    if (!dataset?.length) return [];
-    return dataset;
-  }, [dataset]);
-
-  const energyConsumptionDataMemo = useMemo(() => {
-    if (!energyConsumptionData?.length) return [];
-    return energyConsumptionData;
-  }, [energyConsumptionData]);
-
-  const fabricCutDataMemo = useMemo(() => {
-    if (!fabricCutData?.length) return [];
-    return fabricCutData;
-  }, [fabricCutData]);
-
-  const ghgDatasetMemo = useMemo(() => {
-    if (!ghgDataset?.length) return [];
-    return ghgDataset;
-  }, [ghgDataset]);
-
-  const lineDataMemo = useMemo(() => {
-    if (!lineData?.length) return [];
-    return lineData;
-  }, [lineData]);
-
-  const pieChartDataWaterTreatmentMemo = useMemo(() => {
-    if (!pieChartDataWaterTreatment?.length) return [];
-    return pieChartDataWaterTreatment;
-  }, [pieChartDataWaterTreatment]);
-
-  const pieChartEmissionBreakDownDataMemo = useMemo(() => {
-    if (!pieChartEmissionBreakDownData?.length) return [];
-    return pieChartEmissionBreakDownData;
-  }, [pieChartEmissionBreakDownData]);
-
-  const pieChartRecycledWaterDownDataMemo = useMemo(() => {
-    if (!pieChartRecycledWaterDownData?.length) return [];
-    return pieChartRecycledWaterDownData;
-  }, [pieChartRecycledWaterDownData]);
-
-  const waterWasteDataMemo = useMemo(() => {
-    if (!waterWasteData?.length) return [];
-    return waterWasteData;
-  }, [waterWasteData]);
-
-  const wasteWaterDataMemo = useMemo(() => {
-    if (!wasteWaterData?.length) return [];
-    return wasteWaterData;
-  }, [wasteWaterData]);
-
-  const waterUsageDataMemo = useMemo(() => {
-    if (!waterUsageData?.length) return [];
-    return waterUsageData;
-  }, [waterUsageData]);
-
-  const airEmissionDataMemo = useMemo(() => {
-    if (!airEmissionData?.length) return [];
-    return airEmissionData;
-  }, [airEmissionData]);
+  const handleChangeTabThree = (
+    eventTwo: React.SyntheticEvent,
+    newValueTwo: number
+  ) => {
+    console.log("event", eventTwo);
+    setActiveTabThree(newValueTwo);
+  };
 
   const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
     queryKey: ["divisions"],
     queryFn: fetchDivision,
   });
 
+  //Dashboard API 
   const {
     data: chemicalStockAmountData,
     refetch: refetchChemicalStockAmount,
@@ -476,6 +342,28 @@ function EnvironmentDashboard() {
       fetchChemicalClassification(formattedDateFrom, formattedDateTo, division),
     enabled: false,
   });
+
+  const {
+    data: chemicalMsdsData,
+    refetch: refetchMsdsCount,
+    isFetching: isChemicalMsdsData,
+  } = useQuery({
+    queryKey: [
+      "chemical-msds",
+      formattedDateFrom,
+      formattedDateTo,
+      division,
+      auditType,
+    ],
+    queryFn: () => fetchMsdsCount(formattedDateFrom, formattedDateTo, division),
+    enabled: false,
+  });
+
+  //Dashboard useMemo
+  const chemicalMsdsDataMemo = useMemo(() => {
+    return chemicalMsdsData?.percentage || [];
+  }, [chemicalMsdsData]);
+
   const chemicalClassificationHazardTypeSummaryMemo = useMemo(() => {
     return chemicalClassificationData?.hazardTypeSummary || [];
   }, [chemicalClassificationData]);
@@ -567,6 +455,7 @@ function EnvironmentDashboard() {
     return chemicalStockAmountData || {};
   }, [chemicalStockAmountData]);
 
+  //Dashboard All Summary API
   const {
     data: chemicalDashboardSummeryData,
     isFetching: isChemicalDashboardSummeryData,
@@ -574,6 +463,13 @@ function EnvironmentDashboard() {
     queryKey: ["chemical-dashboard-data", new Date().getFullYear()],
     queryFn: () => fetchChemicalDashboardAllSummary(new Date().getFullYear()),
   });
+
+  //Dashboard All Summary useMemo
+  const msdsPercentageMemo = useMemo(() => {
+    return chemicalDashboardSummeryData?.msdsSummary?.percentage || 0;
+  }, [chemicalDashboardSummeryData]);
+
+  console.log("summary", msdsPercentageMemo);
 
   const chemicalAllStatusSummeryDataMemo = useMemo(() => {
     return (
@@ -704,14 +600,7 @@ function EnvironmentDashboard() {
     refetchChemicalStatusSummery();
     refetchChemicalInventoryInsights();
     refetchChemicalClassification();
-  };
-
-  const CustomCountLabel = ({ x, y, value }: any) => {
-    return (
-      <text x={x} y={y - 10} fill="#444" fontSize={12} textAnchor="middle">
-        {value}
-      </text>
-    );
+    refetchMsdsCount();
   };
 
   return (
@@ -1014,7 +903,7 @@ function EnvironmentDashboard() {
                 textAlign: "center",
               }}
             >
-              {auditType} Status
+              Chemical Inventory Status
             </Typography>
           </Box>
           <ResponsiveContainer
@@ -1521,8 +1410,8 @@ function EnvironmentDashboard() {
                 }}
               >
                 <Tabs
-                  value={activeTab}
-                  onChange={handleChange}
+                  value={activeTabTwo}
+                  onChange={handleChangeTabTwo}
                   indicatorColor="secondary"
                   TabIndicatorProps={{
                     style: {
@@ -1555,7 +1444,7 @@ function EnvironmentDashboard() {
                         </Typography>
                       </Box>
                     }
-                    {...a11yProps(0)}
+                    {...a11yProps2(0)}
                   />
                   <Tab
                     label={
@@ -1571,7 +1460,7 @@ function EnvironmentDashboard() {
                         </Typography>
                       </Box>
                     }
-                    {...a11yProps(1)}
+                    {...a11yProps2(1)}
                   />
                   <Tab
                     label={
@@ -1587,7 +1476,7 @@ function EnvironmentDashboard() {
                         </Typography>
                       </Box>
                     }
-                    {...a11yProps(2)}
+                    {...a11yProps2(2)}
                   />
                   <Tab
                     label={
@@ -1603,7 +1492,7 @@ function EnvironmentDashboard() {
                         </Typography>
                       </Box>
                     }
-                    {...a11yProps(3)}
+                    {...a11yProps2(3)}
                   />
                   <Tab
                     label={
@@ -1619,11 +1508,11 @@ function EnvironmentDashboard() {
                         </Typography>
                       </Box>
                     }
-                    {...a11yProps(4)}
+                    {...a11yProps2(4)}
                   />
                 </Tabs>
               </AppBar>
-              <TabPanel value={activeTab} index={0} dir={theme.direction}>
+              <TabPanel value={activeTabTwo} index={0} dir={theme.direction}>
                 <Box>
                   <Box
                     sx={{
@@ -1681,7 +1570,7 @@ function EnvironmentDashboard() {
                   </Box>
                 </Box>
               </TabPanel>
-              <TabPanel value={activeTab} index={1} dir={theme.direction}>
+              <TabPanel value={activeTabTwo} index={1} dir={theme.direction}>
                 <Box>
                   <Box
                     sx={{
@@ -1739,7 +1628,7 @@ function EnvironmentDashboard() {
                   </Box>
                 </Box>
               </TabPanel>
-              <TabPanel value={activeTab} index={2} dir={theme.direction}>
+              <TabPanel value={activeTabTwo} index={2} dir={theme.direction}>
                 <Box>
                   <Box
                     sx={{
@@ -1796,7 +1685,7 @@ function EnvironmentDashboard() {
                   </Box>
                 </Box>
               </TabPanel>
-              <TabPanel value={activeTab} index={3} dir={theme.direction}>
+              <TabPanel value={activeTabTwo} index={3} dir={theme.direction}>
                 <Box>
                   <Box
                     sx={{
@@ -1852,7 +1741,7 @@ function EnvironmentDashboard() {
                   </Box>
                 </Box>
               </TabPanel>
-              <TabPanel value={activeTab} index={4} dir={theme.direction}>
+              <TabPanel value={activeTabTwo} index={4} dir={theme.direction}>
                 <Box>
                   <Box
                     sx={{
@@ -1989,8 +1878,8 @@ function EnvironmentDashboard() {
                 }}
               >
                 <Tabs
-                  value={activeTab}
-                  onChange={handleChange}
+                  value={activeTabThree}
+                  onChange={handleChangeTabThree}
                   indicatorColor="secondary"
                   TabIndicatorProps={{
                     style: {
@@ -2023,7 +1912,7 @@ function EnvironmentDashboard() {
                         </Typography>
                       </Box>
                     }
-                    {...a11yProps(0)}
+                    {...a11yProps3(0)}
                   />
                   <Tab
                     label={
@@ -2039,7 +1928,7 @@ function EnvironmentDashboard() {
                         </Typography>
                       </Box>
                     }
-                    {...a11yProps(1)}
+                    {...a11yProps3(1)}
                   />
                   <Tab
                     label={
@@ -2055,11 +1944,11 @@ function EnvironmentDashboard() {
                         </Typography>
                       </Box>
                     }
-                    {...a11yProps(2)}
+                    {...a11yProps3(2)}
                   />
                 </Tabs>
               </AppBar>
-              <TabPanel value={activeTab} index={0} dir={theme.direction}>
+              <TabPanel value={activeTabThree} index={0} dir={theme.direction}>
                 <Box>
                   <Box
                     sx={{
@@ -2117,7 +2006,7 @@ function EnvironmentDashboard() {
                   </Box>
                 </Box>
               </TabPanel>
-              <TabPanel value={activeTab} index={1} dir={theme.direction}>
+              <TabPanel value={activeTabThree} index={1} dir={theme.direction}>
                 <Box>
                   <Box
                     sx={{
@@ -2175,7 +2064,7 @@ function EnvironmentDashboard() {
                   </Box>
                 </Box>
               </TabPanel>
-              <TabPanel value={activeTab} index={2} dir={theme.direction}>
+              <TabPanel value={activeTabThree} index={2} dir={theme.direction}>
                 <Box>
                   <Box
                     sx={{
@@ -2256,17 +2145,22 @@ function EnvironmentDashboard() {
               variant="h6"
               sx={{
                 textAlign: "center",
+                mb: 5,
               }}
             >
-              {auditType} Status
+              MSDS Chemical Percentage
             </Typography>
           </Box>
           <ResponsiveContainer width="100%" height={500}>
             <>
-              <CustomPieChart
-                data={chemicalStatusSummeryDataMemo}
-                title="Chemical Status Summary"
-                centerLabel="Status"
+              <RadialStrokeBarChart
+                value={
+                  dateRangeFrom && dateRangeTo && division
+                    ? chemicalMsdsDataMemo
+                    : msdsPercentageMemo
+                }
+                label="MSDS Count"
+                size={400}
               />
             </>
           </ResponsiveContainer>
@@ -2276,4 +2170,4 @@ function EnvironmentDashboard() {
   );
 }
 
-export default EnvironmentDashboard;
+export default ChemicalDashboard;
