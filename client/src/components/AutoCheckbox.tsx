@@ -17,6 +17,7 @@ interface AutocompleteCheckboxProps<T extends Record<string, any>> {
   optionValueKey?: keyof T; // ✅ Key for values (must exist in T)
   getOptionLabel?: (option: T) => string; // ✅ Optional function for labels
   getOptionValue?: (option: T) => string | number; // ✅ Optional function for values
+  style?: React.CSSProperties; // ✅ Optional style prop
 }
 
 // ✅ Works with any data type while ensuring `optionValueKey` is `string | number`
@@ -34,6 +35,7 @@ const AutocompleteCheckbox = <T extends Record<string, any>>({
   optionValueKey,
   getOptionLabel,
   getOptionValue,
+  style,
 }: AutocompleteCheckboxProps<T>) => {
   return (
     <Controller
