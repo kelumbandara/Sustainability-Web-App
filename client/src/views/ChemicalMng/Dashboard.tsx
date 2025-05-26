@@ -440,14 +440,6 @@ function EnvironmentDashboard() {
   });
 
   const {
-    data: chemicalDashboardSummeryData,
-    isFetching: isChemicalDashboardSummeryData,
-  } = useQuery({
-    queryKey: ["chemical-dashboard-data", new Date().getFullYear()],
-    queryFn: () => fetchChemicalDashboardAllSummary(new Date().getFullYear()),
-  });
-
-  const {
     data: chemicalInsightData,
     refetch: refetchChemicalInventoryInsights,
     isFetching: isChemicalInsightData,
@@ -481,11 +473,7 @@ function EnvironmentDashboard() {
       auditType,
     ],
     queryFn: () =>
-      fetchChemicalClassification(
-        formattedDateFrom,
-        formattedDateTo,
-        division
-      ),
+      fetchChemicalClassification(formattedDateFrom, formattedDateTo, division),
     enabled: false,
   });
   const chemicalClassificationHazardTypeSummaryMemo = useMemo(() => {
@@ -578,6 +566,82 @@ function EnvironmentDashboard() {
   const chemicalStockAmountDataMemo = useMemo(() => {
     return chemicalStockAmountData || {};
   }, [chemicalStockAmountData]);
+
+  const {
+    data: chemicalDashboardSummeryData,
+    isFetching: isChemicalDashboardSummeryData,
+  } = useQuery({
+    queryKey: ["chemical-dashboard-data", new Date().getFullYear()],
+    queryFn: () => fetchChemicalDashboardAllSummary(new Date().getFullYear()),
+  });
+
+  const chemicalAllStatusSummeryDataMemo = useMemo(() => {
+    return (
+      chemicalDashboardSummeryData?.statusSummary?.map(
+        (item: { status: string; count: number }) => ({
+          name: item.status,
+          value: item.count,
+        })
+      ) || []
+    );
+  }, [chemicalDashboardSummeryData]);
+  console.log(chemicalAllStatusSummeryDataMemo);
+
+  const chemicalAllZdhcClassificationHazardTypeSummaryMemo = useMemo(() => {
+    return (
+      chemicalDashboardSummeryData?.categoryClassificationSummary
+        ?.zdhcLevelSummary || []
+    );
+  }, [chemicalDashboardSummeryData]);
+
+  const chemicalAllClassificationHazardTypeSummaryMemo = useMemo(() => {
+    return (
+      chemicalDashboardSummeryData?.categoryClassificationSummary
+        ?.hazardTypeSummary || []
+    );
+  }, [chemicalDashboardSummeryData]);
+
+  const chemicalAllGhsClassificationHazardTypeSummaryMemo = useMemo(() => {
+    return (
+      chemicalDashboardSummeryData?.categoryClassificationSummary
+        ?.ghsClassificationSummary || []
+    );
+  }, [chemicalDashboardSummeryData]);
+
+  const chemicalDashboardSummeryTopSuppliersDataMemo = useMemo(() => {
+    return (
+      chemicalDashboardSummeryData?.chemicalInventoryInsights?.topSuppliers ||
+      []
+    );
+  }, [chemicalDashboardSummeryData]);
+
+  const chemicalDashboardSummeryPositiveListDataMemo = useMemo(() => {
+    return (
+      chemicalDashboardSummeryData?.chemicalInventoryInsights?.positiveList ||
+      []
+    );
+  }, [chemicalDashboardSummeryData]);
+
+  const chemicalDashboardSummeryMsdsExpiriesDataMemo = useMemo(() => {
+    return (
+      chemicalDashboardSummeryData?.chemicalInventoryInsights?.msdsExpiries ||
+      []
+    );
+  }, [chemicalDashboardSummeryData]);
+
+  const chemicalDashboardSummeryChemicalExpiryDataMemo = useMemo(() => {
+    return (
+      chemicalDashboardSummeryData?.chemicalInventoryInsights?.chemicalExpiry ||
+      []
+    );
+  }, [chemicalDashboardSummeryData]);
+
+  const chemicalDashboardSummeryCertificateExpiryDataMemo = useMemo(() => {
+    return (
+      chemicalDashboardSummeryData?.chemicalInventoryInsights
+        ?.certificateExpiry || []
+    );
+  }, [chemicalDashboardSummeryData]);
 
   const chemicalDashboardSummeryDataMemo = useMemo(() => {
     return chemicalDashboardSummeryData || {};
@@ -1435,7 +1499,7 @@ function EnvironmentDashboard() {
                 textAlign: "center",
               }}
             >
-              {auditType} Status
+              Chemical Inventory Insights
             </Typography>
           </Box>
 
@@ -1574,44 +1638,45 @@ function EnvironmentDashboard() {
                       gap={4}
                       width={"100%"}
                     >
-                      {chemicalInsightTopSuppliersDataMemo?.map(
-                        (item, index) => (
-                          <>
-                            <Box
-                              key={index}
-                              display="flex"
-                              justifyContent="space-between"
-                            >
-                              <Box flex={2}>
-                                <Typography variant="button" fontSize="1.2rem">
-                                  {item.name}
+                      {(dateRangeFrom && dateRangeTo && division
+                        ? chemicalInsightTopSuppliersDataMemo
+                        : chemicalDashboardSummeryTopSuppliersDataMemo
+                      )?.map((item, index) => (
+                        <>
+                          <Box
+                            key={index}
+                            display="flex"
+                            justifyContent="space-between"
+                          >
+                            <Box flex={2}>
+                              <Typography variant="button" fontSize="1.2rem">
+                                {item.name}
+                              </Typography>
+                              <Box>
+                                <Typography variant="caption" color="gray">
+                                  Quantity: {item.totalQuantity}
                                 </Typography>
-                                <Box>
-                                  <Typography variant="caption" color="gray">
-                                    Quantity: {item.totalQuantity}
-                                  </Typography>
-                                </Box>
-                              </Box>
-                              <Box flex={1}>
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    flexDirection: "row",
-                                    gap: "3rem",
-                                    justifyContent: "space-between",
-                                  }}
-                                >
-                                  <CircularProgressWithLabel
-                                    size={60}
-                                    value={item.percentageOfTotalRecords}
-                                  />
-                                </Box>
                               </Box>
                             </Box>
-                            <Divider />
-                          </>
-                        )
-                      )}
+                            <Box flex={1}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  gap: "3rem",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <CircularProgressWithLabel
+                                  size={60}
+                                  value={item.percentageOfTotalRecords}
+                                />
+                              </Box>
+                            </Box>
+                          </Box>
+                          <Divider />
+                        </>
+                      ))}
                     </Box>
                   </Box>
                 </Box>
@@ -1631,44 +1696,45 @@ function EnvironmentDashboard() {
                       gap={4}
                       width={"100%"}
                     >
-                      {chemicalInsightPositiveListDataMemo?.map(
-                        (item, index) => (
-                          <>
-                            <Box
-                              key={index}
-                              display="flex"
-                              justifyContent="space-between"
-                            >
-                              <Box flex={2}>
-                                <Typography variant="button" fontSize="1.2rem">
-                                  {item.positiveList}
+                      {(dateRangeFrom && dateRangeTo && division
+                        ? chemicalInsightPositiveListDataMemo
+                        : chemicalDashboardSummeryPositiveListDataMemo
+                      )?.map((item, index) => (
+                        <>
+                          <Box
+                            key={index}
+                            display="flex"
+                            justifyContent="space-between"
+                          >
+                            <Box flex={2}>
+                              <Typography variant="button" fontSize="1.2rem">
+                                {item.positiveList}
+                              </Typography>
+                              <Box>
+                                <Typography variant="caption" color="gray">
+                                  Count: {item.count}
                                 </Typography>
-                                <Box>
-                                  <Typography variant="caption" color="gray">
-                                    Count: {item.count}
-                                  </Typography>
-                                </Box>
-                              </Box>
-                              <Box flex={1}>
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    flexDirection: "row",
-                                    gap: "3rem",
-                                    justifyContent: "space-between",
-                                  }}
-                                >
-                                  <CircularProgressWithLabel
-                                    size={60}
-                                    value={item.percentageOfTotalCertificates}
-                                  />
-                                </Box>
                               </Box>
                             </Box>
-                            <Divider />
-                          </>
-                        )
-                      )}
+                            <Box flex={1}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  gap: "3rem",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <CircularProgressWithLabel
+                                  size={60}
+                                  value={item.percentageOfTotalCertificates}
+                                />
+                              </Box>
+                            </Box>
+                          </Box>
+                          <Divider />
+                        </>
+                      ))}
                     </Box>
                   </Box>
                 </Box>
@@ -1688,7 +1754,10 @@ function EnvironmentDashboard() {
                       gap={4}
                       width={"100%"}
                     >
-                      {chemicalInsightMsdsListDataMemo?.map((item, index) => (
+                      {(dateRangeFrom && dateRangeTo && division
+                        ? chemicalInsightMsdsListDataMemo
+                        : chemicalDashboardSummeryMsdsExpiriesDataMemo
+                      )?.map((item, index) => (
                         <>
                           <Box
                             key={index}
@@ -1742,7 +1811,10 @@ function EnvironmentDashboard() {
                       gap={4}
                       width={"100%"}
                     >
-                      {chemicalInsightChemicalExpiryListDataMemo?.map((item, index) => (
+                      {(dateRangeFrom && dateRangeTo && division
+                        ? chemicalInsightChemicalExpiryListDataMemo
+                        : chemicalDashboardSummeryChemicalExpiryDataMemo
+                      )?.map((item, index) => (
                         <>
                           <Box
                             key={index}
@@ -1795,7 +1867,10 @@ function EnvironmentDashboard() {
                       gap={4}
                       width={"100%"}
                     >
-                      {chemicalInsightCertificateExpiryListDataMemo?.map((item, index) => (
+                      {(dateRangeFrom && dateRangeTo && division
+                        ? chemicalInsightCertificateExpiryListDataMemo
+                        : chemicalDashboardSummeryCertificateExpiryDataMemo
+                      )?.map((item, index) => (
                         <>
                           <Box
                             key={index}
@@ -1814,7 +1889,7 @@ function EnvironmentDashboard() {
                             </Box>
                             <Box flex={1}>
                               <Typography variant="button" fontSize="1.2rem">
-                              {item.positiveList}
+                                {item.positiveList}
                               </Typography>
                               <Box>
                                 <Typography variant="caption" color="gray">
@@ -1851,20 +1926,14 @@ function EnvironmentDashboard() {
             marginTop: "1rem",
           }}
         >
-          <Box>
-            <Typography
-              variant="h6"
-              sx={{
-                textAlign: "center",
-              }}
-            >
-              {auditType} Status
-            </Typography>
-          </Box>
           <ResponsiveContainer width="100%" height={500}>
             <>
               <CustomPieChart
-                data={chemicalStatusSummeryDataMemo}
+                data={
+                  dateRangeFrom && dateRangeTo && division
+                    ? chemicalStatusSummeryDataMemo
+                    : chemicalAllStatusSummeryDataMemo
+                }
                 title="Chemical Status Summary"
                 centerLabel="Status"
               />
@@ -1898,7 +1967,7 @@ function EnvironmentDashboard() {
                 textAlign: "center",
               }}
             >
-              {auditType} Status
+              Category & Classification
             </Typography>
           </Box>
 
@@ -2005,44 +2074,45 @@ function EnvironmentDashboard() {
                       gap={4}
                       width={"100%"}
                     >
-                      {chemicalClassificationHazardTypeSummaryMemo?.map(
-                        (item, index) => (
-                          <>
-                            <Box
-                              key={index}
-                              display="flex"
-                              justifyContent="space-between"
-                            >
-                              <Box flex={2}>
-                                <Typography variant="button" fontSize="1.2rem">
-                                  {item.hazardType}
+                      {(dateRangeFrom && dateRangeTo && division
+                        ? chemicalClassificationHazardTypeSummaryMemo
+                        : chemicalAllClassificationHazardTypeSummaryMemo
+                      )?.map((item, index) => (
+                        <>
+                          <Box
+                            key={index}
+                            display="flex"
+                            justifyContent="space-between"
+                          >
+                            <Box flex={2}>
+                              <Typography variant="button" fontSize="1.2rem">
+                                {item.hazardType}
+                              </Typography>
+                              <Box>
+                                <Typography variant="caption" color="gray">
+                                  Count: {item.count}
                                 </Typography>
-                                <Box>
-                                  <Typography variant="caption" color="gray">
-                                    Count: {item.count}
-                                  </Typography>
-                                </Box>
-                              </Box>
-                              <Box flex={1}>
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    flexDirection: "row",
-                                    gap: "3rem",
-                                    justifyContent: "space-between",
-                                  }}
-                                >
-                                  <CircularProgressWithLabel
-                                    size={60}
-                                    value={item.percentage}
-                                  />
-                                </Box>
                               </Box>
                             </Box>
-                            <Divider />
-                          </>
-                        )
-                      )}
+                            <Box flex={1}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  gap: "3rem",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <CircularProgressWithLabel
+                                  size={60}
+                                  value={item.percentage}
+                                />
+                              </Box>
+                            </Box>
+                          </Box>
+                          <Divider />
+                        </>
+                      ))}
                     </Box>
                   </Box>
                 </Box>
@@ -2062,44 +2132,45 @@ function EnvironmentDashboard() {
                       gap={4}
                       width={"100%"}
                     >
-                      {chemicalGhsClassificationHazardTypeSummaryMemo?.map(
-                        (item, index) => (
-                          <>
-                            <Box
-                              key={index}
-                              display="flex"
-                              justifyContent="space-between"
-                            >
-                              <Box flex={2}>
-                                <Typography variant="button" fontSize="1.2rem">
-                                  {item.ghsClassification}
+                      {(dateRangeFrom && dateRangeTo && division
+                        ? chemicalGhsClassificationHazardTypeSummaryMemo
+                        : chemicalAllGhsClassificationHazardTypeSummaryMemo
+                      )?.map((item, index) => (
+                        <>
+                          <Box
+                            key={index}
+                            display="flex"
+                            justifyContent="space-between"
+                          >
+                            <Box flex={2}>
+                              <Typography variant="button" fontSize="1.2rem">
+                                {item.ghsClassification}
+                              </Typography>
+                              <Box>
+                                <Typography variant="caption" color="gray">
+                                  Count: {item.count}
                                 </Typography>
-                                <Box>
-                                  <Typography variant="caption" color="gray">
-                                    Count: {item.count}
-                                  </Typography>
-                                </Box>
-                              </Box>
-                              <Box flex={1}>
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    flexDirection: "row",
-                                    gap: "3rem",
-                                    justifyContent: "space-between",
-                                  }}
-                                >
-                                  <CircularProgressWithLabel
-                                    size={60}
-                                    value={item.percentage}
-                                  />
-                                </Box>
                               </Box>
                             </Box>
-                            <Divider />
-                          </>
-                        )
-                      )}
+                            <Box flex={1}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  gap: "3rem",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <CircularProgressWithLabel
+                                  size={60}
+                                  value={item.percentage}
+                                />
+                              </Box>
+                            </Box>
+                          </Box>
+                          <Divider />
+                        </>
+                      ))}
                     </Box>
                   </Box>
                 </Box>
@@ -2119,44 +2190,45 @@ function EnvironmentDashboard() {
                       gap={4}
                       width={"100%"}
                     >
-                      {chemicalZdhcClassificationHazardTypeSummaryMemo?.map(
-                        (item, index) => (
-                          <>
-                            <Box
-                              key={index}
-                              display="flex"
-                              justifyContent="space-between"
-                            >
-                              <Box flex={2}>
-                                <Typography variant="button" fontSize="1.2rem">
-                                  {item.zdhcLevel}
+                      {(dateRangeFrom && dateRangeTo && division
+                        ? chemicalZdhcClassificationHazardTypeSummaryMemo
+                        : chemicalAllZdhcClassificationHazardTypeSummaryMemo
+                      )?.map((item, index) => (
+                        <>
+                          <Box
+                            key={index}
+                            display="flex"
+                            justifyContent="space-between"
+                          >
+                            <Box flex={2}>
+                              <Typography variant="button" fontSize="1.2rem">
+                                {item.zdhcLevel}
+                              </Typography>
+                              <Box>
+                                <Typography variant="caption" color="gray">
+                                  Count: {item.count}
                                 </Typography>
-                                <Box>
-                                  <Typography variant="caption" color="gray">
-                                    Count: {item.count}
-                                  </Typography>
-                                </Box>
-                              </Box>
-                              <Box flex={1}>
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    flexDirection: "row",
-                                    gap: "3rem",
-                                    justifyContent: "space-between",
-                                  }}
-                                >
-                                  <CircularProgressWithLabel
-                                    size={60}
-                                    value={item.percentage}
-                                  />
-                                </Box>
                               </Box>
                             </Box>
-                            <Divider />
-                          </>
-                        )
-                      )}
+                            <Box flex={1}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  gap: "3rem",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <CircularProgressWithLabel
+                                  size={60}
+                                  value={item.percentage}
+                                />
+                              </Box>
+                            </Box>
+                          </Box>
+                          <Divider />
+                        </>
+                      ))}
                     </Box>
                   </Box>
                 </Box>
