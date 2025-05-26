@@ -42,7 +42,7 @@ function ViewChemicalRequestContent({
     mutationFn: approveChemicalRequest,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["chemical-requests"],
+        queryKey: ["chemical-purchase-inventory"],
       });
       enqueueSnackbar("Chemical Request Approved Successfully!", {
         variant: "success",

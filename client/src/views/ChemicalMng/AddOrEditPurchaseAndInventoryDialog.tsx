@@ -113,6 +113,11 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
   const { enqueueSnackbar } = useSnackbar();
   const { isMobile, isTablet } = useIsMobile();
   const [files, setFiles] = useState<File[]>([]);
+
+  const [removeCertificateArrayId, setRemoveCertificateArrayId] = useState<
+    number[]
+  >([]);
+
   const [activeTab, setActiveTab] = useState(0);
   const [publishModalOpen, setPublishModalOpen] = useState(false);
   const [existingFiles, setExistingFiles] = useState<StorageFile[]>(
@@ -156,6 +161,7 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
   ) => {
     const submitData: Partial<ChemicalPurchaseRequest> = data;
     console.log("submitData", submitData);
+    submitData.removeCertificate = removeCertificateArrayId;
     submitData.documents = files;
     if (filesToRemove?.length > 0) submitData.removeDoc = filesToRemove;
     submitData.compliantWithTheLatestVersionOfZDHCandMRSL =
@@ -1649,14 +1655,20 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                               <TableCell align="center">
                                 <IconButton
                                   onClick={() => {
-                                    setValue(
-                                      "certificate",
-                                      (certificatesWatch ?? []).filter(
-                                        (item) =>
-                                          item.inventoryId !== row.inventoryId
-                                      )
-                                    );
+                                    const filteredCertificates = (certificatesWatch ?? []).filter((item) => {
+                                      const isFileInstance = item.documents instanceof File;
+                                      const shouldKeep = item.inventoryId !== row.inventoryId || isFileInstance;
+                                  
+                                      if (!shouldKeep && row.certificateId) {
+                                        setRemoveCertificateArrayId((prev) => [...prev, row.certificateId]);
+                                      }
+                                  
+                                      return shouldKeep;
+                                    });
+                                  
+                                    setValue("certificate", filteredCertificates);
                                   }}
+                                  
                                 >
                                   <DeleteIcon />
                                 </IconButton>
