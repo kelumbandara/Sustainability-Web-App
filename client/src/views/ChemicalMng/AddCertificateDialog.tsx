@@ -43,6 +43,7 @@ import {
   AddNewPositiveListDialog,
 } from "./AddNewPositiveListDialog";
 import { generateRandomNumberId } from "../../util/numbers.util";
+import { StorageFile } from "../../utils/StorageFiles.util";
 
 const AddCertificateDialog = ({
   open,
@@ -55,6 +56,19 @@ const AddCertificateDialog = ({
 }) => {
   const { isMobile } = useIsMobile();
   const [files, setFiles] = useState<File[]>([]);
+  const [previewFiles, setPreviewFiles] = useState<StorageFile[]>([]);
+
+  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      const newFiles: StorageFile[] = Array.from(files).map((file) => ({
+        fileName: file.name,
+        imageUrl: URL.createObjectURL(file), // Local preview
+      }));
+      setPreviewFiles(newFiles);
+    }
+  }
+
   const [openAddNewTestingLabDialog, setOpenAddNewTestingLabDialog] =
     useState(false);
   const [openAddNewPositiveListDialog, setOpenAddNewPositiveListDialog] =
@@ -381,8 +395,13 @@ const AddCertificateDialog = ({
           }}
           size="medium"
           onClick={handleSubmit((data) => {
-            data.documents = files;
             data.inventoryId = generateRandomNumberId();
+            const mappedFiles: StorageFile[] = files.map((file) => ({
+              fileName: file.name,
+              imageUrl: URL.createObjectURL(file),
+            }));
+            data.previewDocuments = mappedFiles;
+            data.documents = files;
             onSubmit(data);
             reset();
           })}

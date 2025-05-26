@@ -114,11 +114,19 @@ const ViewCertificateDialog = ({
           label="Positive List"
           value={defaultValues?.description}
         />
-        <FileItemsViewer
-          label="Report"
-          files={defaultValues?.documents as StorageFile[]}
-          sx={{ marginY: "1rem" }}
-        />
+        {defaultValues?.previewDocuments != null ? (
+          <FileItemsViewer
+            label="Report"
+            files={defaultValues?.previewDocuments as StorageFile[]}
+            sx={{ marginY: "1rem" }}
+          />
+        ) : (
+          <FileItemsViewer
+            label="Report"
+            files={defaultValues?.documents as StorageFile[]}
+            sx={{ marginY: "1rem" }}
+          />
+        )}
       </DialogContent>
       <Divider />
       <DialogActions sx={{ padding: "1rem" }}>
