@@ -44,6 +44,7 @@ import {
 } from "./AddNewPositiveListDialog";
 import { generateRandomNumberId } from "../../util/numbers.util";
 import { StorageFile } from "../../utils/StorageFiles.util";
+import theme from "../../theme";
 
 const AddCertificateDialog = ({
   open,
@@ -350,13 +351,19 @@ const AddCertificateDialog = ({
             <Box
               sx={{
                 display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-                margin: "0.5rem",
+                flexDirection: "column",
+                padding: "0.3rem",
+                margin: "0.2rem",
+                border: errors.description
+                  ? `1px solid ${theme.palette.error.main}`
+                  : "none",
+                borderRadius: "0.5rem",
               }}
             >
               <Controller
                 control={control}
                 name={"description"}
+                {...register("description", { required: true })}
                 render={({ field }) => {
                   return (
                     <RichTextComponent
@@ -366,6 +373,14 @@ const AddCertificateDialog = ({
                   );
                 }}
               />
+              {errors.description && (
+                <Typography
+                  variant="caption"
+                  sx={{ color: theme.palette.error.main, ml: "0.5rem" }}
+                >
+                  Required
+                </Typography>
+              )}
             </Box>
             <Box
               sx={{

@@ -111,7 +111,6 @@ function ChemicalPurchaseInventoryTable() {
                 <TableCell align="left">Request Date</TableCell>
                 <TableCell align="left">Expiry Date</TableCell>
                 <TableCell align="left">Commercial Name</TableCell>
-                <TableCell align="left">Customer</TableCell>
                 <TableCell align="left">Reviewer</TableCell>
                 <TableCell align="left">Customer</TableCell>
                 <TableCell align="left">Requested Quantity</TableCell>
@@ -146,9 +145,6 @@ function ChemicalPurchaseInventoryTable() {
                         : "--"}
                     </TableCell>
                     <TableCell align="left">{row.commercialName}</TableCell>
-                    <TableCell align="left">
-                      {row?.certificate.testName}
-                    </TableCell>
                     <TableCell align="left">
                       {row?.requestedCustomer ?? "--"}
                     </TableCell>

@@ -370,7 +370,7 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
         >
           <Typography variant="h6" component="div">
             {defaultValues
-              ? "Edit an Chemical Purchase Inventory"
+              ? "Edit a Chemical Purchase Inventory"
               : "Create a Chemical Purchase Inventory Item"}
           </Typography>
           <IconButton
@@ -1873,6 +1873,7 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
             handleClose={() => setPublishModalOpen(false)}
             approveFunc={async () => {
               const isValid = await trigger();
+              console.log("Form Validity", isValid, errors);
               if (isValid) {
                 handlePublishChemicalPurchaseInventory();
               } else {

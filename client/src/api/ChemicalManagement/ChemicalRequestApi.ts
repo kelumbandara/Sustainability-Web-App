@@ -642,9 +642,7 @@ export const publishChemicalPurchase = async (
 };
 
 export const deleteChemicalPurchaseRequest = async (id: string) => {
-  const res = await axios.delete(
-    `/api/purchase-inventory-records/${id}/delete`
-  );
+  const res = await axios.delete(`/api/purchase-inventory-record/${id}/delete`);
   return res.data;
 };
 

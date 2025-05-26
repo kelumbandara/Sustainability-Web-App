@@ -40,9 +40,12 @@ function ViewChemicalRequestContent({
     isPending: isChemicalRequestApproving,
   } = useMutation({
     mutationFn: approveChemicalRequest,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
         queryKey: ["chemical-requests"],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["chemical-purchase-inventory"],
       });
       enqueueSnackbar("Chemical Request Approved Successfully!", {
         variant: "success",
