@@ -236,6 +236,9 @@ export const ChemicalCertificateSchema = z.object({
   documents: z
     .union([z.array(StorageFileSchema), z.array(z.instanceof(File))])
     .optional(),
+  previewDocuments: z
+    .union([z.array(StorageFileSchema), z.array(z.instanceof(File))])
+    .optional(),
   removeDoc: z.array(z.string()).optional(),
 });
 
