@@ -1045,7 +1045,7 @@ function EnvironmentDashboard() {
           </Box>
         </Box>
       ) : (
-        <Alert severity="error" sx={{ mt: 2, borderRadius: 2 }}>
+        <Alert severity="info" sx={{ mt: 2, borderRadius: 2 }}>
           <AlertTitle>Missing Filters</AlertTitle>
           Please select all required filters — Division, Date Range and Audit
           Type.
