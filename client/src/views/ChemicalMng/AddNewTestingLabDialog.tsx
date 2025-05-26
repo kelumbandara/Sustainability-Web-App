@@ -15,14 +15,14 @@ import { grey } from "@mui/material/colors";
 import { useMutation } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
 import { useForm } from "react-hook-form";
-import { createProcessType } from "../../../api/AuditAndInspection/internalAudit";
-import CustomButton from "../../../components/CustomButton";
-import useIsMobile from "../../../customHooks/useIsMobile";
-import queryClient from "../../../state/queryClient";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
+import useIsMobile from "../../customHooks/useIsMobile";
+import queryClient from "../../state/queryClient";
+import CustomButton from "../../components/CustomButton";
+import { createTestLab } from "../../api/ChemicalManagement/ChemicalRequestApi";
 
-export const AddNewProcessTypeDialog = ({
+export const AddNewTestingLabDialog = ({
   open,
   setOpen,
 }: {
@@ -33,17 +33,17 @@ export const AddNewProcessTypeDialog = ({
   const { isMobile } = useIsMobile();
   const { enqueueSnackbar } = useSnackbar();
 
-  const { mutate: createProcessTypeMutation, isPending } = useMutation({
-    mutationFn: createProcessType,
+  const { mutate: createTestingLabMutation, isPending } = useMutation({
+    mutationFn: createTestLab,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["process-types"] });
-      enqueueSnackbar("Process Type Created Successfully!", {
+      queryClient.invalidateQueries({ queryKey: ["testing-labs"] });
+      enqueueSnackbar("Testing Lab Created Successfully!", {
         variant: "success",
       });
       setOpen(false);
     },
     onError: () => {
-      enqueueSnackbar(`Process Type Create Failed`, {
+      enqueueSnackbar(`Testing Lab Create Failed`, {
         variant: "error",
       });
     },
@@ -72,7 +72,7 @@ export const AddNewProcessTypeDialog = ({
         }}
       >
         <Typography variant="h6" component="div">
-          Add New Process Type
+          Add New Testing Lab
         </Typography>
         <IconButton
           aria-label="open drawer"
@@ -94,10 +94,10 @@ export const AddNewProcessTypeDialog = ({
           }}
         >
           <TextField
-            {...register("processType", { required: true })}
+            {...register("laboratoryName", { required: true })}
             required
-            id="processType"
-            label="Process Type"
+            id="laboratoryName"
+            label="Testing Lab"
             size="small"
             fullWidth
             sx={{ marginBottom: "0.5rem" }}
@@ -119,16 +119,16 @@ export const AddNewProcessTypeDialog = ({
           size="medium"
           disabled={isPending}
           endIcon={isPending ? <CircularProgress size={20} /> : null}
-          onClick={handleSubmit((data) => createProcessTypeMutation(data))}
+          onClick={handleSubmit((data) => createTestingLabMutation(data))}
         >
-          Add Process Type
+          Add Lab
         </CustomButton>
       </DialogActions>
     </Dialog>
   );
 };
 
-export const AddNewProcessTypeButton = (props) => (
+export const AddNewTestingLabButton = (props) => (
   <li
     {...props}
     variant="contained"
@@ -149,7 +149,7 @@ export const AddNewProcessTypeButton = (props) => (
   >
     <AddIcon />
     <Typography variant="body2" component="div">
-      Add a new process type
+      Add a new testing lab
     </Typography>
   </li>
 );

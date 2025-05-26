@@ -65,7 +65,7 @@ export default function AddOrEditHazardRiskDialog({
   );
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
   const [addNewContactDialogOpen, setAddNewContactDialogOpen] = useState(false);
-
+  console.log("files", files);
   const {
     register,
     handleSubmit,
