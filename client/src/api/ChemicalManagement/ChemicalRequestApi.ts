@@ -226,6 +226,7 @@ export type ChemicalRequest = z.infer<typeof ChemicalRequestSchema>;
 export const ChemicalCertificateSchema = z.object({
   inventoryId: z.number().nullable(),
   id: z.number().nullable(),
+  certificateId: z.number().nullable(),
   testName: z.string().nullable(),
   testDate: z.date().nullable(),
   testLab: z.string().nullable(),
@@ -240,6 +241,7 @@ export const ChemicalCertificateSchema = z.object({
     .union([z.array(StorageFileSchema), z.array(z.instanceof(File))])
     .optional(),
   removeDoc: z.array(z.string()).optional(),
+  removeCertificate: z.array(z.string()),
 });
 
 export type ChemicalCertificate = z.infer<typeof ChemicalCertificateSchema>;
@@ -304,6 +306,8 @@ export const ChemicalPurchaseRequestSchema = z.object({
   lotNumber: z.string().nullable(),
   certificate: z.array(ChemicalCertificateSchema),
   removeDoc: z.array(z.string()).optional(),
+  removeCertificate: z.array(z.number()),
+  approverName: userSchema,
 });
 
 export type ChemicalPurchaseRequest = z.infer<
@@ -501,72 +505,74 @@ export async function createPositiveList(
 export const updateChemicalPurchaseInventory = async (
   chemicalPurchaseInventory: ChemicalPurchaseRequest
 ) => {
+  const processed = { ...chemicalPurchaseInventory };
+
+  ["hazardType", "useOfPPE"].forEach((key) => {
+    if (processed[key]) {
+      try {
+        let value = processed[key];
+        value = typeof value === "string" ? JSON.parse(value) : value;
+        processed[key] = Array.isArray(value)
+          ? value.map((item: string) => item.replace(/^"|"$/g, ""))
+          : [];
+        console.log("passed", processed);
+      } catch (error) {
+        console.log(`Failed to parse ${key}:`, processed[key]);
+        processed[key] = [];
+      }
+    }
+  });
   const formData = new FormData();
 
-  // Append each property of the maternity Register object to the form data
-  Object.keys(chemicalPurchaseInventory).forEach((key) => {
-    const value =
-      chemicalPurchaseInventory[key as keyof typeof chemicalPurchaseInventory];
-    if (key === "documents" && Array.isArray(value)) {
-      value.forEach((file, index) => {
-        formData.append(`documents[${index}]`, file as File);
-      });
-    } else if (key === "certificate" && Array.isArray(value)) {
-      const validatedCertificate = z
-        .array(ChemicalCertificateSchema)
-        .safeParse(value);
-      console.log("validatedCertificate", validatedCertificate);
-      if (validatedCertificate.success) {
-        validatedCertificate?.data.forEach((item, index) => {
-          formData.append(
-            `certificate.${index}.testName`,
-            item.testName.toString()
-          );
-          formData.append(
-            `certificate.${index}.testDate`,
-            item.testDate.toISOString()
-          );
-          formData.append(
-            `certificate.${index}.testLab`,
-            item.testLab.toString()
-          );
-          formData.append(
-            `certificate.${index}.issuedDate`,
-            item.issuedDate.toISOString()
-          );
-          formData.append(
-            `certificate.${index}.expiryDate`,
-            item.expiryDate.toISOString()
-          );
-          formData.append(
-            `certificate.${index}.positiveList`,
-            item.positiveList.toString()
-          );
-          formData.append(
-            `certificate.${index}.description`,
-            item.description.toString()
-          );
-          if (item.documents && Array.isArray(item.documents)) {
-            item.documents.forEach((file, docIndex) => {
-              formData.append(
-                `certificate.${index}.documents[${docIndex}]`,
-                file as File
-              );
-            });
-          }
-          if (item.removeDoc && Array.isArray(item.removeDoc)) {
-            item.removeDoc.forEach((docId, docIndex) => {
-              formData.append(
-                `certificate.${index}.removeDoc[${docIndex}]`,
-                docId.toString()
-              );
-            });
-          }
-        });
-      }
-    } else if (Array.isArray(value)) {
+  Object.keys(processed).forEach((key) => {
+    const value = processed[key as keyof typeof processed];
+
+    if (Array.isArray(value)) {
       value.forEach((item, index) => {
-        formData.append(`${key}[${index}]`, JSON.stringify(item));
+        if (key === "documents") {
+          (item as File) &&
+            formData.append(`documents[${index}]`, item as File);
+        } else if (key === "certificate") {
+          const certificateItem = item as Record<string, any>;
+
+          const hasOldDocuments =
+            Array.isArray(certificateItem.documents) &&
+            certificateItem.documents.some(
+              (doc: any) =>
+                doc.gsutil_uri || doc.imageUrl || doc.file_name || doc.fileName
+            );
+
+          if (hasOldDocuments) {
+            return;
+          }
+
+          Object.keys(certificateItem).forEach((nestedKey) => {
+            if (
+              nestedKey === "documents" &&
+              Array.isArray(certificateItem[nestedKey])
+            ) {
+              certificateItem[nestedKey].forEach(
+                (doc: File | Blob, docIndex: number) => {
+                  formData.append(
+                    `certificate[${index}][documents][${docIndex}]`,
+                    doc
+                  );
+                }
+              );
+            } else {
+              const value = certificateItem[nestedKey];
+              formData.append(
+                `certificate[${index}][${nestedKey}]`,
+                value instanceof Date ? value.toISOString() : value?.toString()
+              );
+            }
+          });
+        } else {
+          formData.append(
+            `${key}[${index}]`,
+            typeof item === "string" ? item : JSON.stringify(item)
+          );
+        }
       });
     } else if (value instanceof Date) {
       formData.append(key, value.toISOString());
@@ -591,34 +597,73 @@ export const updateChemicalPurchaseInventory = async (
 export const publishChemicalPurchase = async (
   chemicalPurchaseInventory: ChemicalPurchaseRequest
 ) => {
+  const processed = { ...chemicalPurchaseInventory };
+
+  ["hazardType", "useOfPPE"].forEach((key) => {
+    if (processed[key]) {
+      try {
+        let value = processed[key];
+        value = typeof value === "string" ? JSON.parse(value) : value;
+        processed[key] = Array.isArray(value)
+          ? value.map((item: string) => item.replace(/^"|"$/g, ""))
+          : [];
+        console.log("passed", processed);
+      } catch (error) {
+        console.log(`Failed to parse ${key}:`, processed[key]);
+        processed[key] = [];
+      }
+    }
+  });
   const formData = new FormData();
 
-  Object.keys(chemicalPurchaseInventory).forEach((key) => {
-    const value =
-      chemicalPurchaseInventory[key as keyof typeof chemicalPurchaseInventory];
+  Object.keys(processed).forEach((key) => {
+    const value = processed[key as keyof typeof processed];
+
     if (Array.isArray(value)) {
       value.forEach((item, index) => {
-        if (key === "certificate") {
-          Object.keys(item).forEach((nestedKey) => {
-            if (nestedKey === "documents" && Array.isArray(item[nestedKey])) {
-              // Handle documents array specially
-              item[nestedKey].forEach((doc, docIndex) => {
-                formData.append(
-                  `${key}[${index}][${nestedKey}][${docIndex}]`,
-                  doc
-                );
-              });
+        if (key === "documents") {
+          (item as File) &&
+            formData.append(`documents[${index}]`, item as File);
+        } else if (key === "certificate") {
+          const certificateItem = item as Record<string, any>;
+
+          const hasOldDocuments =
+            Array.isArray(certificateItem.documents) &&
+            certificateItem.documents.some(
+              (doc: any) =>
+                doc.gsutil_uri || doc.imageUrl || doc.file_name || doc.fileName
+            );
+
+          if (hasOldDocuments) {
+            return;
+          }
+
+          Object.keys(certificateItem).forEach((nestedKey) => {
+            if (
+              nestedKey === "documents" &&
+              Array.isArray(certificateItem[nestedKey])
+            ) {
+              certificateItem[nestedKey].forEach(
+                (doc: File | Blob, docIndex: number) => {
+                  formData.append(
+                    `certificate[${index}][documents][${docIndex}]`,
+                    doc
+                  );
+                }
+              );
             } else {
+              const value = certificateItem[nestedKey];
               formData.append(
-                `${key}[${index}][${nestedKey}]`,
-                item[nestedKey] instanceof Date
-                  ? item[nestedKey].toISOString()
-                  : item[nestedKey].toString()
+                `certificate[${index}][${nestedKey}]`,
+                value instanceof Date ? value.toISOString() : value?.toString()
               );
             }
           });
         } else {
-          formData.append(`${key}[${index}]`, JSON.stringify(item));
+          formData.append(
+            `${key}[${index}]`,
+            typeof item === "string" ? item : JSON.stringify(item)
+          );
         }
       });
     } else if (value instanceof Date) {
@@ -642,9 +687,8 @@ export const publishChemicalPurchase = async (
 };
 
 export const deleteChemicalPurchaseRequest = async (id: string) => {
-  const res = await axios.delete(
-    `/api/purchase-inventory-records/${id}/delete`
-  );
+  console.log("id", id);
+  const res = await axios.delete(`/api/purchase-inventory-record/${id}/delete`);
   return res.data;
 };
 

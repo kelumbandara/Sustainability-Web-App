@@ -44,6 +44,9 @@ function ViewChemicalRequestContent({
       queryClient.invalidateQueries({
         queryKey: ["chemical-requests"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["chemical-purchase-inventory"],
+      });
       enqueueSnackbar("Chemical Request Approved Successfully!", {
         variant: "success",
       });

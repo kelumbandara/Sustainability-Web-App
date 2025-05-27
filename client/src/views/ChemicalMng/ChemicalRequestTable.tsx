@@ -227,7 +227,7 @@ function ChemicalRequestTable({
                       {row?.requestedMerchandiser ?? "--"}
                     </TableCell>
                     <TableCell align="right">
-                      {row?.deliveryQuantity ?? "--"}
+                      {row?.reviewer?.name ?? "--"}
                     </TableCell>
                     <TableCell align="right">
                       {row.status === ChemicalRequestStatus.DRAFT ? (
