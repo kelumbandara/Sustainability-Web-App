@@ -7,6 +7,7 @@ import { PermissionKeys } from "./views/Administration/SectionList";
 import PermissionDenied from "./components/PermissionDenied";
 import { useQuery } from "@tanstack/react-query";
 import { User, validateUser } from "./api/userApi";
+import { AuditCalendar } from "./views/AuditAndInspection/Calendar/Calendar";
 
 const LoginPage = React.lazy(() => import("./views/LoginPage/LoginPage"));
 const RegistrationPage = React.lazy(
@@ -259,9 +260,7 @@ const AppRoutes = () => {
           path="/audit-inspection/calendar"
           element={withLayout(
             MainLayout,
-            () => (
-              <UnderDevelopment pageName="Audit & Inspection > Calendar" />
-            )
+            AuditCalendar
             // !userPermissionObject?.[
             //   PermissionKeys.AUDIT_INSPECTION_CALENDAR_VIEW
             // ]
