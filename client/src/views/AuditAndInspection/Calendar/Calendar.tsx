@@ -210,7 +210,7 @@ export const AuditCalendar = (props) => {
         drawerContent={
           <Stack
             spacing={1}
-            sx={{ paddingX: theme.spacing(1), paddingY: theme.spacing(3) }}
+            sx={{ paddingX: theme.spacing(1), paddingTop: theme.spacing(4) }}
           >
             {selectedEvent && (
               <Stack>

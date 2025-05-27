@@ -1,7 +1,6 @@
 import { Box, Chip, colors, Stack } from "@mui/material";
 import useIsMobile from "../../../customHooks/useIsMobile";
 import { DrawerContentItem } from "../../../components/ViewDataDrawer";
-import { AuditEvents } from "../../../api/calendarApi";
 
 function ViewAuditContent({ selectedAudit }) {
   const { isTablet } = useIsMobile();
@@ -55,7 +54,12 @@ function ViewAuditContent({ selectedAudit }) {
         />
         <DrawerContentItem
           label="Auditee"
-          value={selectedAudit.auditee?.name}
+          value={selectedAudit.audit?.auditee?.name}
+          sx={{ flex: 1 }}
+        />
+        <DrawerContentItem
+          label="Description"
+          value={selectedAudit.audit?.audit?.description}
           sx={{ flex: 1 }}
         />
       </Box>

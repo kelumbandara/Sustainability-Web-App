@@ -786,6 +786,14 @@ function EnvironmentDashboard() {
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
 
+      {!(division && dateRangeFrom && dateRangeTo && auditType) && (
+        <Alert severity="info" sx={{ mt: 2, borderRadius: 2 }}>
+          <AlertTitle>Apply filters to load dashboard</AlertTitle>
+          Please select all required filters — Division, Date Range and Audit
+          Type.
+        </Alert>
+      )}
+
       <Accordion defaultExpanded>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
@@ -953,7 +961,7 @@ function EnvironmentDashboard() {
         </AccordionDetails>
       </Accordion>
 
-      {division && dateRangeFrom && dateRangeTo && auditType ? (
+      {division && dateRangeFrom && dateRangeTo && auditType && (
         <Box
           sx={{
             display: "flex",
@@ -1044,12 +1052,6 @@ function EnvironmentDashboard() {
             />
           </Box>
         </Box>
-      ) : (
-        <Alert severity="info" sx={{ mt: 2, borderRadius: 2 }}>
-          <AlertTitle>Missing Filters</AlertTitle>
-          Please select all required filters — Division, Date Range and Audit
-          Type.
-        </Alert>
       )}
 
       {division && dateRangeFrom && dateRangeTo && auditType && (
