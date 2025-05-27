@@ -141,7 +141,8 @@ function ViewAuditContent({ selectedAudit }) {
                 Status
               </Typography>
               <Box>
-                {RenderExternalAuditStatusChip(selectedAudit.status) ?? "--"}
+                {RenderExternalAuditStatusChip(selectedAudit.audit?.status) ??
+                  "--"}
               </Box>
             </Box>
           </>
