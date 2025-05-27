@@ -1657,7 +1657,7 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                                   onClick={() => {
                                     const filteredCertificates = (certificatesWatch ?? []).filter((item) => {
                                       const isFileInstance = item.documents instanceof File;
-                                      const shouldKeep = item.inventoryId !== row.inventoryId || isFileInstance;
+                                      const shouldKeep = item.certificateId !== row.certificateId || isFileInstance;
                                   
                                       if (!shouldKeep && row.certificateId) {
                                         setRemoveCertificateArrayId((prev) => [...prev, row.certificateId]);

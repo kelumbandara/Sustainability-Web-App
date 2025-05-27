@@ -604,7 +604,7 @@ function ViewChemicalPurchaseInventoryContent({
         />
         <DrawerContentItem
           label="Approved By"
-          value={chemicalRequest.approvedBy?.name}
+          value={chemicalRequest.approverName?.name}
         />
         <DrawerContentItem
           label="Requested Date"
