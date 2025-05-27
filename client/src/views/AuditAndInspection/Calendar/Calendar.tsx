@@ -9,7 +9,7 @@ import {
 import { Calendar, dateFnsLocalizer, View } from "react-big-calendar";
 import * as dateFns from "date-fns";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { Box, Stack } from "@mui/material";
+import { Box, LinearProgress, Stack } from "@mui/material";
 import PageTitle from "../../../components/PageTitle";
 import theme from "../../../theme";
 import ViewDataDrawer from "../../../components/ViewDataDrawer";
@@ -203,6 +203,9 @@ export const AuditCalendar = (props) => {
             onView={(view) => setView(view)}
           />
         </Box>
+        {isFetchingCalendarAudits && (
+          <LinearProgress sx={{ width: "100%", marginBottom: "1rem" }} />
+        )}
       </Box>
       <ViewDataDrawer
         open={openViewDrawer}
