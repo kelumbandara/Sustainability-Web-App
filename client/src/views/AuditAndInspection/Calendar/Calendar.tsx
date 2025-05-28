@@ -158,6 +158,9 @@ export const AuditCalendar = (props) => {
         }}
       >
         <PageTitle title="Audit Calendar" />
+        {isFetchingCalendarAudits && (
+          <LinearProgress sx={{ width: "100%", marginBottom: "1rem" }} />
+        )}
         <Box sx={{ marginX: 1, marginY: 3 }}>
           <Calendar
             localizer={localizer}
@@ -203,9 +206,6 @@ export const AuditCalendar = (props) => {
             onView={(view) => setView(view)}
           />
         </Box>
-        {isFetchingCalendarAudits && (
-          <LinearProgress sx={{ width: "100%", marginBottom: "1rem" }} />
-        )}
       </Box>
       <ViewDataDrawer
         open={openViewDrawer}
