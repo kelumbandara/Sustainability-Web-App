@@ -30,11 +30,15 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../state/queryClient";
 import { useSnackbar } from "notistack";
 import { fetchDepartmentData } from "../../api/departmentApi";
-import { fetchJobPositionData } from "../../api/jobPositionApi";
+import {
+  createNewJobPosition,
+  fetchJobPositionData,
+} from "../../api/jobPositionApi";
 import { fetchFactoryData } from "../../api/factoryApi";
 import { fetchResponsibleSectionData } from "../../api/responsibleSetionApi";
 import AutoCheckBox from "../../components/AutoCheckbox";
 import SwitchButton from "../../components/SwitchButton";
+import AddIcon from "@mui/icons-material/Add";
 
 type DialogProps = {
   open: boolean;
@@ -88,6 +92,8 @@ export default function EditUserRoleDialog({
   });
   const { enqueueSnackbar } = useSnackbar();
 
+  const [addNewContactDialogOpen, setAddNewContactDialogOpen] = useState(false); //Aluthen Hadanna
+
   const {
     handleSubmit,
     control,
@@ -107,6 +113,119 @@ export default function EditUserRoleDialog({
   const [selectedSections, setSelectedSections] = useState([]);
   const isAvailability = watch("availability");
 
+  const AddNewJobPositionDialog = ({ //methana idan
+    jobPosition,
+  }: {
+    jobPosition: string;
+  }) => {
+    const { register, handleSubmit, watch } = useForm({
+      defaultValues: {
+        jobPosition: "",
+      },
+    });
+    const {
+      mutate: addNewJobPositionMutation,
+      isPending: isAddNewJobPositionMutation,
+    } = useMutation({
+      mutationFn: createNewJobPosition, //aluth API function ekak hadanna
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["jobPositions"],
+        });
+        enqueueSnackbar("Job Position Created Successfully!", {
+          variant: "success",
+        });
+        reset();
+        setAddNewContactDialogOpen(false);
+      },
+      onError: () => {
+        enqueueSnackbar(`Job Position Created Failed`, {
+          variant: "error",
+        });
+      },
+    });
+
+    const handleCreateObservationType = () => {
+      const watchedJob = watch("jobPosition");
+      addNewJobPositionMutation(watchedJob);
+    };
+
+    return (
+      <Dialog
+        open={addNewContactDialogOpen}
+        onClose={() => setAddNewContactDialogOpen(false)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          style: {
+            backgroundColor: grey[50],
+          },
+          component: "form",
+        }}
+      >
+        <DialogTitle
+          sx={{
+            paddingY: "1rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Typography variant="h6" component="div">
+            Add New Job Position
+          </Typography>
+          <IconButton
+            aria-label="open drawer"
+            onClick={() => setAddNewContactDialogOpen(false)}
+            edge="start"
+            sx={{
+              color: "#024271",
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <Divider />
+        <DialogContent>
+          <Stack
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <TextField
+              {...register("jobPosition", { required: true })}
+              required
+              id="jobPosition"
+              label="Job Position"
+              size="small"
+              fullWidth
+              sx={{ marginBottom: "0.5rem" }}
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ padding: "1rem" }}>
+          <Button
+            onClick={() => setAddNewContactDialogOpen(false)}
+            sx={{ color: "var(--pallet-blue)" }}
+          >
+            Cancel
+          </Button>
+          <CustomButton
+            variant="contained"
+            sx={{
+              backgroundColor: "var(--pallet-blue)",
+            }}
+            size="medium"
+            onClick={handleSubmit(handleCreateObservationType)}
+          >
+            Add Job Position
+          </CustomButton>
+        </DialogActions>
+      </Dialog>
+    );
+  }; //methanata aluthen hadala okkoma wenas karanna
+
   useEffect(() => {
     if (defaultValues) {
       reset(defaultValues);
@@ -118,6 +237,32 @@ export default function EditUserRoleDialog({
   const resetForm = () => {
     reset();
   };
+
+  const AddNewChemicalButton = (props) => ( //methanin patan ganne
+    <li
+      {...props}
+      variant="contained"
+      style={{
+        backgroundColor: "var(--pallet-lighter-blue)",
+        color: "var(--pallet-blue)",
+        textTransform: "none",
+        margin: "0.5rem",
+        borderRadius: "0.3rem",
+        display: "flex",
+        flexDirection: "row",
+      }}
+      size="small"
+      // onClick closes the menu
+      onMouseDown={() => {
+        setAddNewContactDialogOpen(true);
+      }}
+    >
+      <AddIcon />
+      <Typography variant="body2" component="div">
+        Add a new Job Position
+      </Typography>
+    </li>
+  ); //mekath aluthen hadanna
 
   return (
     <Dialog
@@ -135,6 +280,7 @@ export default function EditUserRoleDialog({
         component: "form",
       }}
     >
+      <AddNewJobPositionDialog jobPosition={null} />
       <DialogTitle
         sx={{
           paddingY: "1rem",
@@ -244,8 +390,8 @@ export default function EditUserRoleDialog({
                 />
               </Box>
 
-              <Box sx={{ flex: 1 }}>
-                <Controller
+              <Box sx={{ flex: 1 }}> 
+                <Controller //meka job position eka balagena wenas karanna
                   name="department"
                   control={control}
                   defaultValue={defaultValues?.department ?? ""}
@@ -288,13 +434,24 @@ export default function EditUserRoleDialog({
                     <Autocomplete
                       {...field}
                       onChange={(event, newValue) => field.onChange(newValue)}
+                      value={field.value || ""}
                       size="small"
-                      options={
-                        jobPositions?.length
-                          ? jobPositions.map(
-                              (jobPositions) => jobPositions.jobPosition
-                            )
-                          : []
+                      options={[
+                        ...(jobPositions?.length
+                          ? jobPositions.map((item) => item.jobPosition)
+                          : []),
+                        "$ADD_NEW_JOB_POSITION",
+                      ]}
+                      getOptionLabel={(option) => option}
+                      isOptionEqualToValue={(option, value) => option === value}
+                      renderOption={(props, option) =>
+                        option === "$ADD_NEW_JOB_POSITION" ? (
+                          <AddNewChemicalButton {...props} />
+                        ) : (
+                          <li {...props} key={option}>
+                            {option}
+                          </li>
+                        )
                       }
                       sx={{ flex: 1, margin: "0.5rem" }}
                       renderInput={(params) => (
