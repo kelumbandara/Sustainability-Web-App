@@ -93,6 +93,7 @@ export default function EditUserRoleDialog({
   const { enqueueSnackbar } = useSnackbar();
 
   const [addNewContactDialogOpen, setAddNewContactDialogOpen] = useState(false); //Aluthen Hadanna
+  const [addNewDepartmentDialogOpen, setAddNewDepartmentDialogOpen] = useState(false); //Aluthen Hadanna
 
   const {
     handleSubmit,
@@ -113,7 +114,7 @@ export default function EditUserRoleDialog({
   const [selectedSections, setSelectedSections] = useState([]);
   const isAvailability = watch("availability");
 
-  const AddNewJobPositionDialog = ({ //methana idan
+  const AddNewJobPositionDialog = ({
     jobPosition,
   }: {
     jobPosition: string;
@@ -127,7 +128,7 @@ export default function EditUserRoleDialog({
       mutate: addNewJobPositionMutation,
       isPending: isAddNewJobPositionMutation,
     } = useMutation({
-      mutationFn: createNewJobPosition, //aluth API function ekak hadanna
+      mutationFn: createNewJobPosition, 
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ["jobPositions"],
@@ -224,7 +225,124 @@ export default function EditUserRoleDialog({
         </DialogActions>
       </Dialog>
     );
-  }; //methanata aluthen hadala okkoma wenas karanna
+  }; 
+
+
+
+  const AddNewDepartmentDialog = ({ 
+    department,
+  }: {
+    department: string;
+  }) => {
+    const { register, handleSubmit, watch } = useForm({
+      defaultValues: {
+        department: "",
+      },
+    });
+    const {
+      mutate: addNewDepartmentMutation,
+      isPending: isAddNewDepartmentMutation,
+    } = useMutation({
+      mutationFn: createNewJobPosition, 
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["department"],
+        });
+        enqueueSnackbar("Department Created Successfully!", {
+          variant: "success",
+        });
+        reset();
+        setAddNewDepartmentDialogOpen(true);
+      },
+      onError: () => {
+        enqueueSnackbar(`Department Created Failed`, {
+          variant: "error",
+        });
+      },
+    });
+
+     const handleCreateDepartmentType = () => {
+      const watchedDepartment = watch("department");
+      addNewDepartmentMutation(watchedDepartment);
+    };
+
+    return (
+      <Dialog
+        open={addNewDepartmentDialogOpen}
+        onClose={() => setAddNewDepartmentDialogOpen(false)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          style: {
+            backgroundColor: grey[50],
+          },
+          component: "form",
+        }}
+      >
+        <DialogTitle
+          sx={{
+            paddingY: "1rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Typography variant="h6" component="div">
+            Add New Department
+          </Typography>
+          <IconButton
+            aria-label="open drawer"
+            onClick={() => setAddNewDepartmentDialogOpen(false)}
+            edge="start"
+            sx={{
+              color: "#024271",
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <Divider />
+        <DialogContent>
+          <Stack
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <TextField
+              {...register("department", { required: true })}
+              required
+              id="department"
+              label="Department"
+              size="small"
+              fullWidth
+              sx={{ marginBottom: "0.5rem" }}
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ padding: "1rem" }}>
+          <Button
+            onClick={() => setAddNewDepartmentDialogOpen(false)}
+            sx={{ color: "var(--pallet-blue)" }}
+          >
+            Cancel
+          </Button>
+          <CustomButton
+            variant="contained"
+            sx={{
+              backgroundColor: "var(--pallet-blue)",
+            }}
+            size="medium"
+            onClick={handleSubmit(handleCreateDepartmentType)}
+          >
+            Add Department
+          </CustomButton>
+        </DialogActions>
+      </Dialog>
+    );
+  };
+
+
 
   useEffect(() => {
     if (defaultValues) {
@@ -238,7 +356,7 @@ export default function EditUserRoleDialog({
     reset();
   };
 
-  const AddNewChemicalButton = (props) => ( //methanin patan ganne
+  const AddNewChemicalButton = (props) => (
     <li
       {...props}
       variant="contained"
@@ -262,7 +380,31 @@ export default function EditUserRoleDialog({
         Add a new Job Position
       </Typography>
     </li>
-  ); //mekath aluthen hadanna
+  );
+  const AddNewDepartmentButton = (props) => ( 
+    <li
+      {...props}
+      variant="contained"
+      style={{
+        backgroundColor: "var(--pallet-lighter-blue)",
+        color: "var(--pallet-blue)",
+        textTransform: "none",
+        margin: "0.5rem",
+        borderRadius: "0.3rem",
+        display: "flex",
+        flexDirection: "row",
+      }}
+      size="small"
+      onMouseDown={() => {
+        setAddNewContactDialogOpen(true);
+      }}
+    >
+      <AddIcon />
+      <Typography variant="body2" component="div">
+        Add a new Department
+      </Typography>
+    </li>
+  );
 
   return (
     <Dialog
@@ -390,8 +532,8 @@ export default function EditUserRoleDialog({
                 />
               </Box>
 
-              <Box sx={{ flex: 1 }}> 
-                <Controller //meka job position eka balagena wenas karanna
+              <Box sx={{ flex: 1 }}>
+                <Controller
                   name="department"
                   control={control}
                   defaultValue={defaultValues?.department ?? ""}
@@ -399,16 +541,32 @@ export default function EditUserRoleDialog({
                   render={({ field }) => (
                     <Autocomplete
                       {...field}
-                      onChange={(event, newValue) => field.onChange(newValue)}
+                      onChange={(event, newValue) => {
+                        if (newValue === "$ADD_NEW_DEPARTMENT") {
+                          AddNewDepartmentDialog(true);
+                        } else {
+                          field.onChange(newValue);
+                        }
+                      }}
+                      value={field.value || ""}
                       size="small"
-                      options={
-                        departmentData?.length
-                          ? departmentData.map(
-                              (department) => department.department
-                            )
-                          : []
+                      options={[
+                        ...(departmentData?.length
+                          ? departmentData.map((item) => item.department)
+                          : []),
+                        "$ADD_NEW_DEPARTMENT",
+                      ]}
+                      getOptionLabel={(option) => option}
+                      isOptionEqualToValue={(option, value) => option === value}
+                      renderOption={(props, option) =>
+                        option === "$ADD_NEW_DEPARTMENT" ? (
+                          <AddNewDepartmentButton {...props} />
+                        ) : (
+                          <li {...props} key={option}>
+                            {option}
+                          </li>
+                        )
                       }
-                      sx={{ flex: 1, margin: "0.5rem" }}
                       renderInput={(params) => (
                         <TextField
                           {...params}
@@ -422,6 +580,7 @@ export default function EditUserRoleDialog({
                     />
                   )}
                 />
+
               </Box>
 
               <Box sx={{ flex: 1 }}>
