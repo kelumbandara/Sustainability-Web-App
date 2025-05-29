@@ -31,6 +31,7 @@ import queryClient from "../../state/queryClient";
 import { useSnackbar } from "notistack";
 import { fetchDepartmentData } from "../../api/departmentApi";
 import {
+  createNewDepartment,
   createNewJobPosition,
   fetchJobPositionData,
 } from "../../api/jobPositionApi";
@@ -243,7 +244,7 @@ export default function EditUserRoleDialog({
       mutate: addNewDepartmentMutation,
       isPending: isAddNewDepartmentMutation,
     } = useMutation({
-      mutationFn: createNewJobPosition, 
+      mutationFn: createNewDepartment, 
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ["department"],
