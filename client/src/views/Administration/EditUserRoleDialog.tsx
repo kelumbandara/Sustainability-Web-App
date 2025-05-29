@@ -94,7 +94,8 @@ export default function EditUserRoleDialog({
   const { enqueueSnackbar } = useSnackbar();
 
   const [addNewContactDialogOpen, setAddNewContactDialogOpen] = useState(false); //Aluthen Hadanna
-  const [addNewDepartmentDialogOpen, setAddNewDepartmentDialogOpen] = useState(false); //Aluthen Hadanna
+  const [addNewDepartmentDialogOpen, setAddNewDepartmentDialogOpen] =
+    useState(false); //Aluthen Hadanna
 
   const {
     handleSubmit,
@@ -114,6 +115,7 @@ export default function EditUserRoleDialog({
   const [selectedFactories, setSelectedFactories] = useState([]);
   const [selectedSections, setSelectedSections] = useState([]);
   const isAvailability = watch("availability");
+  const job = watch("jobPosition");
 
   const AddNewJobPositionDialog = ({
     jobPosition,
@@ -129,7 +131,7 @@ export default function EditUserRoleDialog({
       mutate: addNewJobPositionMutation,
       isPending: isAddNewJobPositionMutation,
     } = useMutation({
-      mutationFn: createNewJobPosition, 
+      mutationFn: createNewJobPosition,
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ["jobPositions"],
@@ -226,15 +228,9 @@ export default function EditUserRoleDialog({
         </DialogActions>
       </Dialog>
     );
-  }; 
+  };
 
-
-
-  const AddNewDepartmentDialog = ({ 
-    department,
-  }: {
-    department: string;
-  }) => {
+  const AddNewDepartmentDialog = ({ department }: { department: string }) => {
     const { register, handleSubmit, watch } = useForm({
       defaultValues: {
         department: "",
@@ -244,7 +240,7 @@ export default function EditUserRoleDialog({
       mutate: addNewDepartmentMutation,
       isPending: isAddNewDepartmentMutation,
     } = useMutation({
-      mutationFn: createNewDepartment, 
+      mutationFn: createNewDepartment,
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ["department"],
@@ -262,7 +258,7 @@ export default function EditUserRoleDialog({
       },
     });
 
-     const handleCreateDepartmentType = () => {
+    const handleCreateDepartmentType = () => {
       const watchedDepartment = watch("department");
       addNewDepartmentMutation(watchedDepartment);
     };
@@ -313,7 +309,7 @@ export default function EditUserRoleDialog({
             <TextField
               {...register("department", { required: true })}
               required
-              id="department"
+              id="name"
               label="Department"
               size="small"
               fullWidth
@@ -342,8 +338,6 @@ export default function EditUserRoleDialog({
       </Dialog>
     );
   };
-
-
 
   useEffect(() => {
     if (defaultValues) {
@@ -382,7 +376,7 @@ export default function EditUserRoleDialog({
       </Typography>
     </li>
   );
-  const AddNewDepartmentButton = (props) => ( 
+  const AddNewDepartmentButton = (props) => (
     <li
       {...props}
       variant="contained"
@@ -397,7 +391,7 @@ export default function EditUserRoleDialog({
       }}
       size="small"
       onMouseDown={() => {
-        setAddNewContactDialogOpen(true);
+        setAddNewDepartmentDialogOpen(true);
       }}
     >
       <AddIcon />
@@ -423,7 +417,8 @@ export default function EditUserRoleDialog({
         component: "form",
       }}
     >
-      <AddNewJobPositionDialog jobPosition={null} />
+      <AddNewJobPositionDialog jobPosition={job} />
+      <AddNewDepartmentDialog department={null} />
       <DialogTitle
         sx={{
           paddingY: "1rem",
@@ -542,13 +537,7 @@ export default function EditUserRoleDialog({
                   render={({ field }) => (
                     <Autocomplete
                       {...field}
-                      onChange={(event, newValue) => {
-                        if (newValue === "$ADD_NEW_DEPARTMENT") {
-                          AddNewDepartmentDialog(true);
-                        } else {
-                          field.onChange(newValue);
-                        }
-                      }}
+                      onChange={(event, newValue) => field.onChange(newValue)}
                       value={field.value || ""}
                       size="small"
                       options={[
@@ -568,6 +557,7 @@ export default function EditUserRoleDialog({
                           </li>
                         )
                       }
+                      sx={{ flex: 1, margin: "0.5rem" }}
                       renderInput={(params) => (
                         <TextField
                           {...params}
@@ -581,7 +571,6 @@ export default function EditUserRoleDialog({
                     />
                   )}
                 />
-
               </Box>
 
               <Box sx={{ flex: 1 }}>
