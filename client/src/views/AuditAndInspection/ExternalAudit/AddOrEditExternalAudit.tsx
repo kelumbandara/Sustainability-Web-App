@@ -693,8 +693,18 @@ export default function AddOrEditExternalAuditDialog({
                       error={!!errors.auditScore}
                       size="small"
                       // required
+                      helperText={
+                        errors.auditScore &&
+                        (errors.auditScore.message ??
+                          "Audit Score must be at least 0")
+                      }
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("auditScore")}
+                      {...register("auditScore", {
+                        min: {
+                          value: 0,
+                          message: "Audit Score must be at least 0",
+                        },
+                      })}
                     />
 
                     <TextField
@@ -726,8 +736,18 @@ export default function AddOrEditExternalAuditDialog({
                       // required
                       error={!!errors.numberOfNonCom}
                       size="small"
+                      helperText={
+                        errors.numberOfNonCom &&
+                        (errors.numberOfNonCom.message ??
+                          "Number of Non Com must be at least 0")
+                      }
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("numberOfNonCom")}
+                      {...register("numberOfNonCom", {
+                        min: {
+                          value: 0,
+                          message: "Number of Non Com must be at least 0",
+                        },
+                      })}
                     />
 
                     <TextField
@@ -738,7 +758,17 @@ export default function AddOrEditExternalAuditDialog({
                       size="small"
                       // required
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("auditFee")}
+                      helperText={
+                        errors.auditFee &&
+                        (errors.auditFee.message ??
+                          "Audit Fee must be at least 0")
+                      }
+                      {...register("auditFee", {
+                        min: {
+                          value: 0,
+                          message: "Audit Fee must be at least 0",
+                        },
+                      })}
                     />
 
                     <TextField
@@ -1009,7 +1039,7 @@ export default function AddOrEditExternalAuditDialog({
                   }}
                 />
               </Box>
-              {defaultValues && defaultValues.status !== Status.COMPLETE &&(
+              {defaultValues && defaultValues.status !== Status.COMPLETE && (
                 <Box sx={{ margin: "0.5rem" }}>
                   <Typography
                     variant="caption"

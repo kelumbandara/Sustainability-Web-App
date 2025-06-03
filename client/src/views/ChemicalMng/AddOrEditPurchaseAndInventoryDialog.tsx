@@ -899,7 +899,10 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                       helperText={errors.contactNumber ? "Required" : ""}
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("contactNumber", {
-                        required: true,
+                        required: {
+                          value: true,
+                          message: "Required",
+                        },
                       })}
                     />
                   </Box>
@@ -1272,7 +1275,20 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                       size="small"
                       type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("deliveryQuantity", { required: true })}
+                      helperText={
+                        errors.deliveryQuantity &&
+                        errors.deliveryQuantity.message
+                      }
+                      {...register("deliveryQuantity", {
+                        required: {
+                          value: true,
+                          message: "Required",
+                        },
+                        min: {
+                          value: 0,
+                          message: "Delivery quantity must be greater than 0",
+                        },
+                      })}
                     />
                     <Controller
                       name="deliveryUnit"
@@ -1318,7 +1334,19 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                       size="small"
                       type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("purchaseAmount", { required: true })}
+                      helperText={
+                        errors.purchaseAmount && errors.purchaseAmount.message
+                      }
+                      {...register("purchaseAmount", {
+                        required: {
+                          value: true,
+                          message: "Required",
+                        },
+                        min: {
+                          value: 0,
+                          message: "Purchase amount must be greater than 0",
+                        },
+                      })}
                     />
                   </Box>
                   <Box
@@ -1338,7 +1366,19 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                         margin: "0.5rem",
                         marginTop: isMobile ? "0.5rem" : "1.85rem",
                       }}
-                      {...register("thresholdLimit", { required: true })}
+                      helperText={
+                        errors.thresholdLimit && errors.thresholdLimit.message
+                      }
+                      {...register("thresholdLimit", {
+                        required: {
+                          value: true,
+                          message: "Required",
+                        },
+                        min: {
+                          value: 0,
+                          message: "Threshold limit must be greater than 0",
+                        },
+                      })}
                     />
                     <Controller
                       control={control}
@@ -1655,20 +1695,30 @@ export default function AddOrEditChemicalPurchaseAndInventoryDialog({
                               <TableCell align="center">
                                 <IconButton
                                   onClick={() => {
-                                    const filteredCertificates = (certificatesWatch ?? []).filter((item) => {
-                                      const isFileInstance = item.documents instanceof File;
-                                      const shouldKeep = item.certificateId !== row.certificateId || isFileInstance;
-                                  
+                                    const filteredCertificates = (
+                                      certificatesWatch ?? []
+                                    ).filter((item) => {
+                                      const isFileInstance =
+                                        item.documents instanceof File;
+                                      const shouldKeep =
+                                        item.certificateId !==
+                                          row.certificateId || isFileInstance;
+
                                       if (!shouldKeep && row.certificateId) {
-                                        setRemoveCertificateArrayId((prev) => [...prev, row.certificateId]);
+                                        setRemoveCertificateArrayId((prev) => [
+                                          ...prev,
+                                          row.certificateId,
+                                        ]);
                                       }
-                                  
+
                                       return shouldKeep;
                                     });
-                                  
-                                    setValue("certificate", filteredCertificates);
+
+                                    setValue(
+                                      "certificate",
+                                      filteredCertificates
+                                    );
                                   }}
-                                  
                                 >
                                   <DeleteIcon />
                                 </IconButton>

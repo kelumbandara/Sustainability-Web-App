@@ -211,7 +211,24 @@ export default function AddOrEditPersonDialog({
               size="small"
               type="number"
               sx={{ flex: 1, marginX: "0.5rem", marginTop: "1.3rem" }}
-              {...register("age", { required: true })}
+              helperText={
+                errors.age &&
+                (errors.age.message ?? "Age must be a positive number")
+              }
+              {...register("age", {
+                required: {
+                  value: true,
+                  message: "Required",
+                },
+                min: {
+                  value: 0,
+                  message: "Age must be a positive number",
+                },
+                max: {
+                  value: 120,
+                  message: "Age must be less than or equal to 120",
+                },
+              })}
             />
             <Controller
               control={control}
@@ -244,7 +261,21 @@ export default function AddOrEditPersonDialog({
               size="small"
               type="number"
               sx={{ flex: 1, margin: "0.5rem" }}
-              {...register("employmentDuration", { required: true })}
+              helperText={
+                errors.employmentDuration &&
+                (errors.employmentDuration.message ??
+                  "Employment duration must be a positive number")
+              }
+              {...register("employmentDuration", {
+                required: {
+                  value: true,
+                  message: "Required",
+                },
+                min: {
+                  value: 0,
+                  message: "Employment duration must be a positive number",
+                },
+              })}
             />
             <Autocomplete
               {...register("industryExperience", { required: true })}

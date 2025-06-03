@@ -42,6 +42,7 @@ function TimePickerComponent({
           onChange={onChange}
           defaultValue={defaultValue}
           className="date-picker"
+          timeSteps={{ minutes: 1 }}
           sx={{
             border: error ? "1px solid var(--pallet-red)" : "",
             padding: 0,

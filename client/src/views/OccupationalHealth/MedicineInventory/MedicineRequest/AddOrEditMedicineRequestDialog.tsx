@@ -23,7 +23,10 @@ import CustomButton from "../../../../components/CustomButton";
 import { useQuery } from "@tanstack/react-query";
 import { fetchMedicineList } from "../../../../api/OccupationalHealth/medicineNameApi";
 import { fetchDivision } from "../../../../api/divisionApi";
-import { fetchAllUsers, fetchMedicineRequestAssignee } from "../../../../api/userApi";
+import {
+  fetchAllUsers,
+  fetchMedicineRequestAssignee,
+} from "../../../../api/userApi";
 import UserAutoComplete from "../../../../components/UserAutoComplete";
 
 type DialogProps = {
@@ -214,10 +217,23 @@ export default function AddOrEditMedicineRequestDialog({
               id="requestQuantity"
               label="Requested Quantity"
               error={!!errors.requestQuantity}
+              name="requestQuantity"
+              helperText={
+                errors.requestQuantity ? errors.requestQuantity.message : ""
+              }
               type="number"
               size="small"
               sx={{ flex: 1, margin: "0.5rem" }}
-              {...register("requestQuantity", { required: true })}
+              {...register("requestQuantity", {
+                required: {
+                  value: true,
+                  message: "Required",
+                },
+                min: {
+                  value: 1,
+                  message: "Quantity must be at least 1",
+                },
+              })}
             />
             <Box sx={{ flex: 1 }}>
               <UserAutoComplete

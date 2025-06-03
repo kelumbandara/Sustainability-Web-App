@@ -702,11 +702,23 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                       id="supplierContactNumber"
                       label="Supplier Contact Number"
                       error={!!errors.supplierContactNumber}
+                      helperText={
+                        errors.supplierContactNumber
+                          ? errors.supplierContactNumber.message
+                          : ""
+                      }
                       size="small"
                       type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
                       {...register("supplierContactNumber", {
-                        required: true,
+                        required: {
+                          value: true,
+                          message: "Required",
+                        },
+                        min: {
+                          value: 0,
+                          message: "Invalid Contact Number",
+                        },
                       })}
                     />
                   </Box>
@@ -902,30 +914,72 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                       id="deliveryQuantity"
                       label="Delivery Quantity"
                       error={!!errors.deliveryQuantity}
+                      helperText={
+                        errors.deliveryQuantity
+                          ? errors.deliveryQuantity.message
+                          : ""
+                      }
                       size="small"
                       type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("deliveryQuantity", { required: true })}
+                      {...register("deliveryQuantity", {
+                        required: {
+                          value: true,
+                          message: "Required",
+                        },
+                        min: {
+                          value: 1,
+                          message: "Quantity must be at least 1",
+                        },
+                      })}
                     />
                     <TextField
                       required
                       id="purchaseAmount"
                       label="Purchased Amount"
                       error={!!errors.purchaseAmount}
+                      helperText={
+                        errors.purchaseAmount
+                          ? errors.purchaseAmount.message
+                          : ""
+                      }
                       size="small"
                       type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("purchaseAmount", { required: true })}
+                      {...register("purchaseAmount", {
+                        required: {
+                          value: true,
+                          message: "Required",
+                        },
+                        min: {
+                          value: 0,
+                          message: "Amount must be greater than 0",
+                        },
+                      })}
                     />
                     <TextField
                       required
                       id="thresholdLimit"
                       label="Threshold Limit"
                       error={!!errors.thresholdLimit}
+                      helperText={
+                        errors.thresholdLimit
+                          ? errors.thresholdLimit.message
+                          : ""
+                      }
                       size="small"
                       type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("thresholdLimit", { required: true })}
+                      {...register("thresholdLimit", {
+                        required: {
+                          value: true,
+                          message: "Required",
+                        },
+                        min: {
+                          value: 0,
+                          message: "Threshold Limit must be greater than 0",
+                        },
+                      })}
                     />
                   </Box>
                   <Box
@@ -1037,10 +1091,22 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                       id="batchNumber"
                       label="Batch Number"
                       error={!!errors.batchNumber}
+                      helperText={
+                        errors.batchNumber ? errors.batchNumber.message : ""
+                      }
                       size="small"
                       type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("batchNumber", { required: true })}
+                      {...register("batchNumber", {
+                        required: {
+                          value: true,
+                          message: "Required",
+                        },
+                        min: {
+                          value: 0,
+                          message: "Batch Number must be greater than 0",
+                        },
+                      })}
                     />
                   </Box>
                   <Box

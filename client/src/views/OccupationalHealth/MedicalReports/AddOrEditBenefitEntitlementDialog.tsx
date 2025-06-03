@@ -152,18 +152,42 @@ export default function AddOrEditBenefitEntitlementDialog({
               type="number"
               label="Amount Value"
               error={!!errors.amountValue}
+              helperText={errors.amountValue ? errors.amountValue.message : ""}
+              required
               size="small"
               sx={{ flex: 1, margin: "0.5rem" }}
-              {...register("amountValue", { required: true })}
+              {...register("amountValue", {
+                required: {
+                  value: true,
+                  message: "Required",
+                },
+                min: {
+                  value: 0,
+                  message: "Amount must be greater than 0",
+                },
+              })}
             />
             <TextField
               id="totalDaysPaid"
               label="Total Days Paid"
               error={!!errors.totalDaysPaid}
+              helperText={
+                errors.totalDaysPaid ? errors.totalDaysPaid.message : ""
+              }
+              required
               type="number"
               size="small"
               sx={{ flex: 1, margin: "0.5rem" }}
-              {...register("totalDaysPaid", { required: true })}
+              {...register("totalDaysPaid", {
+                required: {
+                  value: true,
+                  message: "Required",
+                },
+                min: {
+                  value: 0,
+                  message: "Total days must be greater than 0",
+                },
+              })}
             />
           </Box>
           <Box
@@ -176,6 +200,12 @@ export default function AddOrEditBenefitEntitlementDialog({
               id="amountOfFirstInstallment"
               label="Amount of First Installment"
               error={!!errors.amount1stInstallment}
+              helperText={
+                errors.amount1stInstallment
+                  ? errors.amount1stInstallment.message
+                  : ""
+              }
+              required
               type="number"
               size="small"
               sx={{
@@ -183,7 +213,16 @@ export default function AddOrEditBenefitEntitlementDialog({
                 margin: "0.5rem",
                 marginTop: isTablet ? "0.5rem" : "1.4rem",
               }}
-              {...register("amount1stInstallment", { required: true })}
+              {...register("amount1stInstallment", {
+                required: {
+                  value: true,
+                  message: "Required",
+                },
+                min: {
+                  value: 0,
+                  message: "Amount must be greater than 0",
+                },
+              })}
             />
             <Controller
               control={control}
@@ -206,6 +245,11 @@ export default function AddOrEditBenefitEntitlementDialog({
               id="amount2ndInstallment"
               label="Amount of Second Installment"
               error={!!errors.amount2ndInstallment}
+              helperText={
+                errors.amount2ndInstallment
+                  ? errors.amount2ndInstallment.message
+                  : ""
+              }
               type="number"
               size="small"
               sx={{
@@ -213,7 +257,12 @@ export default function AddOrEditBenefitEntitlementDialog({
                 margin: "0.5rem",
                 marginTop: isTablet ? "0.5rem" : "1.4rem",
               }}
-              {...register("amount2ndInstallment")}
+              {...register("amount2ndInstallment", {
+                min: {
+                  value: 0,
+                  message: "Amount must be greater than 0",
+                },
+              })}
             />
           </Box>
 
@@ -300,10 +349,24 @@ export default function AddOrEditBenefitEntitlementDialog({
               id="beneficiaryTotalAmount"
               label="Beneficiary Total Amount"
               error={!!errors.beneficiaryTotalAmount}
+              helperText={
+                errors.beneficiaryTotalAmount
+                  ? errors.beneficiaryTotalAmount.message
+                  : ""
+              }
               type="number"
               size="small"
               sx={{ flex: 1, marginX: "0.5rem", marginTop: "1.3rem" }}
-              {...register("beneficiaryTotalAmount", { required: true })}
+              {...register("beneficiaryTotalAmount", {
+                required: {
+                  value: true,
+                  message: "Required",
+                },
+                min: {
+                  value: 0,
+                  message: "Total amount must be greater than 0",
+                },
+              })}
             />
             <Controller
               control={control}

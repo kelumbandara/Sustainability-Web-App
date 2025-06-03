@@ -260,10 +260,19 @@ export default function AddOrEditAdditionalDialog({
               type="number"
               label="Quantity"
               error={!!errors.quantity}
-              helperText={errors.quantity && "Required"}
+              helperText={errors.quantity && errors.quantity.message}
               size="small"
               sx={{ flex: 1, margin: "0.5rem" }}
-              {...register("quantity", { required: true })}
+              {...register("quantity", {
+                required: {
+                  value: true,
+                  message: "Required",
+                },
+                min: {
+                  value: 0,
+                  message: "Quantity must be greater than or equal to 0",
+                },
+              })}
             />
             <TextField
               required
@@ -271,10 +280,19 @@ export default function AddOrEditAdditionalDialog({
               type="number"
               label="Amount"
               error={!!errors.amount}
-              helperText={errors.amount && "Required"}
+              helperText={errors.amount && errors.amount.message}
               size="small"
               sx={{ flex: 1, margin: "0.5rem" }}
-              {...register("amount", { required: true })}
+              {...register("amount", {
+                required: {
+                  value: true,
+                  message: "Required",
+                },
+                min: {
+                  value: 0,
+                  message: "Amount must be greater than or equal to 0",
+                },
+              })}
             />
             <TextField
               required
@@ -282,10 +300,15 @@ export default function AddOrEditAdditionalDialog({
               type="number"
               label="GHG in Tonnes"
               error={!!errors.ghgInTonnes}
-              helperText={errors.ghgInTonnes && "Required"}
+              helperText={errors.ghgInTonnes && errors.ghgInTonnes.message}
               size="small"
               sx={{ flex: 1, margin: "0.5rem" }}
-              {...register("ghgInTonnes", { required: true })}
+              {...register("ghgInTonnes", {
+                required: {
+                  value: true,
+                  message: "Required",
+                },
+              })}
             />
           </Stack>
           <Stack

@@ -297,18 +297,31 @@ export const AddNewFactoryDialog = ({
             }}
           >
             <TextField
-              {...register("factoryContactNumber", { required: true })}
+              {...register("factoryContactNumber", {
+                required: {
+                  value: true,
+                  message: "Required",
+                },
+                min: {
+                  value: 0,
+                  message: "Contact number must be a positive number",
+                },
+              })}
               required
               id="factoryContactNumber"
               label="Contact Number"
-              type="number"
+              type="tel"
               size="small"
               fullWidth
               sx={{
                 margin: "0.5rem",
               }}
               error={!!errors.factoryContactNumber}
-              helperText={errors.factoryContactNumber ? "Required" : ""}
+              helperText={
+                errors.factoryContactNumber
+                  ? errors.factoryContactNumber.message ?? "Required"
+                  : ""
+              }
             />
             <TextField
               {...register("designation", { required: true })}
