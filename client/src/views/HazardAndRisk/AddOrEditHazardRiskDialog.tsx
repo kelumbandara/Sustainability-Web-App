@@ -44,6 +44,7 @@ import { fetchDivision } from "../../api/divisionApi";
 import UserAutoComplete from "../../components/UserAutoComplete";
 import { StorageFile } from "../../utils/StorageFiles.util";
 import { ExistingFileItemsEdit } from "../../components/ExistingFileItemsEdit";
+import { format } from "date-fns";
 
 type DialogProps = {
   open: boolean;
@@ -366,8 +367,7 @@ export default function AddOrEditHazardRiskDialog({
                 <b>Date</b>
               </Typography>
               <Typography variant="body2" component="div">
-                {new Date().toDateString()}
-                {user.id}
+                {format(new Date(), "dd MMM yyyy")}
               </Typography>
             </Box>
             <Box
