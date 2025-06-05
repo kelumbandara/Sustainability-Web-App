@@ -99,12 +99,18 @@ function TargetSettingsTable({
   const paginatedGetTargetSettingsData = useMemo(() => {
     if (isAssignedTasks) {
       if (!assignedTargetSettingsData) return [];
+      if (rowsPerPage === -1) {
+        return assignedTargetSettingsData; // If 'All' is selected, return all data
+      }
       return assignedTargetSettingsData.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
     } else {
       if (!targetSettingsData) return [];
+      if (rowsPerPage === -1) {
+        return targetSettingsData; // If 'All' is selected, return all data
+      }
       return targetSettingsData.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
@@ -283,9 +289,7 @@ function TargetSettingsTable({
                     <TableCell align="right">{row.department}</TableCell>
                     <TableCell align="right">{row.category}</TableCell>
                     <TableCell align="right">{row.source}</TableCell>
-                    <TableCell align="right">
-                      {row.responsible?.name}
-                    </TableCell>
+                    <TableCell align="right">{row.responsible?.name}</TableCell>
                     <TableCell align="right">{row.approver?.name}</TableCell>
                     <TableCell align="right">
                       {format(new Date(row.created_at), "yyyy-MM-dd")}
@@ -334,7 +338,9 @@ function TargetSettingsTable({
               title="Target Settings Details"
               handleClose={() => setOpenViewDrawer(false)}
               disableEdit={
-                isAssignedTasks ? isTargetSettingsAssignEditDisabled : isTargetSettingsEditDisabled
+                isAssignedTasks
+                  ? isTargetSettingsAssignEditDisabled
+                  : isTargetSettingsEditDisabled
               }
               onEdit={() => {
                 setSelectedRow(selectedRow);

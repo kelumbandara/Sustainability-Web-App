@@ -146,12 +146,18 @@ function ConsumptionTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   const paginatedConsumptionData = useMemo(() => {
     if (isAssignedTasks) {
       if (!assignedConsumptionData) return [];
+      if (rowsPerPage === -1) {
+        return assignedConsumptionData; // If 'All' is selected, return all data
+      }
       return assignedConsumptionData.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
     } else {
       if (!consumptionData) return [];
+      if (rowsPerPage === -1) {
+        return consumptionData; // If 'All' is selected, return all data
+      }
       return consumptionData.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage

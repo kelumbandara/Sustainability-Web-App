@@ -162,11 +162,17 @@ function MedicineRequestTable({
   const paginatedMedicineData = useMemo(() => {
     if (isAssignedTasks) {
       if (!medicineAssignedTaskData) return [];
+      if (rowsPerPage === -1) {
+        return medicineAssignedTaskData; // If 'All' is selected, return all data
+      }
       return medicineAssignedTaskData.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
     } else if (!medicineData) return [];
+    if (rowsPerPage === -1) {
+      return medicineData; // If 'All' is selected, return all data
+    }
     return medicineData.slice(
       page * rowsPerPage,
       page * rowsPerPage + rowsPerPage

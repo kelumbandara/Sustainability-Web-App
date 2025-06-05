@@ -25,6 +25,7 @@ import {
   personTypes,
   industryExperience,
 } from "../../constants/accidentConstants";
+import { generateRandomNumberId } from "../../util/numbers.util";
 
 type DialogProps = {
   open: boolean;
@@ -239,6 +240,7 @@ export default function AddOrEditPersonDialog({
                   <DatePickerComponent
                     onChange={(e) => field.onChange(e)}
                     value={field.value ? new Date(field.value) : null}
+                    maxDate={new Date()}
                     label="Date of Join"
                     error={errors?.dateOfJoin ? "Required" : ""}
                   />
@@ -334,7 +336,10 @@ export default function AddOrEditPersonDialog({
           }}
           size="medium"
           onClick={handleSubmit((data) => {
-            onSubmit(data);
+            onSubmit({
+              ...data,
+              personId: defaultValues?.personId ?? generateRandomNumberId(),
+            });
             resetForm();
             handleClose();
           })}

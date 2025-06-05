@@ -90,12 +90,18 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   const paginatedRiskData = useMemo(() => {
     if (isAssignedTasks) {
       if (!assignedRiskData) return [];
+      if (rowsPerPage === -1) {
+        return assignedRiskData;
+      }
       return assignedRiskData.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
     } else {
       if (!riskData) return [];
+      if (rowsPerPage === -1) {
+        return riskData;
+      }
       return riskData.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
