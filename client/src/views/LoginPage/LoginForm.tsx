@@ -79,7 +79,7 @@ function LoginForm() {
           src={groupLogo}
           alt="logo"
           style={{ marginLeft: "1rem" }}
-          height={"45em"}
+          height={"50rem"}
         />
       </Box>
       <Box>
@@ -105,7 +105,25 @@ function LoginForm() {
           type="email"
           size="small"
           sx={{ marginTop: "0.5rem" }}
-          {...register("email", { required: true })}
+          {...register("email", {
+            required: {
+              value: true,
+              message: "Email is required",
+            },
+            minLength: {
+              value: 5,
+              message: "Email must be at least 5 characters long",
+            },
+            maxLength: {
+              value: 320,
+              message: "Email cannot exceed 320 characters long",
+            },
+            pattern: {
+              value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+              message: "Invalid email format",
+            },
+          })}
+          helperText={errors.email ? errors.email.message : ""}
         />
 
         <TextField
@@ -117,7 +135,21 @@ function LoginForm() {
           fullWidth
           sx={{ marginTop: "1rem" }}
           error={!!errors.password}
-          {...register("password", { required: true })}
+          {...register("password", {
+            required: {
+              value: true,
+              message: "Password is required",
+            },
+            minLength: {
+              value: 6,
+              message: "Password must be at least 6 characters long",
+            },
+            maxLength: {
+              value: 128,
+              message: "Password cannot exceed 128 characters long",
+            },
+          })}
+          helperText={errors.password ? errors.password.message : ""}
         />
 
         <Box>

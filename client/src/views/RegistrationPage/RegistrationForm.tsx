@@ -103,13 +103,11 @@ function RegistrationForm() {
 
   const onRegistrationSubmit = (data) => {
     if (data.isCompanyEmployee && data.assignedFactory.length === 0) {
-      console.log(data);
       enqueueSnackbar("Please select at least one factory.", {
         variant: "error",
       });
       return;
     }
-    console.log(data);
     registrationMutation(data);
   };
 
@@ -170,20 +168,17 @@ function RegistrationForm() {
           fullWidth
           size="small"
           sx={{ marginTop: "1rem" }}
-          helperText={
-            errors.name && (
-              <Typography
-                sx={{
-                  mt: "0",
-                  ml: -1,
-                }}
-                variant="caption"
-              >
-                Name is required
-              </Typography>
-            )
-          }
-          {...register("name", { required: true })}
+          helperText={errors.name ? errors.name.message : ""}
+          {...register("name", {
+            required: {
+              value: true,
+              message: "Required",
+            },
+            pattern: {
+              value: /^[a-zA-Z\s]+$/,
+              message: "Name must contain only letters and spaces",
+            },
+          })}
         />
 
         <TextField
@@ -196,20 +191,25 @@ function RegistrationForm() {
           type="email"
           size="small"
           sx={{ marginTop: "1rem" }}
-          helperText={
-            errors.email && (
-              <Typography
-                sx={{
-                  mt: "0",
-                  ml: -1,
-                }}
-                variant="caption"
-              >
-                Email is required
-              </Typography>
-            )
-          }
-          {...register("email", { required: true })}
+          {...register("email", {
+            required: {
+              value: true,
+              message: "Email is required",
+            },
+            minLength: {
+              value: 5,
+              message: "Email must be at least 5 characters long",
+            },
+            maxLength: {
+              value: 320,
+              message: "Email cannot exceed 320 characters long",
+            },
+            pattern: {
+              value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+              message: "Invalid email format",
+            },
+          })}
+          helperText={errors.email ? errors.email.message : ""}
         />
 
         <TextField
@@ -221,20 +221,21 @@ function RegistrationForm() {
           fullWidth
           sx={{ marginTop: "1rem" }}
           error={!!errors.password}
-          helperText={
-            errors.password && (
-              <Typography
-                sx={{
-                  mt: "0",
-                  ml: -1,
-                }}
-                variant="caption"
-              >
-                Password is required
-              </Typography>
-            )
-          }
-          {...register("password", { required: true })}
+          {...register("password", {
+            required: {
+              value: true,
+              message: "Password is required",
+            },
+            minLength: {
+              value: 6,
+              message: "Password must be at least 6 characters long",
+            },
+            maxLength: {
+              value: 128,
+              message: "Password cannot exceed 128 characters long",
+            },
+          })}
+          helperText={errors.password ? errors.password.message : ""}
         />
 
         <TextField
@@ -245,23 +246,19 @@ function RegistrationForm() {
           size="small"
           fullWidth
           helperText={
-            errors.confirmPassword && (
-              <Typography
-                sx={{
-                  mt: "0",
-                  ml: -1,
-                }}
-                variant="caption"
-              >
-                Passwords do not match
-              </Typography>
-            )
+            errors.confirmPassword ? errors.confirmPassword.message : ""
           }
           sx={{ marginTop: "1rem" }}
           error={!!errors.confirmPassword}
           {...register("confirmPassword", {
-            required: true,
-            validate: (value) => value === userPassword,
+            required: {
+              value: true,
+              message: "Confirm Password is required",
+            },
+            validate: {
+              matchesPreviousPassword: (value) =>
+                value === userPassword || "Passwords do not match",
+            },
           })}
         />
 
@@ -294,29 +291,26 @@ function RegistrationForm() {
           size="small"
           sx={{ marginTop: "1rem" }}
           helperText={
-            errors.mobileNumber && (
-              <Typography
-                sx={{
-                  mt: "0",
-                  ml: -1,
-                }}
-                variant="caption"
-              >
-                {`${
-                  errors.mobileNumber.message || "Mobile number is required"
-                }`}
-              </Typography>
-            )
+            typeof errors.mobileNumber?.message === "string"
+              ? errors.mobileNumber.message
+              : ""
           }
           {...register("mobileNumber", {
-            required: true,
-            validate: (value) => {
-              if (isNaN(value)) {
-                return "Mobile number must be a number";
-              } else if (value.length < 10) {
-                return "Mobile number must be at least 10 digits";
-              }
-              return true;
+            required: {
+              value: true,
+              message: "Mobile number is required",
+            },
+            minLength: {
+              value: 6,
+              message: "Mobile number must be at least 6 digits",
+            },
+            maxLength: {
+              value: 16,
+              message: "Mobile number cannot exceed 16 digits",
+            },
+            pattern: {
+              value: /^[0-9]+$/,
+              message: "Enter a valid mobile number (digits only)",
             },
           })}
         />
@@ -423,7 +417,20 @@ function RegistrationForm() {
               error={!!errors.employeeNumber}
               size="small"
               sx={{ marginTop: "1rem" }}
-              {...register("employeeNumber", { required: true })}
+              {...register("employeeNumber", {
+                required: {
+                  value: true,
+                  message: "Employee Number is required",
+                },
+                pattern: {
+                  value: /^[a-zA-Z0-9]+$/,
+                  message:
+                    "Employee Number must contain only letters and numbers",
+                },
+              })}
+              helperText={
+                errors.employeeNumber ? errors.employeeNumber.message : ""
+              }
             />
           </Stack>
         ) : null}

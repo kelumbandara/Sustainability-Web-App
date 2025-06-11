@@ -88,43 +88,49 @@ function IncidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
     queryFn: getIncidentsAssignedTaskList,
   });
 
-  const { mutate: createIncidentMutation } = useMutation({
-    mutationFn: createIncidents,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["incidents"] });
-      queryClient.invalidateQueries({ queryKey: ["incidents-assigned-tasks"] });
-      enqueueSnackbar("Incident Report Created Successfully!", {
-        variant: "success",
-      });
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
-    },
-    onError: () => {
-      enqueueSnackbar(`Incident Creation Failed`, {
-        variant: "error",
-      });
-    },
-  });
+  const { mutate: createIncidentMutation, isPending: isIncidentCreating } =
+    useMutation({
+      mutationFn: createIncidents,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["incidents"] });
+        queryClient.invalidateQueries({
+          queryKey: ["incidents-assigned-tasks"],
+        });
+        enqueueSnackbar("Incident Report Created Successfully!", {
+          variant: "success",
+        });
+        setSelectedRow(null);
+        setOpenViewDrawer(false);
+        setOpenAddOrEditDialog(false);
+      },
+      onError: () => {
+        enqueueSnackbar(`Incident Creation Failed`, {
+          variant: "error",
+        });
+      },
+    });
 
-  const { mutate: updateIncidentMutation } = useMutation({
-    mutationFn: updateIncident,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["incidents"] });
-      queryClient.invalidateQueries({ queryKey: ["incidents-assigned-tasks"] });
-      enqueueSnackbar("Incident Report Update Successfully!", {
-        variant: "success",
-      });
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
-    },
-    onError: () => {
-      enqueueSnackbar(`Incident Updation Failed`, {
-        variant: "error",
-      });
-    },
-  });
+  const { mutate: updateIncidentMutation, isPending: isIncidentUpdating } =
+    useMutation({
+      mutationFn: updateIncident,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["incidents"] });
+        queryClient.invalidateQueries({
+          queryKey: ["incidents-assigned-tasks"],
+        });
+        enqueueSnackbar("Incident Report Update Successfully!", {
+          variant: "success",
+        });
+        setSelectedRow(null);
+        setOpenViewDrawer(false);
+        setOpenAddOrEditDialog(false);
+      },
+      onError: () => {
+        enqueueSnackbar(`Incident Updation Failed`, {
+          variant: "error",
+        });
+      },
+    });
 
   const { mutate: deleteIncidentMutation } = useMutation({
     mutationFn: deleteIncident,
@@ -148,12 +154,18 @@ function IncidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   const paginatedIncidentData = useMemo(() => {
     if (isAssignedTasks) {
       if (!incidentAssignedTaskData) return [];
+      if (rowsPerPage === -1) {
+        return incidentAssignedTaskData; // If 'All' is selected, return all data
+      }
       return incidentAssignedTaskData.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
     } else {
       if (!incidentData) return [];
+      if (rowsPerPage === -1) {
+        return incidentData; // If 'All' is selected, return all data
+      }
       return incidentData.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
@@ -361,7 +373,6 @@ function IncidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
           }}
           onSubmit={(data) => {
             if (selectedRow) {
-              console.log("Updating document", data);
               updateIncidentMutation(data);
               // setIncidentData(
               //   incidentData.map((risk) => (risk.id === data.id ? data : risk))
@@ -370,7 +381,6 @@ function IncidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
               //   variant: "success",
               // });
             } else {
-              console.log("Adding new incident", data);
               createIncidentMutation(data);
               // setIncidentData([...incidentData, data]); // Add new document to the list
               // enqueueSnackbar("Incident Created Successfully!", {
@@ -382,6 +392,7 @@ function IncidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
             setOpenAddOrEditDialog(false);
           }}
           defaultValues={selectedRow}
+          isLoading={isIncidentCreating || isIncidentUpdating}
         />
       )}
       {deleteDialogOpen && (

@@ -588,7 +588,6 @@ function HazardAndRiskDashboard() {
                 )}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 onChange={(e, value) => {
-                  console.log("e", e);
                   setValue("category", value);
                 }}
                 renderInput={(params) => (
@@ -612,9 +611,7 @@ function HazardAndRiskDashboard() {
             }}
           >
             <Button
-              onClick={() => {
-                console.log("reset");
-              }}
+              onClick={() => {}}
               sx={{ color: "var(--pallet-blue)", marginRight: "0.5rem" }}
             >
               Reset
@@ -627,7 +624,6 @@ function HazardAndRiskDashboard() {
               size="medium"
               onClick={handleSubmit((data) => {
                 // handleCreateDocument(data);
-                console.log("data", data);
               })}
             >
               Add Filter

@@ -13,11 +13,10 @@ export const createAccessRole = async (role: UserRole) => {
 
 export const updateAccessRole = async (role: UserRole) => {
   const res = await axios.post(`/api/user-permissions/${role.id}/update`, role);
-  console.log(role.id)
   return res.data;
 };
 
-export const deleteAccessRole = async (roleId: string) => {
+export const deleteAccessRole = async (roleId: number) => {
   const res = await axios.delete(`/api/user-permissions/${roleId}/delete`);
   return res.data;
 };

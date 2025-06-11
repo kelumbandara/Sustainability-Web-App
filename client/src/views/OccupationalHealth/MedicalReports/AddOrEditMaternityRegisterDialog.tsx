@@ -505,10 +505,24 @@ export default function AddOrEditMaternityRegisterDialog({
                       id="age"
                       label="Age"
                       error={!!errors.age}
+                      helperText={errors.age ? errors.age.message : ""}
                       size="small"
                       type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("age", { required: true })}
+                      {...register("age", {
+                        required: {
+                          value: true,
+                          message: "Required",
+                        },
+                        min: {
+                          value: 0,
+                          message: "Age must be at least 18",
+                        },
+                        max: {
+                          value: 120,
+                          message: "Age must be less than 120",
+                        },
+                      })}
                     />
                   </Box>
                   <Box
@@ -522,10 +536,22 @@ export default function AddOrEditMaternityRegisterDialog({
                       id="contactNumber"
                       label="Contact Number"
                       error={!!errors.contactNumber}
+                      helperText={
+                        errors.contactNumber ? errors.contactNumber.message : ""
+                      }
                       size="small"
                       type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("contactNumber", { required: true })}
+                      {...register("contactNumber", {
+                        required: {
+                          value: true,
+                          message: "Required",
+                        },
+                        min: {
+                          value: 0,
+                          message: "Contact number must be a positive number",
+                        },
+                      })}
                     />
                     <TextField
                       required
@@ -588,6 +614,9 @@ export default function AddOrEditMaternityRegisterDialog({
                       id="averageWages"
                       label="Average Wages"
                       error={!!errors.averageWages}
+                      helperText={
+                        errors.averageWages ? errors.averageWages.message : ""
+                      }
                       size="small"
                       type="number"
                       sx={{
@@ -595,7 +624,16 @@ export default function AddOrEditMaternityRegisterDialog({
                         margin: "0.5rem",
                         marginTop: isTablet ? "0.5rem" : "1.8rem",
                       }}
-                      {...register("averageWages", { required: true })}
+                      {...register("averageWages", {
+                        required: {
+                          value: true,
+                          message: "Required",
+                        },
+                        min: {
+                          value: 0,
+                          message: "Average wages must be a positive number",
+                        },
+                      })}
                     />
                   </Box>
                   <Box
@@ -882,9 +920,6 @@ export default function AddOrEditMaternityRegisterDialog({
                                 },
                                 cursor: "pointer",
                               }}
-                              onClick={() => {
-                                console.log("row");
-                              }}
                             >
                               <TableCell
                                 component="th"
@@ -1164,9 +1199,6 @@ export default function AddOrEditMaternityRegisterDialog({
                                   border: 0,
                                 },
                                 cursor: "pointer",
-                              }}
-                              onClick={() => {
-                                console.log("row");
                               }}
                             >
                               <TableCell

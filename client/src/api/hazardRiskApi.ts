@@ -199,7 +199,7 @@ export const HazardAndRiskSchema = z.object({
   unsafeActOrCondition: z.nativeEnum(UnsafeActOrCondition),
   dueDate: z.date(),
   assignee: userSchema,
-  assigneeId: z.string().optional(),
+  assigneeId: z.number().optional(),
   documents: z
     .array(z.union([z.instanceof(File), StorageFileSchema]))
     .optional(),
@@ -241,7 +241,6 @@ export const createHazardRisk = async (hazardRisk: HazardAndRisk) => {
   const formData = new FormData();
 
   formData.append("token", token);
-  console.log("submit", token);
 
   Object.keys(hazardRisk).forEach((key) => {
     const value = hazardRisk[key as keyof HazardAndRisk];

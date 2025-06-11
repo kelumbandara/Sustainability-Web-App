@@ -5,6 +5,9 @@ import PageLoader from "./components/PageLoader";
 import useCurrentUser from "./hooks/useCurrentUser";
 import { PermissionKeys } from "./views/Administration/SectionList";
 import PermissionDenied from "./components/PermissionDenied";
+import { useQuery } from "@tanstack/react-query";
+import { User, validateUser } from "./api/userApi";
+import { AuditCalendar } from "./views/AuditAndInspection/Calendar/Calendar";
 
 const LoginPage = React.lazy(() => import("./views/LoginPage/LoginPage"));
 const RegistrationPage = React.lazy(
@@ -17,12 +20,42 @@ const UserTable = React.lazy(() => import("./views/Administration/UserTable"));
 const AccessManagementTable = React.lazy(
   () => import("./views/Administration/AccessManagementTable")
 );
+const OrganizationTable = React.lazy(
+  () => import("./views/Administration/OrganizationSettings/OrganizationSettingsTable")
+);
 
 const UnderDevelopment = React.lazy(
   () => import("./components/UnderDevelopment")
 );
+
+//sustainability apps
+//chemical management
+const ChemicalRequestTable = React.lazy(
+  () => import("./views/ChemicalMng/ChemicalRequestTable")
+);
+const ChemicalPurchaseInventoryTable = React.lazy(
+  () => import("./views/ChemicalMng/ChemicalPurchaseInventoryTable")
+);
+const ChemicalTransactionTable = React.lazy(
+  () => import("./views/ChemicalMng/TransactionTable")
+);
+const ChemicalDashboard = React.lazy(
+  () => import("./views/ChemicalMng/Dashboard")
+);
+
+//health and safety apps
+//document
 const DocumentRegister = React.lazy(
   () => import("./views/DocumentsPage/DocumentsTable")
+);
+
+//audit and inspection
+const InternalAuditTable = React.lazy(
+  () => import("./views/AuditAndInspection/InternalAudit/InternalAuditTable")
+);
+
+const AuditBuilderTable = React.lazy(
+  () => import("./views/AuditAndInspection/AuditBuilder/AuditBuilderTable")
 );
 
 //hazard and risk
@@ -89,6 +122,32 @@ const MaternityRegisterTable = React.lazy(
     import("./views/OccupationalHealth/MedicalReports/MaternityRegisterTable")
 );
 
+//External Audit And Inspection
+const ExternalAuditTable = React.lazy(
+  () => import("./views/AuditAndInspection/ExternalAudit/AuditTable")
+);
+
+//Sustainability
+const SustainabilityTable = React.lazy(
+  () => import("./views/Sustainability/SustainabilityTable")
+);
+
+//Environment
+const TargetSettingsTable = React.lazy(
+  () => import("./views/Environment/TargetSettings/TargetSettingsTable")
+);
+
+const EnvironmentTable = React.lazy(
+  () => import("./views/Environment/Consumption/ConsumptionTable")
+);
+const AuditAndInspectionDashboard = React.lazy(
+  () => import("./views/AuditAndInspection/Dashboard")
+);
+const EnvironmentDashBoard = React.lazy(
+  () => import("./views/Environment/Dashboard")
+);
+
+
 function withLayout(Layout: any, Component: any, restrictAccess = false) {
   return (
     <Layout>
@@ -121,7 +180,6 @@ function withoutLayout(Component: React.LazyExoticComponent<any>) {
 
 const ProtectedRoute = () => {
   const { user, status } = useCurrentUser();
-  console.log(user, status);
 
   if (status === "loading" || status === "idle" || status === "pending") {
     return <PageLoader />;
@@ -135,14 +193,17 @@ const ProtectedRoute = () => {
 };
 
 const AppRoutes = () => {
-  const { user } = useCurrentUser();
+  const { data: user, status } = useQuery<User>({
+    queryKey: ["current-user"],
+    queryFn: validateUser,
+  });
 
   const userPermissionObject = useMemo(() => {
-    if (user?.permissionObject) {
+    if (user && user?.permissionObject) {
       return user?.permissionObject;
     }
   }, [user]);
-
+  console.log("user", user);
   return (
     <Routes>
       <Route path="/" element={withoutLayout(LoginPage)} />
@@ -159,6 +220,15 @@ const AppRoutes = () => {
 
         {/* Administration */}
         <Route
+          path="/admin/organization-settings"
+          element={withLayout(
+            MainLayout,
+            OrganizationTable,
+            !userPermissionObject?.[PermissionKeys.ADMIN_USERS_VIEW]
+          )}
+        />
+
+        <Route
           path="/admin/users"
           element={withLayout(
             MainLayout,
@@ -174,42 +244,46 @@ const AppRoutes = () => {
             !userPermissionObject?.[PermissionKeys.ADMIN_ACCESS_MNG_VIEW]
           )}
         />
-
+        
         {/* Audit & Inspection */}
         <Route
           path="/audit-inspection/dashboard"
           element={withLayout(
             MainLayout,
-            () => (
-              <UnderDevelopment pageName="Audit & Inspection > Dashboard" />
-            )
-            // !userPermissionObject?.[
-            //   PermissionKeys.AUDIT_INSPECTION_DASHBOARD_VIEW
-            // ]
+            AuditAndInspectionDashboard,
+            !userPermissionObject?.[
+              PermissionKeys.AUDIT_INSPECTION_DASHBOARD_VIEW
+            ]
           )}
         />
         <Route
           path="/audit-inspection/calendar"
           element={withLayout(
             MainLayout,
-            () => (
-              <UnderDevelopment pageName="Audit & Inspection > Calendar" />
-            )
+            AuditCalendar
             // !userPermissionObject?.[
             //   PermissionKeys.AUDIT_INSPECTION_CALENDAR_VIEW
             // ]
           )}
         />
         <Route
-          path="/audit-inspection/internal-audit"
+          path="/audit-inspection/internal-audit/form-builder"
           element={withLayout(
             MainLayout,
-            () => (
-              <UnderDevelopment pageName="Audit & Inspection > Internal Audit" />
-            )
-            // !userPermissionObject?.[
-            //   PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_QUEUE_VIEW
-            // ]
+            AuditBuilderTable,
+            !userPermissionObject?.[
+              PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_FORM_BUILDER_VIEW
+            ]
+          )}
+        />
+        <Route
+          path="/audit-inspection/internal-audit/scheduled-audits"
+          element={withLayout(
+            MainLayout,
+            InternalAuditTable,
+            !userPermissionObject?.[
+              PermissionKeys.AUDIT_INSPECTION_INTERNAL_AUDIT_REGISTER_VIEW
+            ]
           )}
         />
         <Route
@@ -224,6 +298,39 @@ const AppRoutes = () => {
             // ]
           )}
         />
+
+        {/* sustainability apps */}
+        {/* chemical management */}
+        <Route
+          path="/chemical-mng/dashboard"
+          element={withLayout(
+            MainLayout,
+            ChemicalDashboard,
+            !userPermissionObject?.[
+              PermissionKeys.CHEMICAL_MNG_DASHBOARD_VIEW
+            ]
+          )}
+        />
+        <Route
+          path="/chemical-mng/chemical-requests"
+          element={withLayout(MainLayout, ChemicalRequestTable)}
+        />
+        <Route
+          path="/chemical-mng/purchase-inventory"
+          element={withLayout(MainLayout, ChemicalPurchaseInventoryTable)}
+        />
+        <Route
+          path="/chemical-mng/transaction"
+          element={withLayout(MainLayout, ChemicalTransactionTable)}
+        />
+        <Route
+          path="/chemical-mng/assigned-tasks"
+          element={withLayout(MainLayout, () => (
+            <ChemicalRequestTable isAssignedTasks={true} />
+
+          ))}
+        />
+
         {/* document */}
         <Route
           path="/document"
@@ -472,7 +579,131 @@ const AppRoutes = () => {
             ]
           )}
         />
+
+        {/* External Audits */}
+        <Route
+          path="/audit-inspection/external-audit/register"
+          element={withLayout(
+            MainLayout,
+            ExternalAuditTable,
+            !userPermissionObject?.[
+              PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_REGISTER_VIEW
+            ]
+          )}
+        />
+        <Route
+          path="/sustainability/register"
+          element={withLayout(
+            MainLayout,
+            SustainabilityTable,
+            !userPermissionObject?.[
+              PermissionKeys.SUSTAINABILITY_SDG_REPORTING_CREATE
+            ]
+          )}
+        />
+        <Route
+          path="/environment/dashboard"
+          element={withLayout(
+            MainLayout,
+            EnvironmentDashBoard,
+            !userPermissionObject?.[PermissionKeys.ENVIRONMENT_DASHBOARD_VIEW]
+          )}
+        />
+        <Route
+          path="/environment/history/target-setting"
+          element={withLayout(
+            MainLayout,
+            TargetSettingsTable,
+            !userPermissionObject?.[
+              PermissionKeys.ENVIRONMENT_HISTORY_TARGET_SETTING_VIEW
+            ]
+          )}
+        />
+        <Route
+          path="/environment/assigned-tasks/target-setting"
+          element={withLayout(
+            MainLayout,
+            () => (
+              <TargetSettingsTable isAssignedTasks={true} />
+            ),
+            !userPermissionObject?.[
+              PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_TARGET_SETTING_VIEW
+            ]
+          )}
+        />
+        <Route
+          path="/environment/history/consumption"
+          element={withLayout(
+            MainLayout,
+            EnvironmentTable,
+            !userPermissionObject?.[
+              PermissionKeys.ENVIRONMENT_HISTORY_CONSUMPTION_VIEW
+            ]
+          )}
+        />
+        <Route
+          path="/environment/assigned-tasks/consumption"
+          element={withLayout(
+            MainLayout,
+            () => (
+              <EnvironmentTable isAssignedTasks={true} />
+            ),
+            !userPermissionObject?.[
+              PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_CONSUMPTION_VIEW
+            ]
+          )}
+        />
       </Route>
+      <Route
+        path="/audit-inspection/external-audit/assigned-tasks"
+        element={withLayout(
+          MainLayout,
+          () => (
+            <ExternalAuditTable
+              isAssignedTasks={true}
+              isCorrectiveAction={false}
+              isAuditQueue={false}
+            />
+          ),
+          false
+          // !userPermissionObject?.[
+          //   PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_TASK_VIEW
+          // ]
+        )}
+      />
+      <Route
+        path="/audit-inspection/external-audit/audit-queue"
+        element={withLayout(
+          MainLayout,
+          () => (
+            <ExternalAuditTable
+              isAssignedTasks={false}
+              isCorrectiveAction={false}
+              isAuditQueue={true}
+            />
+          ),
+          !userPermissionObject?.[
+            PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_VIEW
+          ]
+        )}
+      />
+      <Route
+        path="/audit-inspection/external-audit/corrective-action"
+        element={withLayout(
+          MainLayout,
+          () => (
+            <ExternalAuditTable
+              isAssignedTasks={false}
+              isCorrectiveAction={true}
+              isAuditQueue={false}
+            />
+          ),
+          !userPermissionObject?.[
+            PermissionKeys
+              .AUDIT_INSPECTION_EXTERNAL_AUDIT_CORRECTIVE_ACTION_VIEW
+          ]
+        )}
+      />
     </Routes>
   );
 };

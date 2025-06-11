@@ -118,6 +118,9 @@ function MaternityRegisterTable() {
 
   const paginatedMaternityRegisterData = useMemo(() => {
     if (!maternityRegisterList) return [];
+    if (rowsPerPage === -1) {
+      return maternityRegisterList; // If 'All' is selected, return all data
+    }
     return maternityRegisterList.slice(
       page * rowsPerPage,
       page * rowsPerPage + rowsPerPage

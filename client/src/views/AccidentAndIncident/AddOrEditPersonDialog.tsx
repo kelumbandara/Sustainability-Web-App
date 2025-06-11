@@ -25,6 +25,7 @@ import {
   personTypes,
   industryExperience,
 } from "../../constants/accidentConstants";
+import { generateRandomNumberId } from "../../util/numbers.util";
 
 type DialogProps = {
   open: boolean;
@@ -130,7 +131,6 @@ export default function AddOrEditPersonDialog({
               sx={{ flex: 1, margin: "0.5rem" }}
               defaultValue={defaultValues?.personType}
               onChange={(e, value) => {
-                console.log("e", e);
                 setValue("personType", value);
               }}
               renderInput={(params) => (
@@ -183,7 +183,6 @@ export default function AddOrEditPersonDialog({
               sx={{ flex: 1, margin: "0.5rem" }}
               defaultValue={defaultValues?.gender}
               onChange={(e, value) => {
-                console.log("e", e);
                 setValue("gender", value);
               }}
               renderInput={(params) => (
@@ -213,7 +212,24 @@ export default function AddOrEditPersonDialog({
               size="small"
               type="number"
               sx={{ flex: 1, marginX: "0.5rem", marginTop: "1.3rem" }}
-              {...register("age", { required: true })}
+              helperText={
+                errors.age &&
+                (errors.age.message ?? "Age must be a positive number")
+              }
+              {...register("age", {
+                required: {
+                  value: true,
+                  message: "Required",
+                },
+                min: {
+                  value: 0,
+                  message: "Age must be a positive number",
+                },
+                max: {
+                  value: 120,
+                  message: "Age must be less than or equal to 120",
+                },
+              })}
             />
             <Controller
               control={control}
@@ -224,6 +240,7 @@ export default function AddOrEditPersonDialog({
                   <DatePickerComponent
                     onChange={(e) => field.onChange(e)}
                     value={field.value ? new Date(field.value) : null}
+                    maxDate={new Date()}
                     label="Date of Join"
                     error={errors?.dateOfJoin ? "Required" : ""}
                   />
@@ -246,7 +263,21 @@ export default function AddOrEditPersonDialog({
               size="small"
               type="number"
               sx={{ flex: 1, margin: "0.5rem" }}
-              {...register("employmentDuration", { required: true })}
+              helperText={
+                errors.employmentDuration &&
+                (errors.employmentDuration.message ??
+                  "Employment duration must be a positive number")
+              }
+              {...register("employmentDuration", {
+                required: {
+                  value: true,
+                  message: "Required",
+                },
+                min: {
+                  value: 0,
+                  message: "Employment duration must be a positive number",
+                },
+              })}
             />
             <Autocomplete
               {...register("industryExperience", { required: true })}
@@ -255,7 +286,6 @@ export default function AddOrEditPersonDialog({
               sx={{ flex: 1, margin: "0.5rem" }}
               defaultValue={defaultValues?.industryExperience}
               onChange={(e, value) => {
-                console.log("e", e);
                 setValue("industryExperience", value);
               }}
               renderInput={(params) => (
@@ -306,7 +336,10 @@ export default function AddOrEditPersonDialog({
           }}
           size="medium"
           onClick={handleSubmit((data) => {
-            onSubmit(data);
+            onSubmit({
+              ...data,
+              personId: defaultValues?.personId ?? generateRandomNumberId(),
+            });
             resetForm();
             handleClose();
           })}

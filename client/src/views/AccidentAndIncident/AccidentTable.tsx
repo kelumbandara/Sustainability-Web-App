@@ -88,43 +88,49 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
     theme.breakpoints.down("md")
   );
 
-  const { mutate: createAccidentMutation } = useMutation({
-    mutationFn: createAccident,
-    onSuccess: () => {
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
-      queryClient.invalidateQueries({ queryKey: ["accidents"] });
-      queryClient.invalidateQueries({ queryKey: ["accidents-assigned-task"] });
-      enqueueSnackbar("Accident Report Created Successfully!", {
-        variant: "success",
-      });
-    },
-    onError: () => {
-      enqueueSnackbar(`Accident Creation Failed`, {
-        variant: "error",
-      });
-    },
-  });
+  const { mutate: createAccidentMutation, isPending: isAccidentCreating } =
+    useMutation({
+      mutationFn: createAccident,
+      onSuccess: () => {
+        setSelectedRow(null);
+        setOpenViewDrawer(false);
+        setOpenAddOrEditDialog(false);
+        queryClient.invalidateQueries({ queryKey: ["accidents"] });
+        queryClient.invalidateQueries({
+          queryKey: ["accidents-assigned-task"],
+        });
+        enqueueSnackbar("Accident Report Created Successfully!", {
+          variant: "success",
+        });
+      },
+      onError: () => {
+        enqueueSnackbar(`Accident Creation Failed`, {
+          variant: "error",
+        });
+      },
+    });
 
-  const { mutate: updateAccidentMutation } = useMutation({
-    mutationFn: updateAccident,
-    onSuccess: () => {
-      setSelectedRow(null);
-      setOpenViewDrawer(false);
-      setOpenAddOrEditDialog(false);
-      queryClient.invalidateQueries({ queryKey: ["accidents"] });
-      queryClient.invalidateQueries({ queryKey: ["accidents-assigned-task"] });
-      enqueueSnackbar("Accident Report Updated Successfully!", {
-        variant: "success",
-      });
-    },
-    onError: () => {
-      enqueueSnackbar(`Accident Update Failed`, {
-        variant: "error",
-      });
-    },
-  });
+  const { mutate: updateAccidentMutation, isPending: isAccidentUpdating } =
+    useMutation({
+      mutationFn: updateAccident,
+      onSuccess: () => {
+        setSelectedRow(null);
+        setOpenViewDrawer(false);
+        setOpenAddOrEditDialog(false);
+        queryClient.invalidateQueries({ queryKey: ["accidents"] });
+        queryClient.invalidateQueries({
+          queryKey: ["accidents-assigned-task"],
+        });
+        enqueueSnackbar("Accident Report Updated Successfully!", {
+          variant: "success",
+        });
+      },
+      onError: () => {
+        enqueueSnackbar(`Accident Update Failed`, {
+          variant: "error",
+        });
+      },
+    });
 
   const { mutate: deleteAccidentMutation } = useMutation({
     mutationFn: deleteAccident,
@@ -149,12 +155,18 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   const paginatedAccidentData = useMemo(() => {
     if (isAssignedTasks) {
       if (!accidentAssignedTaskData) return [];
+      if (rowsPerPage === -1) {
+        return accidentAssignedTaskData; // If 'All' is selected, return all data
+      }
       return accidentAssignedTaskData.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
     } else {
       if (!accidentData) return [];
+      if (rowsPerPage === -1) {
+        return accidentData; // If 'All' is selected, return all data
+      }
       return accidentData.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
@@ -373,6 +385,7 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
             }
           }}
           defaultValues={selectedRow}
+          isLoading={isAccidentCreating || isAccidentUpdating}
         />
       )}
       {deleteDialogOpen && (

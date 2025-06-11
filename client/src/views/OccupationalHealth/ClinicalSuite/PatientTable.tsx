@@ -137,6 +137,9 @@ function PatientTable() {
 
   const paginatedPatientData = useMemo(() => {
     if (!patientData) return [];
+    if (rowsPerPage === -1) {
+      return patientData; // If 'All' is selected, return all data
+    }
     return patientData.slice(
       page * rowsPerPage,
       page * rowsPerPage + rowsPerPage

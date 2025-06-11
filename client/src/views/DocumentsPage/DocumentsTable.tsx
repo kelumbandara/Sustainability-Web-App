@@ -135,6 +135,9 @@ function DocumentTable() {
 
   const paginatedDocumentData = useMemo(() => {
     if (!documents) return [];
+    if (rowsPerPage === -1) {
+      return documents;
+    }
     return documents.slice(
       page * rowsPerPage,
       page * rowsPerPage + rowsPerPage
@@ -249,7 +252,11 @@ function DocumentTable() {
                         : "--"}
                     </TableCell>
                     <TableCell align="right">
-                      {differenceInDays(row.expiryDate, new Date()) > 10 ? (
+                      {row.isNoExpiry ? (
+                        <Typography sx={{ color: "green" }}>
+                          No Expiry
+                        </Typography>
+                      ) : differenceInDays(row.expiryDate, new Date()) > 10 ? (
                         <Typography sx={{ color: "green" }}>Active</Typography>
                       ) : differenceInDays(row.expiryDate, new Date()) > 0 ? (
                         <Typography sx={{ color: "orange" }}>
@@ -329,7 +336,6 @@ function DocumentTable() {
           }}
           onSubmit={(data) => {
             if (selectedRow) {
-              console.log("Updating document", data);
               updateDocumentMutation(data);
               // setDocuments(
               //   documents.map((doc) => (doc.id === data.id ? data : doc))
@@ -338,7 +344,6 @@ function DocumentTable() {
               //   variant: "success",
               // });
             } else {
-              console.log("Adding new document", data);
               createDocumentMutation(data);
               // setDocuments([...documents, data]); // Add new document to the list
               // enqueueSnackbar("Document Created Successfully!", {

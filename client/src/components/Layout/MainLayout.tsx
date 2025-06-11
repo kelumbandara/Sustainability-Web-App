@@ -13,19 +13,15 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ListItem from "@mui/material/ListItem";
-import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-
-import GridViewIcon from "@mui/icons-material/GridView";
-import groupLogo from "../../assets/group-logo.png";
 import {
   Alert,
-  Avatar,
   Badge,
   Button,
   Collapse,
   Drawer as MobileDrawer,
+  Stack,
   useMediaQuery,
 } from "@mui/material";
 import { Link, useLocation, useNavigate } from "react-router";
@@ -39,6 +35,13 @@ import { useSnackbar } from "notistack";
 import { PermissionKeysObject } from "../../views/Administration/SectionList";
 import useCurrentUser from "../../hooks/useCurrentUser";
 import "./MainLayout.css";
+import ViewUserContent from "../../views/Administration/ViewUserProfileContent";
+import ViewProfileDataDrawer, {
+  DrawerProfileHeader,
+} from "../ViewProfileDataDrawer";
+import ProfileImage from "../ProfileImageComponent";
+import { useQuery } from "@tanstack/react-query";
+import { getOrganization } from "../../api/OrganizationSettings/organizationSettingsApi";
 
 const drawerWidth = 265;
 
@@ -134,6 +137,13 @@ export default function MainLayout({ children }: Props) {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [open, setOpen] = React.useState(isMobile ? false : true);
   const { user } = useCurrentUser();
+  const [openViewProfileDrawer, setOpenViewProfileDrawer] = useState(false);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const [openEditUserRoleDialog, setOpenEditUserRoleDialog] = useState(false);
+  const statusColor = user?.availability ? "#44b700" : "#f44336";
+
+  const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate();
 
   const toggleDrawerOpen = () => {
     setOpen(!open);
@@ -142,6 +152,20 @@ export default function MainLayout({ children }: Props) {
   const handleDrawerClose = () => {
     setOpen(false);
   };
+
+  const { data: organizationData } = useQuery({
+    queryKey: ["organization"],
+    queryFn: getOrganization,
+  });
+
+  console.log("yoo", organizationData?.logoUrl);
+  const logoUrl = useMemo(() => {
+    if (organizationData && organizationData?.logoUrl) {
+      return Array.isArray(organizationData.logoUrl)
+        ? organizationData.logoUrl[0]
+        : organizationData.logoUrl;
+    }
+  }, [organizationData]);
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -178,14 +202,16 @@ export default function MainLayout({ children }: Props) {
               >
                 <MenuIcon />
               </IconButton>
-              <Box>
-                <img
-                  src={groupLogo}
-                  alt="logo"
-                  height={"35em"}
-                  style={{ marginTop: "5px" }}
-                />
-              </Box>
+              {logoUrl && (
+                <Box>
+                  <img
+                    src={logoUrl?.signedUrl}
+                    alt="logo"
+                    height={"45rem"}
+                    style={{ marginTop: "10px" }}
+                  />
+                </Box>
+              )}
             </Box>
             {!isMobile && (
               <Box
@@ -253,15 +279,59 @@ export default function MainLayout({ children }: Props) {
                   </IconButton>
                 </>
               )} */}
-              <Avatar
+              {/* <Avatar
                 sx={{
                   bgcolor: "var(--pallet-orange)",
                   height: "2rem",
                   width: "2rem",
+                  cursor: "pointer",
                 }}
+                onClick={() => setOpenViewProfileDrawer(true)}
               >
                 {user?.name?.charAt(0).toUpperCase()}
-              </Avatar>
+              </Avatar> */}
+
+              <Badge
+                overlap="circular"
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                variant="dot"
+                sx={{
+                  "& .MuiBadge-badge": {
+                    backgroundColor: statusColor,
+                    color: statusColor,
+                    boxShadow: "0 0 0 2px white",
+                    height: "8px",
+                    width: "8px",
+                    borderRadius: "50%",
+                  },
+                }}
+              >
+                <ProfileImage
+                  name={user?.name}
+                  files={user?.profileImage}
+                  size="2rem"
+                  onClick={() => setOpenViewProfileDrawer(true)}
+                />
+              </Badge>
+              <ViewProfileDataDrawer
+                open={openViewProfileDrawer}
+                handleClose={() => setOpenViewProfileDrawer(false)}
+                fullScreen={true}
+                drawerContent={
+                  <Stack spacing={1} sx={{ paddingX: theme.spacing(1) }}>
+                    <DrawerProfileHeader
+                      title="User Profile"
+                      handleClose={() => setOpenViewProfileDrawer(false)}
+                      onEdit={() => {
+                        setOpenEditUserRoleDialog(true);
+                      }}
+                    />
+                    <Stack>
+                      <ViewUserContent selectedUser={user} />
+                    </Stack>
+                  </Stack>
+                }
+              />
             </Box>
           </Box>
         </Toolbar>
@@ -319,11 +389,11 @@ const DrawerContent = ({
   const { user } = useCurrentUser();
 
   const userPermissionObject = useMemo(() => {
-    if (user.permissionObject) {
+    if (user && user?.permissionObject) {
       return user.permissionObject;
     }
   }, [user]);
-
+  console.log(userPermissionObject);
   return (
     <>
       <DrawerHeader sx={{ justifyContent: "flex-start" }}>
@@ -361,6 +431,9 @@ const DrawerContent = ({
         }}
       >
         {sidebarItems.map((item, i) => {
+          if (item?.accessKey && !userPermissionObject[`${item?.accessKey}`])
+            return null;
+
           if (item?.headline) {
             return (
               <Typography
@@ -381,9 +454,11 @@ const DrawerContent = ({
 
           if (item.nestedItems) {
             return (
-              <Box sx={{ marginLeft: "1rem" }} key={item.accessKey}>
+              <Box
+                sx={{ marginLeft: "1rem" }}
+                key={`${item.href} +${item.title}`}
+              >
                 <NestedItem
-                  key={item.accessKey}
                   item={item}
                   handleDrawerClose={handleDrawerClose}
                   userPermissionObject={userPermissionObject}
@@ -475,6 +550,23 @@ const NestedItem = React.memo(
     userPermissionObject: PermissionKeysObject;
   }) => {
     const [open, setOpen] = React.useState(item.open);
+    const isAllItemsHidden = useMemo(() => {
+      const checkNestedItems = (nestedItems: SidebarItem[]) => {
+        return nestedItems.every((nestedItem) => {
+          if (nestedItem.nestedItems) {
+            return checkNestedItems(nestedItem.nestedItems);
+          }
+          return (
+            nestedItem?.accessKey && !userPermissionObject[nestedItem.accessKey]
+          );
+        });
+      };
+
+      return checkNestedItems(item.nestedItems);
+    }, [item.nestedItems, userPermissionObject]);
+
+    if (isAllItemsHidden) return null;
+
     return (
       <React.Fragment key={item.accessKey}>
         <Button
@@ -510,6 +602,12 @@ const NestedItem = React.memo(
         <Collapse in={open} unmountOnExit>
           <List>
             {item.nestedItems.map((item) => {
+              if (
+                item?.accessKey &&
+                !userPermissionObject[`${item?.accessKey}`]
+              )
+                return null;
+
               if (item.nestedItems) {
                 return (
                   <Box key={item.accessKey} sx={{ marginLeft: "0.5rem" }}>
