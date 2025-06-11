@@ -310,6 +310,11 @@ export async function resetProfileEmailConfirm({ newEmail,id }: { newEmail: stri
   return res.data;
 }
 
+export async function searchUser({ query }: { query: string }) {
+  const res = await axios.get(`/api/users/search?keyword=${query}`)
+  return res.data;
+}
+
 
 
 

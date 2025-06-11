@@ -24,7 +24,12 @@ import { useMemo, useState } from "react";
 import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
-import { fetchAllUsers, updateUserType, User } from "../../api/userApi";
+import {
+  fetchAllUsers,
+  searchUser,
+  updateUserType,
+  User,
+} from "../../api/userApi";
 import ViewUserContent from "./ViewUserContent";
 import EditUserRoleDialog from "./EditUserRoleDialog";
 import { PermissionKeys } from "./SectionList";
@@ -32,6 +37,7 @@ import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { green, grey } from "@mui/material/colors";
 import queryClient from "../../state/queryClient";
+import SearchBar from "../../components/SearchBar";
 
 function UserTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -72,16 +78,43 @@ function UserTable() {
     theme.breakpoints.down("md")
   );
 
-  const paginatedUsersData = useMemo(() => {
-    if (!usersData) return [];
-    if (rowsPerPage === -1) {
-      return usersData; // If 'All' is selected, return all data
+  const [searchQuery, setSearchQuery] = useState("");
+  const {
+    data: searchedUserData,
+    refetch: researchUser,
+    isFetching: isSearchingUser,
+  } = useQuery({
+    queryKey: ["user-search-data", searchQuery],
+    queryFn: ({ queryKey }) => searchUser({ query: queryKey[1] }),
+    enabled: false,
+  });
+  const handleSearch = async (query: string) => {
+    console.log("Searching for:", query);
+    setSearchQuery(query);
+    try {
+      await researchUser();
+    } catch (error) {
+      console.error("Search failed:", error);
     }
-    return usersData.slice(
+  };
+
+  const paginatedUsersData = useMemo(() => {
+    const isSearchActive = searchQuery !== "";
+    const hasSearchResults = Array.isArray(searchedUserData);
+    const sourceData =
+      isSearchActive && hasSearchResults ? searchedUserData : usersData;
+
+    if (!sourceData) return [];
+
+    if (rowsPerPage === -1) {
+      return sourceData;
+    }
+
+    return sourceData.slice(
       page * rowsPerPage,
       page * rowsPerPage + rowsPerPage
     );
-  }, [usersData, page, rowsPerPage]);
+  }, [usersData, searchedUserData, searchQuery, page, rowsPerPage]);
 
   const { mutate: updateUserRoleMutation, isPending } = useMutation({
     mutationFn: updateUserType,
@@ -113,6 +146,17 @@ function UserTable() {
         <PageTitle title="Users" />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
+
+      <Box mb={2} display="flex" justifyContent="flex-end">
+        <SearchBar
+          placeholder="Search Users..."
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onSearch={handleSearch}
+          isSearching={isSearchingUser}
+        />
+      </Box>
+
       <Stack sx={{ alignItems: "center" }}>
         <TableContainer
           component={Paper}
