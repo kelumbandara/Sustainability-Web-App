@@ -25,14 +25,16 @@ import { useState } from "react";
 import theme from "../../theme";
 import PageTitle from "../../components/PageTitle";
 import Breadcrumb from "../../components/BreadCrumb";
-
+import DatePickerComponent from "../../components/DatePickerComponent";
+import DateRangePicker from "../../components/DateRangePicker";
+import TimePickerComponent from "../../components/TimePickerComponent";
 
 export default function AddOrEditHazardRiskDialog({
   defaultValues: defaultValues,
 }) {
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
-    { title: "AutoComplete" },
+    { title: "Date & Time Pickers" },
   ];
   const { isMobile, isTablet } = useIsMobile();
   const [selectedDemo, setSelectedDemo] = useState([]);
@@ -162,7 +164,7 @@ export default function AddOrEditHazardRiskDialog({
 
   return (
     <>
-    <Box
+      <Box
         sx={{
           padding: theme.spacing(2),
           boxShadow: 2,
@@ -195,150 +197,49 @@ export default function AddOrEditHazardRiskDialog({
           }}
         >
           <Box>
-            <Typography>Normal AutoComplete</Typography>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-              }}
-            >
-              <Autocomplete
-                {...register("name", { required: true })}
-                size="small"
-                options={
-                  demoData?.length ? demoData.map((demo) => demo.name) : []
-                }
-                defaultValue={defaultValues?.name}
-                sx={{ flex: 1, margin: "0.5rem" }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    error={!!errors.name}
-                    helperText={errors.name ? "Required" : ""}
-                    label="Demo"
-                    name="demo"
-                  />
-                )}
-              />
-            </Box>
-          </Box>
-          <Box>
-            <Typography>AutoComplete Return the ID</Typography>
-            <Box>
-              <UserAutoComplete
-                name="name"
-                label="Demo"
-                control={control}
-                register={register}
-                errors={errors}
-                userData={demoData}
-                defaultValue={defaultValues?.name}
-                required={true}
-              />
-            </Box>
-          </Box>
-          <Box sx={{ marginX: "0.5rem" }}>
-            <Typography>AutoComplete Checkboxes</Typography>
-            <AutoCheckBox
-              {...register("name", { required: true })}
+            <Controller
               control={control}
-              required={true}
-              name="name"
-              label="Demo"
-              options={demoData}
-              selectedValues={selectedDemo}
-              setSelectedValues={setSelectedDemo}
-              getOptionLabel={(option) => option.name}
-              getOptionValue={(option) => option.name}
-              placeholder="Choose Demo"
-              limitTags={2}
+              {...register("date", { required: true })}
+              name={"date"}
+              render={({ field }) => {
+                return (
+                  <DatePickerComponent
+                    onChange={(e) => field.onChange(e)}
+                    value={field.value ? new Date(field.value) : undefined}
+                    label="Date Picker"
+                    error={errors?.date ? "Required" : ""}
+                    disablePast={true}
+                  />
+                );
+              }}
             />
           </Box>
           <Box>
-            <Typography>AutoComplete with Create Option</Typography>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-              }}
-            >
-              <Autocomplete
-                {...register("name")}
-                size="small"
-                noOptionsText={
-                  <>
-                    <Typography variant="body2" color="inherit" gutterBottom>
-                      No matching Items
-                    </Typography>
-                  </>
-                }
-                options={[
-                  ...(demoData?.length
-                    ? demoData.map((demo) => demo.name)
-                    : []),
-                  "$ADD_NEW_ITEM",
-                ]}
-                renderOption={(props, option) => (
-                  <>
-                    {option === "$ADD_NEW_ITEM" ? (
-                      <AddNewObservationButton {...props} />
-                    ) : (
-                      <li {...props} key={option}>
-                        {option}
-                      </li>
-                    )}
-                  </>
-                )}
-                defaultValue={defaultValues?.name}
-                sx={{ flex: 1, margin: "0.5rem" }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    error={!!errors.name}
-                    label="Demo"
-                    name="name"
-                  />
-                )}
-              />
-            </Box>
+            <Typography>Date Range Picker</Typography>
+            <DateRangePicker
+              control={control}
+              register={register}
+              errors={errors}
+              label="Enter a date Range"
+              year={2025}
+            />
           </Box>
-          <Box>
-            <Typography>Controlled AutoComplete</Typography>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-              }}
-            >
-              <Controller
-                name="name"
-                control={control}
-                defaultValue={defaultValues?.name ?? ""}
-                {...register("name", { required: true })}
-                render={({ field }) => (
-                  <Autocomplete
-                    {...field}
-                    onChange={(event, newValue) => field.onChange(newValue)}
-                    size="small"
-                    options={
-                      demoData?.length ? demoData.map((demo) => demo.name) : []
-                    }
-                    sx={{ flex: 1, margin: "0.5rem" }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        required
-                        error={!!errors.name}
-                        helperText={errors.name && "Required"}
-                        label="Demo"
-                        name="name"
-                      />
-                    )}
+          <Box sx={{ margin: "0.5rem" }}>
+            <Controller
+              control={control}
+              {...register("date", { required: true })}
+              name={"date"}
+              render={({ field }) => {
+                return (
+                  <TimePickerComponent
+                    onChange={(e) => field.onChange(e)}
+                    value={field.value ? new Date(field.value) : null}
+                    label="Time Picker"
+                    error={errors?.date ? "Required" : ""}
                   />
-                )}
-              />
-            </Box>
+                );
+              }}
+            />
           </Box>
         </Stack>
       </Stack>

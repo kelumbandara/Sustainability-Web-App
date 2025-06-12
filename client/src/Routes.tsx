@@ -145,7 +145,13 @@ const AuditAndInspectionDashboard = React.lazy(
 );
 
 const Autocomplete = React.lazy(
-  () => import("./views/Components/Autocomplete")
+  () => import("./views/Components/AutoComplete")
+);
+const TextField = React.lazy(
+  () => import("./views/Components/TextField")
+);
+const DatePickers = React.lazy(
+  () => import("./views/Components/DatePickers")
 );
 const EnvironmentDashBoard = React.lazy(
   () => import("./views/Environment/Dashboard")
@@ -255,6 +261,26 @@ const AppRoutes = () => {
           element={withLayout(
             MainLayout,
             Autocomplete,
+            !userPermissionObject?.[
+              PermissionKeys.AUDIT_INSPECTION_DASHBOARD_VIEW
+            ]
+          )}
+        />
+        <Route
+          path="/input-fields/textfield"
+          element={withLayout(
+            MainLayout,
+            TextField,
+            !userPermissionObject?.[
+              PermissionKeys.AUDIT_INSPECTION_DASHBOARD_VIEW
+            ]
+          )}
+        />
+        <Route
+          path="/input-fields/date-pickers"
+          element={withLayout(
+            MainLayout,
+            DatePickers,
             !userPermissionObject?.[
               PermissionKeys.AUDIT_INSPECTION_DASHBOARD_VIEW
             ]
