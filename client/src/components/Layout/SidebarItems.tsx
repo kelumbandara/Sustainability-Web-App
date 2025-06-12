@@ -80,18 +80,18 @@ export const sidebarItems: Array<SidebarItem> = [
     accessKey: PermissionKeys.ADMIN_ACCESS_MNG_VIEW,
   },
   {
-    headline: "Sustainability Apps",
+    headline: "Components",
   },
   {
-    title: "Audit & Inspection",
+    title: "Input Fields",
     icon: <LayersIcon fontSize="small" />,
     href: "/audit-inspection",
     open: false,
     disabled: false,
     nestedItems: [
       {
-        title: "Dashboard",
-        href: "/audit-inspection/dashboard",
+        title: "Auto Complete",
+        href: "/input-fields/autocomplete",
         icon: <DashboardIcon fontSize="small" />,
         accessKey: PermissionKeys.AUDIT_INSPECTION_DASHBOARD_VIEW,
       },
@@ -264,327 +264,89 @@ export const sidebarItems: Array<SidebarItem> = [
       },
     ],
   },
+  
   {
-    headline: "Health & Safety Apps",
+    headline: "Main Layout Demo",
   },
   {
-    title: "Hazard & Risk",
-    href: "/hazard-risk",
-    icon: <EmergencyIcon fontSize="small" />,
-    nestedItems: [
-      {
-        title: "Dashboard",
-        href: "/hazard-risk/dashboard",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-        accessKey: PermissionKeys.HAZARD_RISK_DASHBOARD_VIEW,
-      },
-      {
-        title: "History",
-        href: "/hazard-risk/history",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-        accessKey: PermissionKeys.HAZARD_RISK_REGISTER_VIEW,
-      },
-      {
-        title: "Assigned Tasks",
-        href: "/hazard-risk/assigned-tasks",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-        accessKey: PermissionKeys.HAZARD_RISK_ASSIGNED_TASKS_VIEW,
-      },
-    ],
-  },
-  {
-    title: "Accident & Incident",
-    href: "/accident-incident",
-    icon: <ChangeHistoryIcon fontSize="small" />,
-    nestedItems: [
-      {
-        title: "Dashboard",
-        href: "/accident-incident/dashboard",
-        icon: <DashboardIcon fontSize="small" />,
-        accessKey: PermissionKeys.INCIDENT_ACCIDENT_DASHBOARD_VIEW,
-      },
-      {
-        title: "Register",
-        href: "/accident-incident/register",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-        nestedItems: [
-          {
-            title: "Accident Register",
-            href: "/accident-incident/register/accident-register",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-            accessKey: PermissionKeys.INCIDENT_ACCIDENT_REGISTER_ACCIDENT_VIEW,
-          },
-          {
-            title: "Incident Register",
-            href: "/accident-incident/register/incident-register",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-            accessKey: PermissionKeys.INCIDENT_ACCIDENT_REGISTER_INCIDENT_VIEW,
-          },
-          // {
-          //   title: "Corrective Action",
-          //   href: "/accident-incident/register/corrective-action",
-          //   icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-          //   accessKey: PermissionKeys.INCIDENT_ACCIDENT_CORRECTIVE_ACTION_VIEW,
-          // },
-        ],
-      },
-
-      {
-        title: "Assigned Tasks",
-        href: "/accident-incident/assigned-tasks",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-        nestedItems: [
-          {
-            title: "Accident Assigned",
-            href: "/accident-incident/assigned-tasks/accident-assigned",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-            accessKey:
-              PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_ACCIDENT_VIEW,
-          },
-          {
-            title: "Incident Assigned",
-            href: "/accident-incident/assigned-tasks/incident-assigned",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-            accessKey:
-              PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_INCIDENT_VIEW,
-          },
-          {
-            title: "Corrective Action",
-            href: "/accident-incident/assigned-tasks/corrective-action",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-            accessKey:
-              PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_CORRECTIVE_ACTION_VIEW,
-          },
-        ],
-      },
-    ],
-  },
-  {
-    title: "Document",
-    href: "/document",
-    icon: <FolderIcon fontSize="small" />,
-    accessKey: PermissionKeys.DOCUMENT_REGISTER_VIEW,
-  },
-  // {
-  //   title: "Equipment MNG",
-  //   href: "/equipment-mng",
-  //   icon: <ConstructionIcon fontSize="small" />,
-  //   disabled: true,
-  //   nestedItems: [
-  //     {
-  //       title: "Equipment",
-  //       href: "/equipment-mng/equipment",
-  //       icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-  //       nestedItems: [
-  //         {
-  //           title: "Register",
-  //           href: "/equipment-mng/equipment/register",
-  //           icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-  //         },
-  //         {
-  //           title: "Create",
-  //           href: "/equipment-mng/equipment/create",
-  //           icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       title: "Client",
-  //       href: "/equipment-mng/client",
-  //       icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-  //     },
-  //     {
-  //       title: "GEO Tag",
-  //       href: "/equipment-mng/geo-tag",
-  //       icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-  //     },
-  //     {
-  //       title: "Inspection Template",
-  //       href: "/equipment-mng/inspection-template",
-  //       icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-  //     },
-  //   ],
-  // },
-  {
-    title: "Occupational Health",
-    href: "/occupational-health",
-    icon: <FavoriteBorderIcon fontSize="small" />,
+    title: "Demo Layout 01",
+    href: "#",
+    icon: <ErrorOutlineOutlinedIcon fontSize="small" />,
     disabled: false,
     nestedItems: [
       {
-        title: "Dashboard",
-        href: "/occupational-health/dashboard",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-        accessKey: PermissionKeys.OCCUPATIONAL_HEALTH_DASHBOARD_VIEW,
-      },
-      {
-        title: "Clinical Suite",
-        href: "/occupational-health/clinical-suite",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-        nestedItems: [
-          {
-            title: "Patient Register",
-            href: "/occupational-health/clinical-suite/patient-register",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-            accessKey:
-              PermissionKeys.OCCUPATIONAL_HEALTH_CLINICAL_SUITE_PATIENT_REGISTER_VIEW,
-          },
-          {
-            title: "Consultation",
-            href: "/occupational-health/clinical-suite/consultation",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-            accessKey:
-              PermissionKeys.OCCUPATIONAL_HEALTH_CLINICAL_SUITE_CONSULTATION_VIEW,
-          },
-          {
-            title: "Medicine Stock",
-            href: "/occupational-health/clinical-suite/medicine-stock",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-            accessKey:
-              PermissionKeys.OCCUPATIONAL_HEALTH_CLINICAL_SUITE_MEDICINE_STOCK_VIEW,
-          },
-          {
-            title: "Pharmacy Queue",
-            href: "/occupational-health/clinical-suite/pharmacy-queue",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-            accessKey:
-              PermissionKeys.OCCUPATIONAL_HEALTH_CLINICAL_SUITE_PHARMACY_QUEUE_VIEW,
-          },
-        ],
-      },
-      {
-        title: "Medicine Inventory",
-        href: "/medicines-inventory",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-        nestedItems: [
-          {
-            title: "Medicine Request",
-            href: "/occupational-health/medicines-inventory/medicine-request",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-            accessKey:
-              PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_MEDICINE_REQUEST_VIEW,
-          },
-          {
-            title: "Purchase & Inventory",
-            href: "/occupational-health/medicines-inventory/purchase-inventory",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-            accessKey:
-              PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_PURCHASE_INVENTORY_VIEW,
-          },
-          {
-            title: "Transaction",
-            href: "/occupational-health/medicines-inventory/transaction",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-            accessKey:
-              PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_TRANSACTION_VIEW,
-          },
-          {
-            title: "Assigned Tasks",
-            href: "/occupational-health/medicines-inventory/assigned-tasks",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-            accessKey:
-              PermissionKeys.OCCUPATIONAL_HEALTH_MEDICINE_INVENTORY_ASSIGNED_TASKS_VIEW,
-          },
-        ],
-      },
-      {
-        title: "Medical Records",
-        href: "/occupational-health/medical-records",
-        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-        nestedItems: [
-          {
-            title: "Maternity Register",
-            href: "/occupational-health/medical-records/maternity-register",
-            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
-            accessKey:
-              PermissionKeys.OCCUPATIONAL_HEALTH_MEDICAL_RECORDS_MATERNITY_REGISTER_VIEW,
-          },
-        ],
-      },
-    ],
-  },
-  {
-    headline: "Social Apps",
-  },
-  {
-    title: "Grievance",
-    href: "/grievance",
-    icon: <ErrorOutlineOutlinedIcon fontSize="small" />,
-    disabled: true,
-    nestedItems: [
-      {
-        title: "Dashboard",
-        href: "/grievance/dashboard",
+        title: "Nested Layout 01",
+        href: "#",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
         accessKey: PermissionKeys.GRIEVANCE_DASHBOARD_VIEW,
       },
       {
-        title: "Register",
-        href: "/grievance/register",
+        title: "Nested Layout 02",
+        href: "#",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
         accessKey: PermissionKeys.GRIEVANCE_REGISTER_VIEW,
       },
       {
-        title: "Assigned Tasks",
-        href: "/grievance/assigned-tasks",
+        title: "Nested Layout 03",
+        href: "#",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
         accessKey: PermissionKeys.GRIEVANCE_ASSIGNED_TASKS_VIEW,
       },
     ],
   },
   {
-    title: "RAG",
-    href: "/rag",
+    title: "Demo Layout 02",
+    href: "#",
     icon: <SentimentSatisfiedAltOutlinedIcon fontSize="small" />,
-    disabled: true,
+    disabled: false,
     nestedItems: [
       {
-        title: "Dashboard",
-        href: "/rag/dashboard",
+        title: "Nested Layout 01",
+        href: "#",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
         accessKey: PermissionKeys.RAG_DASHBOARD_VIEW,
       },
       {
-        title: "Register",
-        href: "/rag/register",
+        title: "Nested Layout 02",
+        href: "#",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
         accessKey: PermissionKeys.RAG_REGISTER_VIEW,
       },
     ],
   },
   {
-    title: "Engagement",
-    href: "/engagement",
+    title: "Demo Layout 03",
+    href: "#",
     icon: <DatasetLinkedOutlinedIcon fontSize="small" />,
-    disabled: true,
+    disabled: false,
     nestedItems: [
       {
-        title: "History",
-        href: "/engagement/history",
+        title: "Nested Layout 01",
+        href: "#",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
         accessKey: PermissionKeys.ENGAGEMENT_REGISTER_VIEW,
       },
     ],
   },
   {
-    title: "Attrition",
-    href: "/attrition",
+    title: "Demo Layout 04",
+    href: "#",
     icon: <PersonRemoveOutlinedIcon fontSize="small" />,
-    disabled: true,
+    disabled: false,
     nestedItems: [
       {
-        title: "History",
-        href: "/attrition/history",
+        title: "Nested Layout 01",
+        href: "#",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
         accessKey: PermissionKeys.ATTRITION_REGISTER_VIEW,
       },
     ],
   },
   {
-    title: "Satisfaction Survey",
-    href: "/satisfaction-survey",
+    title: "Demo Layout 05",
+    href: "#",
     icon: <PollOutlinedIcon fontSize="small" />,
-    disabled: true,
+    disabled: false,
     accessKey: PermissionKeys.SATISFACTION_SURVEY_VIEW,
   },
 ];

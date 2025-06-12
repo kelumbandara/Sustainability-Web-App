@@ -143,6 +143,10 @@ const EnvironmentTable = React.lazy(
 const AuditAndInspectionDashboard = React.lazy(
   () => import("./views/AuditAndInspection/Dashboard")
 );
+
+const Autocomplete = React.lazy(
+  () => import("./views/Components/Autocomplete")
+);
 const EnvironmentDashBoard = React.lazy(
   () => import("./views/Environment/Dashboard")
 );
@@ -247,10 +251,10 @@ const AppRoutes = () => {
         
         {/* Audit & Inspection */}
         <Route
-          path="/audit-inspection/dashboard"
+          path="/input-fields/autocomplete"
           element={withLayout(
             MainLayout,
-            AuditAndInspectionDashboard,
+            Autocomplete,
             !userPermissionObject?.[
               PermissionKeys.AUDIT_INSPECTION_DASHBOARD_VIEW
             ]
