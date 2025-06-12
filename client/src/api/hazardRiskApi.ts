@@ -174,6 +174,7 @@ export enum HazardAndRiskStatus {
   OPEN = "Open",
   DRAFT = "Draft",
   PUBLISHED = "Published",
+  APPROVED = "Approved",
 }
 
 export enum HazardDashboardPeriods {
@@ -313,7 +314,12 @@ export const deleteHazardRisk = async (id: string) => {
 };
 
 export const createObservationType = async (data: ObservationTypes) => {
-  const res = await axios.post('/api/store-observation',data);
+  const res = await axios.post("/api/store-observation", data);
   console.log(data);
   return res.data;
 };
+
+export async function approveHazardOrRisk(id: string) {
+  const res = await axios.post(`api/hazard-risk/${id}/update-approved`);
+  return res.data;
+}

@@ -315,9 +315,9 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
                     <TableCell align="right">{row.createdByUserName}</TableCell>
                     <TableCell align="right">{row.assignee?.name}</TableCell>
                     <TableCell align="right">
-                      {row.status === HazardAndRiskStatus.OPEN ? (
+                      {row.status === HazardAndRiskStatus.APPROVED ? (
                         <Typography sx={{ color: "var(--pallet-blue)" }}>
-                          Open
+                          Approved
                         </Typography>
                       ) : (
                         <Typography sx={{ color: "var(--pallet-orange)" }}>
@@ -383,7 +383,10 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
 
             {selectedRow && (
               <Stack>
-                <ViewHazardOrRiskContent hazardOrRisk={selectedRow} />
+                <ViewHazardOrRiskContent
+                  hazardOrRisk={selectedRow}
+                  handleCloseDrawer={() => setOpenViewDrawer(false)}
+                />
               </Stack>
             )}
           </Stack>

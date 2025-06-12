@@ -1,6 +1,19 @@
-import { AppBar, Box, Stack, Tab, Tabs, Typography } from "@mui/material";
+import {
+  Alert,
+  AppBar,
+  Box,
+  CircularProgress,
+  Stack,
+  Tab,
+  Tabs,
+  Typography,
+} from "@mui/material";
 import { DrawerContentItem } from "../../components/ViewDataDrawer";
-import { HazardAndRisk } from "../../api/hazardRiskApi";
+import {
+  approveHazardOrRisk,
+  HazardAndRisk,
+  HazardAndRiskStatus,
+} from "../../api/hazardRiskApi";
 import { differenceInDays, format } from "date-fns";
 import { useState } from "react";
 import theme from "../../theme";
@@ -9,6 +22,12 @@ import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import FireExtinguisherIcon from "@mui/icons-material/FireExtinguisher";
 import { FileItemsViewer } from "../../components/FileItemsViewer";
 import { StorageFile } from "../../utils/StorageFiles.util";
+import CustomButton from "../../components/CustomButton";
+import { useMutation } from "@tanstack/react-query";
+import queryClient from "../../state/queryClient";
+import { useSnackbar } from "notistack";
+import ApproveConfirmationModal from "../OccupationalHealth/MedicineInventory/MedicineRequest/ApproveConfirmationModal";
+import useCurrentUser from "../../hooks/useCurrentUser";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -42,11 +61,38 @@ function a11yProps(index: number) {
 
 function ViewHazardOrRiskContent({
   hazardOrRisk,
+  handleCloseDrawer,
 }: {
   hazardOrRisk: HazardAndRisk;
+  handleCloseDrawer: () => void;
 }) {
-  const [activeTab, setActiveTab] = useState(0);
   const { isTablet } = useIsMobile();
+  const { enqueueSnackbar } = useSnackbar();
+  const { user } = useCurrentUser();
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
+
+  const {
+    mutate: approveHazardOrRiskMutation,
+    isPending: isHazardOrRiskApproving,
+  } = useMutation({
+    mutationFn: approveHazardOrRisk,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["hazardRisks"],
+      });
+      enqueueSnackbar("Hazard/Risk Approved Successfully!", {
+        variant: "success",
+      });
+      setApproveDialogOpen(false);
+      handleCloseDrawer();
+    },
+    onError: () => {
+      enqueueSnackbar(`Hazard/Risk Approval Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -230,7 +276,58 @@ function ViewHazardOrRiskContent({
               : "--"
           }
         />
+        {hazardOrRisk.status === HazardAndRiskStatus.DRAFT &&
+          user.userType === 5 && (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                marginTop: "1rem",
+                objectFit: "contain",
+              }}
+            >
+              <CustomButton
+                variant="contained"
+                sx={{
+                  backgroundColor: "var(--pallet-blue)",
+                  marginTop: "1rem",
+                  marginX: "0.5rem",
+                }}
+                size="medium"
+                disabled={isHazardOrRiskApproving}
+                endIcon={
+                  isHazardOrRiskApproving ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : null
+                }
+                onClick={() => setApproveDialogOpen(true)}
+              >
+                Approve Hazard/Risk
+              </CustomButton>
+            </Box>
+          )}
       </Box>
+      {approveDialogOpen && (
+        <ApproveConfirmationModal
+          open={approveDialogOpen}
+          title="Approve Hazard/Risk Confirmation"
+          content={
+            <>
+              Are you sure you want to approve this hazard/risk?
+              <Alert severity="warning" style={{ marginTop: "1rem" }}>
+                This action is not reversible.
+              </Alert>
+            </>
+          }
+          handleClose={() => setApproveDialogOpen(false)}
+          approveFunc={async () => {
+            await approveHazardOrRiskMutation(hazardOrRisk.id);
+          }}
+          onSuccess={() => {}}
+          handleReject={() => {}}
+        />
+      )}
     </Stack>
   );
 }

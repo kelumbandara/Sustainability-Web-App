@@ -44,7 +44,7 @@ export const userSchema = z.object({
   gender: z.string(),
   availability: z.boolean(),
   responsibleSection: z.array(z.string()),
-  userType: userTypeSchema,
+  userType: z.number(),
   userLevel: userLevelSchema,
   profileImage: z
     .array(z.union([z.instanceof(File), StorageFileSchema]))
@@ -289,27 +289,41 @@ export async function updateUserProfileDetails({
   return res.data;
 }
 
-export async function resetProfileEmail({ currentEmail,id }: { currentEmail: string, id: number }) {
+export async function resetProfileEmail({
+  currentEmail,
+  id,
+}: {
+  currentEmail: string;
+  id: number;
+}) {
   const res = await axios.post(`/api/user/${id}/email-change`, {
     currentEmail,
   });
   return res.data;
 }
 
-export async function resetProfileEmailVerification({ otp,id }: { otp: string, id: number }) {
+export async function resetProfileEmailVerification({
+  otp,
+  id,
+}: {
+  otp: string;
+  id: number;
+}) {
   const res = await axios.post(`/api/user/${id}/email-change-verify`, {
     otp,
   });
   return res.data;
 }
 
-export async function resetProfileEmailConfirm({ newEmail,id }: { newEmail: string, id: number }) {
+export async function resetProfileEmailConfirm({
+  newEmail,
+  id,
+}: {
+  newEmail: string;
+  id: number;
+}) {
   const res = await axios.post(`/api/user/${id}/email-change-confirm`, {
     newEmail,
   });
   return res.data;
 }
-
-
-
-
