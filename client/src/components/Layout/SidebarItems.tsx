@@ -108,6 +108,12 @@ export const sidebarItems: Array<SidebarItem> = [
         accessKey: PermissionKeys.AUDIT_INSPECTION_CALENDAR_VIEW,
       },
       {
+        title: "Other Inputs",
+        href: "/input-fields/other-inputs",
+        icon: <CalendarMonthIcon fontSize="small" />,
+        accessKey: PermissionKeys.AUDIT_INSPECTION_CALENDAR_VIEW,
+      },
+      {
         title: "External Audit",
         href: "/audit-inspection/external-audit",
         icon: <TravelExploreIcon fontSize="small" />,

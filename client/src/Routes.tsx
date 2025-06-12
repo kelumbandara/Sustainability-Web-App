@@ -153,6 +153,9 @@ const TextField = React.lazy(
 const DatePickers = React.lazy(
   () => import("./views/Components/DatePickers")
 );
+const OtherInputs = React.lazy(
+  () => import("./views/Components/OtherInputs")
+);
 const EnvironmentDashBoard = React.lazy(
   () => import("./views/Environment/Dashboard")
 );
@@ -281,6 +284,16 @@ const AppRoutes = () => {
           element={withLayout(
             MainLayout,
             DatePickers,
+            !userPermissionObject?.[
+              PermissionKeys.AUDIT_INSPECTION_DASHBOARD_VIEW
+            ]
+          )}
+        />
+        <Route
+          path="/input-fields/other-inputs"
+          element={withLayout(
+            MainLayout,
+            OtherInputs,
             !userPermissionObject?.[
               PermissionKeys.AUDIT_INSPECTION_DASHBOARD_VIEW
             ]
