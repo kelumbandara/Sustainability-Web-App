@@ -44,7 +44,7 @@ export const userSchema = z.object({
   gender: z.string(),
   availability: z.boolean(),
   responsibleSection: z.array(z.string()),
-  userType: z.number(),
+  userType: userTypeSchema,
   userLevel: userLevelSchema,
   profileImage: z
     .array(z.union([z.instanceof(File), StorageFileSchema]))

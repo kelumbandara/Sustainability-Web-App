@@ -277,7 +277,7 @@ function ViewHazardOrRiskContent({
           }
         />
         {hazardOrRisk.status === HazardAndRiskStatus.DRAFT &&
-          user.userType === 5 && (
+          user.userType.id === 5 && (
             <Box
               sx={{
                 display: "flex",
