@@ -22,10 +22,11 @@ export const userTypeSchema = z.object({
 });
 
 export const userLevelSchema = z.object({
-  id: z.string(),
-  levelId: z.string(),
+  id: z.number(),
+  levelId: z.number(),
   levelName: z.string().optional(),
   created_at: z.string(),
+  updated_at: z.string(),
 });
 
 export type UserLevel = z.infer<typeof userLevelSchema>;

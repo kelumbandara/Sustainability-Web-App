@@ -9,6 +9,8 @@ import {
   Alert,
   Box,
   Button,
+  Chip,
+  colors,
   LinearProgress,
   Stack,
   TableFooter,
@@ -316,13 +318,21 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
                     <TableCell align="right">{row.assignee?.name}</TableCell>
                     <TableCell align="right">
                       {row.status === HazardAndRiskStatus.APPROVED ? (
-                        <Typography sx={{ color: "var(--pallet-blue)" }}>
-                          Approved
-                        </Typography>
+                        <Chip
+                          label={"Approved"}
+                          sx={{
+                            color: "var(--pallet-green)",
+                            backgroundColor: colors.green[50],
+                          }}
+                        />
                       ) : (
-                        <Typography sx={{ color: "var(--pallet-orange)" }}>
-                          Draft
-                        </Typography>
+                        <Chip
+                          label={"Draft"}
+                          sx={{
+                            color: "var(--pallet-orange)",
+                            backgroundColor: colors.orange[50],
+                          }}
+                        />
                       )}
                     </TableCell>
                   </TableRow>
@@ -367,7 +377,11 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
               title="Hazard or Risk Details"
               handleClose={() => setOpenViewDrawer(false)}
               disableEdit={
-                isAssignedTasks ? isRiskAssignEditDisabled : isRiskEditDisabled
+                isAssignedTasks
+                  ? isRiskAssignEditDisabled ||
+                    selectedRow?.status === HazardAndRiskStatus.APPROVED
+                  : isRiskEditDisabled ||
+                    selectedRow?.status === HazardAndRiskStatus.APPROVED
               }
               onEdit={() => {
                 setSelectedRow(selectedRow);

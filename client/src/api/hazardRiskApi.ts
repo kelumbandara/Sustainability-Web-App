@@ -323,3 +323,8 @@ export async function approveHazardOrRisk(id: string) {
   const res = await axios.post(`api/hazard-risk/${id}/update-approved`);
   return res.data;
 }
+
+export async function getApprovedHazardOrRiskList() {
+  const res = await axios.get("api/hazard-risks-assign-task-approved");
+  return res.data;
+}
