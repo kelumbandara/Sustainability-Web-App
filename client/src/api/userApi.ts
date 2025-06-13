@@ -58,7 +58,7 @@ export const userSchema = z.object({
   assignedFactory: z.array(z.string()),
   employeeNumber: z.string(),
   jobPosition: z.string(),
-  assigneeLevel: z.string(),
+  assigneeLevel: z.number(),
   permissionObject: PermissionKeysObjectSchema,
 });
 
@@ -191,7 +191,7 @@ export async function updateUserType({
 }: {
   id: number;
   userTypeId: number;
-  assigneeLevel: string;
+  assigneeLevel: number;
   department: string;
   availability: boolean;
   jobPosition: string;
