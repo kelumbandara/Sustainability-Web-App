@@ -570,7 +570,7 @@ export const sidebarItems: Array<SidebarItem> = [
     title: "Attrition",
     href: "/attrition",
     icon: <PersonRemoveOutlinedIcon fontSize="small" />,
-    disabled: true,
+    disabled: false,
     nestedItems: [
       {
         title: "History",
