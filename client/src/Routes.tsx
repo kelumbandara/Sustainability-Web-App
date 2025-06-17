@@ -21,7 +21,10 @@ const AccessManagementTable = React.lazy(
   () => import("./views/Administration/AccessManagementTable")
 );
 const OrganizationTable = React.lazy(
-  () => import("./views/Administration/OrganizationSettings/OrganizationSettingsTable")
+  () =>
+    import(
+      "./views/Administration/OrganizationSettings/OrganizationSettingsTable"
+    )
 );
 
 const UnderDevelopment = React.lazy(
@@ -147,7 +150,11 @@ const EnvironmentDashBoard = React.lazy(
   () => import("./views/Environment/Dashboard")
 );
 
-
+//RAG
+const RAGDashBoard = React.lazy(() => import("./views/Environment/Dashboard"));
+const RAGRegisterTable = React.lazy(
+  () => import("./views/RAG/RagRegisterTable")
+);
 function withLayout(Layout: any, Component: any, restrictAccess = false) {
   return (
     <Layout>
@@ -244,7 +251,7 @@ const AppRoutes = () => {
             !userPermissionObject?.[PermissionKeys.ADMIN_ACCESS_MNG_VIEW]
           )}
         />
-        
+
         {/* Audit & Inspection */}
         <Route
           path="/audit-inspection/dashboard"
@@ -306,9 +313,7 @@ const AppRoutes = () => {
           element={withLayout(
             MainLayout,
             ChemicalDashboard,
-            !userPermissionObject?.[
-              PermissionKeys.CHEMICAL_MNG_DASHBOARD_VIEW
-            ]
+            !userPermissionObject?.[PermissionKeys.CHEMICAL_MNG_DASHBOARD_VIEW]
           )}
         />
         <Route
@@ -327,7 +332,6 @@ const AppRoutes = () => {
           path="/chemical-mng/assigned-tasks"
           element={withLayout(MainLayout, () => (
             <ChemicalRequestTable isAssignedTasks={true} />
-
           ))}
         />
 
@@ -599,6 +603,22 @@ const AppRoutes = () => {
             !userPermissionObject?.[
               PermissionKeys.SUSTAINABILITY_SDG_REPORTING_CREATE
             ]
+          )}
+        />
+        <Route
+          path="/rag/dashboard"
+          element={withLayout(
+            MainLayout,
+            UnderDevelopment
+          )}
+        />
+
+        <Route
+          path="/rag/register"
+          element={withLayout(
+            MainLayout,
+            RAGRegisterTable,
+            !userPermissionObject?.[PermissionKeys.RAG_REGISTER_VIEW]
           )}
         />
         <Route

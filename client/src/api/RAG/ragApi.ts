@@ -1,0 +1,247 @@
+import { z } from "zod";
+import axios from "axios";
+
+export const RAGSchema = z.object({
+  id: z.string(),
+  referenceNumber: z.string(),
+  employeeType: z.string(),
+  employeeId: z.string(),
+  division: z.string(),
+  employeeName: z.string(),
+  dateOfJoin: z.date(),
+  designation: z.string(),
+  department: z.string(),
+  gender: z.string(),
+  age: z.number(),
+  dateOfBirth: z.date(),
+  servicePeriod: z.string(),
+  tenureSplit: z.string(),
+  sourceOfHiring: z.string(),
+  function: z.string(),
+  reportingManager: z.string(),
+  employmentType: z.string(),
+  countryName: z.string(),
+  state: z.string(),
+  origin: z.string(),
+  category: z.string(),
+  discussionSummary: z.string(),
+  remark: z.string(),
+  status: z.string(),
+  createdByUser: z.number(),
+  updatedBy: z.number(),
+  rejectedBy: z.number(),
+  inprogressBy: z.number(),
+  approvedBy: z.number(),
+  created_at: z.date(),
+});
+
+export type RAG = z.infer<typeof RAGSchema>;
+
+export const RAGData = [
+  {
+    id: "1",
+    referenceNumber: "RAG-01",
+    employeeName: "Akila Manujith",
+    employeeId: "FAE-02",
+    gender: "Male",
+    countryName: "Sri Lanka",
+    state: "Kandy",
+    dateOfJoin: new Date("2023-12-31"),
+    resignedDate: new Date("2023-12-31"),
+    relievedDate: new Date("2023-12-31"),
+    division: "Vintage Denim Pvt (Ltd.)",
+    designation: "Team Manager",
+    department: "Kandy",
+    perDaySalary: "25000.00",
+    employmentClassification: "Manager",
+    employmentType: "Full-Time",
+    isHostelAccess: true,
+    isWorkHistory: false,
+    resignationType: "Retirement",
+    resignationReason: "Over Date",
+    servicePeriod: "35 Years",
+    tenureSplit: "4-5 Years",
+    isNormalResignation: true,
+    remark: "OK",
+    status: "Announced",
+    createdByUser: 2,
+    updatedBy: 4,
+    completeBy: 5,
+  },
+  {
+    id: "2",
+    referenceNumber: "RAG-02",
+    employeeName: "Nimasha Perera",
+    employeeId: "FAE-05",
+    gender: "Female",
+    countryName: "Sri Lanka",
+    state: "Colombo",
+    dateOfJoin: new Date("2023-12-31"),
+
+    resignedDate: new Date("2024-03-15"),
+    relievedDate: new Date("2024-04-01"),
+    division: "Vintage Apparel Co.",
+    designation: "HR Executive",
+    department: "Human Resources",
+    perDaySalary: "18000.00",
+    employmentClassification: "Executive",
+    employmentType: "Full-Time",
+    isHostelAccess: false,
+    isWorkHistory: true,
+    resignationType: "Voluntary",
+    resignationReason: "Personal Reasons",
+    servicePeriod: "5 Years",
+    tenureSplit: "2-3 Years",
+    isNormalResignation: true,
+    remark: "Exit interview completed",
+    status: "Processing",
+    createdByUser: 3,
+    updatedBy: 3,
+    completeBy: 7,
+  },
+  {
+    id: "3",
+    referenceNumber: "RAG-03",
+    employeeName: "Sahan Fernando",
+    employeeId: "FAE-12",
+    gender: "Male",
+    countryName: "Sri Lanka",
+    state: "Galle",
+    dateOfJoin: new Date("2023-12-31"),
+
+    resignedDate: new Date("2024-01-10"),
+    relievedDate: new Date("2024-01-31"),
+    division: "Denim Designers Ltd.",
+    designation: "Software Engineer",
+    department: "IT",
+    perDaySalary: "22000.00",
+    employmentClassification: "Technical",
+    employmentType: "Contract",
+    isHostelAccess: false,
+    isWorkHistory: true,
+    resignationType: "Termination",
+    resignationReason: "Performance Issues",
+    servicePeriod: "1.5 Years",
+    tenureSplit: "<2 Years",
+    isNormalResignation: false,
+    remark: "No further action required",
+    status: "Completed",
+    createdByUser: 1,
+    updatedBy: 2,
+    completeBy: 2,
+  },
+  {
+    id: "4",
+    referenceNumber: "RAG-04",
+    employeeName: "Tharindu Jayasuriya",
+    employeeId: "FAE-09",
+    gender: "Male",
+    countryName: "Sri Lanka",
+    state: "Kurunegala",
+    dateOfJoin: new Date("2023-12-31"),
+
+    resignedDate: new Date("2023-11-20"),
+    relievedDate: new Date("2023-11-30"),
+    division: "Vintage Denim Pvt (Ltd.)",
+    designation: "Line Supervisor",
+    department: "Production",
+    perDaySalary: "15000.00",
+    employmentClassification: "Supervisor",
+    employmentType: "Full-Time",
+    isHostelAccess: true,
+    isWorkHistory: true,
+    resignationType: "Voluntary",
+    resignationReason: "Family Relocation",
+    servicePeriod: "10 Years",
+    tenureSplit: "6-10 Years",
+    isNormalResignation: true,
+    remark: "Cleared",
+    status: "Approved",
+    createdByUser: 4,
+    updatedBy: 4,
+    completeBy: 4,
+  },
+];
+
+export const EmployeeTypeData = [
+  {
+    id: "1",
+    employeeType: "Existing Employee",
+  },
+  {
+    id: "2",
+    employeeType: "New Employee",
+  },
+];
+
+export const DesignationData = [
+  {
+    id: "1",
+    designationName: "CEO",
+  },
+  {
+    id: "2",
+    designationName: "Manager",
+  },
+];
+
+export const FunctionData = [
+  {
+    id: "1",
+    functionName: "Fun 1",
+  },
+  {
+    id: "2",
+    functionName: "Fun 2",
+  },
+];
+
+export const SourceOfHiring = [
+  {
+    id: "1",
+    sourceName: "src 1",
+  },
+  {
+    id: "2",
+    sourceName: "src 2",
+  },
+];
+
+export const EmploymentTypeData = [
+  {
+    id: "1",
+    employmentType: "Worker",
+  },
+  {
+    id: "2",
+    employmentType: "Staff",
+  },
+];
+
+export const CountryData = [
+  {
+    id: "1",
+    countryName: "Sri Lanka",
+  },
+  {
+    id: "2",
+    countryName: "India",
+  },
+];
+
+export const StateData = [
+  {
+    id: "1",
+    stateName: "Kandy",
+  },
+  {
+    id: "2",
+    stateName: "Colombo",
+  },
+];
+
+export const createDesignation = async (designation: string) => {
+  const res = await axios.post("/api/designation", designation);
+  console.log(designation);
+  return res.data;
+};
