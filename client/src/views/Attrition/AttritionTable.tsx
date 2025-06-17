@@ -36,14 +36,15 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../state/queryClient";
 import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
 import { PermissionKeys } from "../Administration/SectionList";
-import { RAG, RAGData } from "../../api/RAG/ragApi";
-import ViewRAGContent from "./ViewRAGContent";
-import AddOrEditRAGDialog from "./AddOrEditRagDetailsDialog";
+import { Attrition, attritionData } from "../../api/Attrition/attritionApi";
+// import { RAG, RAGData } from "../../api/RAG/ragApi";
+// import ViewRAGContent from "./ViewRAGContent";
+import AddOrEditAttritionDialog from "./AddOrEditAttritionDialog";
 
 function DocumentTable() {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<RAG>(null);
+  const [selectedRow, setSelectedRow] = useState<Attrition>(null);
   const [openAddOrEditDialog, setOpenAddOrEditDialog] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [page, setPage] = useState(0);
@@ -145,10 +146,12 @@ function DocumentTable() {
                 setOpenAddOrEditDialog(true);
               }}
               disabled={
-                !useCurrentUserHaveAccess(PermissionKeys.RAG_REGISTER_CREATE)
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.ATTRITION_REGISTER_CREATE
+                )
               }
             >
-              Add New RAG Detail
+              Add New Attrition Detail
             </Button>
           </Box>
           {isDocumentDataFetching && <LinearProgress sx={{ width: "100%" }} />}
@@ -156,19 +159,20 @@ function DocumentTable() {
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
                 <TableCell>Reference Number</TableCell>
-                <TableCell align="right">Employment Type</TableCell>
-                <TableCell align="right">Employment Id</TableCell>
-                <TableCell align="right">Division</TableCell>
+                <TableCell align="right">Employee Id</TableCell>
                 <TableCell align="right">Employee Name</TableCell>
-                <TableCell align="right">Date Of Join</TableCell>
-                <TableCell align="right">Designation</TableCell>
-                <TableCell align="right">Department</TableCell>
                 <TableCell align="right">Gender</TableCell>
+                <TableCell align="right">Date Of Join</TableCell>
+                <TableCell align="right">Division</TableCell>
+                <TableCell align="right">Resigned Date</TableCell>
+                <TableCell align="right">Relieved Date</TableCell>
+                <TableCell align="right">Department</TableCell>
+                <TableCell align="right">Tenure Split</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {RAGData?.length > 0 ? (
-                RAGData.map((row) => (
+              {attritionData?.length > 0 ? (
+                attritionData.map((row) => (
                   <TableRow
                     key={`${row.id}${row.referenceNumber}`}
                     sx={{
@@ -183,16 +187,21 @@ function DocumentTable() {
                     <TableCell component="th" scope="row">
                       {row.referenceNumber}
                     </TableCell>
-                    <TableCell align="right">{row.employmentType}</TableCell>
                     <TableCell align="right">{row.employeeId}</TableCell>
-                    <TableCell align="right">{row.division}</TableCell>
                     <TableCell align="right">{row.employeeName}</TableCell>
+                    <TableCell align="right">{row.gender}</TableCell>
                     <TableCell align="right">
                       {format(new Date(row.dateOfJoin), "yyyy-MM-dd")}
                     </TableCell>
-                    <TableCell align="right">{row.designation}</TableCell>
+                    <TableCell align="right">{row.division}</TableCell>
+                    <TableCell align="right">
+                      {format(new Date(row.resignedDate), "yyyy-MM-dd")}
+                    </TableCell>
+                    <TableCell align="right">
+                      {format(new Date(row.relievedDate), "yyyy-MM-dd")}
+                    </TableCell>
                     <TableCell align="right">{row.department}</TableCell>
-                    <TableCell align="right">{row.gender}</TableCell>
+                    <TableCell align="right">{row.tenureSplit}</TableCell>
                   </TableRow>
                 ))
               ) : (
@@ -228,36 +237,38 @@ function DocumentTable() {
         drawerContent={
           <Stack spacing={1} sx={{ paddingX: theme.spacing(1) }}>
             <DrawerHeader
-              title="RAG Details"
+              title="Attrition Details"
               handleClose={() => setOpenViewDrawer(false)}
               onEdit={() => {
                 setSelectedRow(selectedRow);
                 setOpenAddOrEditDialog(true);
               }}
               disableEdit={
-                !useCurrentUserHaveAccess(PermissionKeys.DOCUMENT_REGISTER_EDIT)
+                !useCurrentUserHaveAccess(
+                  PermissionKeys.ATTRITION_REGISTER_EDIT
+                )
               }
               onDelete={() => setDeleteDialogOpen(true)}
               disableDelete={
                 !useCurrentUserHaveAccess(
-                  PermissionKeys.DOCUMENT_REGISTER_DELETE
+                  PermissionKeys.ATTRITION_REGISTER_DELETE
                 )
               }
             />
 
-            {selectedRow && (
+            {/* {selectedRow && (
               <Stack>
                 <ViewRAGContent
                   rag={selectedRow}
                   handleCloseDrawer={() => setOpenViewDrawer(false)}
                 />
               </Stack>
-            )}
+            )} */}
           </Stack>
         }
       />
       {openAddOrEditDialog && (
-        <AddOrEditRAGDialog
+        <AddOrEditAttritionDialog
           open={openAddOrEditDialog}
           handleClose={() => {
             setSelectedRow(null);

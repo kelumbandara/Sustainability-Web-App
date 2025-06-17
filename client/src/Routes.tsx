@@ -21,7 +21,10 @@ const AccessManagementTable = React.lazy(
   () => import("./views/Administration/AccessManagementTable")
 );
 const OrganizationTable = React.lazy(
-  () => import("./views/Administration/OrganizationSettings/OrganizationSettingsTable")
+  () =>
+    import(
+      "./views/Administration/OrganizationSettings/OrganizationSettingsTable"
+    )
 );
 
 const UnderDevelopment = React.lazy(
@@ -147,6 +150,9 @@ const EnvironmentDashBoard = React.lazy(
   () => import("./views/Environment/Dashboard")
 );
 
+const AttritionTable = React.lazy(
+  () => import("./views/Attrition/AttritionTable")
+);
 
 function withLayout(Layout: any, Component: any, restrictAccess = false) {
   return (
@@ -244,7 +250,7 @@ const AppRoutes = () => {
             !userPermissionObject?.[PermissionKeys.ADMIN_ACCESS_MNG_VIEW]
           )}
         />
-        
+
         {/* Audit & Inspection */}
         <Route
           path="/audit-inspection/dashboard"
@@ -306,9 +312,7 @@ const AppRoutes = () => {
           element={withLayout(
             MainLayout,
             ChemicalDashboard,
-            !userPermissionObject?.[
-              PermissionKeys.CHEMICAL_MNG_DASHBOARD_VIEW
-            ]
+            !userPermissionObject?.[PermissionKeys.CHEMICAL_MNG_DASHBOARD_VIEW]
           )}
         />
         <Route
@@ -327,7 +331,6 @@ const AppRoutes = () => {
           path="/chemical-mng/assigned-tasks"
           element={withLayout(MainLayout, () => (
             <ChemicalRequestTable isAssignedTasks={true} />
-
           ))}
         />
 
@@ -516,6 +519,17 @@ const AppRoutes = () => {
             //   PermissionKeys
             //     .OCCUPATIONAL_HEALTH_CLINICAL_SUITE_PHARMACY_QUEUE_VIEW
             // ]
+          )}
+        />
+        <Route
+          path="/attrition/history"
+          element={withLayout(
+            MainLayout,
+            AttritionTable,
+            !userPermissionObject?.[
+              PermissionKeys
+                .ATTRITION_REGISTER_VIEW
+            ]
           )}
         />
         {/* Medicine Inventory */}
