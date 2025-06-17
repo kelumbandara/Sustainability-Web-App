@@ -56,6 +56,7 @@ import {
   Attrition,
   CountryData,
   DesignationData,
+  genderData,
   StateData,
 } from "../../api/Attrition/attritionApi";
 import SwitchButton from "../../components/SwitchButton";
@@ -593,14 +594,36 @@ export default function AddOrEditRAGDialog({
                       flexDirection: isMobile ? "column" : "row",
                     }}
                   >
-                    <TextField
-                      required
-                      id="gender"
-                      label="Gender"
-                      error={!!errors.gender}
-                      size="small"
-                      sx={{ flex: 1, margin: "0.5rem" }}
+                    <Controller
+                      name="gender"
+                      control={control}
+                      defaultValue={defaultValues?.gender ?? ""}
                       {...register("gender", { required: true })}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(event, newValue) =>
+                            field.onChange(newValue)
+                          }
+                          size="small"
+                          options={
+                            genderData?.length
+                              ? genderData.map((gender) => gender.gender)
+                              : []
+                          }
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              required
+                              error={!!errors.gender}
+                              helperText={errors.gender && "Required"}
+                              label="Gender"
+                              name="gender"
+                            />
+                          )}
+                        />
+                      )}
                     />
                     <Controller
                       name="countryName"

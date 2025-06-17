@@ -165,7 +165,20 @@ export const attritionData = [
       completeBy: 4,
     },
   ];
-
+  export const genderData = [
+    {
+      id: "1",
+      gender: "Male",
+    },
+    {
+      id: "2",
+      gender: "Female",
+    },
+    {
+      id: "3",
+      gender: "Other",
+    },
+  ];
   export const EmployeeTypeData = [
     {
       id: "1",
