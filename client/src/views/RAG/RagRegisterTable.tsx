@@ -159,11 +159,11 @@ function DocumentTable() {
                 <TableCell align="right">Employment Type</TableCell>
                 <TableCell align="right">Employment Id</TableCell>
                 <TableCell align="right">Division</TableCell>
+                <TableCell align="right">Employee Name</TableCell>
                 <TableCell align="right">Date Of Join</TableCell>
                 <TableCell align="right">Designation</TableCell>
                 <TableCell align="right">Department</TableCell>
                 <TableCell align="right">Gender</TableCell>
-                <TableCell align="right">Status</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -186,13 +186,13 @@ function DocumentTable() {
                     <TableCell align="right">{row.employmentType}</TableCell>
                     <TableCell align="right">{row.employeeId}</TableCell>
                     <TableCell align="right">{row.division}</TableCell>
+                    <TableCell align="right">{row.employeeName}</TableCell>
                     <TableCell align="right">
                       {format(new Date(row.dateOfJoin), "yyyy-MM-dd")}
                     </TableCell>
                     <TableCell align="right">{row.designation}</TableCell>
                     <TableCell align="right">{row.department}</TableCell>
                     <TableCell align="right">{row.gender}</TableCell>
-                    <TableCell align="right">{row.status}</TableCell>
                   </TableRow>
                 ))
               ) : (

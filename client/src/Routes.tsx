@@ -607,10 +607,9 @@ const AppRoutes = () => {
         />
         <Route
           path="/rag/dashboard"
-          element={withLayout(
-            MainLayout,
-            UnderDevelopment
-          )}
+          element={withLayout(MainLayout, () => (
+            <UnderDevelopment pageName="RAG > RAG Dashboard" />
+          ))}
         />
 
         <Route
