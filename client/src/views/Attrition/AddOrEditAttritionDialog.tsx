@@ -143,99 +143,91 @@ export default function AddOrEditRAGDialog({
 
   const isPersonalDetailsValid = useMemo(() => {
     return (
-      !errors.division &&
-      !errors.employeeType &&
       !errors.employeeId &&
       !errors.employeeName &&
       !errors.gender &&
-      !errors.dateOfBirth &&
-      !errors.age
+      !errors.countryName &&
+      !errors.state
     );
   }, [
-    errors.division,
-    errors.employeeType,
     errors.employeeId,
     errors.employeeName,
     errors.gender,
-    errors.dateOfBirth,
-    errors.age,
+    errors.countryName,
+    errors.state,
   ]);
   const triggerPersonalDetailsSection = () => {
-    trigger([
-      "division",
-      "employeeType",
-      "employeeId",
-      "employeeName",
-      "gender",
-      "dateOfBirth",
-      "age",
-    ]);
+    trigger(["employeeId", "employeeName", "gender", "countryName", "state"]);
   };
 
   const isEmploymentDetailsValid = useMemo(() => {
     return (
-      !errors.dateOfJoin &&
-      !errors.servicePeriod &&
-      !errors.tenureSplit &&
+      !errors.division &&
       !errors.designation &&
       !errors.department &&
-      !errors.reportingManager &&
-      !errors.sourceOfHiring &&
+      !errors.dateOfJoin &&
+      !errors.perDaySalary &&
+      !errors.employmentClassification &&
       !errors.employmentType
     );
   }, [
-    errors.dateOfJoin,
-    errors.servicePeriod,
-    errors.tenureSplit,
+    errors.division,
     errors.designation,
+    errors.dateOfJoin,
     errors.department,
-    errors.reportingManager,
-    errors.sourceOfHiring,
+    errors.perDaySalary,
+    errors.employmentClassification,
     errors.employmentType,
   ]);
 
   const triggerEmploymentDetailsSection = () => {
     trigger([
-      "dateOfJoin",
-      "servicePeriod",
-      "tenureSplit",
+      "division",
       "designation",
+      "dateOfJoin",
       "department",
-      "reportingManager",
-      "sourceOfHiring",
+      "perDaySalary",
+      "employmentClassification",
       "employmentType",
     ]);
   };
 
-  const isLocationDetailsValid = useMemo(() => {
-    return !errors.countryName && !errors.state && !errors.origin;
-  }, [errors.countryName, errors.state, errors.origin]);
+  const isAttritionDetailsValid = useMemo(() => {
+    return (
+      !errors.resignationType &&
+      !errors.resignationReason &&
+      !errors.attritionDesignation &&
+      !errors.servicePeriod &&
+      !errors.tenureSplit
+    );
+  }, [
+    errors.resignationType,
+    errors.resignationReason,
+    errors.attritionDesignation,
+    errors.servicePeriod,
+    errors.tenureSplit,
+  ]);
 
-  const triggerLocationDetailsSection = () => {
-    trigger(["countryName", "state", "origin"]);
+  const triggerAttritionDetailsSection = () => {
+    trigger([
+      "resignationType",
+      "resignationReason",
+      "attritionDesignation",
+      "servicePeriod",
+      "tenureSplit",
+    ]);
   };
 
-  const isRAGDetailsValid = useMemo(() => {
-    return !errors.category && !errors.remark && !errors.discussionSummary;
-  }, [errors.category, errors.remark, errors.discussionSummary]);
-  const triggerRAGDetailsSection = () => {
-    trigger(["countryName", "state", "origin"]);
-  };
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     if (newValue === 1) {
       triggerPersonalDetailsSection();
     } else if (newValue === 2) {
       triggerPersonalDetailsSection();
       triggerEmploymentDetailsSection();
-    } else if (newValue === 3) {
-      triggerPersonalDetailsSection();
-      triggerEmploymentDetailsSection();
-      triggerLocationDetailsSection();
     } else {
       triggerPersonalDetailsSection();
       triggerEmploymentDetailsSection();
-      triggerLocationDetailsSection();
-      triggerRAGDetailsSection();
+      triggerAttritionDetailsSection();
     }
     setActiveTab(newValue);
   };
@@ -451,8 +443,7 @@ export default function AddOrEditRAGDialog({
                     backgroundColor:
                       isPersonalDetailsValid &&
                       isEmploymentDetailsValid &&
-                      isLocationDetailsValid &&
-                      isRAGDetailsValid
+                      isAttritionDetailsValid
                         ? "var(--pallet-blue)"
                         : "var(--pallet-red)",
                     height: "3px",
@@ -526,7 +517,7 @@ export default function AddOrEditRAGDialog({
                   label={
                     <Box
                       sx={{
-                        color: isRAGDetailsValid
+                        color: isAttritionDetailsValid
                           ? "var(--pallet-blue)"
                           : "var(--pallet-red)",
                         display: "flex",
@@ -537,7 +528,7 @@ export default function AddOrEditRAGDialog({
                       <Typography variant="body2" sx={{ ml: "0.3rem" }}>
                         Attrition Details
                       </Typography>{" "}
-                      {!isRAGDetailsValid && (
+                      {!isAttritionDetailsValid && (
                         <Typography
                           variant="subtitle1"
                           sx={{ ml: "0.3rem", color: "var(--pallet-red)" }}
@@ -1298,55 +1289,6 @@ export default function AddOrEditRAGDialog({
                     endIcon={<ArrowForwardIcon />}
                   >
                     Next
-                  </CustomButton>
-                </Box>
-              </TabPanel>
-              <TabPanel value={activeTab} index={3} dir={theme.direction}>
-                <Stack
-                  sx={{
-                    display: "flex",
-                    flexDirection: isMobile ? "column" : "column",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      margin: "0.5rem",
-                    }}
-                  >
-                    <Controller
-                      control={control}
-                      name={"remark"}
-                      render={({ field }) => {
-                        return (
-                          <RichTextComponent
-                            onChange={(e) => field.onChange(e)}
-                            placeholder={field.value ?? "Description"}
-                          />
-                        );
-                      }}
-                    />
-                  </Box>
-                </Stack>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: isMobile ? "column" : "row",
-                    margin: "0.5rem",
-                    justifyContent: "flex-end",
-                  }}
-                >
-                  <CustomButton
-                    variant="contained"
-                    sx={{
-                      backgroundColor: "var(--pallet-blue)",
-                    }}
-                    size="medium"
-                    onClick={() => {
-                      handleTabChange(null, 2);
-                    }}
-                    endIcon={<ArrowBackIcon />}
-                  >
-                    Previous
                   </CustomButton>
                 </Box>
               </TabPanel>
