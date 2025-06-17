@@ -40,6 +40,7 @@ import {
   EmployeeTypeData,
   EmploymentTypeData,
   FunctionData,
+  genderData,
   RAG,
   SourceOfHiring,
   StateData,
@@ -50,8 +51,8 @@ import {
   AddNewFunctionDialog,
   AddNewStateDialog,
 } from "./CreateRAGDialogs";
-import AccessibilityNewOutlinedIcon from '@mui/icons-material/AccessibilityNewOutlined';
-import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
+import AccessibilityNewOutlinedIcon from "@mui/icons-material/AccessibilityNewOutlined";
+import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 
 type DialogProps = {
   open: boolean;
@@ -686,18 +687,40 @@ export default function AddOrEditRAGDialog({
                       flexDirection: isMobile ? "column" : "row",
                     }}
                   >
-                    <TextField
-                      required
-                      id="gender"
-                      label="Gender"
-                      error={!!errors.gender}
-                      size="small"
-                      sx={{
-                        flex: 1,
-                        margin: "0.5rem",
-                        marginTop: isTablet ? "0.5rem" : "1.8rem",
-                      }}
+                    <Controller
+                      name="gender"
+                      control={control}
+                      defaultValue={defaultValues?.gender ?? ""}
                       {...register("gender", { required: true })}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(event, newValue) =>
+                            field.onChange(newValue)
+                          }
+                          size="small"
+                          options={
+                            genderData?.length
+                              ? genderData.map((gender) => gender.gender)
+                              : []
+                          }
+                          sx={{
+                            flex: 1,
+                            margin: "0.5rem",
+                            marginTop: isTablet ? "0.5rem" : "1.8rem",
+                          }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              required
+                              error={!!errors.gender}
+                              helperText={errors.gender && "Required"}
+                              label="Gender"
+                              name="gender"
+                            />
+                          )}
+                        />
+                      )}
                     />
                     <Controller
                       control={control}

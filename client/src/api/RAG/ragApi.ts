@@ -240,6 +240,21 @@ export const StateData = [
   },
 ];
 
+export const genderData = [
+  {
+    id: "1",
+    gender: "Male",
+  },
+  {
+    id: "2",
+    gender: "Female",
+  },
+  {
+    id: "3",
+    gender: "Other",
+  },
+];
+
 export const createDesignation = async (designation: string) => {
   const res = await axios.post("/api/designation", designation);
   console.log(designation);
