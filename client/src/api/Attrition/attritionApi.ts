@@ -22,6 +22,7 @@ export const attritionSchema = z.object({
   isWorkHistory: z.boolean(),
   resignationType: z.string(),
   resignationReason: z.string(),
+  attritionDesignation: z.string(),
   servicePeriod: z.string(),
   tenureSplit: z.string(),
   isNormalResignation: z.boolean(),
@@ -162,6 +163,83 @@ export const attritionData = [
       createdByUser: 4,
       updatedBy: 4,
       completeBy: 4,
+    },
+  ];
+
+  export const EmployeeTypeData = [
+    {
+      id: "1",
+      employeeType: "Existing Employee",
+    },
+    {
+      id: "2",
+      employeeType: "New Employee",
+    },
+  ];
+  
+  export const DesignationData = [
+    {
+      id: "1",
+      designationName: "CEO",
+    },
+    {
+      id: "2",
+      designationName: "Manager",
+    },
+  ];
+  
+  export const FunctionData = [
+    {
+      id: "1",
+      functionName: "Fun 1",
+    },
+    {
+      id: "2",
+      functionName: "Fun 2",
+    },
+  ];
+  
+  export const SourceOfHiring = [
+    {
+      id: "1",
+      sourceName: "src 1",
+    },
+    {
+      id: "2",
+      sourceName: "src 2",
+    },
+  ];
+  
+  export const EmploymentTypeData = [
+    {
+      id: "1",
+      employmentType: "Worker",
+    },
+    {
+      id: "2",
+      employmentType: "Staff",
+    },
+  ];
+  
+  export const CountryData = [
+    {
+      id: "1",
+      countryName: "Sri Lanka",
+    },
+    {
+      id: "2",
+      countryName: "India",
+    },
+  ];
+  
+  export const StateData = [
+    {
+      id: "1",
+      stateName: "Kandy",
+    },
+    {
+      id: "2",
+      stateName: "Colombo",
     },
   ];
 

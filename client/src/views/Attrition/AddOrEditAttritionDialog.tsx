@@ -47,11 +47,18 @@ import { fetchDepartmentData } from "../../api/departmentApi";
 import {
   AddNewCountryDialog,
   AddNewDesignationDialog,
+  AddNewResignationTypeDialog,
   AddNewStateDialog,
 } from "./CreateAttritionDialogs";
-import AccessibilityNewOutlinedIcon from '@mui/icons-material/AccessibilityNewOutlined';
-import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
-import { Attrition } from "../../api/Attrition/attritionApi";
+import AccessibilityNewOutlinedIcon from "@mui/icons-material/AccessibilityNewOutlined";
+import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
+import {
+  Attrition,
+  CountryData,
+  DesignationData,
+  StateData,
+} from "../../api/Attrition/attritionApi";
+import SwitchButton from "../../components/SwitchButton";
 
 type DialogProps = {
   open: boolean;
@@ -234,7 +241,7 @@ export default function AddOrEditRAGDialog({
 
   const [openAddNewDesignationDialog, setOpenAddNewDesignationDialog] =
     useState(false);
-  const [openAddNewFunctionDialog, setOpenAddNewFunctionDialog] =
+  const [openAddNewResignationTypeDialog, setOpenAddNewResignationTypeDialog] =
     useState(false);
   const [openAddNewCountryDialog, setOpenAddNewCountryDialog] = useState(false);
   const [openAddNewStateDialog, setOpenAddNewStateDialog] = useState(false);
@@ -262,7 +269,7 @@ export default function AddOrEditRAGDialog({
       </Typography>
     </li>
   );
-  const AddNewFunctionButton = (props) => (
+  const AddNewResignationTypeButton = (props) => (
     <li
       {...props}
       variant="contained"
@@ -277,12 +284,12 @@ export default function AddOrEditRAGDialog({
       }}
       size="small"
       onMouseDown={() => {
-        setOpenAddNewFunctionDialog(true);
+        setOpenAddNewResignationTypeDialog(true);
       }}
     >
       <AddIcon />
       <Typography variant="body2" component="div">
-        Add New Function
+        Add New Resignation Type
       </Typography>
     </li>
   );
@@ -355,10 +362,10 @@ export default function AddOrEditRAGDialog({
           open={openAddNewDesignationDialog}
           setOpen={setOpenAddNewDesignationDialog}
         />
-        {/* <AddNewFunctionDialog
-          open={openAddNewFunctionDialog}
-          setOpen={setOpenAddNewFunctionDialog}
-        /> */}
+        <AddNewResignationTypeDialog
+          open={openAddNewResignationTypeDialog}
+          setOpen={setOpenAddNewResignationTypeDialog}
+        />
         <AddNewCountryDialog
           open={openAddNewCountryDialog}
           setOpen={setOpenAddNewCountryDialog}
@@ -513,33 +520,7 @@ export default function AddOrEditRAGDialog({
                   }
                   {...a11yProps(1)}
                 />
-                <Tab
-                  label={
-                    <Box
-                      sx={{
-                        color: isLocationDetailsValid
-                          ? "var(--pallet-blue)"
-                          : "var(--pallet-red)",
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                    >
-                      <LocationOnOutlinedIcon fontSize="small" />
-                      <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                        Location Details
-                      </Typography>{" "}
-                      {!isLocationDetailsValid && (
-                        <Typography
-                          variant="subtitle1"
-                          sx={{ ml: "0.3rem", color: "var(--pallet-red)" }}
-                        >
-                          *
-                        </Typography>
-                      )}
-                    </Box>
-                  }
-                  {...a11yProps(2)}
-                />
+
                 <Tab
                   label={
                     <Box
@@ -553,7 +534,7 @@ export default function AddOrEditRAGDialog({
                     >
                       <WarningIcon fontSize="small" />
                       <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                        RAG Details
+                        Attrition Details
                       </Typography>{" "}
                       {!isRAGDetailsValid && (
                         <Typography
@@ -565,10 +546,183 @@ export default function AddOrEditRAGDialog({
                       )}
                     </Box>
                   }
-                  {...a11yProps(3)}
+                  {...a11yProps(2)}
                 />
               </Tabs>
               <TabPanel value={activeTab} index={0} dir={theme.direction}>
+                <Stack
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    backgroundColor: "#fff",
+                    flex: { lg: 3, md: 1 },
+                    borderRadius: "0.3rem",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: isMobile ? "column" : "row",
+                    }}
+                  >
+                    <TextField
+                      required
+                      id="employeeId"
+                      label="Employee Id"
+                      error={!!errors.employeeId}
+                      helperText={errors.employeeId && "Required"}
+                      size="small"
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      {...register("employeeId", { required: true })}
+                    />
+                    <TextField
+                      required
+                      id="employeeName"
+                      label="Employee Name"
+                      error={!!errors.employeeName}
+                      helperText={errors.employeeName && "Required"}
+                      size="small"
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      {...register("employeeName", { required: true })}
+                    />
+                  </Box>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: isMobile ? "column" : "row",
+                    }}
+                  >
+                    <TextField
+                      required
+                      id="gender"
+                      label="Gender"
+                      error={!!errors.gender}
+                      size="small"
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      {...register("gender", { required: true })}
+                    />
+                    <Controller
+                      name="countryName"
+                      control={control}
+                      rules={{ required: "required" }}
+                      defaultValue={defaultValues?.countryName ?? ""}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(_, value) => field.onChange(value)}
+                          value={field.value || ""}
+                          size="small"
+                          noOptionsText={
+                            <Typography
+                              variant="body2"
+                              color="inherit"
+                              gutterBottom
+                            >
+                              No matching Items
+                            </Typography>
+                          }
+                          options={[
+                            ...(CountryData?.length
+                              ? CountryData.map(
+                                  (country) => country.countryName
+                                )
+                              : []),
+                            "$ADD_NEW_COUNTRY",
+                          ]}
+                          renderOption={(props, option) =>
+                            option === "$ADD_NEW_COUNTRY" ? (
+                              <AddNewCountryButton {...props} />
+                            ) : (
+                              <li {...props} key={option}>
+                                {option}
+                              </li>
+                            )
+                          }
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              error={!!errors.countryName}
+                              label="Country"
+                            />
+                          )}
+                        />
+                      )}
+                    />
+
+                    <Controller
+                      name="state"
+                      control={control}
+                      rules={{ required: "required" }}
+                      defaultValue={defaultValues?.state ?? ""}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(_, value) => field.onChange(value)}
+                          value={field.value || ""}
+                          size="small"
+                          noOptionsText={
+                            <Typography
+                              variant="body2"
+                              color="inherit"
+                              gutterBottom
+                            >
+                              No matching Items
+                            </Typography>
+                          }
+                          options={[
+                            ...(StateData?.length
+                              ? StateData.map((state) => state.stateName)
+                              : []),
+                            "$ADD_NEW_ITEM",
+                          ]}
+                          renderOption={(props, option) =>
+                            option === "$ADD_NEW_ITEM" ? (
+                              <AddNewStateButton {...props} />
+                            ) : (
+                              <li {...props} key={option}>
+                                {option}
+                              </li>
+                            )
+                          }
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              error={!!errors.state}
+                              label="State"
+                            />
+                          )}
+                        />
+                      )}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: isMobile ? "column" : "row",
+                      margin: "0.5rem",
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <CustomButton
+                      variant="contained"
+                      sx={{
+                        backgroundColor: "var(--pallet-blue)",
+                      }}
+                      size="medium"
+                      onClick={() => {
+                        handleTabChange(null, 1);
+                      }}
+                      endIcon={<ArrowForwardIcon />}
+                    >
+                      Next
+                    </CustomButton>
+                  </Box>
+                </Stack>
+              </TabPanel>
+              <TabPanel value={activeTab} index={1} dir={theme.direction}>
                 <Stack
                   sx={{
                     display: "flex",
@@ -617,153 +771,6 @@ export default function AddOrEditRAGDialog({
                         />
                       )}
                     />
-                    
-                    <TextField
-                      required
-                      id="employeeId"
-                      label="Employee Id"
-                      error={!!errors.employeeId}
-                      helperText={errors.employeeId && "Required"}
-                      size="small"
-                      sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("employeeId", { required: true })}
-                    />
-                  </Box>
-
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: isMobile ? "column" : "row",
-                    }}
-                  >
-                    <TextField
-                      required
-                      id="employeeName"
-                      label="Employee Name"
-                      error={!!errors.employeeName}
-                      helperText={errors.employeeName && "Required"}
-                      size="small"
-                      sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("employeeName", { required: true })}
-                    />
-                  </Box>
-
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: isMobile ? "column" : "row",
-                    }}
-                  >
-                    <TextField
-                      required
-                      id="gender"
-                      label="Gender"
-                      error={!!errors.gender}
-                      size="small"
-                      sx={{
-                        flex: 1,
-                        margin: "0.5rem",
-                        marginTop: isTablet ? "0.5rem" : "1.8rem",
-                      }}
-                      {...register("gender", { required: true })}
-                    />
-                    
-                    
-                  </Box>
-
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: isMobile ? "column" : "row",
-                      margin: "0.5rem",
-                      justifyContent: "flex-end",
-                    }}
-                  >
-                    <CustomButton
-                      variant="contained"
-                      sx={{
-                        backgroundColor: "var(--pallet-blue)",
-                      }}
-                      size="medium"
-                      onClick={() => {
-                        handleTabChange(null, 1);
-                      }}
-                      endIcon={<ArrowForwardIcon />}
-                    >
-                      Next
-                    </CustomButton>
-                  </Box>
-                </Stack>
-              </TabPanel>
-              <TabPanel value={activeTab} index={1} dir={theme.direction}>
-                <Stack
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    backgroundColor: "#fff",
-                    flex: { lg: 3, md: 1 },
-                    borderRadius: "0.3rem",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: isMobile ? "column" : "row",
-                    }}
-                  >
-                    <Controller
-                      control={control}
-                      {...register("dateOfJoin", { required: true })}
-                      name={"dateOfJoin"}
-                      render={({ field }) => {
-                        return (
-                          <Box sx={{ flex: 1, margin: "0.5rem" }}>
-                            <DatePickerComponent
-                              onChange={(e) => field.onChange(e)}
-                              value={
-                                field.value ? new Date(field.value) : undefined
-                              }
-                              label="Date of Join"
-                              error={errors?.dateOfJoin ? "Required" : ""}
-                            />
-                          </Box>
-                        );
-                      }}
-                    />
-                    <TextField
-                      required
-                      id="servicePeriod"
-                      label="Service Period"
-                      error={!!errors.servicePeriod}
-                      size="small"
-                      sx={{
-                        flex: 1,
-                        margin: "0.5rem",
-                        marginTop: isTablet ? "0.5rem" : "1.8rem",
-                      }}
-                      {...register("servicePeriod", { required: true })}
-                    />
-                    <TextField
-                      required
-                      id="tenureSplit"
-                      label="Tenure Split"
-                      error={!!errors.tenureSplit}
-                      size="small"
-                      sx={{
-                        flex: 1,
-                        margin: "0.5rem",
-                        marginTop: isTablet ? "0.5rem" : "1.8rem",
-                      }}
-                      {...register("tenureSplit", { required: true })}
-                    />
-                  </Box>
-
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: isMobile ? "column" : "row",
-                    }}
-                  >
                     <Controller
                       name="designation"
                       control={control}
@@ -812,7 +819,6 @@ export default function AddOrEditRAGDialog({
                         />
                       )}
                     />
-
                     <Controller
                       name="department"
                       control={control}
@@ -846,50 +852,45 @@ export default function AddOrEditRAGDialog({
                         />
                       )}
                     />
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: isMobile ? "column" : "row",
+                    }}
+                  >
                     <Controller
-                      name="function"
                       control={control}
-                      defaultValue={defaultValues?.function ?? ""}
-                      render={({ field }) => (
-                        <Autocomplete
-                          {...field}
-                          onChange={(_, value) => field.onChange(value)}
-                          value={field.value || ""}
-                          size="small"
-                          noOptionsText={
-                            <Typography
-                              variant="body2"
-                              color="inherit"
-                              gutterBottom
-                            >
-                              No matching Items
-                            </Typography>
-                          }
-                          options={[
-                            ...(FunctionData?.length
-                              ? FunctionData.map((fun) => fun.functionName)
-                              : []),
-                            "$ADD_NEW_ITEM",
-                          ]}
-                          renderOption={(props, option) =>
-                            option === "$ADD_NEW_ITEM" ? (
-                              <AddNewFunctionButton {...props} />
-                            ) : (
-                              <li {...props} key={option}>
-                                {option}
-                              </li>
-                            )
-                          }
-                          sx={{ flex: 1, margin: "0.5rem" }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              error={!!errors.function}
-                              label="Function"
+                      {...register("dateOfJoin", { required: true })}
+                      name={"dateOfJoin"}
+                      render={({ field }) => {
+                        return (
+                          <Box sx={{ flex: 1, margin: "0.5rem" }}>
+                            <DatePickerComponent
+                              onChange={(e) => field.onChange(e)}
+                              value={
+                                field.value ? new Date(field.value) : undefined
+                              }
+                              label="Date of Join"
+                              error={errors?.dateOfJoin ? "Required" : ""}
                             />
-                          )}
-                        />
-                      )}
+                          </Box>
+                        );
+                      }}
+                    />
+                    <TextField
+                      required
+                      type="number"
+                      id="perDaySalary"
+                      label="Per Day Salary"
+                      error={!!errors.perDaySalary}
+                      size="small"
+                      sx={{
+                        flex: 1,
+                        margin: "0.5rem",
+                        marginTop: isTablet ? "0.5rem" : "1.8rem",
+                      }}
+                      {...register("perDaySalary", { required: true })}
                     />
                   </Box>
 
@@ -899,21 +900,15 @@ export default function AddOrEditRAGDialog({
                       flexDirection: isMobile ? "column" : "row",
                     }}
                   >
-                    <TextField
-                      required
-                      id="reportingManager"
-                      label="Reporting Manager"
-                      error={!!errors.reportingManager}
-                      helperText={errors.reportingManager && "Required"}
-                      size="small"
-                      sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("reportingManager", { required: true })}
-                    />
                     <Controller
-                      name="sourceOfHiring"
+                      name="employmentClassification"
                       control={control}
-                      defaultValue={defaultValues?.sourceOfHiring ?? ""}
-                      {...register("sourceOfHiring", { required: true })}
+                      defaultValue={
+                        defaultValues?.employmentClassification ?? ""
+                      }
+                      {...register("employmentClassification", {
+                        required: true,
+                      })}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -922,9 +917,9 @@ export default function AddOrEditRAGDialog({
                           }
                           size="small"
                           options={
-                            SourceOfHiring?.length
-                              ? SourceOfHiring.map(
-                                  (source) => source.sourceName
+                            departmentData?.length
+                              ? departmentData.map(
+                                  (department) => department.department
                                 )
                               : []
                           }
@@ -933,10 +928,12 @@ export default function AddOrEditRAGDialog({
                             <TextField
                               {...params}
                               required
-                              error={!!errors.sourceOfHiring}
-                              helperText={errors.sourceOfHiring && "Required"}
-                              label="Source Of Hiring"
-                              name="sourceOfHiring"
+                              error={!!errors.employmentClassification}
+                              helperText={
+                                errors.employmentClassification && "Required"
+                              }
+                              label="Employment Classification"
+                              name="employmentClassification"
                             />
                           )}
                         />
@@ -955,9 +952,9 @@ export default function AddOrEditRAGDialog({
                           }
                           size="small"
                           options={
-                            EmploymentTypeData?.length
-                              ? EmploymentTypeData.map(
-                                  (employee) => employee.employmentType
+                            departmentData?.length
+                              ? departmentData.map(
+                                  (department) => department.department
                                 )
                               : []
                           }
@@ -976,7 +973,44 @@ export default function AddOrEditRAGDialog({
                       )}
                     />
                   </Box>
-
+                  <Box
+                    sx={{
+                      marginLeft: "0.5rem",
+                    }}
+                  >
+                    <Controller
+                      control={control}
+                      name={"isHostelAccess"}
+                      render={({ field }) => {
+                        return (
+                          <SwitchButton
+                            label="Is Hostel Access?"
+                            onChange={field.onChange}
+                            value={field.value}
+                          />
+                        );
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      marginLeft: "0.5rem",
+                    }}
+                  >
+                    <Controller
+                      control={control}
+                      name={"isWorkHistory"}
+                      render={({ field }) => {
+                        return (
+                          <SwitchButton
+                            label="Work History"
+                            onChange={field.onChange}
+                            value={field.value}
+                          />
+                        );
+                      }}
+                    />
+                  </Box>
                   <Box
                     sx={{
                       display: "flex",
@@ -1025,21 +1059,11 @@ export default function AddOrEditRAGDialog({
                     flexDirection: isMobile ? "column" : "row",
                   }}
                 >
-                  <TextField
-                    required
-                    id="origin"
-                    label="Origin"
-                    error={!!errors.origin}
-                    helperText={errors.origin && "Required"}
-                    size="small"
-                    sx={{ flex: 1, margin: "0.5rem" }}
-                    {...register("origin", { required: true })}
-                  />
                   <Controller
-                    name="countryName"
+                    name="resignationType"
                     control={control}
                     rules={{ required: "required" }}
-                    defaultValue={defaultValues?.countryName ?? ""}
+                    defaultValue={defaultValues?.resignationType ?? ""}
                     render={({ field }) => (
                       <Autocomplete
                         {...field}
@@ -1063,7 +1087,7 @@ export default function AddOrEditRAGDialog({
                         ]}
                         renderOption={(props, option) =>
                           option === "$ADD_NEW_COUNTRY" ? (
-                            <AddNewCountryButton {...props} />
+                            <AddNewResignationTypeButton {...props} />
                           ) : (
                             <li {...props} key={option}>
                               {option}
@@ -1074,19 +1098,52 @@ export default function AddOrEditRAGDialog({
                         renderInput={(params) => (
                           <TextField
                             {...params}
-                            error={!!errors.countryName}
-                            label="Country"
+                            error={!!errors.resignationType}
+                            label="Resignation Type"
                           />
                         )}
                       />
                     )}
                   />
-
+                </Box>
+                <Box
+                  sx={{
+                    margin: "0.5rem",
+                  }}
+                >
                   <Controller
-                    name="state"
+                    control={control}
+                    name={"resignationReason"}
+                    render={({ field }) => {
+                      return (
+                        <RichTextComponent
+                          onChange={(e) => field.onChange(e)}
+                          placeholder={field.value ?? "Description"}
+                        />
+                      );
+                    }}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: isMobile ? "column" : "row",
+                  }}
+                >
+                  <TextField
+                    required
+                    id="servicePeriod"
+                    label="Service Period"
+                    error={!!errors.servicePeriod}
+                    size="small"
+                    sx={{ flex: 1, margin: "0.5rem" }}
+                    {...register("servicePeriod", { required: true })}
+                  />
+                  <Controller
+                    name="attritionDesignation"
                     control={control}
                     rules={{ required: "required" }}
-                    defaultValue={defaultValues?.state ?? ""}
+                    defaultValue={defaultValues?.attritionDesignation ?? ""}
                     render={({ field }) => (
                       <Autocomplete
                         {...field}
@@ -1103,14 +1160,16 @@ export default function AddOrEditRAGDialog({
                           </Typography>
                         }
                         options={[
-                          ...(StateData?.length
-                            ? StateData.map((state) => state.stateName)
+                          ...(DesignationData?.length
+                            ? DesignationData.map(
+                                (designation) => designation.designationName
+                              )
                             : []),
                           "$ADD_NEW_ITEM",
                         ]}
                         renderOption={(props, option) =>
                           option === "$ADD_NEW_ITEM" ? (
-                            <AddNewStateButton {...props} />
+                            <AddNewDesignationButton {...props} />
                           ) : (
                             <li {...props} key={option}>
                               {option}
@@ -1121,12 +1180,62 @@ export default function AddOrEditRAGDialog({
                         renderInput={(params) => (
                           <TextField
                             {...params}
-                            error={!!errors.state}
-                            label="State"
+                            error={!!errors.attritionDesignation}
+                            label="Attrition Designation"
                           />
                         )}
                       />
                     )}
+                  />
+                  <Controller
+                    name="tenureSplit"
+                    control={control}
+                    defaultValue={defaultValues?.tenureSplit ?? ""}
+                    {...register("tenureSplit", { required: true })}
+                    render={({ field }) => (
+                      <Autocomplete
+                        {...field}
+                        onChange={(event, newValue) => field.onChange(newValue)}
+                        size="small"
+                        options={
+                          departmentData?.length
+                            ? departmentData.map(
+                                (department) => department.department
+                              )
+                            : []
+                        }
+                        sx={{ flex: 1, margin: "0.5rem" }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            required
+                            error={!!errors.tenureSplit}
+                            helperText={errors.tenureSplit && "Required"}
+                            label="Tenure Split"
+                            name="tenureSplit"
+                          />
+                        )}
+                      />
+                    )}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    marginLeft: "0.5rem",
+                  }}
+                >
+                  <Controller
+                    control={control}
+                    name={"isNormalResignation"}
+                    render={({ field }) => {
+                      return (
+                        <SwitchButton
+                          label="Normal Registration"
+                          onChange={field.onChange}
+                          value={field.value}
+                        />
+                      );
+                    }}
                   />
                 </Box>
                 <Box
@@ -1176,55 +1285,6 @@ export default function AddOrEditRAGDialog({
                     flexDirection: isMobile ? "column" : "column",
                   }}
                 >
-                  <Controller
-                    name="category"
-                    control={control}
-                    defaultValue={defaultValues?.category ?? ""}
-                    {...register("category", { required: true })}
-                    render={({ field }) => (
-                      <Autocomplete
-                        {...field}
-                        onChange={(event, newValue) => field.onChange(newValue)}
-                        size="small"
-                        options={
-                          EmploymentTypeData?.length
-                            ? EmploymentTypeData.map(
-                                (employee) => employee.employmentType
-                              )
-                            : []
-                        }
-                        sx={{ flex: 1, margin: "0.5rem" }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            required
-                            error={!!errors.category}
-                            helperText={errors.category && "Required"}
-                            label="Category"
-                            name="category"
-                          />
-                        )}
-                      />
-                    )}
-                  />
-                  <Box
-                    sx={{
-                      margin: "0.5rem",
-                    }}
-                  >
-                    <Controller
-                      control={control}
-                      name={"discussionSummary"}
-                      render={({ field }) => {
-                        return (
-                          <RichTextComponent
-                            onChange={(e) => field.onChange(e)}
-                            placeholder={field.value ?? "Description"}
-                          />
-                        );
-                      }}
-                    />
-                  </Box>
                   <Box
                     sx={{
                       margin: "0.5rem",
@@ -1268,6 +1328,55 @@ export default function AddOrEditRAGDialog({
                 </Box>
               </TabPanel>
             </Box>
+            <Stack
+              sx={{
+                display: "flex",
+                flex: { lg: 1, md: 1 },
+                flexDirection: "column",
+                backgroundColor: "#fff",
+                boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+                padding: "0.5rem",
+                borderRadius: "0.3rem",
+                marginY: isTablet ? "0.5rem" : 0,
+                marginLeft: isTablet ? 0 : "0.5rem",
+                height: "fit-content",
+              }}
+            >
+              <Controller
+                control={control}
+                {...register("resignedDate", { required: true })}
+                name={"resignedDate"}
+                render={({ field }) => {
+                  return (
+                    <Box sx={{ flex: 1, margin: "0.5rem" }}>
+                      <DatePickerComponent
+                        onChange={(e) => field.onChange(e)}
+                        value={field.value ? new Date(field.value) : undefined}
+                        label="Resigned Date"
+                        error={errors?.resignedDate ? "Required" : ""}
+                      />
+                    </Box>
+                  );
+                }}
+              />
+              <Controller
+                control={control}
+                {...register("relievedDate", { required: true })}
+                name={"relievedDate"}
+                render={({ field }) => {
+                  return (
+                    <Box sx={{ flex: 1, margin: "0.5rem" }}>
+                      <DatePickerComponent
+                        onChange={(e) => field.onChange(e)}
+                        value={field.value ? new Date(field.value) : undefined}
+                        label="Relieved Date"
+                        error={errors?.relievedDate ? "Required" : ""}
+                      />
+                    </Box>
+                  );
+                }}
+              />
+            </Stack>
           </Stack>
         </DialogContent>
         <Divider />
