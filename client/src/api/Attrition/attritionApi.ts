@@ -31,6 +31,7 @@ export const attritionSchema = z.object({
   createdByUser: z.number(),
   updatedBy: z.number(),
   completeBy: z.number(),
+  created_at: z.date(),
 });
 
 export type Attrition = z.infer<typeof attritionSchema>;
