@@ -561,6 +561,7 @@ export default function AddOrEditRAGDialog({
                       required
                       id="employeeId"
                       label="Employee Id"
+                      defaultValue={defaultValues?.employeeId ?? ""}
                       error={!!errors.employeeId}
                       helperText={errors.employeeId && "Required"}
                       size="small"
@@ -571,6 +572,7 @@ export default function AddOrEditRAGDialog({
                       required
                       id="employeeName"
                       label="Employee Name"
+                      defaultValue={defaultValues?.employeeName ?? ""}
                       error={!!errors.employeeName}
                       helperText={errors.employeeName && "Required"}
                       size="small"
@@ -897,6 +899,7 @@ export default function AddOrEditRAGDialog({
                       type="number"
                       id="perDaySalary"
                       label="Per Day Salary"
+                      defaultValue={defaultValues?.perDaySalary ?? ""}
                       error={!!errors.perDaySalary}
                       size="small"
                       sx={{
@@ -995,6 +998,7 @@ export default function AddOrEditRAGDialog({
                     <Controller
                       control={control}
                       name={"isHostelAccess"}
+                      defaultValue={defaultValues?.isHostelAccess ?? false}
                       render={({ field }) => {
                         return (
                           <SwitchButton
@@ -1014,6 +1018,7 @@ export default function AddOrEditRAGDialog({
                     <Controller
                       control={control}
                       name={"isWorkHistory"}
+                      defaultValue={defaultValues?.isWorkHistory ?? false}
                       render={({ field }) => {
                         return (
                           <SwitchButton
@@ -1128,6 +1133,7 @@ export default function AddOrEditRAGDialog({
                   <Controller
                     control={control}
                     name={"resignationReason"}
+                    defaultValue={defaultValues?.resignationReason ?? ""}
                     render={({ field }) => {
                       return (
                         <RichTextComponent
@@ -1148,6 +1154,7 @@ export default function AddOrEditRAGDialog({
                     required
                     id="servicePeriod"
                     label="Service Period"
+                    defaultValue={defaultValues?.servicePeriod ?? ""}
                     error={!!errors.servicePeriod}
                     size="small"
                     sx={{ flex: 1, margin: "0.5rem" }}
@@ -1241,6 +1248,7 @@ export default function AddOrEditRAGDialog({
                   <Controller
                     control={control}
                     name={"isNormalResignation"}
+                    defaultValue={defaultValues?.isNormalResignation ?? false}
                     render={({ field }) => {
                       return (
                         <SwitchButton

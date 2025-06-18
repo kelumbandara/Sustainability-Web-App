@@ -262,21 +262,64 @@ function ViewRAGContent({
         </TabPanel>
         <TabPanel value={activeTab} index={2} dir={theme.direction}>
           <Stack>
-            <DrawerContentItem label="Country" value={rag.countryName} />
-            <DrawerContentItem label="State" value={rag.state} />
-            <DrawerContentItem label="Origin" value={rag.origin} />
-          </Stack>
-        </TabPanel>
-        <TabPanel value={activeTab} index={3} dir={theme.direction}>
-          <Stack>
-            <DrawerContentItem label="Category" value={rag.category} />
             <DrawerContentItem
-              label="Summery Of Discussion"
-              value={rag.discussionSummary}
+              label="Resignation Type"
+              value={attrition.resignationType}
             />
-            <DrawerContentItem label="Remark" value={rag.remark} />
+            <DrawerContentItem
+              label="Resignation Reason"
+              value={attrition.resignationReason}
+            />
+            <DrawerContentItem
+              label="Designation"
+              value={attrition.attritionDesignation}
+            />
+            <DrawerContentItem
+              label="Service Period"
+              value={attrition.servicePeriod}
+            />
+            <DrawerContentItem
+              label="Tenure Split"
+              value={attrition.tenureSplit}
+            />
+            <DrawerContentItem
+              label="Normal Resignation"
+              value={attrition.isNormalResignation ? "Yes" : "No"}
+            />
           </Stack>
         </TabPanel>
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flex: { lg: 1, md: 1 },
+          flexDirection: "column",
+          backgroundColor: "#fff",
+          boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+          padding: "1rem",
+          borderRadius: "0.3rem",
+          marginY: isTablet ? "0.5rem" : 0,
+          marginLeft: isTablet ? 0 : "0.5rem",
+          height: "fit-content",
+        }}
+      >
+        <DrawerContentItem
+          label="Resigned Data"
+          value={
+            attrition.resignedDate
+              ? format(new Date(attrition.resignedDate), "yyyy-MM-dd")
+              : "N/A"
+          }
+        />
+
+        <DrawerContentItem
+          label="Resigned Data"
+          value={
+            attrition.relievedDate
+              ? format(new Date(attrition.relievedDate), "yyyy-MM-dd")
+              : "N/A"
+          }
+        />
       </Box>
 
       {/* {approveDialogOpen && (

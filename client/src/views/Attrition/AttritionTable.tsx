@@ -38,7 +38,7 @@ import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
 import { PermissionKeys } from "../Administration/SectionList";
 import { Attrition, attritionData } from "../../api/Attrition/attritionApi";
 // import { RAG, RAGData } from "../../api/RAG/ragApi";
-// import ViewRAGContent from "./ViewRAGContent";
+import ViewAttritionContent from "./ViewAttritionContent";
 import AddOrEditAttritionDialog from "./AddOrEditAttritionDialog";
 
 function DocumentTable() {
@@ -256,14 +256,14 @@ function DocumentTable() {
               }
             />
 
-            {/* {selectedRow && (
+            {selectedRow && (
               <Stack>
-                <ViewRAGContent
-                  rag={selectedRow}
+                <ViewAttritionContent
+                  attrition={selectedRow}
                   handleCloseDrawer={() => setOpenViewDrawer(false)}
                 />
               </Stack>
-            )} */}
+            )}
           </Stack>
         }
       />
