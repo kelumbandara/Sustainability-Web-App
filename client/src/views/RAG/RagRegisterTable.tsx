@@ -20,15 +20,9 @@ import {
 import theme from "../../theme";
 import PageTitle from "../../components/PageTitle";
 import Breadcrumb from "../../components/BreadCrumb";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import AddIcon from "@mui/icons-material/Add";
-import {
-  createDocumentRecord,
-  getDocumentList,
-  updateDocumentRecord,
-  deleteDocumentRecord,
-} from "../../api/documentApi";
 import { format } from "date-fns";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
@@ -36,11 +30,15 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../state/queryClient";
 import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
 import { PermissionKeys } from "../Administration/SectionList";
-import { RAG, RAGData } from "../../api/RAG/ragApi";
+import {
+  deleteRagRecord,
+  fetchRagRecord,
+  RAG,
+} from "../../api/RAG/ragApi";
 import ViewRAGContent from "./ViewRAGContent";
 import AddOrEditRAGDialog from "./AddOrEditRagDetailsDialog";
 
-function DocumentTable() {
+function RagDetailsTable() {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<RAG>(null);
@@ -73,15 +71,16 @@ function DocumentTable() {
     theme.breakpoints.down("md")
   );
 
-  const { data: documents, isFetching: isDocumentDataFetching } = useQuery({
-    queryKey: ["documentRecords"],
-    queryFn: getDocumentList,
+  const { data: ragData, isFetching: isRagDataFetching } = useQuery({
+    queryKey: ["rag-details"],
+    queryFn: fetchRagRecord,
   });
-  const { mutate: deleteDocumentMutation } = useMutation({
-    mutationFn: deleteDocumentRecord,
+
+  const { mutate: deleteRagRecordMutation } = useMutation({
+    mutationFn: deleteRagRecord,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["documentRecords"] });
-      enqueueSnackbar("Document Records Deleted Successfully!", {
+      queryClient.invalidateQueries({ queryKey: ["rag-details"] });
+      enqueueSnackbar("Rag Report Deleted Successfully!", {
         variant: "success",
       });
       setSelectedRow(null);
@@ -89,22 +88,19 @@ function DocumentTable() {
       setOpenAddOrEditDialog(false);
     },
     onError: () => {
-      enqueueSnackbar(`Document Delete Delete Failed`, {
+      enqueueSnackbar(`Rag Report Delete Failed`, {
         variant: "error",
       });
     },
   });
 
-  //   const paginatedDocumentData = useMemo(() => {
-  //     if (!documents) return [];
-  //     if (rowsPerPage === -1) {
-  //       return documents;
-  //     }
-  //     return documents.slice(
-  //       page * rowsPerPage,
-  //       page * rowsPerPage + rowsPerPage
-  //     );
-  //   }, [documents, page, rowsPerPage]);
+  const paginatedRagData = useMemo(() => {
+    if (!ragData) return [];
+    if (rowsPerPage === -1) {
+      return ragData;
+    }
+    return ragData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  }, [ragData, page, rowsPerPage]);
 
   return (
     <Stack>
@@ -151,7 +147,7 @@ function DocumentTable() {
               Add New RAG Detail
             </Button>
           </Box>
-          {isDocumentDataFetching && <LinearProgress sx={{ width: "100%" }} />}
+          {isRagDataFetching && <LinearProgress sx={{ width: "100%" }} />}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -167,8 +163,8 @@ function DocumentTable() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {RAGData?.length > 0 ? (
-                RAGData.map((row) => (
+              {paginatedRagData?.length > 0 ? (
+                paginatedRagData.map((row) => (
                   <TableRow
                     key={`${row.id}${row.referenceNumber}`}
                     sx={{
@@ -208,7 +204,7 @@ function DocumentTable() {
                 <TablePagination
                   rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
                   colSpan={100}
-                  count={documents?.length ?? 0}
+                  count={ragData?.length ?? 0}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   showFirstButton={true}
@@ -273,7 +269,7 @@ function DocumentTable() {
           title="Remove Document Confirmation"
           content={
             <>
-              Are you sure you want to remove this document?
+              Are you sure you want to remove this RAG Report?
               <Alert severity="warning" style={{ marginTop: "1rem" }}>
                 This action is not reversible.
               </Alert>
@@ -281,7 +277,7 @@ function DocumentTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            deleteDocumentMutation(selectedRow.id);
+            deleteRagRecordMutation(selectedRow.id);
             setDeleteDialogOpen(false);
             setOpenViewDrawer(false);
           }}
@@ -293,4 +289,4 @@ function DocumentTable() {
   );
 }
 
-export default DocumentTable;
+export default RagDetailsTable;

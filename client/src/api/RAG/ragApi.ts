@@ -1,6 +1,13 @@
 import { z } from "zod";
 import axios from "axios";
 
+export const CountrySchema = z.object({
+  id: z.number(),
+  countryName: z.string(),
+});
+
+export type Country = z.infer<typeof CountrySchema>;
+
 export const RAGSchema = z.object({
   id: z.string(),
   referenceNumber: z.string(),
@@ -20,10 +27,12 @@ export const RAGSchema = z.object({
   function: z.string(),
   reportingManager: z.string(),
   employmentType: z.string(),
-  countryName: z.string(),
+  country: z.number(),
+  countryName: CountrySchema,
   state: z.string(),
   origin: z.string(),
   category: z.string(),
+  stateName: z.string(),
   discussionSummary: z.string(),
   remark: z.string(),
   status: z.string(),
@@ -42,9 +51,11 @@ export const RAGData = [
     id: "1",
     referenceNumber: "RAG-01",
     employeeName: "Akila Manujith",
+    employeeType: "New Employee",
     employeeId: "FAE-02",
+    age: 10,
     gender: "Male",
-    countryName: "Sri Lanka",
+    countryName: { id: 1, countryName: "India" },
     state: "Kandy",
     dateOfJoin: new Date("2023-12-31"),
     resignedDate: new Date("2023-12-31"),
@@ -74,10 +85,9 @@ export const RAGData = [
     employeeName: "Nimasha Perera",
     employeeId: "FAE-05",
     gender: "Female",
-    countryName: "Sri Lanka",
+    countryName: { id: 1, countryName: "Sri Lanka" },
     state: "Colombo",
     dateOfJoin: new Date("2023-12-31"),
-
     resignedDate: new Date("2024-03-15"),
     relievedDate: new Date("2024-04-01"),
     division: "Vintage Apparel Co.",
@@ -254,9 +264,92 @@ export const genderData = [
     gender: "Other",
   },
 ];
+export const createRagRecord = async (data: RAG) => {
+  const res = await axios.post("/api/rag-record", data);
+  console.log(data);
+  return res.data;
+};
 
-export const createDesignation = async (designation: string) => {
-  const res = await axios.post("/api/designation", designation);
-  console.log(designation);
+export const updateRagRecord = async (data: RAG) => {
+  const res = await axios.post(`/api/rag-record/${data.id}/update`, data);
+  console.log(data);
+  return res.data;
+};
+
+export const deleteRagRecord = async (id: String) => {
+  const res = await axios.delete(`/api/rag-record/${id}/delete`,);
+  console.log(id);
+  return res.data;
+};
+
+export const createDesignation = async (data: { designationName: string }) => {
+  const res = await axios.post("/api/rag-designation-names", data);
+  console.log(data);
+  return res.data;
+};
+
+export const createFunction = async (data: { functionName: string }) => {
+  const res = await axios.post("/api/rag-functions", data);
+  console.log(data);
+  return res.data;
+};
+
+export const createCountryName = async (data: { countryName: string }) => {
+  const res = await axios.post("/api/rag-country-names", data);
+  console.log(data);
+  return res.data;
+};
+
+export const createState = async (data: {
+  countryId: number;
+  stateName: String;
+}) => {
+  console.log(data);
+  const res = await axios.post(`/api/rag-state-names`, data);
+  console.log(data);
+  return res.data;
+};
+
+export const fetchRagRecord = async () => {
+  const res = await axios.get("/api/rag-record");
+  return res.data;
+};
+export const fetchRagDesignationNames = async () => {
+  const res = await axios.get("/api/rag-designation-names");
+  return res.data;
+};
+
+export const fetchRagFunction = async () => {
+  const res = await axios.get("/api/rag-functions");
+  return res.data;
+};
+
+export const fetchRagSource = async () => {
+  const res = await axios.get("/api/rag-source-of-hirng");
+  return res.data;
+};
+
+export const fetchRagEmployee = async () => {
+  const res = await axios.get("/api/rag-employee-types");
+  return res.data;
+};
+
+export const fetchRagCountryNames = async () => {
+  const res = await axios.get(`/api/rag-country-names`);
+  return res.data;
+};
+
+export const fetchRagStateNames = async (id: number) => {
+  const res = await axios.get(`/api/rag-state-names/${id}`);
+  return res.data;
+};
+
+export const fetchRagCategory = async () => {
+  const res = await axios.get("/api/rag-category-names");
+  return res.data;
+};
+
+export const fetchRagEmployment = async () => {
+  const res = await axios.get("/api/rag-employment-types");
   return res.data;
 };

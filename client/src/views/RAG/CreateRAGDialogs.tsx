@@ -19,7 +19,14 @@ import CustomButton from "../../components/CustomButton";
 import useIsMobile from "../../customHooks/useIsMobile";
 import queryClient from "../../state/queryClient";
 import CloseIcon from "@mui/icons-material/Close";
-import { createDesignation, RAG } from "../../api/RAG/ragApi";
+import {
+  Country,
+  createCountryName,
+  createDesignation,
+  createFunction,
+  createState,
+  RAG,
+} from "../../api/RAG/ragApi";
 
 export const AddNewDesignationDialog = ({
   open,
@@ -33,8 +40,12 @@ export const AddNewDesignationDialog = ({
   const { isMobile } = useIsMobile();
 
   const handleCreateDesignation = (data: { designation: string }) => {
-    createDesignationMutation(data.designation);
+    const submitData = {
+      designationName: data.designation,
+    };
+    createDesignationMutation(submitData);
   };
+
   const {
     mutate: createDesignationMutation,
     isPending: isDesignationCreating,
@@ -42,7 +53,7 @@ export const AddNewDesignationDialog = ({
     mutationFn: createDesignation,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["designation"],
+        queryKey: ["designation-data"],
       });
       enqueueSnackbar("Designation Created Successfully!", {
         variant: "success",
@@ -149,15 +160,18 @@ export const AddNewFunctionDialog = ({
   const { register, handleSubmit, reset } = useForm<RAG>();
   const { isMobile } = useIsMobile();
 
-  const handleCreateFunction = (data: { designation: string }) => {
-    createFunctionMutation(data.designation);
+  const handleCreateFunction = (data: { function: string }) => {
+    const submitData = {
+      functionName: data.function,
+    };
+    createFunctionMutation(submitData);
   };
   const { mutate: createFunctionMutation, isPending: isFunctionCreating } =
     useMutation({
-      mutationFn: createDesignation, //change this
+      mutationFn: createFunction, //change this
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ["function"],
+          queryKey: ["function-data"],
         });
         enqueueSnackbar("Function Created Successfully!", {
           variant: "success",
@@ -259,18 +273,19 @@ export const AddNewCountryDialog = ({
   setOpen: (open: boolean) => void;
 }) => {
   const { enqueueSnackbar } = useSnackbar();
-  const { register, handleSubmit, reset } = useForm<RAG>();
+  const { register, handleSubmit, reset } = useForm<Country>();
   const { isMobile } = useIsMobile();
 
   const handleCreateCountry = (data: { countryName: string }) => {
-    createCountryMutation(data.countryName);
+    createCountryMutation({ countryName: data.countryName });
   };
+
   const { mutate: createCountryMutation, isPending: isCountryCreating } =
     useMutation({
-      mutationFn: createDesignation, //change this
+      mutationFn: createCountryName,
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ["country"],
+          queryKey: ["country-data"],
         });
         enqueueSnackbar("Country Created Successfully!", {
           variant: "success",
@@ -284,7 +299,6 @@ export const AddNewCountryDialog = ({
         });
       },
     });
-
   return (
     <Dialog
       open={open}
@@ -367,23 +381,30 @@ export const AddNewCountryDialog = ({
 export const AddNewStateDialog = ({
   open,
   setOpen,
+  countryId,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
+  countryId: number;
 }) => {
   const { enqueueSnackbar } = useSnackbar();
   const { register, handleSubmit, reset } = useForm<RAG>();
   const { isMobile } = useIsMobile();
 
-  const handleCreateState = (data: { state: string }) => {
-    createStateMutation(data.state);
+  const handleCreateState = (data: { stateName: string }) => {
+    const parsedId = Number(countryId);
+    createStateMutation({
+      countryId: parsedId,
+      stateName: data.stateName,
+    });
   };
+
   const { mutate: createStateMutation, isPending: isStateCreating } =
     useMutation({
-      mutationFn: createDesignation, //change this
+      mutationFn: createState,
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ["state"],
+          queryKey: ["state-data"],
         });
         enqueueSnackbar("State Created Successfully!", {
           variant: "success",
@@ -443,9 +464,10 @@ export const AddNewStateDialog = ({
           }}
         >
           <TextField
-            {...register("state", { required: true })}
+            {...register("stateName", { required: true })}
             required
-            id="state"
+            id="stateName"
+            name="stateName"
             label="State"
             size="small"
             fullWidth

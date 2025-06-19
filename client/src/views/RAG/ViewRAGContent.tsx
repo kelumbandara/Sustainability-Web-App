@@ -14,14 +14,11 @@ import { useState } from "react";
 import theme from "../../theme";
 import useIsMobile from "../../customHooks/useIsMobile";
 import TextSnippetIcon from "@mui/icons-material/TextSnippet";
-import FireExtinguisherIcon from "@mui/icons-material/FireExtinguisher";
-import { useSnackbar } from "notistack";
 // import ApproveConfirmationModal from "../OccupationalHealth/MedicineInventory/MedicineRequest/ApproveConfirmationModal";
 import { RAG } from "../../api/RAG/ragApi";
-import AccessibilityNewOutlinedIcon from '@mui/icons-material/AccessibilityNewOutlined';
-import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
+import AccessibilityNewOutlinedIcon from "@mui/icons-material/AccessibilityNewOutlined";
+import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import WarningIcon from "@mui/icons-material/Warning";
-
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -276,7 +273,10 @@ function ViewRAGContent({
         </TabPanel>
         <TabPanel value={activeTab} index={2} dir={theme.direction}>
           <Stack>
-            <DrawerContentItem label="Country" value={rag.countryName} />
+            <DrawerContentItem
+              label="Country"
+              value={rag.countryName.countryName}
+            />
             <DrawerContentItem label="State" value={rag.state} />
             <DrawerContentItem label="Origin" value={rag.origin} />
           </Stack>

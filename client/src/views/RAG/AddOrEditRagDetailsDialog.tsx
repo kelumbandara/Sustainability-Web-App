@@ -5,7 +5,6 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import {
   Alert,
-  AppBar,
   Autocomplete,
   Box,
   CircularProgress,
@@ -31,19 +30,22 @@ import theme from "../../theme";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import RichTextComponent from "../../components/RichTextComponent";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../api/divisionApi";
 import { fetchDepartmentData } from "../../api/departmentApi";
 import {
-  CountryData,
-  DesignationData,
-  EmployeeTypeData,
-  EmploymentTypeData,
-  FunctionData,
+  createRagRecord,
+  fetchRagCategory,
+  fetchRagCountryNames,
+  fetchRagDesignationNames,
+  fetchRagEmployee,
+  fetchRagEmployment,
+  fetchRagFunction,
+  fetchRagSource,
+  fetchRagStateNames,
   genderData,
   RAG,
-  SourceOfHiring,
-  StateData,
+  updateRagRecord,
 } from "../../api/RAG/ragApi";
 import {
   AddNewCountryDialog,
@@ -53,6 +55,8 @@ import {
 } from "./CreateRAGDialogs";
 import AccessibilityNewOutlinedIcon from "@mui/icons-material/AccessibilityNewOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
+import queryClient from "../../state/queryClient";
+import { enqueueSnackbar } from "notistack";
 
 type DialogProps = {
   open: boolean;
@@ -96,8 +100,6 @@ export default function AddOrEditRAGDialog({
   open,
   handleClose,
   defaultValues,
-  onSubmit,
-  isLoading,
 }: DialogProps) {
   const { isMobile, isTablet } = useIsMobile();
   const [activeTab, setActiveTab] = useState(0);
@@ -109,10 +111,17 @@ export default function AddOrEditRAGDialog({
     formState: { errors },
     reset,
     trigger,
+    watch,
+    setValue,
   } = useForm<RAG>({
+    defaultValues,
     reValidateMode: "onChange",
     mode: "onChange",
   });
+
+  const selectedCountry = watch("countryName");
+  const countryId = selectedCountry?.id;
+  console.log(countryId);
 
   const resetForm = () => {
     reset();
@@ -128,10 +137,98 @@ export default function AddOrEditRAGDialog({
     queryFn: fetchDepartmentData,
   });
 
-  const handleSubmitAccidentRecord = (data: RAG) => {
+  const { data: designationData } = useQuery({
+    queryKey: ["designation-data"],
+    queryFn: fetchRagDesignationNames,
+  });
+
+  const { data: functionData } = useQuery({
+    queryKey: ["function-data"],
+    queryFn: fetchRagFunction,
+  });
+
+  const { data: sourceData } = useQuery({
+    queryKey: ["source-data"],
+    queryFn: fetchRagSource,
+  });
+
+  const { data: ragEmployeeData } = useQuery({
+    queryKey: ["employee-data"],
+    queryFn: fetchRagEmployee,
+  });
+
+  const { data: countryData } = useQuery({
+    queryKey: ["country-data"],
+    queryFn: fetchRagCountryNames,
+  });
+
+  const { data: stateData } = useQuery({
+    queryKey: ["state-data", countryId],
+    queryFn: () => fetchRagStateNames(countryId),
+    enabled: !!countryId,
+  });
+
+  const { data: categoryData } = useQuery({
+    queryKey: ["category-data"],
+    queryFn: fetchRagCategory,
+  });
+
+  const { data: employmentData } = useQuery({
+    queryKey: ["employment-data"],
+    queryFn: fetchRagEmployment,
+  });
+
+  const { mutate: createRagReportMutation, isPending: isRagReportCreating } =
+    useMutation({
+      mutationFn: createRagRecord,
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["rag-details"],
+        });
+        enqueueSnackbar("RAG Report Created Successfully!", {
+          variant: "success",
+        });
+        reset();
+        handleClose();
+      },
+      onError: () => {
+        enqueueSnackbar(`RAG Report Create Failed`, {
+          variant: "error",
+        });
+      },
+    });
+
+  const { mutate: updateRagReportMutation, isPending: isRagReportUpdating } =
+    useMutation({
+      mutationFn: updateRagRecord,
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["rag-details"],
+        });
+        enqueueSnackbar("RAG Report Updated Successfully!", {
+          variant: "success",
+        });
+        reset();
+        handleClose();
+      },
+      onError: () => {
+        enqueueSnackbar(`RAG Updated Create Failed`, {
+          variant: "error",
+        });
+      },
+    });
+
+  const handleSubmitRagReport = (data: RAG) => {
     const submitData: Partial<RAG> = data;
+    submitData.country = selectedCountry.id;
     console.log(submitData);
-    onSubmit(submitData as RAG);
+    if (defaultValues) {
+      submitData.id = defaultValues.id;
+      updateRagReportMutation(submitData);
+    } else {
+      createRagReportMutation(submitData);
+    }
+    resetForm();
   };
 
   const isPersonalDetailsValid = useMemo(() => {
@@ -153,17 +250,6 @@ export default function AddOrEditRAGDialog({
     errors.dateOfBirth,
     errors.age,
   ]);
-  const triggerPersonalDetailsSection = () => {
-    trigger([
-      "division",
-      "employeeType",
-      "employeeId",
-      "employeeName",
-      "gender",
-      "dateOfBirth",
-      "age",
-    ]);
-  };
 
   const isEmploymentDetailsValid = useMemo(() => {
     return (
@@ -187,6 +273,25 @@ export default function AddOrEditRAGDialog({
     errors.employmentType,
   ]);
 
+  const isLocationDetailsValid = useMemo(() => {
+    return !errors.country && !errors.state && !errors.origin;
+  }, [errors.country, errors.state, errors.origin]);
+
+  const isRAGDetailsValid = useMemo(() => {
+    return !errors.category && !errors.remark && !errors.discussionSummary;
+  }, [errors.category, errors.remark, errors.discussionSummary]);
+
+  const triggerPersonalDetailsSection = () => {
+    trigger([
+      "division",
+      "employeeType",
+      "employeeId",
+      "employeeName",
+      "gender",
+      "dateOfBirth",
+      "age",
+    ]);
+  };
   const triggerEmploymentDetailsSection = () => {
     trigger([
       "dateOfJoin",
@@ -199,35 +304,21 @@ export default function AddOrEditRAGDialog({
       "employmentType",
     ]);
   };
-
-  const isLocationDetailsValid = useMemo(() => {
-    return !errors.countryName && !errors.state && !errors.origin;
-  }, [errors.countryName, errors.state, errors.origin]);
-
   const triggerLocationDetailsSection = () => {
-    trigger(["countryName", "state", "origin"]);
+    trigger(["country", "state", "origin"]);
   };
 
-  const isRAGDetailsValid = useMemo(() => {
-    return !errors.category && !errors.remark && !errors.discussionSummary;
-  }, [errors.category, errors.remark, errors.discussionSummary]);
   const triggerRAGDetailsSection = () => {
-    trigger(["countryName", "state", "origin"]);
+    trigger(["category", "remark", "discussionSummary"]);
   };
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    if (newValue === 1) {
+    if (activeTab === 0) {
       triggerPersonalDetailsSection();
-    } else if (newValue === 2) {
-      triggerPersonalDetailsSection();
+    } else if (activeTab === 1) {
       triggerEmploymentDetailsSection();
-    } else if (newValue === 3) {
-      triggerPersonalDetailsSection();
-      triggerEmploymentDetailsSection();
+    } else if (activeTab === 2) {
       triggerLocationDetailsSection();
     } else {
-      triggerPersonalDetailsSection();
-      triggerEmploymentDetailsSection();
-      triggerLocationDetailsSection();
       triggerRAGDetailsSection();
     }
     setActiveTab(newValue);
@@ -365,6 +456,7 @@ export default function AddOrEditRAGDialog({
           setOpen={setOpenAddNewCountryDialog}
         />
         <AddNewStateDialog
+          countryId={countryId}
           open={openAddNewStateDialog}
           setOpen={setOpenAddNewStateDialog}
         />
@@ -588,7 +680,6 @@ export default function AddOrEditRAGDialog({
                     <Controller
                       name="division"
                       control={control}
-                      defaultValue={defaultValues?.division ?? ""}
                       {...register("division", { required: true })}
                       render={({ field }) => (
                         <Autocomplete
@@ -622,7 +713,7 @@ export default function AddOrEditRAGDialog({
                       name="employeeType"
                       control={control}
                       defaultValue={defaultValues?.employeeType ?? ""}
-                      {...register("employeeType", { required: true })}
+                      rules={{ required: true }}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -631,10 +722,8 @@ export default function AddOrEditRAGDialog({
                           }
                           size="small"
                           options={
-                            EmployeeTypeData?.length
-                              ? EmployeeTypeData.map(
-                                  (type) => type.employeeType
-                                )
+                            ragEmployeeData?.length
+                              ? ragEmployeeData.map((type) => type.employeeType)
                               : []
                           }
                           sx={{ flex: 1, margin: "0.5rem" }}
@@ -644,7 +733,7 @@ export default function AddOrEditRAGDialog({
                               required
                               error={!!errors.employeeType}
                               helperText={errors.employeeType && "Required"}
-                              label="Employment Type"
+                              label="Employee Type"
                               name="employeeType"
                             />
                           )}
@@ -655,6 +744,7 @@ export default function AddOrEditRAGDialog({
                       required
                       id="employeeId"
                       label="Employee Id"
+                      defaultValue={defaultValues?.employeeId ?? ""}
                       error={!!errors.employeeId}
                       helperText={errors.employeeId && "Required"}
                       size="small"
@@ -673,6 +763,7 @@ export default function AddOrEditRAGDialog({
                       required
                       id="employeeName"
                       label="Employee Name"
+                      defaultValue={defaultValues?.employeeName ?? ""}
                       error={!!errors.employeeName}
                       helperText={errors.employeeName && "Required"}
                       size="small"
@@ -725,6 +816,7 @@ export default function AddOrEditRAGDialog({
                     <Controller
                       control={control}
                       {...register("dateOfBirth", { required: true })}
+                      defaultValue={defaultValues?.dateOfBirth}
                       name={"dateOfBirth"}
                       render={({ field }) => {
                         return (
@@ -745,6 +837,8 @@ export default function AddOrEditRAGDialog({
                       required
                       id="age"
                       label="Age"
+                      type="number"
+                      defaultValue={defaultValues?.age ?? ""}
                       error={!!errors.age}
                       size="small"
                       sx={{
@@ -819,6 +913,7 @@ export default function AddOrEditRAGDialog({
                       required
                       id="servicePeriod"
                       label="Service Period"
+                      defaultValue={defaultValues?.servicePeriod ?? ""}
                       error={!!errors.servicePeriod}
                       size="small"
                       sx={{
@@ -832,6 +927,7 @@ export default function AddOrEditRAGDialog({
                       required
                       id="tenureSplit"
                       label="Tenure Split"
+                      defaultValue={defaultValues?.tenureSplit ?? ""}
                       error={!!errors.tenureSplit}
                       size="small"
                       sx={{
@@ -870,8 +966,8 @@ export default function AddOrEditRAGDialog({
                             </Typography>
                           }
                           options={[
-                            ...(DesignationData?.length
-                              ? DesignationData.map(
+                            ...(designationData?.length
+                              ? designationData.map(
                                   (designation) => designation.designationName
                                 )
                               : []),
@@ -951,8 +1047,8 @@ export default function AddOrEditRAGDialog({
                             </Typography>
                           }
                           options={[
-                            ...(FunctionData?.length
-                              ? FunctionData.map((fun) => fun.functionName)
+                            ...(functionData?.length
+                              ? functionData.map((fun) => fun.functionName)
                               : []),
                             "$ADD_NEW_ITEM",
                           ]}
@@ -988,6 +1084,7 @@ export default function AddOrEditRAGDialog({
                       required
                       id="reportingManager"
                       label="Reporting Manager"
+                      defaultValue={defaultValues?.reportingManager ?? ""}
                       error={!!errors.reportingManager}
                       helperText={errors.reportingManager && "Required"}
                       size="small"
@@ -1007,10 +1104,8 @@ export default function AddOrEditRAGDialog({
                           }
                           size="small"
                           options={
-                            SourceOfHiring?.length
-                              ? SourceOfHiring.map(
-                                  (source) => source.sourceName
-                                )
+                            sourceData?.length
+                              ? sourceData.map((source) => source.sourceName)
                               : []
                           }
                           sx={{ flex: 1, margin: "0.5rem" }}
@@ -1040,8 +1135,8 @@ export default function AddOrEditRAGDialog({
                           }
                           size="small"
                           options={
-                            EmploymentTypeData?.length
-                              ? EmploymentTypeData.map(
+                            employmentData?.length
+                              ? employmentData.map(
                                   (employee) => employee.employmentType
                                 )
                               : []
@@ -1110,51 +1205,43 @@ export default function AddOrEditRAGDialog({
                     flexDirection: isMobile ? "column" : "row",
                   }}
                 >
-                  <TextField
-                    required
-                    id="origin"
-                    label="Origin"
-                    error={!!errors.origin}
-                    helperText={errors.origin && "Required"}
-                    size="small"
-                    sx={{ flex: 1, margin: "0.5rem" }}
-                    {...register("origin", { required: true })}
-                  />
                   <Controller
                     name="countryName"
                     control={control}
                     rules={{ required: "required" }}
-                    defaultValue={defaultValues?.countryName ?? ""}
                     render={({ field }) => (
                       <Autocomplete
                         {...field}
-                        onChange={(_, value) => field.onChange(value)}
-                        value={field.value || ""}
-                        size="small"
-                        noOptionsText={
-                          <Typography
-                            variant="body2"
-                            color="inherit"
-                            gutterBottom
-                          >
-                            No matching Items
-                          </Typography>
+                        onChange={(event, newValue) => {
+                          field.onChange(newValue);
+                          setValue("state", "");
+                        }}
+                        value={field.value || null}
+                        getOptionLabel={(option) =>
+                          typeof option === "string"
+                            ? option
+                            : option.countryName
+                        }
+                        isOptionEqualToValue={(option, value) =>
+                          option.id === value.id
                         }
                         options={[
-                          ...(CountryData?.length
-                            ? CountryData.map((country) => country.countryName)
-                            : []),
-                          "$ADD_NEW_COUNTRY",
+                          ...(countryData?.length ? countryData : []),
+                          {
+                            id: "$ADD_NEW_COUNTRY",
+                            countryName: "$ADD_NEW_COUNTRY",
+                          },
                         ]}
                         renderOption={(props, option) =>
-                          option === "$ADD_NEW_COUNTRY" ? (
+                          option.countryName === "$ADD_NEW_COUNTRY" ? (
                             <AddNewCountryButton {...props} />
                           ) : (
-                            <li {...props} key={option}>
-                              {option}
+                            <li {...props} key={option.id}>
+                              {option.countryName}
                             </li>
                           )
                         }
+                        size="small"
                         sx={{ flex: 1, margin: "0.5rem" }}
                         renderInput={(params) => (
                           <TextField
@@ -1167,51 +1254,64 @@ export default function AddOrEditRAGDialog({
                     )}
                   />
 
-                  <Controller
-                    name="state"
-                    control={control}
-                    rules={{ required: "required" }}
-                    defaultValue={defaultValues?.state ?? ""}
-                    render={({ field }) => (
-                      <Autocomplete
-                        {...field}
-                        onChange={(_, value) => field.onChange(value)}
-                        value={field.value || ""}
-                        size="small"
-                        noOptionsText={
-                          <Typography
-                            variant="body2"
-                            color="inherit"
-                            gutterBottom
-                          >
-                            No matching Items
-                          </Typography>
-                        }
-                        options={[
-                          ...(StateData?.length
-                            ? StateData.map((state) => state.stateName)
-                            : []),
-                          "$ADD_NEW_ITEM",
-                        ]}
-                        renderOption={(props, option) =>
-                          option === "$ADD_NEW_ITEM" ? (
-                            <AddNewStateButton {...props} />
-                          ) : (
-                            <li {...props} key={option}>
-                              {option}
-                            </li>
-                          )
-                        }
-                        sx={{ flex: 1, margin: "0.5rem" }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            error={!!errors.state}
-                            label="State"
-                          />
-                        )}
-                      />
-                    )}
+                  {selectedCountry && (
+                    <Controller
+                      name="state"
+                      control={control}
+                      rules={{ required: "required" }}
+                      defaultValue={defaultValues?.state ?? ""}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(_, value) => field.onChange(value)}
+                          value={field.value || ""}
+                          size="small"
+                          noOptionsText={
+                            <Typography
+                              variant="body2"
+                              color="inherit"
+                              gutterBottom
+                            >
+                              No matching Items
+                            </Typography>
+                          }
+                          options={[
+                            ...(stateData?.length
+                              ? stateData.map((state) => state.stateName)
+                              : []),
+                            "$ADD_NEW_ITEM",
+                          ]}
+                          renderOption={(props, option) =>
+                            option === "$ADD_NEW_ITEM" ? (
+                              <AddNewStateButton {...props} />
+                            ) : (
+                              <li {...props} key={option}>
+                                {option}
+                              </li>
+                            )
+                          }
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              error={!!errors.state}
+                              label="State"
+                            />
+                          )}
+                        />
+                      )}
+                    />
+                  )}
+                  <TextField
+                    required
+                    id="origin"
+                    label="Origin"
+                    defaultValue={defaultValues?.origin ?? ""}
+                    error={!!errors.origin}
+                    helperText={errors.origin && "Required"}
+                    size="small"
+                    sx={{ flex: 1, margin: "0.5rem" }}
+                    {...register("origin", { required: true })}
                   />
                 </Box>
                 <Box
@@ -1272,9 +1372,9 @@ export default function AddOrEditRAGDialog({
                         onChange={(event, newValue) => field.onChange(newValue)}
                         size="small"
                         options={
-                          EmploymentTypeData?.length
-                            ? EmploymentTypeData.map(
-                                (employee) => employee.employmentType
+                          categoryData?.length
+                            ? categoryData.map(
+                                (employee) => employee.categoryName
                               )
                             : []
                         }
@@ -1304,7 +1404,7 @@ export default function AddOrEditRAGDialog({
                         return (
                           <RichTextComponent
                             onChange={(e) => field.onChange(e)}
-                            placeholder={field.value ?? "Description"}
+                            placeholder={field.value ?? "Discussion Summary"}
                           />
                         );
                       }}
@@ -1322,7 +1422,7 @@ export default function AddOrEditRAGDialog({
                         return (
                           <RichTextComponent
                             onChange={(e) => field.onChange(e)}
-                            placeholder={field.value ?? "Description"}
+                            placeholder={field.value ?? "Remark"}
                           />
                         );
                       }}
@@ -1372,10 +1472,14 @@ export default function AddOrEditRAGDialog({
               backgroundColor: "var(--pallet-blue)",
             }}
             size="medium"
-            disabled={isLoading}
-            startIcon={isLoading ? <CircularProgress size={24} /> : null}
+            disabled={isRagReportCreating || isRagReportUpdating}
+            startIcon={
+              isRagReportCreating || isRagReportUpdating ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : null
+            }
             onClick={handleSubmit((data) => {
-              handleSubmitAccidentRecord(data);
+              handleSubmitRagReport(data);
             })}
           >
             {defaultValues ? "Update Changes" : "Submit Report"}
