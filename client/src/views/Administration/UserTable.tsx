@@ -75,7 +75,7 @@ function UserTable() {
   );
 
   const [searchQuery, setSearchQuery] = useState("");
-  const debouncedQuery = useDebounce(searchQuery, 500);
+  const debouncedQuery = useDebounce(searchQuery, 2000);
 
   const {
     data: searchedUserData,
