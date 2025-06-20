@@ -70,11 +70,6 @@ function UserTable() {
     { title: "Users" },
   ];
 
-  const { data: usersData, isFetching: isUserDataFetching } = useQuery({
-    queryKey: ["users"],
-    queryFn: fetchAllUsers,
-  });
-
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("md")
   );
@@ -88,14 +83,13 @@ function UserTable() {
     isFetching: isSearchingUser,
   } = useQuery({
     queryKey: ["users", debouncedQuery],
-    queryFn: ({ queryKey }) => searchUser({ query: queryKey[1] }), // call API with any query, including ""
-    enabled: false,
+    queryFn: ({ queryKey }) => searchUser({ query: queryKey[1] }),
   });
 
   useEffect(() => {
     researchUser();
   }, [debouncedQuery]);
-  
+
   const handleSearch = async (query: string) => {
     console.log("Searching for:", query);
     setSearchQuery(query);
@@ -107,22 +101,15 @@ function UserTable() {
   };
 
   const paginatedUsersData = useMemo(() => {
-    const isSearchActive = searchQuery !== "";
-    const hasSearchResults = Array.isArray(searchedUserData);
-    const sourceData =
-      isSearchActive && hasSearchResults ? searchedUserData : usersData;
-
-    if (!sourceData) return [];
-
+    if (!searchedUserData) return [];
     if (rowsPerPage === -1) {
-      return sourceData;
+      return searchedUserData; // If 'All' is selected, return all data
     }
-
-    return sourceData.slice(
+    return searchedUserData.slice(
       page * rowsPerPage,
       page * rowsPerPage + rowsPerPage
     );
-  }, [usersData, searchedUserData, searchQuery, page, rowsPerPage]);
+  }, [searchedUserData, page, rowsPerPage]);
 
   const { mutate: updateUserRoleMutation, isPending } = useMutation({
     mutationFn: updateUserType,
@@ -174,7 +161,7 @@ function UserTable() {
             maxWidth: isMobile ? "88vw" : "100%",
           }}
         >
-          {isUserDataFetching && <LinearProgress sx={{ width: "100%" }} />}
+          {isSearchingUser && <LinearProgress sx={{ width: "100%" }} />}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -231,7 +218,11 @@ function UserTable() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={11} align="center">
-                    <Typography variant="body2">No Users found</Typography>
+                    {isSearchingUser ? (
+                      <Typography variant="body2">Looking For Users</Typography>
+                    ) : (
+                      <Typography variant="body2">No Users found</Typography>
+                    )}
                   </TableCell>
                 </TableRow>
               )}
@@ -241,7 +232,7 @@ function UserTable() {
                 <TablePagination
                   rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
                   colSpan={100}
-                  count={usersData?.length}
+                  count={searchedUserData?.length}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   showFirstButton={true}
