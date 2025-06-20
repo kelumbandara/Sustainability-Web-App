@@ -8,6 +8,12 @@ export const CountrySchema = z.object({
 
 export type Country = z.infer<typeof CountrySchema>;
 
+export enum RagColor {
+  RED = "red",
+  AMBER = "amber",
+  GREEN = "green",
+}
+
 export const RAGSchema = z.object({
   id: z.string(),
   referenceNumber: z.string(),

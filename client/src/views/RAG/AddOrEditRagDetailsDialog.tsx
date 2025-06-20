@@ -839,9 +839,7 @@ export default function AddOrEditRAGDialog({
                       label="Age"
                       type="number"
                       error={!!errors.age}
-                      helperText={
-                        errors.age ? errors.age.message : ""
-                      }
+                      helperText={errors.age ? errors.age.message : ""}
                       size="small"
                       sx={{
                         flex: 1,
@@ -1465,6 +1463,20 @@ export default function AddOrEditRAGDialog({
               </TabPanel>
             </Box>
           </Stack>
+          <Stack
+            sx={{
+              display: "flex",
+              flex: { lg: 1, md: 1 },
+              flexDirection: "column",
+              backgroundColor: "#fff",
+              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+              padding: "0.5rem",
+              borderRadius: "0.3rem",
+              marginY: isTablet ? "0.5rem" : 0,
+              marginLeft: isTablet ? 0 : "0.5rem",
+              height: "fit-content",
+            }}
+          ></Stack>
         </DialogContent>
         <Divider />
         <DialogActions sx={{ padding: "1rem" }}>
