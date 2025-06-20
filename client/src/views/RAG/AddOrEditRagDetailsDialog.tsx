@@ -1514,7 +1514,7 @@ export default function AddOrEditRAGDialog({
                               sx={{
                                 "&.Mui-selected": {
                                   bgcolor: "#ffcccc80",
-                                  color: "gray",
+                                  color: "red",
                                 },
                               }}
                             >
@@ -1529,7 +1529,7 @@ export default function AddOrEditRAGDialog({
                               sx={{
                                 "&.Mui-selected": {
                                   bgcolor: "#ffd58080",
-                                  color: "gray",
+                                  color: "#ff8f00",
                                 },
                               }}
                             >
@@ -1544,7 +1544,7 @@ export default function AddOrEditRAGDialog({
                               sx={{
                                 "&.Mui-selected": {
                                   bgcolor: "#ccffcc80",
-                                  color: "gray",
+                                  color: "green",
                                 },
                               }}
                             >
