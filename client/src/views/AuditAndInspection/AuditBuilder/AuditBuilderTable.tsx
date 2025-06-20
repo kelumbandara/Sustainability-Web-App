@@ -85,6 +85,9 @@ function AuditBuilderTable() {
 
   const paginatedInternalAuditData = useMemo(() => {
     if (!internalAuditData) return [];
+    if (rowsPerPage === -1) {
+      return internalAuditData; // Return all data if rowsPerPage is -1
+    }
     return internalAuditData.slice(
       page * rowsPerPage,
       page * rowsPerPage + rowsPerPage

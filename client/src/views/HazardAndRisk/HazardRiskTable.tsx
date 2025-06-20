@@ -9,6 +9,8 @@ import {
   Alert,
   Box,
   Button,
+  Chip,
+  colors,
   LinearProgress,
   Stack,
   TableFooter,
@@ -90,12 +92,18 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   const paginatedRiskData = useMemo(() => {
     if (isAssignedTasks) {
       if (!assignedRiskData) return [];
+      if (rowsPerPage === -1) {
+        return assignedRiskData;
+      }
       return assignedRiskData.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
     } else {
       if (!riskData) return [];
+      if (rowsPerPage === -1) {
+        return riskData;
+      }
       return riskData.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
@@ -309,14 +317,22 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
                     <TableCell align="right">{row.createdByUserName}</TableCell>
                     <TableCell align="right">{row.assignee?.name}</TableCell>
                     <TableCell align="right">
-                      {row.status === HazardAndRiskStatus.OPEN ? (
-                        <Typography sx={{ color: "var(--pallet-blue)" }}>
-                          Open
-                        </Typography>
+                      {row.status === HazardAndRiskStatus.APPROVED ? (
+                        <Chip
+                          label={"Approved"}
+                          sx={{
+                            color: "var(--pallet-green)",
+                            backgroundColor: colors.green[50],
+                          }}
+                        />
                       ) : (
-                        <Typography sx={{ color: "var(--pallet-orange)" }}>
-                          Draft
-                        </Typography>
+                        <Chip
+                          label={"Draft"}
+                          sx={{
+                            color: "var(--pallet-orange)",
+                            backgroundColor: colors.orange[50],
+                          }}
+                        />
                       )}
                     </TableCell>
                   </TableRow>
@@ -361,7 +377,11 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
               title="Hazard or Risk Details"
               handleClose={() => setOpenViewDrawer(false)}
               disableEdit={
-                isAssignedTasks ? isRiskAssignEditDisabled : isRiskEditDisabled
+                isAssignedTasks
+                  ? isRiskAssignEditDisabled ||
+                    selectedRow?.status === HazardAndRiskStatus.APPROVED
+                  : isRiskEditDisabled ||
+                    selectedRow?.status === HazardAndRiskStatus.APPROVED
               }
               onEdit={() => {
                 setSelectedRow(selectedRow);
@@ -377,7 +397,10 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
 
             {selectedRow && (
               <Stack>
-                <ViewHazardOrRiskContent hazardOrRisk={selectedRow} />
+                <ViewHazardOrRiskContent
+                  hazardOrRisk={selectedRow}
+                  handleCloseDrawer={() => setOpenViewDrawer(false)}
+                />
               </Stack>
             )}
           </Stack>

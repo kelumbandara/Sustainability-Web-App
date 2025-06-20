@@ -9,21 +9,38 @@ import {
   Box,
   LinearProgress,
   Stack,
+  TableFooter,
+  TablePagination,
   Theme,
   Typography,
   useMediaQuery,
 } from "@mui/material";
 import { format } from "date-fns";
-import {
-  fetchChemicalTransactionPublished,
-} from "../../api/ChemicalManagement/ChemicalRequestApi";
+import { fetchChemicalTransactionPublished } from "../../api/ChemicalManagement/ChemicalRequestApi";
 import theme from "../../theme";
 import PageTitle from "../../components/PageTitle";
 import Breadcrumb from "../../components/BreadCrumb";
 import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 
-function ChemicalRequestTable() {
+function ChemicalRequestTransactionTable() {
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
+  const handleChangePage = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
@@ -39,6 +56,17 @@ function ChemicalRequestTable() {
       queryKey: ["chemical-requests-transaction"],
       queryFn: fetchChemicalTransactionPublished,
     });
+
+  const paginatedChemicalTransactionData = useMemo(() => {
+    if (!chemicalTransaction) return [];
+    if (rowsPerPage === -1) {
+      return chemicalTransaction; // If 'All' is selected, return all data
+    }
+    return chemicalTransaction.slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage
+    );
+  }, [chemicalTransaction, page, rowsPerPage]);
 
   return (
     <Stack>
@@ -78,8 +106,8 @@ function ChemicalRequestTable() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {chemicalTransaction?.length > 0 ? (
-                chemicalTransaction.map((row) => (
+              {paginatedChemicalTransactionData?.length > 0 ? (
+                paginatedChemicalTransactionData.map((row) => (
                   <TableRow
                     key={`${row.id}`}
                     sx={{
@@ -126,6 +154,21 @@ function ChemicalRequestTable() {
                 </TableRow>
               )}
             </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                  colSpan={100}
+                  count={chemicalTransaction?.length ?? 0}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  showFirstButton={true}
+                  showLastButton={true}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+              </TableRow>
+            </TableFooter>
           </Table>
         </TableContainer>
       </Stack>
@@ -133,4 +176,4 @@ function ChemicalRequestTable() {
   );
 }
 
-export default ChemicalRequestTable;
+export default ChemicalRequestTransactionTable;

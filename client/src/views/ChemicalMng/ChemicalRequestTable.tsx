@@ -118,12 +118,18 @@ function ChemicalRequestTable({
   const paginatedChemicalRequestData = useMemo(() => {
     if (isAssignedTasks) {
       if (!chemicalRequestsAssignedData) return [];
+      if (rowsPerPage === -1) {
+        return chemicalRequestsAssignedData; // If 'All' is selected, return all data
+      }
       return chemicalRequestsAssignedData.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
     } else {
       if (!chemicalRequests) return [];
+      if (rowsPerPage === -1) {
+        return chemicalRequests; // If 'All' is selected, return all data
+      }
       return chemicalRequests.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage

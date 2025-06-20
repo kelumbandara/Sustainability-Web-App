@@ -605,10 +605,24 @@ export default function AddOrEditTargetSettingsDialog({
                       type="number"
                       label="Base Line Consumption"
                       error={!!errors.baselineConsumption}
-                      helperText={errors.baselineConsumption ? "Required" : ""}
+                      helperText={
+                        errors.baselineConsumption
+                          ? errors.baselineConsumption.message
+                          : ""
+                      }
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("baselineConsumption", { required: true })}
+                      {...register("baselineConsumption", {
+                        required: {
+                          value: true,
+                          message: "Required",
+                        },
+                        min: {
+                          value: 0,
+                          message:
+                            "Base Line Consumption must be greater than 0",
+                        },
+                      })}
                     />
                     <TextField
                       required
@@ -616,10 +630,21 @@ export default function AddOrEditTargetSettingsDialog({
                       type="number"
                       label="GHG Emission"
                       error={!!errors.ghgEmission}
-                      helperText={errors.ghgEmission ? "Required" : ""}
+                      helperText={
+                        errors.ghgEmission ? errors.ghgEmission.message : ""
+                      }
                       size="small"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("ghgEmission", { required: true })}
+                      {...register("ghgEmission", {
+                        required: {
+                          value: true,
+                          message: "Required",
+                        },
+                        min: {
+                          value: 0,
+                          message: "GHG Emission must be greater than 0",
+                        },
+                      })}
                     />
                   </Box>
                   <Box
@@ -867,33 +892,73 @@ export default function AddOrEditTargetSettingsDialog({
                       id="implementationCost"
                       label="Implementation Cost"
                       error={!!errors.implementationCost}
-                      helperText={errors.implementationCost ? "Required" : ""}
+                      helperText={
+                        errors.implementationCost
+                          ? errors.implementationCost.message
+                          : ""
+                      }
                       size="small"
                       type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("implementationCost", { required: true })}
+                      {...register("implementationCost", {
+                        required: {
+                          value: true,
+                          message: "Required",
+                        },
+                        min: {
+                          value: 0,
+                          message: "Implementation Cost must be greater than 0",
+                        },
+                      })}
                     />
                     <TextField
                       required
                       id="expectedSavings"
                       label="Expected Savings"
                       error={!!errors.expectedSavings}
-                      helperText={errors.expectedSavings ? "Required" : ""}
+                      helperText={
+                        errors.expectedSavings
+                          ? errors.expectedSavings.message
+                          : ""
+                      }
                       size="small"
                       type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("expectedSavings", { required: true })}
+                      {...register("expectedSavings", {
+                        required: {
+                          value: true,
+                          message: "Required",
+                        },
+                        min: {
+                          value: 0,
+                          message: "Expected Savings must be greater than 0",
+                        },
+                      })}
                     />
                     <TextField
                       required
                       id="targetGHGReduction"
                       label="Target GHG Reduction"
                       error={!!errors.targetGHGReduction}
-                      helperText={errors.targetGHGReduction ? "Required" : ""}
+                      helperText={
+                        errors.targetGHGReduction
+                          ? errors.targetGHGReduction.message
+                          : ""
+                      }
                       size="small"
                       type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("targetGHGReduction", { required: true })}
+                      {...register("targetGHGReduction", {
+                        required: {
+                          value: true,
+                          message: "Required",
+                        },
+                        min: {
+                          value: 0,
+                          message:
+                            "Target GHG Reduction must be greater than 0",
+                        },
+                      })}
                     />
                   </Box>
                   <Box
@@ -907,33 +972,68 @@ export default function AddOrEditTargetSettingsDialog({
                       id="costSavings"
                       label="Cost Saving"
                       error={!!errors.costSavings}
-                      helperText={errors.costSavings ? "Required" : ""}
+                      helperText={
+                        errors.costSavings ? errors.costSavings.message : ""
+                      }
                       size="small"
                       type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("costSavings", { required: true })}
+                      {...register("costSavings", {
+                        required: {
+                          value: true,
+                          message: "Required",
+                        },
+                        min: {
+                          value: 0,
+                          message: "Cost Saving must be greater than 0",
+                        },
+                      })}
                     />
                     <TextField
                       required
                       id="paybackPeriod"
                       label="Payback Period"
                       error={!!errors.paybackPeriod}
-                      helperText={errors.paybackPeriod ? "Required" : ""}
+                      helperText={
+                        errors.paybackPeriod ? errors.paybackPeriod.message : ""
+                      }
                       size="small"
                       type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("paybackPeriod", { required: true })}
+                      {...register("paybackPeriod", {
+                        required: {
+                          value: true,
+                          message: "Required",
+                        },
+                        min: {
+                          value: 0,
+                          message: "Payback Period must be greater than 0",
+                        },
+                      })}
                     />
                     <TextField
                       required
                       id="projectLifespan"
                       label="Project Lifespan"
                       error={!!errors.projectLifespan}
-                      helperText={errors.projectLifespan ? "Required" : ""}
+                      helperText={
+                        errors.projectLifespan
+                          ? errors.projectLifespan.message
+                          : ""
+                      }
                       size="small"
                       type="number"
                       sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("projectLifespan", { required: true })}
+                      {...register("projectLifespan", {
+                        required: {
+                          value: true,
+                          message: "Required",
+                        },
+                        min: {
+                          value: 0,
+                          message: "Project Lifespan must be greater than 0",
+                        },
+                      })}
                     />
                   </Box>
                   <Box sx={{ margin: "0.5rem" }}>
@@ -1020,50 +1120,52 @@ export default function AddOrEditTargetSettingsDialog({
                 />
               </Box>
 
-              {defaultValues && (<Box sx={{ margin: "0.5rem" }}>
-                <Typography
-                  variant="caption"
-                  sx={{ marginBottom: "0.1rem", color: grey[700] }}
-                >
-                  Status:
-                </Typography>
-                <Controller
-                  control={control}
-                  name={"status"}
-                  render={({ field }) => {
-                    return (
-                      <ToggleButtonGroup
-                        size="small"
-                        {...control}
-                        aria-label="Small sizes"
-                        color="primary"
-                        value={field.value}
-                        exclusive
-                        orientation="vertical"
-                        fullWidth
-                        onChange={(e, value) => {
-                          console.log("e", e);
-                          field.onChange(value);
-                        }}
-                      >
-                        <ToggleButton value={Status.DRAFT} key={Status.DRAFT}>
-                          <Typography variant="caption" component="div">
-                            {Status.DRAFT}
-                          </Typography>
-                        </ToggleButton>
-                        <ToggleButton
-                          value={Status.APPROVED}
-                          key={Status.APPROVED}
+              {defaultValues && (
+                <Box sx={{ margin: "0.5rem" }}>
+                  <Typography
+                    variant="caption"
+                    sx={{ marginBottom: "0.1rem", color: grey[700] }}
+                  >
+                    Status:
+                  </Typography>
+                  <Controller
+                    control={control}
+                    name={"status"}
+                    render={({ field }) => {
+                      return (
+                        <ToggleButtonGroup
+                          size="small"
+                          {...control}
+                          aria-label="Small sizes"
+                          color="primary"
+                          value={field.value}
+                          exclusive
+                          orientation="vertical"
+                          fullWidth
+                          onChange={(e, value) => {
+                            console.log("e", e);
+                            field.onChange(value);
+                          }}
                         >
-                          <Typography variant="caption" component="div">
-                            {Status.APPROVED}
-                          </Typography>
-                        </ToggleButton>
-                      </ToggleButtonGroup>
-                    );
-                  }}
-                />
-              </Box>)}
+                          <ToggleButton value={Status.DRAFT} key={Status.DRAFT}>
+                            <Typography variant="caption" component="div">
+                              {Status.DRAFT}
+                            </Typography>
+                          </ToggleButton>
+                          <ToggleButton
+                            value={Status.APPROVED}
+                            key={Status.APPROVED}
+                          >
+                            <Typography variant="caption" component="div">
+                              {Status.APPROVED}
+                            </Typography>
+                          </ToggleButton>
+                        </ToggleButtonGroup>
+                      );
+                    }}
+                  />
+                </Box>
+              )}
             </Box>
           </Stack>
         </DialogContent>

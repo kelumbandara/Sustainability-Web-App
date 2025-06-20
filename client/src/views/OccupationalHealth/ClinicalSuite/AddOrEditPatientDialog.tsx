@@ -86,15 +86,17 @@ export default function AddOrEditPatientDialog({
     queryFn: fetchDivision,
   });
 
-  const { data: departmentData, isFetching: isDepartmentDataFetching } = useQuery({
-    queryKey: ["departments"],
-    queryFn: fetchDepartmentData,
-  });
+  const { data: departmentData, isFetching: isDepartmentDataFetching } =
+    useQuery({
+      queryKey: ["departments"],
+      queryFn: fetchDepartmentData,
+    });
 
-  const { data: designationData, isFetching: isDesignationDataFetching } = useQuery({
-    queryKey: ["designations"],
-    queryFn: fetchDesignation,
-  });
+  const { data: designationData, isFetching: isDesignationDataFetching } =
+    useQuery({
+      queryKey: ["designations"],
+      queryFn: fetchDesignation,
+    });
 
   const handleCreateDocument = (data: Patient) => {
     const submitData: Partial<Patient> = data;
@@ -229,16 +231,35 @@ export default function AddOrEditPatientDialog({
                 label="Age"
                 error={!!errors.age}
                 type="number"
+                helperText={errors.age ? errors.age.message : ""}
                 size="small"
                 sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("age", { required: true })}
+                {...register("age", {
+                  required: {
+                    value: true,
+                    message: "Required",
+                  },
+                  min: {
+                    value: 0,
+                    message: "Age must be greater than 0",
+                  },
+                  max: {
+                    value: 120,
+                    message: "Age must be less than 120",
+                  },
+                })}
               />
             </Box>
             <Autocomplete
               {...register("designation", { required: true })}
               size="small"
               options={
-                designationData?.length ? designationData.map((designation) => designation.designationName) : []}
+                designationData?.length
+                  ? designationData.map(
+                      (designation) => designation.designationName
+                    )
+                  : []
+              }
               defaultValue={defaultValues?.designation}
               sx={{ flex: 1, margin: "0.5rem" }}
               renderInput={(params) => (
@@ -262,7 +283,10 @@ export default function AddOrEditPatientDialog({
                 {...register("division", { required: true })}
                 size="small"
                 options={
-                  divisionData?.length ? divisionData.map((division) => division.divisionName) : []}
+                  divisionData?.length
+                    ? divisionData.map((division) => division.divisionName)
+                    : []
+                }
                 defaultValue={defaultValues?.division}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (
@@ -279,7 +303,10 @@ export default function AddOrEditPatientDialog({
                 {...register("department", { required: true })}
                 size="small"
                 options={
-                  departmentData?.length ? departmentData.map((department) => department.department) : []}
+                  departmentData?.length
+                    ? departmentData.map((department) => department.department)
+                    : []
+                }
                 defaultValue={defaultValues?.department}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (
@@ -412,20 +439,42 @@ export default function AddOrEditPatientDialog({
                 id="bodyTemperature"
                 label="Body Temperature (°C)"
                 error={!!errors.bodyTemperature}
+                helperText={
+                  errors.bodyTemperature ? errors.bodyTemperature.message : ""
+                }
                 type="number"
                 size="small"
                 sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("bodyTemperature", { required: true })}
+                {...register("bodyTemperature", {
+                  required: {
+                    value: true,
+                    message: "Required",
+                  },
+                  min: {
+                    value: 30,
+                    message: "Temperature must be greater than 30°C",
+                  },
+                })}
               />
               <TextField
                 required
                 id="weight"
                 label="Weight (Kg)"
                 error={!!errors.weight}
+                helperText={errors.weight ? errors.weight.message : ""}
                 type="number"
                 size="small"
                 sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("weight", { required: true })}
+                {...register("weight", {
+                  required: {
+                    value: true,
+                    message: "Required",
+                  },
+                  min: {
+                    value: 0,
+                    message: "Weight must be greater than 0 Kg",
+                  },
+                })}
               />
             </Box>
             <Box
@@ -440,10 +489,20 @@ export default function AddOrEditPatientDialog({
                 id="height"
                 label="Height (cm)"
                 error={!!errors.height}
+                helperText={errors.height ? errors.height.message : ""}
                 type="number"
                 size="small"
                 sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("height", { required: true })}
+                {...register("height", {
+                  required: {
+                    value: true,
+                    message: "Required",
+                  },
+                  min: {
+                    value: 0,
+                    message: "Height must be greater than 0 cm",
+                  },
+                })}
               />
               <TextField
                 required
@@ -471,7 +530,10 @@ export default function AddOrEditPatientDialog({
                 {...register("consultingDoctor", { required: true })}
                 size="small"
                 options={
-                  doctorData?.length ? doctorData.map((doctor) => doctor.doctorName) : []}
+                  doctorData?.length
+                    ? doctorData.map((doctor) => doctor.doctorName)
+                    : []
+                }
                 defaultValue={defaultValues?.consultingDoctor}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (
@@ -517,7 +579,10 @@ export default function AddOrEditPatientDialog({
                 {...register("clinicDivision", { required: true })}
                 size="small"
                 options={
-                  divisionData?.length ? divisionData.map((division) => division.divisionName) : []}
+                  divisionData?.length
+                    ? divisionData.map((division) => division.divisionName)
+                    : []
+                }
                 defaultValue={defaultValues?.clinicDivision}
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (

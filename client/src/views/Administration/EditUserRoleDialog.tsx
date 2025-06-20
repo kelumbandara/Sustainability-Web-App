@@ -48,7 +48,7 @@ type DialogProps = {
   onSubmit: (data: {
     id: number;
     userTypeId: number;
-    assigneeLevel: string;
+    assigneeLevel: number;
     department: string;
     availability: boolean;
     jobPosition: string;

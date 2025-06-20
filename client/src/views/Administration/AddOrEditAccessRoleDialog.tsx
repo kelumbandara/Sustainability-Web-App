@@ -23,7 +23,11 @@ import {
   TextField,
 } from "@mui/material";
 import useIsMobile from "../../customHooks/useIsMobile";
-import { defaultAdminPermissions, PermissionSection } from "./SectionList";
+import {
+  defaultAdminPermissions,
+  PermissionKeys,
+  PermissionSection,
+} from "./SectionList";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { UserRole } from "../../api/userApi";
 import CloseIcon from "@mui/icons-material/Close";
@@ -132,8 +136,17 @@ function AddOrEditAccessRoleDialog({
               size="small"
               sx={{ margin: "0.5rem" }}
               error={!!errors.userType}
-              {...register("userType", { required: true })}
-              helperText={errors.userType ? "Role Name is required" : ""}
+              {...register("userType", {
+                required: {
+                  value: true,
+                  message: "Required",
+                },
+                pattern: {
+                  value: /^[a-zA-Z0-9\s]+$/,
+                  message: "Role Name can only contain letters and numbers",
+                },
+              })}
+              helperText={errors.userType ? errors.userType.message : ""}
             />
             <TextField
               required
@@ -143,8 +156,17 @@ function AddOrEditAccessRoleDialog({
               size="small"
               sx={{ flex: 1, margin: "0.5rem" }}
               error={!!errors.description}
-              {...register("description", { required: true })}
-              helperText={errors.description ? "Description is required" : ""}
+              {...register("description", {
+                required: {
+                  value: true,
+                  message: "Required",
+                },
+                pattern: {
+                  value: /^[a-zA-Z0-9\s.,-]+$/,
+                  message:
+                    "Description can only contain letters, numbers, spaces, and punctuation",
+                },
+              })}
             />
           </Box>
           <Box sx={{ paddingY: "1rem" }}>
@@ -266,8 +288,13 @@ const SectionAccordion = ({
                         <TableCell align="center">
                           <Checkbox
                             checked={Boolean(
-                              rolePermissions[`${row.key}_VIEW`]
+                              rolePermissions[`${row.key}_VIEW`] ||
+                                `${row.key}_VIEW` ===
+                                  PermissionKeys.INSIGHT_VIEW
                             )}
+                            disabled={
+                              `${row.key}_VIEW` === PermissionKeys.INSIGHT_VIEW
+                            }
                             onChange={() => {
                               if (rolePermissions[`${row.key}_VIEW`]) {
                                 setRolePermissions({

@@ -89,6 +89,9 @@ function InternalAuditTable() {
 
   const paginatedInternalAuditData = useMemo(() => {
     if (!scheduledInternalAuditData) return [];
+    if (rowsPerPage === -1) {
+      return scheduledInternalAuditData; // If 'All' is selected, return all data
+    }
     return scheduledInternalAuditData?.slice(
       page * rowsPerPage,
       page * rowsPerPage + rowsPerPage

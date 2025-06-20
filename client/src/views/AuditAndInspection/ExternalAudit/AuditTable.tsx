@@ -198,24 +198,36 @@ function ExternalAuditTable({
   const paginatedExternalAuditData = useMemo(() => {
     if (isAssignedTasks) {
       if (!externalAuditData) return [];
+      if (rowsPerPage === -1) {
+        return externalAuditData; // If 'All' is selected, return all data
+      }
       return externalAuditTaskData?.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
     } else if (isCorrectiveAction) {
       if (!externalAuditCorrectiveData) return [];
+      if (rowsPerPage === -1) {
+        return externalAuditCorrectiveData; // If 'All' is selected, return all data
+      }
       return externalAuditCorrectiveData?.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
     } else if (isAuditQueue) {
       if (!externalAuditQueueData) return [];
+      if (rowsPerPage === -1) {
+        return externalAuditQueueData; // If 'All' is selected, return all data
+      }
       return externalAuditQueueData?.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
     } else {
       if (!externalAuditData) return [];
+      if (rowsPerPage === -1) {
+        return externalAuditData; // If 'All' is selected, return all data
+      }
       return externalAuditData?.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
@@ -224,7 +236,6 @@ function ExternalAuditTable({
   }, [
     page,
     rowsPerPage,
-
     externalAuditData,
     externalAuditTaskData,
     externalAuditCorrectiveData,

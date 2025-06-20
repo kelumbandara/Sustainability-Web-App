@@ -230,7 +230,10 @@ export const EditInternalAuditQuestionDialog = ({
               name="score"
               control={control}
               rules={{
-                required: "Score is required",
+                required: {
+                  value: true,
+                  message: "Required",
+                },
                 min: {
                   value: 0,
                   message: "Score must be greater than 0",

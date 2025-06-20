@@ -761,9 +761,21 @@ const AddOrEditQuestionDialog = ({
                 size="small"
                 sx={{ flex: 1, margin: "0.5rem" }}
                 error={!!errors.allocatedScore}
-                {...register("allocatedScore", { required: true })}
+                {...register("allocatedScore", {
+                  required: {
+                    value: true,
+                    message: "Required",
+                  },
+                  min: {
+                    value: 0,
+                    message: "Allocated score must be a positive number",
+                  },
+                })}
                 helperText={
-                  errors.allocatedScore ? "Allocated score is required" : ""
+                  errors.allocatedScore
+                    ? errors.allocatedScore.message ??
+                      "Allocated score must be a positive number"
+                    : ""
                 }
               />
             </Box>

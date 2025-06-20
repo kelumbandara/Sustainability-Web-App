@@ -71,6 +71,7 @@ export type AccidentWitness = z.infer<typeof AccidentWitnessSchema>;
 
 export const AccidentEffectedIndividualSchema = z.object({
   id: z.string(),
+  personId: z.number(),
   personType: z.string(),
   employeeId: z.string(),
   name: z.string(),

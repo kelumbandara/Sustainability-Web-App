@@ -74,6 +74,9 @@ function UserTable() {
 
   const paginatedUsersData = useMemo(() => {
     if (!usersData) return [];
+    if (rowsPerPage === -1) {
+      return usersData; // If 'All' is selected, return all data
+    }
     return usersData.slice(
       page * rowsPerPage,
       page * rowsPerPage + rowsPerPage

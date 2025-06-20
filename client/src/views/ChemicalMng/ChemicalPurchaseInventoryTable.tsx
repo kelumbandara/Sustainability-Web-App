@@ -11,11 +11,13 @@ import {
   Chip,
   LinearProgress,
   Stack,
+  TableFooter,
+  TablePagination,
   Theme,
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import { useSnackbar } from "notistack";
 import {
@@ -44,7 +46,22 @@ function ChemicalPurchaseInventoryTable() {
   //   sampleChemicalRequestData
   // );
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
+  const handleChangePage = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number
+  ) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
     { title: "Chemical Purchase & Inventory" },
@@ -79,6 +96,17 @@ function ChemicalPurchaseInventoryTable() {
       });
     },
   });
+
+  const paginatedChemicalPurchaseInventoryData = useMemo(() => {
+    if (!chemicalPurchaseRequests) return [];
+    if (rowsPerPage === -1) {
+      return chemicalPurchaseRequests; // If 'All' is selected, return all data
+    }
+    return chemicalPurchaseRequests.slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage
+    );
+  }, [chemicalPurchaseRequests, page, rowsPerPage]);
 
   return (
     <Stack>
@@ -118,8 +146,8 @@ function ChemicalPurchaseInventoryTable() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {chemicalPurchaseRequests?.length > 0 ? (
-                chemicalPurchaseRequests.map((row) => (
+              {paginatedChemicalPurchaseInventoryData?.length > 0 ? (
+                paginatedChemicalPurchaseInventoryData.map((row) => (
                   <TableRow
                     key={`${row.id}`}
                     sx={{
@@ -145,9 +173,7 @@ function ChemicalPurchaseInventoryTable() {
                         : "--"}
                     </TableCell>
                     <TableCell align="left">{row.commercialName}</TableCell>
-                    <TableCell align="left">
-                      {row?.reviewer?.name}
-                    </TableCell>
+                    <TableCell align="left">{row?.reviewer?.name}</TableCell>
                     <TableCell align="left">
                       {row?.requestedCustomer ?? "--"}
                     </TableCell>
@@ -194,6 +220,21 @@ function ChemicalPurchaseInventoryTable() {
                 </TableRow>
               )}
             </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                  colSpan={100}
+                  count={chemicalPurchaseRequests?.length || 0}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  showFirstButton={true}
+                  showLastButton={true}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+              </TableRow>
+            </TableFooter>
           </Table>
         </TableContainer>
       </Stack>

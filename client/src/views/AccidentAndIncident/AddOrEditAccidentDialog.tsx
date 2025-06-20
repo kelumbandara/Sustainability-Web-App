@@ -7,6 +7,7 @@ import {
   Alert,
   Autocomplete,
   Box,
+  CircularProgress,
   Divider,
   IconButton,
   Paper,
@@ -72,6 +73,7 @@ type DialogProps = {
   handleClose: () => void;
   defaultValues?: Accident;
   onSubmit?: (data: Accident) => void;
+  isLoading?: boolean;
 };
 
 interface TabPanelProps {
@@ -109,6 +111,7 @@ export default function AddOrEditAccidentDialog({
   handleClose,
   defaultValues,
   onSubmit,
+  isLoading,
 }: DialogProps) {
   const { isMobile, isTablet } = useIsMobile();
   const [files, setFiles] = useState<File[]>([]);
@@ -747,7 +750,7 @@ export default function AddOrEditAccidentDialog({
                         {effectedIndividualsWatch?.length > 0 ? (
                           effectedIndividualsWatch?.map((row) => (
                             <TableRow
-                              // key={`${row.id}`}
+                              key={`${row.personId}`}
                               sx={{
                                 "&:last-child td, &:last-child th": {
                                   border: 0,
@@ -778,10 +781,11 @@ export default function AddOrEditAccidentDialog({
                                 </IconButton>
                                 <IconButton
                                   onClick={() => {
+                                    console.log("row", row);
                                     setValue(
                                       "effectedIndividuals",
                                       (effectedIndividualsWatch ?? []).filter(
-                                        (item) => item.id !== row.id
+                                        (item) => item.personId !== row.personId
                                       )
                                     );
                                   }}
@@ -1381,6 +1385,8 @@ export default function AddOrEditAccidentDialog({
               backgroundColor: "var(--pallet-blue)",
             }}
             size="medium"
+            disabled={isLoading}
+            startIcon={isLoading ? <CircularProgress size={24} /> : null}
             onClick={handleSubmit((data) => {
               handleSubmitAccidentRecord(data);
             })}

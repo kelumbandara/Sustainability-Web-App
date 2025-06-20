@@ -58,6 +58,9 @@ function MedicineStockTable() {
 
   const paginatedMedicineInventoryData = useMemo(() => {
     if (!medicineInventory) return [];
+    if (rowsPerPage === -1) {
+      return medicineInventory;
+    }
     return medicineInventory.slice(
       page * rowsPerPage,
       page * rowsPerPage + rowsPerPage

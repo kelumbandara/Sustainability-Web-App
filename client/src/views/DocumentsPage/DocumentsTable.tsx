@@ -135,6 +135,9 @@ function DocumentTable() {
 
   const paginatedDocumentData = useMemo(() => {
     if (!documents) return [];
+    if (rowsPerPage === -1) {
+      return documents;
+    }
     return documents.slice(
       page * rowsPerPage,
       page * rowsPerPage + rowsPerPage
@@ -249,7 +252,11 @@ function DocumentTable() {
                         : "--"}
                     </TableCell>
                     <TableCell align="right">
-                      {differenceInDays(row.expiryDate, new Date()) > 10 ? (
+                      {row.isNoExpiry ? (
+                        <Typography sx={{ color: "green" }}>
+                          No Expiry
+                        </Typography>
+                      ) : differenceInDays(row.expiryDate, new Date()) > 10 ? (
                         <Typography sx={{ color: "green" }}>Active</Typography>
                       ) : differenceInDays(row.expiryDate, new Date()) > 0 ? (
                         <Typography sx={{ color: "orange" }}>

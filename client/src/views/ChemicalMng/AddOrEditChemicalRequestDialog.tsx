@@ -443,8 +443,19 @@ export default function AddOrEditChemicalRequestDialog({
                 size="small"
                 type="number"
                 sx={{ flex: 1, margin: "0.5rem" }}
-                helperText={errors.requestQuantity ? "Required" : ""}
-                {...register("requestQuantity", { required: true })}
+                helperText={
+                  errors.requestQuantity ? errors.requestQuantity.message : ""
+                }
+                {...register("requestQuantity", {
+                  required: {
+                    value: true,
+                    message: "Required",
+                  },
+                  min: {
+                    value: 0,
+                    message: "Quantity must be greater than 0",
+                  },
+                })}
                 slotProps={{ inputLabel: { shrink: true } }}
               />
               <Autocomplete

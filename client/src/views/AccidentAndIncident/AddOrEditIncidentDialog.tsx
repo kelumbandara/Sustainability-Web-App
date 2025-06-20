@@ -7,6 +7,7 @@ import {
   Alert,
   Autocomplete,
   Box,
+  CircularProgress,
   Divider,
   IconButton,
   Paper,
@@ -69,6 +70,7 @@ type DialogProps = {
   handleClose: () => void;
   defaultValues?: Incident;
   onSubmit?: (data: Incident) => void;
+  isLoading?: boolean;
 };
 
 interface TabPanelProps {
@@ -106,6 +108,7 @@ export default function AddOrEditIncidentDialog({
   handleClose,
   defaultValues,
   onSubmit,
+  isLoading,
 }: DialogProps) {
   const { isMobile, isTablet } = useIsMobile();
   const [files, setFiles] = useState<File[]>([]);
@@ -868,7 +871,8 @@ export default function AddOrEditIncidentDialog({
                                       setValue(
                                         "effectedIndividuals",
                                         (effectedIndividualsWatch ?? []).filter(
-                                          (item) => item.id !== row.id
+                                          (item) =>
+                                            item.personId !== row.personId
                                         )
                                       );
                                     }}
@@ -1068,6 +1072,8 @@ export default function AddOrEditIncidentDialog({
               backgroundColor: "var(--pallet-blue)",
             }}
             size="medium"
+            disabled={isLoading}
+            startIcon={isLoading ? <CircularProgress size={20} /> : null}
             onClick={handleSubmit((data) => {
               handleSubmitIncident(data);
             })}

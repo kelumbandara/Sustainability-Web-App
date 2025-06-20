@@ -24,13 +24,7 @@ import { useMemo, useState } from "react";
 import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import AddIcon from "@mui/icons-material/Add";
 import AddorEditSustainabilityDialog from "./AddorEditSustainabilityDialog";
-import {
-  Document,
-  createDocumentRecord,
-  getDocumentList,
-  updateDocumentRecord,
-  deleteDocumentRecord,
-} from "../../api/documentApi";
+import { Document } from "../../api/documentApi";
 import { format } from "date-fns";
 import SustainabilityContent from "./ViewSustainabilityContent";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
@@ -39,7 +33,6 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../state/queryClient";
 import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
 import { PermissionKeys } from "../Administration/SectionList";
-import { sampleSustainabilityData } from "../../api/sampleData/sustainabilityData";
 import MultiTableCell from "../../components/MultiTableCell";
 import {
   createSustainabilityReport,
@@ -143,6 +136,9 @@ function SustainabilityTable() {
 
   const paginatedSustainabilityData = useMemo(() => {
     if (!sustainabilityData) return [];
+    if (rowsPerPage === -1) {
+      return sustainabilityData; // If 'All' is selected, return all data
+    }
     return sustainabilityData.slice(
       page * rowsPerPage,
       page * rowsPerPage + rowsPerPage

@@ -202,21 +202,44 @@ export default function AddOrEditConsumptionDialog({
                   id="totalWorkForce"
                   label="Total WorkForce"
                   error={!!errors.totalWorkForce}
-                  helperText={errors.totalWorkForce && "Required"}
+                  helperText={
+                    errors.totalWorkForce && errors.totalWorkForce.message
+                  }
                   size="small"
                   sx={{ flex: 1, margin: "0.5rem" }}
-                  {...register("totalWorkForce", { required: true })}
+                  {...register("totalWorkForce", {
+                    required: {
+                      value: true,
+                      message: "Required",
+                    },
+                    min: {
+                      value: 0,
+                      message: "Total WorkForce must be greater than 0",
+                    },
+                  })}
                 />
                 <TextField
                   required
                   id="numberOfDaysWorked"
                   label="Number Of Days Worked"
                   type="number"
-                  helperText={errors.numberOfDaysWorked && "Required"}
+                  helperText={
+                    errors.numberOfDaysWorked &&
+                    errors.numberOfDaysWorked.message
+                  }
                   error={!!errors.numberOfDaysWorked}
                   size="small"
                   sx={{ flex: 1, margin: "0.5rem" }}
-                  {...register("numberOfDaysWorked", { required: true })}
+                  {...register("numberOfDaysWorked", {
+                    required: {
+                      value: true,
+                      message: "Required",
+                    },
+                    min: {
+                      value: 0,
+                      message: "Number of Days Worked must be greater than 0",
+                    },
+                  })}
                 />
                 <TextField
                   required
@@ -224,10 +247,19 @@ export default function AddOrEditConsumptionDialog({
                   label="Area In Square Meter"
                   type="number"
                   error={!!errors.area}
-                  helperText={errors.area && "Required"}
+                  helperText={errors.area && errors.area.message}
                   size="small"
                   sx={{ flex: 1, margin: "0.5rem" }}
-                  {...register("area", { required: true })}
+                  {...register("area", {
+                    required: {
+                      value: true,
+                      message: "Required",
+                    },
+                    min: {
+                      value: 0,
+                      message: "Area must be greater than 0",
+                    },
+                  })}
                 />
               </Box>
               <Box
@@ -241,11 +273,23 @@ export default function AddOrEditConsumptionDialog({
                   id="totalProductProducedPcs"
                   label="Total Product Produced/Shipped (Pcs)"
                   error={!!errors.totalProductProducedPcs}
-                  helperText={errors.totalProductProducedPcs && "Required"}
+                  helperText={
+                    errors.totalProductProducedPcs &&
+                    errors.totalProductProducedPcs.message
+                  }
                   size="small"
                   type="number"
                   sx={{ flex: 1, margin: "0.5rem" }}
-                  {...register("totalProductProducedPcs", { required: true })}
+                  {...register("totalProductProducedPcs", {
+                    required: {
+                      value: true,
+                      message: "Required",
+                    },
+                    min: {
+                      value: 0,
+                      message: "Total Product Produced must be greater than 0",
+                    },
+                  })}
                 />
                 <TextField
                   required
@@ -253,10 +297,22 @@ export default function AddOrEditConsumptionDialog({
                   label="Total Product Produced/Shipped(Kg)"
                   type="number"
                   error={!!errors.totalProductProducedKg}
-                  helperText={errors.totalProductProducedKg && "Required"}
+                  helperText={
+                    errors.totalProductProducedKg &&
+                    errors.totalProductProducedKg.message
+                  }
                   size="small"
                   sx={{ flex: 1, margin: "0.5rem" }}
-                  {...register("totalProductProducedKg", { required: true })}
+                  {...register("totalProductProducedKg", {
+                    required: {
+                      value: true,
+                      message: "Required",
+                    },
+                    min: {
+                      value: 0,
+                      message: "Total Product Produced must be greater than 0",
+                    },
+                  })}
                 />
               </Box>
 
@@ -533,50 +589,52 @@ export default function AddOrEditConsumptionDialog({
                 />
               </Box>
 
-              {defaultValues && (<Box sx={{ margin: "0.5rem" }}>
-                <Typography
-                  variant="caption"
-                  sx={{ marginBottom: "0.1rem", color: grey[700] }}
-                >
-                  Status:
-                </Typography>
-                <Controller
-                  control={control}
-                  name={"status"}
-                  render={({ field }) => {
-                    return (
-                      <ToggleButtonGroup
-                        size="small"
-                        {...control}
-                        aria-label="Small sizes"
-                        color="primary"
-                        value={field.value}
-                        exclusive
-                        orientation="vertical"
-                        fullWidth
-                        onChange={(e, value) => {
-                          console.log("e", e);
-                          field.onChange(value);
-                        }}
-                      >
-                        <ToggleButton value={Status.DRAFT} key={Status.DRAFT}>
-                          <Typography variant="caption" component="div">
-                            {Status.DRAFT}
-                          </Typography>
-                        </ToggleButton>
-                        <ToggleButton
-                          value={Status.APPROVED}
-                          key={Status.APPROVED}
+              {defaultValues && (
+                <Box sx={{ margin: "0.5rem" }}>
+                  <Typography
+                    variant="caption"
+                    sx={{ marginBottom: "0.1rem", color: grey[700] }}
+                  >
+                    Status:
+                  </Typography>
+                  <Controller
+                    control={control}
+                    name={"status"}
+                    render={({ field }) => {
+                      return (
+                        <ToggleButtonGroup
+                          size="small"
+                          {...control}
+                          aria-label="Small sizes"
+                          color="primary"
+                          value={field.value}
+                          exclusive
+                          orientation="vertical"
+                          fullWidth
+                          onChange={(e, value) => {
+                            console.log("e", e);
+                            field.onChange(value);
+                          }}
                         >
-                          <Typography variant="caption" component="div">
-                            {Status.APPROVED}
-                          </Typography>
-                        </ToggleButton>
-                      </ToggleButtonGroup>
-                    );
-                  }}
-                />
-              </Box>)}
+                          <ToggleButton value={Status.DRAFT} key={Status.DRAFT}>
+                            <Typography variant="caption" component="div">
+                              {Status.DRAFT}
+                            </Typography>
+                          </ToggleButton>
+                          <ToggleButton
+                            value={Status.APPROVED}
+                            key={Status.APPROVED}
+                          >
+                            <Typography variant="caption" component="div">
+                              {Status.APPROVED}
+                            </Typography>
+                          </ToggleButton>
+                        </ToggleButtonGroup>
+                      );
+                    }}
+                  />
+                </Box>
+              )}
             </Stack>
           </Stack>
         </DialogContent>
