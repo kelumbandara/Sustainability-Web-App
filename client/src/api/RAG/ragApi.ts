@@ -48,6 +48,7 @@ export const RAGSchema = z.object({
   inprogressBy: z.number(),
   approvedBy: z.number(),
   created_at: z.date(),
+  rag: z.nativeEnum(RagColor)
 });
 
 export type RAG = z.infer<typeof RAGSchema>;
