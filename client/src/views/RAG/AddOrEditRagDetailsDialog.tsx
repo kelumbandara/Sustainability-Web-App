@@ -14,6 +14,8 @@ import {
   Tab,
   Tabs,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
 import useIsMobile from "../../customHooks/useIsMobile";
@@ -45,6 +47,8 @@ import {
   fetchRagStateNames,
   genderData,
   RAG,
+  RagColor,
+  Status,
   updateRagRecord,
 } from "../../api/RAG/ragApi";
 import {
@@ -1462,21 +1466,151 @@ export default function AddOrEditRAGDialog({
                 </Box>
               </TabPanel>
             </Box>
+            {defaultValues && (
+              <Stack
+                sx={{
+                  display: "flex",
+                  flex: { lg: 1, md: 1 },
+                  flexDirection: "column",
+                  backgroundColor: "#fff",
+                  boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+                  padding: "0.5rem",
+                  borderRadius: "0.3rem",
+                  marginY: isTablet ? "0.5rem" : 0,
+                  marginLeft: isTablet ? 0 : "0.5rem",
+                  height: "fit-content",
+                }}
+              >
+                {defaultValues && (
+                  <Box sx={{ margin: "0.5rem" }}>
+                    <Typography
+                      variant="caption"
+                      sx={{ marginBottom: "0.1rem", color: grey[700] }}
+                    >
+                      RAG Level:
+                    </Typography>
+                    <Controller
+                      control={control}
+                      name={"rag"}
+                      render={({ field }) => {
+                        return (
+                          <ToggleButtonGroup
+                            size="small"
+                            {...control}
+                            aria-label="Small sizes"
+                            color="primary"
+                            value={field.value}
+                            exclusive
+                            orientation="vertical"
+                            fullWidth
+                            onChange={(e, value) => {
+                              console.log("e", e);
+                              field.onChange(value);
+                            }}
+                          >
+                            <ToggleButton
+                              value={RagColor.RED}
+                              key={RagColor.RED}
+                              sx={{
+                                "&.Mui-selected": {
+                                  bgcolor: "#ffcccc80",
+                                  color: "gray",
+                                },
+                              }}
+                            >
+                              <Typography variant="caption" component="div">
+                                {RagColor.RED}
+                              </Typography>
+                            </ToggleButton>
+
+                            <ToggleButton
+                              value={RagColor.AMBER}
+                              key={RagColor.AMBER}
+                              sx={{
+                                "&.Mui-selected": {
+                                  bgcolor: "#ffd58080",
+                                  color: "gray",
+                                },
+                              }}
+                            >
+                              <Typography variant="caption" component="div">
+                                {RagColor.AMBER}
+                              </Typography>
+                            </ToggleButton>
+
+                            <ToggleButton
+                              value={RagColor.GREEN}
+                              key={RagColor.GREEN}
+                              sx={{
+                                "&.Mui-selected": {
+                                  bgcolor: "#ccffcc80",
+                                  color: "gray",
+                                },
+                              }}
+                            >
+                              <Typography variant="caption" component="div">
+                                {RagColor.GREEN}
+                              </Typography>
+                            </ToggleButton>
+                          </ToggleButtonGroup>
+                        );
+                      }}
+                    />
+                  </Box>
+                )}
+
+                {defaultValues && (
+                  <Box sx={{ margin: "0.5rem" }}>
+                    <Typography
+                      variant="caption"
+                      sx={{ marginBottom: "0.1rem", color: grey[700] }}
+                    >
+                      Status:
+                    </Typography>
+                    <Controller
+                      control={control}
+                      name={"status"}
+                      render={({ field }) => {
+                        return (
+                          <ToggleButtonGroup
+                            size="small"
+                            {...control}
+                            aria-label="Small sizes"
+                            color="primary"
+                            value={field.value}
+                            exclusive
+                            orientation="vertical"
+                            fullWidth
+                            onChange={(e, value) => {
+                              console.log("e", e);
+                              field.onChange(value);
+                            }}
+                          >
+                            <ToggleButton
+                              value={Status.DRAFT}
+                              key={Status.DRAFT}
+                            >
+                              <Typography variant="caption" component="div">
+                                {Status.DRAFT}
+                              </Typography>
+                            </ToggleButton>
+                            <ToggleButton
+                              value={Status.APPROVED}
+                              key={Status.APPROVED}
+                            >
+                              <Typography variant="caption" component="div">
+                                {Status.APPROVED}
+                              </Typography>
+                            </ToggleButton>
+                          </ToggleButtonGroup>
+                        );
+                      }}
+                    />
+                  </Box>
+                )}
+              </Stack>
+            )}
           </Stack>
-          <Stack
-            sx={{
-              display: "flex",
-              flex: { lg: 1, md: 1 },
-              flexDirection: "column",
-              backgroundColor: "#fff",
-              boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-              padding: "0.5rem",
-              borderRadius: "0.3rem",
-              marginY: isTablet ? "0.5rem" : 0,
-              marginLeft: isTablet ? 0 : "0.5rem",
-              height: "fit-content",
-            }}
-          ></Stack>
         </DialogContent>
         <Divider />
         <DialogActions sx={{ padding: "1rem" }}>

@@ -14,6 +14,11 @@ export enum RagColor {
   GREEN = "green",
 }
 
+export enum Status {
+  DRAFT = "draft",
+  APPROVED = "approved",
+}
+
 export const RAGSchema = z.object({
   id: z.string(),
   referenceNumber: z.string(),
@@ -41,7 +46,7 @@ export const RAGSchema = z.object({
   stateName: z.string(),
   discussionSummary: z.string(),
   remark: z.string(),
-  status: z.string(),
+  status: z.nativeEnum(Status),
   createdByUser: z.number(),
   updatedBy: z.number(),
   rejectedBy: z.number(),
