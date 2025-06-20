@@ -86,9 +86,9 @@ function UserTable() {
     queryFn: ({ queryKey }) => searchUser({ query: queryKey[1] }),
   });
 
-  useEffect(() => {
-    researchUser();
-  }, [debouncedQuery]);
+  // useEffect(() => {
+  //   researchUser();
+  // }, [debouncedQuery]);
 
   const handleSearch = async (query: string) => {
     console.log("Searching for:", query);
@@ -103,7 +103,7 @@ function UserTable() {
   const paginatedUsersData = useMemo(() => {
     if (!searchedUserData) return [];
     if (rowsPerPage === -1) {
-      return searchedUserData; // If 'All' is selected, return all data
+      return searchedUserData;
     }
     return searchedUserData.slice(
       page * rowsPerPage,
