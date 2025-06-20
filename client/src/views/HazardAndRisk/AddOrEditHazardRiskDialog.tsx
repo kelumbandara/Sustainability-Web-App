@@ -3,12 +3,16 @@ import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
+import theme from "../../theme";
 import {
+  AppBar,
   Autocomplete,
   Box,
   Divider,
   IconButton,
   Stack,
+  Tab,
+  Tabs,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
@@ -26,6 +30,7 @@ import { useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import AddIcon from "@mui/icons-material/Add";
 import {
+  createObservationType,
   HazardAndRisk,
   HazardAndRiskStatus,
   HazardOrRiskCategories,
@@ -37,7 +42,7 @@ import {
   fetchObservationType,
   fetchMainCategory,
 } from "../../api/categoryApi";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import useCurrentUser from "../../hooks/useCurrentUser";
 import { fetchAllUsers, fetchHazardRiskAssignee } from "../../api/userApi";
 import { fetchDivision } from "../../api/divisionApi";
@@ -45,6 +50,10 @@ import UserAutoComplete from "../../components/UserAutoComplete";
 import { StorageFile } from "../../utils/StorageFiles.util";
 import { ExistingFileItemsEdit } from "../../components/ExistingFileItemsEdit";
 import { format } from "date-fns";
+import { enqueueSnackbar } from "notistack";
+import queryClient from "../../state/queryClient";
+import TextSnippetIcon from "@mui/icons-material/TextSnippet";
+import FireExtinguisherIcon from "@mui/icons-material/FireExtinguisher";
 
 type DialogProps = {
   open: boolean;
@@ -52,6 +61,36 @@ type DialogProps = {
   defaultValues?: HazardAndRisk;
   onSubmit?: (data: HazardAndRisk) => void;
 };
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  dir?: string;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`full-width-tabpanel-${index}`}
+      aria-labelledby={`full-width-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
+  );
+}
+
+function a11yProps(index: number) {
+  return {
+    id: `full-width-tab-${index}`,
+    "aria-controls": `full-width-tabpanel-${index}`,
+  };
+}
 
 export default function AddOrEditHazardRiskDialog({
   open,
@@ -66,6 +105,10 @@ export default function AddOrEditHazardRiskDialog({
   );
   const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
   const [addNewContactDialogOpen, setAddNewContactDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
+  };
   console.log("files", files);
   const {
     register,
@@ -160,6 +203,7 @@ export default function AddOrEditHazardRiskDialog({
   const handleSubmitHazardAndRisk = (data: HazardAndRisk) => {
     const submitData: Partial<HazardAndRisk> = data;
     submitData.id = defaultValues?.id ?? uuidv4();
+    // submitData.createdByUser = user.id;
     submitData.assigneeId = assignee.id;
     // submitData.createdDate = new Date();
     // submitData.createdByUser = sampleAssignees[0].name;
@@ -197,20 +241,42 @@ export default function AddOrEditHazardRiskDialog({
   );
 
   const AddNewObservationTypeDialog = ({
-    category,
+    categoryName,
     subCategory,
   }: {
-    category: string;
+    categoryName: string;
     subCategory: string;
   }) => {
     const { register, handleSubmit } = useForm({
       defaultValues: {
-        observation: "",
+        observationType: "",
       },
     });
 
-    const handleCreateObservationType = (data: { observation: string }) => {
-      console.log("Creating observation type", data, category, subCategory);
+    const { mutate: createObservationTypeMutation } = useMutation({
+      mutationFn: createObservationType,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["observationType"] });
+        enqueueSnackbar("Observation Type Created Successfully!", {
+          variant: "success",
+        });
+      },
+      onError: () => {
+        enqueueSnackbar(`Observation Type Creation Failed`, {
+          variant: "error",
+        });
+      },
+    });
+
+    const handleCreateObservationType = (data: { observationType: string }) => {
+      const submitData = {
+        ...data,
+        categoryName,
+        subCategory,
+      };
+      console.log(submitData);
+      createObservationTypeMutation(submitData);
+      setAddNewContactDialogOpen(false);
     };
 
     return (
@@ -258,7 +324,7 @@ export default function AddOrEditHazardRiskDialog({
             }}
           >
             <TextField
-              {...register("observation", { required: true })}
+              {...register("observationType", { required: true })}
               required
               id="observation"
               label="Observation"
@@ -307,7 +373,7 @@ export default function AddOrEditHazardRiskDialog({
     >
       {/* {addNewContactDialogOpen &&  */}
       <AddNewObservationTypeDialog
-        category={category}
+        categoryName={category}
         subCategory={subCategory}
       />
       {/* } */}
@@ -370,73 +436,64 @@ export default function AddOrEditHazardRiskDialog({
                 {format(new Date(), "dd MMM yyyy")}
               </Typography>
             </Box>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-              }}
-            >
-              <Autocomplete
-                {...register("category", { required: true })}
-                size="small"
-                options={
-                  categoryData?.length
-                    ? categoryData.map((category) => category.categoryName)
-                    : []
-                }
-                sx={{ flex: 1, margin: "0.5rem" }}
-                defaultValue={defaultValues?.category}
-                onChange={(e, value) => {
-                  reset({
-                    category: value,
-                    subCategory: null, // Reset subCategory
-                    observationType: null, // Reset observationType
-                  });
+            <AppBar position="static">
+              <Tabs
+                value={activeTab}
+                onChange={handleChange}
+                indicatorColor="secondary"
+                TabIndicatorProps={{
+                  style: {
+                    backgroundColor: "var(--pallet-blue)",
+                    height: "3px",
+                  },
                 }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    error={!!errors.category}
-                    helperText={errors.category ? "Required" : ""}
-                    label="Category"
-                    name="category"
+                sx={{
+                  backgroundColor: "var(--pallet-lighter-grey)",
+                  color: "var(--pallet-blue)",
+                }}
+                textColor="inherit"
+                variant="scrollable"
+                scrollButtons={true}
+              >
+                <Tab
+                  label={
+                    <Box
+                      sx={{
+                        color: "var(--pallet-blue)",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <TextSnippetIcon fontSize="small" />
+                      <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                        Hazard / Risk Details
+                      </Typography>
+                    </Box>
+                  }
+                  {...a11yProps(0)}
+                />
+                {defaultValues && (
+                  <Tab
+                    label={
+                      <Box
+                        sx={{
+                          color: "var(--pallet-blue)",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <FireExtinguisherIcon fontSize="small" />
+                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                          Resolution Details
+                        </Typography>
+                      </Box>
+                    }
+                    {...a11yProps(1)}
                   />
                 )}
-              />
-              {category && (
-                <Autocomplete
-                  {...register("subCategory", { required: true })}
-                  size="small"
-                  options={
-                    subCategoryData?.length
-                      ? subCategoryData.map((category) => category.subCategory)
-                      : []
-                  }
-                  defaultValue={defaultValues?.subCategory}
-                  onChange={(e, value) => {
-                    reset({
-                      category: watch("category"), // Preserve category
-                      subCategory: value,
-                      observationType: null, // Reset observationType
-                    });
-                  }}
-                  sx={{ flex: 1, margin: "0.5rem" }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      required
-                      error={!!errors.subCategory}
-                      helperText={errors.subCategory ? "Required" : ""}
-                      label="Sub Category"
-                      name="subCategory"
-                    />
-                  )}
-                />
-              )}
-            </Box>
-
-            {category && subCategory && (
+              </Tabs>
+            </AppBar>
+            <TabPanel value={activeTab} index={0} dir={theme.direction}>
               <Box
                 sx={{
                   display: "flex",
@@ -444,146 +501,280 @@ export default function AddOrEditHazardRiskDialog({
                 }}
               >
                 <Autocomplete
-                  {...register("observationType")}
+                  {...register("category", { required: true })}
                   size="small"
-                  noOptionsText={
-                    <>
-                      <Typography variant="body2" color="inherit" gutterBottom>
-                        No matching Items
-                      </Typography>
-                    </>
+                  options={
+                    categoryData?.length
+                      ? categoryData.map((category) => category.categoryName)
+                      : []
                   }
-                  options={[
-                    ...(observationData?.length
-                      ? observationData.map(
-                          (category) => category.observationType
-                        )
-                      : []),
-                    "$ADD_NEW_ITEM",
-                  ]}
-                  renderOption={(props, option) => (
-                    <>
-                      {option === "$ADD_NEW_ITEM" ? (
-                        <AddNewObservationButton {...props} />
-                      ) : (
-                        <li {...props} key={option}>
-                          {option}
-                        </li>
-                      )}
-                    </>
+                  sx={{ flex: 1, margin: "0.5rem" }}
+                  defaultValue={defaultValues?.category}
+                  onChange={(e, value) => {
+                    reset({
+                      category: value,
+                      subCategory: null, // Reset subCategory
+                      observationType: null, // Reset observationType
+                    });
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      required
+                      error={!!errors.category}
+                      helperText={errors.category ? "Required" : ""}
+                      label="Category"
+                      name="category"
+                    />
                   )}
-                  defaultValue={defaultValues?.observationType}
+                />
+                {category && (
+                  <Autocomplete
+                    {...register("subCategory", { required: true })}
+                    size="small"
+                    options={
+                      subCategoryData?.length
+                        ? subCategoryData.map(
+                            (category) => category.subCategory
+                          )
+                        : []
+                    }
+                    defaultValue={defaultValues?.subCategory}
+                    onChange={(e, value) => {
+                      reset({
+                        category: watch("category"), // Preserve category
+                        subCategory: value,
+                        observationType: null, // Reset observationType
+                      });
+                    }}
+                    sx={{ flex: 1, margin: "0.5rem" }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        required
+                        error={!!errors.subCategory}
+                        helperText={errors.subCategory ? "Required" : ""}
+                        label="Sub Category"
+                        name="subCategory"
+                      />
+                    )}
+                  />
+                )}
+              </Box>
+
+              {category && subCategory && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: isMobile ? "column" : "row",
+                  }}
+                >
+                  <Autocomplete
+                    {...register("observationType")}
+                    size="small"
+                    noOptionsText={
+                      <>
+                        <Typography
+                          variant="body2"
+                          color="inherit"
+                          gutterBottom
+                        >
+                          No matching Items
+                        </Typography>
+                      </>
+                    }
+                    options={[
+                      ...(observationData?.length
+                        ? observationData.map(
+                            (category) => category.observationType
+                          )
+                        : []),
+                      "$ADD_NEW_ITEM",
+                    ]}
+                    renderOption={(props, option) => (
+                      <>
+                        {option === "$ADD_NEW_ITEM" ? (
+                          <AddNewObservationButton {...props} />
+                        ) : (
+                          <li {...props} key={option}>
+                            {option}
+                          </li>
+                        )}
+                      </>
+                    )}
+                    defaultValue={defaultValues?.observationType}
+                    sx={{ flex: 1, margin: "0.5rem" }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        error={!!errors.observationType}
+                        label="Observation Type"
+                        name="observationType"
+                      />
+                    )}
+                  />
+                </Box>
+              )}
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: isMobile ? "column" : "row",
+                }}
+              >
+                <Autocomplete
+                  {...register("division", { required: true })}
+                  size="small"
+                  options={
+                    divisionData?.length
+                      ? divisionData.map((division) => division.divisionName)
+                      : []
+                  }
+                  defaultValue={defaultValues?.division}
                   sx={{ flex: 1, margin: "0.5rem" }}
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      error={!!errors.observationType}
-                      label="Observation Type"
-                      name="observationType"
+                      required
+                      error={!!errors.division}
+                      helperText={errors.division ? "Required" : ""}
+                      label="Division"
+                      name="division"
                     />
                   )}
                 />
+                <TextField
+                  required
+                  id="locationOrDepartment"
+                  label="Location or Department"
+                  error={!!errors.locationOrDepartment}
+                  helperText={errors.locationOrDepartment ? "Required" : ""}
+                  size="small"
+                  sx={{ flex: 1, margin: "0.5rem" }}
+                  {...register("locationOrDepartment", { required: true })}
+                />
               </Box>
-            )}
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-              }}
-            >
-              <Autocomplete
-                {...register("division", { required: true })}
-                size="small"
-                options={
-                  divisionData?.length
-                    ? divisionData.map((division) => division.divisionName)
-                    : []
-                }
-                defaultValue={defaultValues?.division}
-                sx={{ flex: 1, margin: "0.5rem" }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    error={!!errors.division}
-                    helperText={errors.division ? "Required" : ""}
-                    label="Division"
-                    name="division"
-                  />
-                )}
-              />
-              <TextField
-                required
-                id="locationOrDepartment"
-                label="Location or Department"
-                error={!!errors.locationOrDepartment}
-                helperText={errors.locationOrDepartment ? "Required" : ""}
-                size="small"
-                sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("locationOrDepartment", { required: true })}
-              />
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-              }}
-            >
-              <TextField
-                id="subLocation"
-                label="Sub Location"
-                error={!!errors.subLocation}
-                size="small"
-                sx={{ flex: 1, margin: "0.5rem" }}
-                {...register("subLocation")}
-              />
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-                margin: "0.5rem",
-              }}
-            >
-              <Controller
-                control={control}
-                name={"description"}
-                render={({ field }) => {
-                  return (
-                    <RichTextComponent
-                      onChange={(e) => field.onChange(e)}
-                      placeholder={field.value ?? "Description"}
-                    />
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: isMobile ? "column" : "row",
+                }}
+              >
+                <TextField
+                  id="subLocation"
+                  label="Sub Location"
+                  error={!!errors.subLocation}
+                  size="small"
+                  sx={{ flex: 1, margin: "0.5rem" }}
+                  {...register("subLocation")}
+                />
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: isMobile ? "column" : "row",
+                  margin: "0.5rem",
+                }}
+              >
+                <Controller
+                  control={control}
+                  name={"description"}
+                  render={({ field }) => {
+                    return (
+                      <RichTextComponent
+                        onChange={(e) => field.onChange(e)}
+                        placeholder={field.value ?? "Description"}
+                      />
+                    );
+                  }}
+                />
+              </Box>
+              <ExistingFileItemsEdit
+                label="Existing evidence"
+                files={existingFiles}
+                sx={{ marginY: "1rem" }}
+                handleRemoveItem={(file) => {
+                  setFilesToRemove([...filesToRemove, file.gsutil_uri]);
+                  setExistingFiles(
+                    existingFiles.filter(
+                      (f) => f.gsutil_uri !== file.gsutil_uri
+                    )
                   );
                 }}
               />
-            </Box>
-            <ExistingFileItemsEdit
-              label="Existing evidence"
-              files={existingFiles}
-              sx={{ marginY: "1rem" }}
-              handleRemoveItem={(file) => {
-                setFilesToRemove([...filesToRemove, file.gsutil_uri]);
-                setExistingFiles(
-                  existingFiles.filter((f) => f.gsutil_uri !== file.gsutil_uri)
-                );
-              }}
-            />
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-                margin: "0.5rem",
-              }}
-            >
-              <DropzoneComponent
-                files={files}
-                setFiles={setFiles}
-                dropzoneLabel={
-                  "Drop your evidence here. Please ensure the image size is less than 10mb."
-                }
-              />
-            </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: isMobile ? "column" : "row",
+                  margin: "0.5rem",
+                }}
+              >
+                <DropzoneComponent
+                  files={files}
+                  setFiles={setFiles}
+                  dropzoneLabel={
+                    "Drop your evidence here. Please ensure the image size is less than 10mb."
+                  }
+                />
+              </Box>
+            </TabPanel>
+            <TabPanel value={activeTab} index={1} dir={theme.direction}>
+              <Stack gap={1}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: isMobile ? "column" : "row",
+                  }}
+                >
+                  <TextField
+                    required
+                    id="control"
+                    label="Control"
+                    error={!!errors.control}
+                    helperText={errors.control ? "Required" : ""}
+                    size="small"
+                    sx={{ flex: 1, margin: "0.5rem" }}
+                    {...register("control", { required: true })}
+                  />
+                  <TextField
+                    required
+                    id="cost"
+                    label="Cost"
+                    error={!!errors.cost}
+                    helperText={errors.cost ? "Required" : ""}
+                    size="small"
+                    sx={{ flex: 1, margin: "0.5rem" }}
+                    {...register("cost", { required: true })}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: isMobile ? "column" : "row",
+                  }}
+                >
+                  <TextField
+                    required
+                    id="actionTaken"
+                    label="ActionTaken"
+                    error={!!errors.actionTaken}
+                    helperText={errors.actionTaken ? "Required" : ""}
+                    size="small"
+                    sx={{ flex: 1, margin: "0.5rem" }}
+                    {...register("actionTaken", { required: true })}
+                  />
+                  <TextField
+                    required
+                    id="remarks"
+                    label="Remarks"
+                    error={!!errors.remarks}
+                    helperText={errors.remarks ? "Required" : ""}
+                    size="small"
+                    sx={{ flex: 1, margin: "0.5rem" }}
+                    {...register("remarks", { required: true })}
+                  />
+                </Box>
+              </Stack>
+            </TabPanel>
           </Stack>
           <Stack
             sx={{
