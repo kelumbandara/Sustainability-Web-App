@@ -6,6 +6,7 @@ import DialogActions from "@mui/material/DialogActions";
 import {
   Autocomplete,
   Box,
+  CircularProgress,
   Divider,
   IconButton,
   Stack,
@@ -93,9 +94,9 @@ export default function EditUserRoleDialog({
   });
   const { enqueueSnackbar } = useSnackbar();
 
-  const [addNewContactDialogOpen, setAddNewContactDialogOpen] = useState(false); //Aluthen Hadanna
+  const [addNewContactDialogOpen, setAddNewContactDialogOpen] = useState(false);
   const [addNewDepartmentDialogOpen, setAddNewDepartmentDialogOpen] =
-    useState(false); //Aluthen Hadanna
+    useState(false);
 
   const {
     handleSubmit,
@@ -117,11 +118,7 @@ export default function EditUserRoleDialog({
   const isAvailability = watch("availability");
   const job = watch("jobPosition");
 
-  const AddNewJobPositionDialog = ({
-    jobPosition,
-  }: {
-    jobPosition: string;
-  }) => {
+  const AddNewJobPositionDialog = () => {
     const { register, handleSubmit, watch } = useForm({
       defaultValues: {
         jobPosition: "",
@@ -149,7 +146,7 @@ export default function EditUserRoleDialog({
       },
     });
 
-    const handleCreateObservationType = () => {
+    const handleCreateJobPosition = () => {
       const watchedJob = watch("jobPosition");
       addNewJobPositionMutation(watchedJob);
     };
@@ -215,13 +212,20 @@ export default function EditUserRoleDialog({
           >
             Cancel
           </Button>
+
           <CustomButton
             variant="contained"
             sx={{
               backgroundColor: "var(--pallet-blue)",
             }}
             size="medium"
-            onClick={handleSubmit(handleCreateObservationType)}
+            disabled={isAddNewJobPositionMutation}
+            endIcon={
+              isAddNewJobPositionMutation ? (
+                <CircularProgress size={20} />
+              ) : null
+            }
+            onClick={handleSubmit(handleCreateJobPosition)}
           >
             Add Job Position
           </CustomButton>
@@ -230,7 +234,7 @@ export default function EditUserRoleDialog({
     );
   };
 
-  const AddNewDepartmentDialog = ({ department }: { department: string }) => {
+  const AddNewDepartmentDialog = () => {
     const { register, handleSubmit, watch } = useForm({
       defaultValues: {
         department: "",
@@ -238,18 +242,18 @@ export default function EditUserRoleDialog({
     });
     const {
       mutate: addNewDepartmentMutation,
-      isPending: isAddNewDepartmentMutation,
+      isPending: isAddNewDepartmentCreating,
     } = useMutation({
       mutationFn: createNewDepartment,
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ["department"],
+          queryKey: ["departments"],
         });
         enqueueSnackbar("Department Created Successfully!", {
           variant: "success",
         });
         reset();
-        setAddNewDepartmentDialogOpen(true);
+        setAddNewDepartmentDialogOpen(false);
       },
       onError: () => {
         enqueueSnackbar(`Department Created Failed`, {
@@ -324,12 +328,17 @@ export default function EditUserRoleDialog({
           >
             Cancel
           </Button>
+
           <CustomButton
             variant="contained"
             sx={{
               backgroundColor: "var(--pallet-blue)",
             }}
             size="medium"
+            disabled={isAddNewDepartmentCreating}
+            endIcon={
+              isAddNewDepartmentCreating ? <CircularProgress size={20} /> : null
+            }
             onClick={handleSubmit(handleCreateDepartmentType)}
           >
             Add Department
@@ -417,8 +426,8 @@ export default function EditUserRoleDialog({
         component: "form",
       }}
     >
-      <AddNewJobPositionDialog jobPosition={job} />
-      <AddNewDepartmentDialog department={null} />
+      <AddNewJobPositionDialog />
+      <AddNewDepartmentDialog />
       <DialogTitle
         sx={{
           paddingY: "1rem",
