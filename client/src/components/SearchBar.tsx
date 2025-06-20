@@ -38,13 +38,7 @@ const StyledInput = styled(InputBase)(({ theme }) => ({
 }));
 
 const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
-  ({ placeholder, value, onChange, onSearch,isSearching }, ref) => {
-    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') {
-        onSearch(value);
-      }
-    };
-
+  ({ placeholder, value, onChange, isSearching }, ref) => {
     return (
       <SearchContainer>
         <StyledInput
@@ -52,15 +46,15 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
           placeholder={placeholder || 'Search…'}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          onKeyDown={handleKeyPress}
           inputProps={{ 'aria-label': 'search input' }}
         />
-        <IconButton onClick={() => onSearch(value)} aria-label="search">
+        <IconButton disabled>
           {isSearching ? <CircularProgress size={24}/> : <SearchIcon />}
         </IconButton>
       </SearchContainer>
     );
   }
 );
+
 
 export default SearchInput;

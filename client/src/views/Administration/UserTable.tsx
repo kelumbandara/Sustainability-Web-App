@@ -20,7 +20,7 @@ import {
 import theme from "../../theme";
 import PageTitle from "../../components/PageTitle";
 import Breadcrumb from "../../components/BreadCrumb";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
@@ -38,6 +38,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { green, grey } from "@mui/material/colors";
 import queryClient from "../../state/queryClient";
 import SearchBar from "../../components/SearchBar";
+import { useDebounce } from "../../util/useDebounce";
 
 function UserTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -79,15 +80,22 @@ function UserTable() {
   );
 
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedQuery = useDebounce(searchQuery, 500);
+
   const {
     data: searchedUserData,
     refetch: researchUser,
     isFetching: isSearchingUser,
   } = useQuery({
-    queryKey: ["user-search-data", searchQuery],
-    queryFn: ({ queryKey }) => searchUser({ query: queryKey[1] }),
+    queryKey: ["users", debouncedQuery],
+    queryFn: ({ queryKey }) => searchUser({ query: queryKey[1] }), // call API with any query, including ""
     enabled: false,
   });
+
+  useEffect(() => {
+    researchUser();
+  }, [debouncedQuery]);
+  
   const handleSearch = async (query: string) => {
     console.log("Searching for:", query);
     setSearchQuery(query);
