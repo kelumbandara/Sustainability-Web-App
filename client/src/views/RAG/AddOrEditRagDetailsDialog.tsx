@@ -838,15 +838,26 @@ export default function AddOrEditRAGDialog({
                       id="age"
                       label="Age"
                       type="number"
-                      defaultValue={defaultValues?.age ?? ""}
                       error={!!errors.age}
+                      helperText={
+                        errors.age ? errors.age.message : ""
+                      }
                       size="small"
                       sx={{
                         flex: 1,
                         margin: "0.5rem",
                         marginTop: isTablet ? "0.5rem" : "1.8rem",
                       }}
-                      {...register("age", { required: true })}
+                      {...register("age", {
+                        required: {
+                          value: true,
+                          message: "Required",
+                        },
+                        min: {
+                          value: 18,
+                          message: "Age must be greater than 18",
+                        },
+                      })}
                     />
                   </Box>
 
