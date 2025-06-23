@@ -1,6 +1,13 @@
 import { z } from "zod";
 import axios from "axios";
 
+export const CountrySchema = z.object({
+  id: z.number(),
+  countryName: z.string(),
+});
+
+export type Country = z.infer<typeof CountrySchema>;
+
 export const attritionSchema = z.object({
   id: z.string(),
   referenceNumber: z.string(),
