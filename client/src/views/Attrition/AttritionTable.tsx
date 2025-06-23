@@ -36,7 +36,10 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../state/queryClient";
 import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
 import { PermissionKeys } from "../Administration/SectionList";
-import { Attrition, attritionData } from "../../api/Attrition/attritionApi";
+import {
+  Attrition,
+  fetchAttritionRecord,
+} from "../../api/Attrition/attritionApi";
 // import { RAG, RAGData } from "../../api/RAG/ragApi";
 import ViewAttritionContent from "./ViewAttritionContent";
 import AddOrEditAttritionDialog from "./AddOrEditAttritionDialog";
@@ -74,9 +77,9 @@ function DocumentTable() {
     theme.breakpoints.down("md")
   );
 
-  const { data: attritionDataa, isFetching: isDocumentDataFetching } = useQuery({
+  const { data: attritionData, isFetching: isDocumentDataFetching } = useQuery({
     queryKey: ["attrition-data"],
-    queryFn: getDocumentList,
+    queryFn: fetchAttritionRecord,
   });
   const { mutate: deleteDocumentMutation } = useMutation({
     mutationFn: deleteDocumentRecord,
@@ -207,7 +210,7 @@ function DocumentTable() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={11} align="center">
-                    <Typography variant="body2">No documents found</Typography>
+                    <Typography variant="body2">No Attrition found</Typography>
                   </TableCell>
                 </TableRow>
               )}

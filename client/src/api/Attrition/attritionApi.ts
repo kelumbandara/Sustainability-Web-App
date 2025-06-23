@@ -14,7 +14,8 @@ export const attritionSchema = z.object({
   employeeName: z.string(),
   employeeId: z.string(),
   gender: z.string(),
-  countryName: z.string(),
+  countryName: CountrySchema,
+  country: z.number(),
   state: z.string(),
   resignedDate: z.date(),
   relievedDate: z.date(),
@@ -274,5 +275,53 @@ export const createDesignation = async (designation: string) => {
 export const createAttritionReport = async (data: Attrition) => {
   const res = await axios.post("/api/attrition-record", data);
   console.log(data);
+  return res.data;
+};
+export const fetchAttritionRecord = async () => {
+  const res = await axios.get("/api/attrition-record");
+  return res.data;
+};
+
+export const fetchRagRecord = async () => {
+  const res = await axios.get("/api/rag-record");
+  return res.data;
+};
+export const fetchRagDesignationNames = async () => {
+  const res = await axios.get("/api/rag-designation-names");
+  return res.data;
+};
+
+export const fetchRagFunction = async () => {
+  const res = await axios.get("/api/rag-functions");
+  return res.data;
+};
+
+export const fetchRagSource = async () => {
+  const res = await axios.get("/api/rag-source-of-hirng");
+  return res.data;
+};
+
+export const fetchRagEmployee = async () => {
+  const res = await axios.get("/api/rag-employee-types");
+  return res.data;
+};
+
+export const fetchRagCountryNames = async () => {
+  const res = await axios.get(`/api/rag-country-names`);
+  return res.data;
+};
+
+export const fetchRagStateNames = async (id: number) => {
+  const res = await axios.get(`/api/rag-state-names/${id}`);
+  return res.data;
+};
+
+export const fetchRagCategory = async () => {
+  const res = await axios.get("/api/rag-category-names");
+  return res.data;
+};
+
+export const fetchRagEmployment = async () => {
+  const res = await axios.get("/api/rag-employment-types");
   return res.data;
 };

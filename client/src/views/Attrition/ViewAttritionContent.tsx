@@ -217,7 +217,7 @@ function ViewRAGContent({
               />
             </Box>
             <DrawerContentItem label="Gender" value={attrition.gender} />
-            <DrawerContentItem label="Country" value={attrition.countryName} />
+            <DrawerContentItem label="Country" value={attrition.countryName.countryName} />
             <DrawerContentItem label="State" value={attrition.state} />
           </Stack>
         </TabPanel>

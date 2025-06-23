@@ -55,7 +55,16 @@ import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import {
   Attrition,
   CountryData,
+  createAttritionReport,
   DesignationData,
+  fetchRagCategory,
+  fetchRagCountryNames,
+  fetchRagDesignationNames,
+  fetchRagEmployee,
+  fetchRagEmployment,
+  fetchRagFunction,
+  fetchRagSource,
+  fetchRagStateNames,
   genderData,
   StateData,
 } from "../../api/Attrition/attritionApi";
@@ -117,6 +126,8 @@ export default function AddOrEditRAGDialog({
     control,
     formState: { errors },
     reset,
+    setValue,
+    watch,
     trigger,
   } = useForm<Attrition>({
     reValidateMode: "onChange",
@@ -127,6 +138,10 @@ export default function AddOrEditRAGDialog({
     reset();
   };
 
+  const selectedCountry = watch("countryName");
+  const countryId = selectedCountry?.id;
+  console.log(countryId)
+
   const { data: divisionData } = useQuery({
     queryKey: ["divisions"],
     queryFn: fetchDivision,
@@ -135,6 +150,47 @@ export default function AddOrEditRAGDialog({
   const { data: departmentData } = useQuery({
     queryKey: ["departments"],
     queryFn: fetchDepartmentData,
+  });
+
+  const { data: designationData } = useQuery({
+    queryKey: ["designation-data"],
+    queryFn: fetchRagDesignationNames,
+  });
+
+  const { data: functionData } = useQuery({
+    queryKey: ["function-data"],
+    queryFn: fetchRagFunction,
+  });
+
+  const { data: sourceData } = useQuery({
+    queryKey: ["source-data"],
+    queryFn: fetchRagSource,
+  });
+
+  const { data: ragEmployeeData } = useQuery({
+    queryKey: ["employee-data"],
+    queryFn: fetchRagEmployee,
+  });
+
+  const { data: countryData } = useQuery({
+    queryKey: ["country-data"],
+    queryFn: fetchRagCountryNames,
+  });
+
+  const { data: stateData } = useQuery({
+    queryKey: ["state-data", countryId],
+    queryFn: () => fetchRagStateNames(countryId),
+    enabled: !!countryId,
+  });
+
+  const { data: categoryData } = useQuery({
+    queryKey: ["category-data"],
+    queryFn: fetchRagCategory,
+  });
+
+  const { data: employmentData } = useQuery({
+    queryKey: ["employment-data"],
+    queryFn: fetchRagEmployment,
   });
 
   const handleSubmitAccidentRecord = (data: Attrition) => {
@@ -234,25 +290,27 @@ export default function AddOrEditRAGDialog({
     setActiveTab(newValue);
   };
 
-  const { mutate: createRagReportMutation, isPending: isRagReportCreating } =
-    useMutation({
-      mutationFn: createRagRecord,
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: ["attrition-data"],
-        });
-        enqueueSnackbar("RAG Report Created Successfully!", {
-          variant: "success",
-        });
-        reset();
-        handleClose();
-      },
-      onError: () => {
-        enqueueSnackbar(`RAG Report Create Failed`, {
-          variant: "error",
-        });
-      },
-    });
+  const {
+    mutate: createAttritionReportMutation,
+    isPending: isRagReportCreating,
+  } = useMutation({
+    mutationFn: createAttritionReport,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["attrition-data"],
+      });
+      enqueueSnackbar("Attrition Report Created Successfully!", {
+        variant: "success",
+      });
+      reset();
+      handleClose();
+    },
+    onError: () => {
+      enqueueSnackbar(`RAG Report Create Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   // const { mutate: updateRagReportMutation, isPending: isRagReportUpdating } =
   //   useMutation({
@@ -274,15 +332,15 @@ export default function AddOrEditRAGDialog({
   //     },
   //   });
 
-  const handleSubmitRagReport = (data: Attrition) => {
+  const handleSubmitAttritionReport = (data: Attrition) => {
     const submitData: Partial<Attrition> = data;
     submitData.country = selectedCountry.id;
     console.log(submitData);
     if (defaultValues) {
       submitData.id = defaultValues.id;
-      updateRagReportMutation(submitData);
+      // updateRagReportMutation(submitData);
     } else {
-      createRagReportMutation(submitData);
+      createAttritionReportMutation(submitData);
     }
   };
 
@@ -676,39 +734,39 @@ export default function AddOrEditRAGDialog({
                       name="countryName"
                       control={control}
                       rules={{ required: "required" }}
-                      defaultValue={defaultValues?.countryName ?? ""}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
-                          onChange={(_, value) => field.onChange(value)}
-                          value={field.value || ""}
-                          size="small"
-                          noOptionsText={
-                            <Typography
-                              variant="body2"
-                              color="inherit"
-                              gutterBottom
-                            >
-                              No matching Items
-                            </Typography>
+                          onChange={(event, newValue) => {
+                            field.onChange(newValue);
+                            setValue("state", "");
+                          }}
+                          value={field.value || null}
+                          getOptionLabel={(option) =>
+                            typeof option === "string"
+                              ? option
+                              : option.countryName
+                          }
+                          isOptionEqualToValue={(option, value) =>
+                            option.id === value.id
                           }
                           options={[
-                            ...(CountryData?.length
-                              ? CountryData.map(
-                                  (country) => country.countryName
-                                )
-                              : []),
-                            "$ADD_NEW_COUNTRY",
+                            ...(countryData?.length ? countryData : []),
+                            {
+                              id: "$ADD_NEW_COUNTRY",
+                              countryName: "$ADD_NEW_COUNTRY",
+                            },
                           ]}
                           renderOption={(props, option) =>
-                            option === "$ADD_NEW_COUNTRY" ? (
+                            option.countryName === "$ADD_NEW_COUNTRY" ? (
                               <AddNewCountryButton {...props} />
                             ) : (
-                              <li {...props} key={option}>
-                                {option}
+                              <li {...props} key={option.id}>
+                                {option.countryName}
                               </li>
                             )
                           }
+                          size="small"
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
@@ -720,7 +778,6 @@ export default function AddOrEditRAGDialog({
                         />
                       )}
                     />
-
                     <Controller
                       name="state"
                       control={control}
@@ -1426,7 +1483,7 @@ export default function AddOrEditRAGDialog({
             disabled={isLoading}
             startIcon={isLoading ? <CircularProgress size={24} /> : null}
             onClick={handleSubmit((data) => {
-              handleSubmitAccidentRecord(data);
+              handleSubmitAttritionReport(data);
             })}
           >
             {defaultValues ? "Update Changes" : "Submit Report"}
