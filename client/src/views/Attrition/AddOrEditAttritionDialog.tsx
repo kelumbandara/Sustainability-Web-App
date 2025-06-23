@@ -205,17 +205,17 @@ export default function AddOrEditRAGDialog({
       !errors.employeeName &&
       !errors.gender &&
       !errors.countryName &&
-      !errors.state
+      !errors.stateName
     );
   }, [
     errors.employeeId,
     errors.employeeName,
     errors.gender,
     errors.countryName,
-    errors.state,
+    errors.stateName,
   ]);
   const triggerPersonalDetailsSection = () => {
-    trigger(["employeeId", "employeeName", "gender", "countryName", "state"]);
+    trigger(["employeeId", "employeeName", "gender", "countryName", "stateName"]);
   };
 
   const isEmploymentDetailsValid = useMemo(() => {
@@ -478,6 +478,7 @@ export default function AddOrEditRAGDialog({
         <AddNewStateDialog
           open={openAddNewStateDialog}
           setOpen={setOpenAddNewStateDialog}
+          countryId={countryId}
         />
         <DialogTitle
           sx={{
@@ -739,7 +740,7 @@ export default function AddOrEditRAGDialog({
                           {...field}
                           onChange={(event, newValue) => {
                             field.onChange(newValue);
-                            setValue("state", "");
+                            setValue("stateName", "");
                           }}
                           value={field.value || null}
                           getOptionLabel={(option) =>
@@ -779,10 +780,10 @@ export default function AddOrEditRAGDialog({
                       )}
                     />
                     <Controller
-                      name="state"
+                      name="stateName"
                       control={control}
                       rules={{ required: "required" }}
-                      defaultValue={defaultValues?.state ?? ""}
+                      defaultValue={defaultValues?.stateName ?? ""}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -817,7 +818,7 @@ export default function AddOrEditRAGDialog({
                           renderInput={(params) => (
                             <TextField
                               {...params}
-                              error={!!errors.state}
+                              error={!!errors.stateName}
                               label="State"
                             />
                           )}

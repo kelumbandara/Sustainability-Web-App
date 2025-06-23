@@ -16,7 +16,7 @@ export const attritionSchema = z.object({
   gender: z.string(),
   countryName: CountrySchema,
   country: z.number(),
-  state: z.string(),
+  stateName: z.string(),
   resignedDate: z.date(),
   relievedDate: z.date(),
   division: z.string(),
@@ -265,6 +265,16 @@ export const StateData = [
     stateName: "Colombo",
   },
 ];
+
+export const createState = async (data: {
+  countryId: number;
+  stateName: String;
+}) => {
+  console.log(data);
+  const res = await axios.post(`/api/rag-state-names`, data);
+  console.log(data);
+  return res.data;
+};
 
 export const createDesignation = async (designation: string) => {
   const res = await axios.post("/api/designation", designation);

@@ -23,6 +23,7 @@ import {
   Attrition,
   Country,
   createDesignation,
+  createState,
 } from "../../api/Attrition/attritionApi";
 
 export const AddNewDesignationDialog = ({
