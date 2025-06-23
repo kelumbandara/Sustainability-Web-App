@@ -232,7 +232,6 @@ export default function AddOrEditRAGDialog({
     } else {
       createRagReportMutation(submitData);
     }
-    resetForm();
   };
 
   const isPersonalDetailsValid = useMemo(() => {
