@@ -3,6 +3,7 @@ import { grey } from "@mui/material/colors";
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import CloseIcon from "@mui/icons-material/Close";
+import { enqueueSnackbar } from "notistack";
 
 function DropzoneComponent({
   files,
@@ -13,22 +14,37 @@ function DropzoneComponent({
   setFiles: (files: File[]) => void;
   dropzoneLabel?: string;
 }) {
+  const maxSize = 10 * 1024 * 1024;
+
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
-      // Do something with the files
       setFiles([...files, ...acceptedFiles]);
     },
     [files, setFiles]
   );
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  const onDropRejected = useCallback((fileRejections) => {
+    fileRejections.forEach(({ file }) => {
+      if (file.size > maxSize) {
+        enqueueSnackbar(`Max File size is 5MB`, {
+          variant: "error",
+        });
+      }
+    });
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    onDropRejected,
+    maxSize,
+  });
 
   return (
     <Stack direction={"column"} sx={{ width: "100%" }}>
       <Box sx={{ display: "flex", flexWrap: "wrap", marginY: "0.3rem" }}>
-        {files && files?.length > 0 && (
+        {files && files.length > 0 && (
           <>
-            {files?.map((file, index) => {
+            {files.map((file, index) => {
               const isImage = file.type.startsWith("image/");
               const fileURL = URL.createObjectURL(file);
 
@@ -75,7 +91,7 @@ function DropzoneComponent({
                     </Box>
                   ) : (
                     <Chip
-                      label={file?.name}
+                      label={file.name}
                       sx={{ marginRight: "0.5rem" }}
                       onDelete={() => {
                         setFiles(files.filter((f) => f !== file));
@@ -108,7 +124,7 @@ function DropzoneComponent({
           sx={{ color: grey[600], marginY: "0.3rem" }}
         >
           {dropzoneLabel
-            ? `${dropzoneLabel}`
+            ? dropzoneLabel
             : isDragActive
             ? "Drop the files here ..."
             : "Drag 'n' drop some files here, or click to select files"}
