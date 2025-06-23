@@ -31,7 +31,7 @@ import theme from "../../theme";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import RichTextComponent from "../../components/RichTextComponent";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../api/divisionApi";
 import { fetchDepartmentData } from "../../api/departmentApi";
 // import {
@@ -60,6 +60,8 @@ import {
   StateData,
 } from "../../api/Attrition/attritionApi";
 import SwitchButton from "../../components/SwitchButton";
+import queryClient from "../../state/queryClient";
+import { enqueueSnackbar } from "notistack";
 
 type DialogProps = {
   open: boolean;
@@ -230,6 +232,58 @@ export default function AddOrEditRAGDialog({
       triggerAttritionDetailsSection();
     }
     setActiveTab(newValue);
+  };
+
+  const { mutate: createRagReportMutation, isPending: isRagReportCreating } =
+    useMutation({
+      mutationFn: createRagRecord,
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["attrition-data"],
+        });
+        enqueueSnackbar("RAG Report Created Successfully!", {
+          variant: "success",
+        });
+        reset();
+        handleClose();
+      },
+      onError: () => {
+        enqueueSnackbar(`RAG Report Create Failed`, {
+          variant: "error",
+        });
+      },
+    });
+
+  // const { mutate: updateRagReportMutation, isPending: isRagReportUpdating } =
+  //   useMutation({
+  //     mutationFn: updateRagRecord,
+  //     onSuccess: () => {
+  //       queryClient.invalidateQueries({
+  //         queryKey: ["attrition-data"],
+  //       });
+  //       enqueueSnackbar("RAG Report Updated Successfully!", {
+  //         variant: "success",
+  //       });
+  //       reset();
+  //       handleClose();
+  //     },
+  //     onError: () => {
+  //       enqueueSnackbar(`RAG Updated Create Failed`, {
+  //         variant: "error",
+  //       });
+  //     },
+  //   });
+
+  const handleSubmitRagReport = (data: Attrition) => {
+    const submitData: Partial<Attrition> = data;
+    submitData.country = selectedCountry.id;
+    console.log(submitData);
+    if (defaultValues) {
+      submitData.id = defaultValues.id;
+      updateRagReportMutation(submitData);
+    } else {
+      createRagReportMutation(submitData);
+    }
   };
 
   const [openAddNewDesignationDialog, setOpenAddNewDesignationDialog] =
