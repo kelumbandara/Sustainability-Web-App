@@ -74,8 +74,8 @@ function DocumentTable() {
     theme.breakpoints.down("md")
   );
 
-  const { data: documents, isFetching: isDocumentDataFetching } = useQuery({
-    queryKey: ["documentRecords"],
+  const { data: attritionDataa, isFetching: isDocumentDataFetching } = useQuery({
+    queryKey: ["attrition-data"],
     queryFn: getDocumentList,
   });
   const { mutate: deleteDocumentMutation } = useMutation({
@@ -217,7 +217,7 @@ function DocumentTable() {
                 <TablePagination
                   rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
                   colSpan={100}
-                  count={documents?.length ?? 0}
+                  count={attritionData?.length ?? 0}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   showFirstButton={true}
