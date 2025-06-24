@@ -1,6 +1,7 @@
 import { number, z } from "zod";
 import { Gender } from "../OccupationalHealth/patientApi";
 import { StorageFileSchema } from "../../utils/StorageFiles.util";
+import { userSchema } from "../userApi";
 
 export enum GrievanceStatus {
   draft = "draft",
@@ -88,7 +89,6 @@ export const GrievanceLegalAdvisorDetailsSchema = z.object({
   id: z.string(),
   legalAdvisorId: z.string(),
   grievanceId: z.string(),
-  employeeId: z.string(),
   name: z.string(),
   email: z.string(),
   phone: z.string(),
@@ -106,7 +106,9 @@ export const GrievanceSchema = z.object({
   name: z.string(),
   gender: z.nativeEnum(Gender),
   supervisor: z.string().optional(),
+  employeeId: z.string().optional(),
   employeeShift: z.string(),
+  division: z.string().optional(),
   location: z.string().optional(),
   caseId: z.string(),
   type: z.nativeEnum(GrievanceType),
@@ -115,7 +117,7 @@ export const GrievanceSchema = z.object({
   channel: z.nativeEnum(GrievanceChannel),
   category: z.nativeEnum(GrievanceCategory),
   topic: z.string(),
-  submission: z.string(),
+  submissions: z.string(),
   description: z.string(),
   dueDate: z.date().optional(),
   businessUnit: z.string().optional(),
@@ -156,6 +158,7 @@ export const GrievanceSchema = z.object({
   designation: z.string().optional(),
   department: z.string().optional(),
   assigneeId: z.number().optional(),
+  assignee: userSchema.optional(),
   respondentDetails: z.array(GrievanceRespondentDetailsSchema).optional(),
   committeeMemberDetails: z
     .array(GrievanceCommitteeMemberDetailsSchema)
@@ -163,3 +166,5 @@ export const GrievanceSchema = z.object({
   nomineeDetails: z.array(GrievanceNomineeDetailsSchema).optional(),
   legalAdvisorDetails: z.array(GrievanceLegalAdvisorDetailsSchema).optional(),
 });
+
+export type Grievance = z.infer<typeof GrievanceSchema>;

@@ -21,7 +21,10 @@ const AccessManagementTable = React.lazy(
   () => import("./views/Administration/AccessManagementTable")
 );
 const OrganizationTable = React.lazy(
-  () => import("./views/Administration/OrganizationSettings/OrganizationSettingsTable")
+  () =>
+    import(
+      "./views/Administration/OrganizationSettings/OrganizationSettingsTable"
+    )
 );
 
 const UnderDevelopment = React.lazy(
@@ -147,6 +150,9 @@ const EnvironmentDashBoard = React.lazy(
   () => import("./views/Environment/Dashboard")
 );
 
+const GrievanceTable = React.lazy(
+  () => import("./views/Grievance/GrievanceTable")
+);
 
 function withLayout(Layout: any, Component: any, restrictAccess = false) {
   return (
@@ -244,7 +250,7 @@ const AppRoutes = () => {
             !userPermissionObject?.[PermissionKeys.ADMIN_ACCESS_MNG_VIEW]
           )}
         />
-        
+
         {/* Audit & Inspection */}
         <Route
           path="/audit-inspection/dashboard"
@@ -306,9 +312,7 @@ const AppRoutes = () => {
           element={withLayout(
             MainLayout,
             ChemicalDashboard,
-            !userPermissionObject?.[
-              PermissionKeys.CHEMICAL_MNG_DASHBOARD_VIEW
-            ]
+            !userPermissionObject?.[PermissionKeys.CHEMICAL_MNG_DASHBOARD_VIEW]
           )}
         />
         <Route
@@ -327,7 +331,6 @@ const AppRoutes = () => {
           path="/chemical-mng/assigned-tasks"
           element={withLayout(MainLayout, () => (
             <ChemicalRequestTable isAssignedTasks={true} />
-
           ))}
         />
 
@@ -702,6 +705,47 @@ const AppRoutes = () => {
             PermissionKeys
               .AUDIT_INSPECTION_EXTERNAL_AUDIT_CORRECTIVE_ACTION_VIEW
           ]
+        )}
+      />
+
+      {/* Grievance */}
+      <Route
+        path="/grievance/dashboard"
+        element={withLayout(
+          MainLayout,
+          () => (
+            <UnderDevelopment pageName="Grievance > Dashboard" />
+          )
+          // !userPermissionObject?.[
+          //   PermissionKeys
+          //     .AUDIT_INSPECTION_EXTERNAL_AUDIT_CORRECTIVE_ACTION_VIEW
+          // ]
+        )}
+      />
+      <Route
+        path="/grievance/register"
+        element={withLayout(
+          MainLayout,
+          () => (
+            <GrievanceTable isAssignedTasks={false} />
+          )
+          // !userPermissionObject?.[
+          //   PermissionKeys
+          //     .AUDIT_INSPECTION_EXTERNAL_AUDIT_CORRECTIVE_ACTION_VIEW
+          // ]
+        )}
+      />
+      <Route
+        path="/grievance/assigned-tasks"
+        element={withLayout(
+          MainLayout,
+          () => (
+            <UnderDevelopment pageName="Grievance > Assigned Tasks" />
+          )
+          // !userPermissionObject?.[
+          //   PermissionKeys
+          //     .AUDIT_INSPECTION_EXTERNAL_AUDIT_CORRECTIVE_ACTION_VIEW
+          // ]
         )}
       />
     </Routes>
