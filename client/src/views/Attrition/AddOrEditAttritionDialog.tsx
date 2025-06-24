@@ -67,6 +67,7 @@ import {
   fetchRagStateNames,
   genderData,
   StateData,
+  updateAttritionRecord,
 } from "../../api/Attrition/attritionApi";
 import SwitchButton from "../../components/SwitchButton";
 import queryClient from "../../state/queryClient";
@@ -140,7 +141,7 @@ export default function AddOrEditRAGDialog({
 
   const selectedCountry = watch("countryName");
   const countryId = selectedCountry?.id;
-  console.log(countryId)
+  console.log(countryId);
 
   const { data: divisionData } = useQuery({
     queryKey: ["divisions"],
@@ -193,12 +194,6 @@ export default function AddOrEditRAGDialog({
     queryFn: fetchRagEmployment,
   });
 
-  const handleSubmitAccidentRecord = (data: Attrition) => {
-    const submitData: Partial<Attrition> = data;
-    console.log(submitData);
-    onSubmit(submitData as Attrition);
-  };
-
   const isPersonalDetailsValid = useMemo(() => {
     return (
       !errors.employeeId &&
@@ -215,7 +210,13 @@ export default function AddOrEditRAGDialog({
     errors.stateName,
   ]);
   const triggerPersonalDetailsSection = () => {
-    trigger(["employeeId", "employeeName", "gender", "countryName", "stateName"]);
+    trigger([
+      "employeeId",
+      "employeeName",
+      "gender",
+      "countryName",
+      "stateName",
+    ]);
   };
 
   const isEmploymentDetailsValid = useMemo(() => {
@@ -306,31 +307,31 @@ export default function AddOrEditRAGDialog({
       handleClose();
     },
     onError: () => {
-      enqueueSnackbar(`RAG Report Create Failed`, {
+      enqueueSnackbar(`Attrition Report Create Failed`, {
         variant: "error",
       });
     },
   });
 
-  // const { mutate: updateRagReportMutation, isPending: isRagReportUpdating } =
-  //   useMutation({
-  //     mutationFn: updateRagRecord,
-  //     onSuccess: () => {
-  //       queryClient.invalidateQueries({
-  //         queryKey: ["attrition-data"],
-  //       });
-  //       enqueueSnackbar("RAG Report Updated Successfully!", {
-  //         variant: "success",
-  //       });
-  //       reset();
-  //       handleClose();
-  //     },
-  //     onError: () => {
-  //       enqueueSnackbar(`RAG Updated Create Failed`, {
-  //         variant: "error",
-  //       });
-  //     },
-  //   });
+  const { mutate: updateAttritionReportMutation, isPending: isRagReportUpdating } =
+    useMutation({
+      mutationFn: updateAttritionRecord,
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["attrition-data"],
+        });
+        enqueueSnackbar("Attrition Report Updated Successfully!", {
+          variant: "success",
+        });
+        reset();
+        handleClose();
+      },
+      onError: () => {
+        enqueueSnackbar(`Attrition Updated Create Failed`, {
+          variant: "error",
+        });
+      },
+    });
 
   const handleSubmitAttritionReport = (data: Attrition) => {
     const submitData: Partial<Attrition> = data;
@@ -338,7 +339,7 @@ export default function AddOrEditRAGDialog({
     console.log(submitData);
     if (defaultValues) {
       submitData.id = defaultValues.id;
-      // updateRagReportMutation(submitData);
+      updateAttritionReportMutation(submitData);
     } else {
       createAttritionReportMutation(submitData);
     }

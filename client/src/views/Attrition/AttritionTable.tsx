@@ -38,6 +38,7 @@ import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
 import { PermissionKeys } from "../Administration/SectionList";
 import {
   Attrition,
+  deleteAttritionRecord,
   fetchAttritionRecord,
 } from "../../api/Attrition/attritionApi";
 // import { RAG, RAGData } from "../../api/RAG/ragApi";
@@ -81,11 +82,11 @@ function DocumentTable() {
     queryKey: ["attrition-data"],
     queryFn: fetchAttritionRecord,
   });
-  const { mutate: deleteDocumentMutation } = useMutation({
-    mutationFn: deleteDocumentRecord,
+  const { mutate: deleteAttritionMutation } = useMutation({
+    mutationFn: deleteAttritionRecord,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["documentRecords"] });
-      enqueueSnackbar("Document Records Deleted Successfully!", {
+      queryClient.invalidateQueries({ queryKey: ["attrition-data"] });
+      enqueueSnackbar("Attrition Records Deleted Successfully!", {
         variant: "success",
       });
       setSelectedRow(null);
@@ -93,7 +94,7 @@ function DocumentTable() {
       setOpenAddOrEditDialog(false);
     },
     onError: () => {
-      enqueueSnackbar(`Document Delete Delete Failed`, {
+      enqueueSnackbar(`Attrition Delete Delete Failed`, {
         variant: "error",
       });
     },
@@ -284,10 +285,10 @@ function DocumentTable() {
       {deleteDialogOpen && (
         <DeleteConfirmationModal
           open={deleteDialogOpen}
-          title="Remove Document Confirmation"
+          title="Remove Attrition Record Confirmation"
           content={
             <>
-              Are you sure you want to remove this document?
+              Are you sure you want to remove Attrition Record?
               <Alert severity="warning" style={{ marginTop: "1rem" }}>
                 This action is not reversible.
               </Alert>
@@ -295,7 +296,7 @@ function DocumentTable() {
           }
           handleClose={() => setDeleteDialogOpen(false)}
           deleteFunc={async () => {
-            deleteDocumentMutation(selectedRow.id);
+            deleteAttritionMutation(selectedRow.id);
             setDeleteDialogOpen(false);
             setOpenViewDrawer(false);
           }}

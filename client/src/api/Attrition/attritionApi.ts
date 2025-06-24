@@ -287,6 +287,19 @@ export const createAttritionReport = async (data: Attrition) => {
   console.log(data);
   return res.data;
 };
+
+export const updateAttritionRecord = async (data: Attrition) => {
+  const res = await axios.post(`/api/attrition-record/${data.id}/update`, data);
+  console.log(data);
+  return res.data;
+};
+
+export const deleteAttritionRecord = async (id: String) => {
+  const res = await axios.delete(`/api/attrition-record/${id}/delete`,);
+  console.log(id);
+  return res.data;
+};
+
 export const fetchAttritionRecord = async () => {
   const res = await axios.get("/api/attrition-record");
   return res.data;
