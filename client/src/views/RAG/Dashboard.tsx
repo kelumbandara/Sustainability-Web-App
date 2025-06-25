@@ -680,6 +680,52 @@ function RagDashboard() {
     queryFn: fetchAllRagRecord,
   });
 
+  const ragAllCountDataMemo = useMemo(() => {
+    if (
+      !ragAllData ||
+      typeof ragAllData !== "object" ||
+      typeof ragAllData.ragSummary !== "object"
+    ) {
+      return {};
+    }
+
+    return ragAllData.ragSummary;
+  }, [ragAllData]);
+
+  const ragAllCountBarDataMemo = useMemo(() => {
+    if (!ragAllData?.ragSummary || typeof ragAllData.ragSummary !== "object")
+      return [];
+
+    const { red, amber, green } = ragAllData.ragSummary;
+
+    return [
+      {
+        name: "RAG Count",
+        red: red?.count || 0,
+        amber: amber?.count || 0,
+        green: green?.count || 0,
+      },
+    ];
+  }, [ragAllData]);
+
+  const ragGenderAllCountDataMemo = useMemo(() => {
+    if (
+      !ragAllData?.genderSummary ||
+      typeof ragAllData.genderSummary !== "object"
+    ) {
+      return [];
+    }
+
+    const allowedCategories = ["Male", "Female", "Other"];
+
+    return Object.entries(ragAllData.genderSummary)
+      .filter(([key]) => allowedCategories.includes(key))
+      .map(([category, data]) => ({
+        name: category,
+        value: (data as { count: number }).count,
+      }));
+  }, [ragAllData]);
+
   const ragAgeGroupChartDataMemo = useMemo(() => {
     if (
       !ragAgeGroupCount ||
@@ -908,8 +954,16 @@ function RagDashboard() {
           <DashboardCard
             title="Total"
             titleIcon={<HourglassEmptyOutlinedIcon fontSize="large" />}
-            value={ragCountDataMemo?.totalRag}
-            subDescription={ragCountDataMemo?.ragPercentage + "%"}
+            value={
+              ragCountDataMemo?.totalRag
+                ? ragCountDataMemo?.totalRag
+                : ragAllCountDataMemo?.totalRag
+            }
+            subDescription={
+              ragCountDataMemo?.ragPercentage
+                ? ragCountDataMemo?.ragPercentage
+                : ragAllCountDataMemo?.ragPercentage + "%"
+            }
           />
         </Box>
         <Box
@@ -928,8 +982,16 @@ function RagDashboard() {
                 sx={{ color: "red" }}
               />
             }
-            value={ragCountDataMemo.red?.count}
-            subDescription={ragCountDataMemo.red?.percentage + "%"}
+            value={
+              ragCountDataMemo.red?.count
+                ? ragCountDataMemo.red?.count
+                : ragAllCountDataMemo.red?.count
+            }
+            subDescription={
+              ragCountDataMemo.red?.percentage
+                ? ragCountDataMemo.red?.percentage
+                : ragAllCountDataMemo.red?.percentage + "%"
+            }
           />
         </Box>
 
@@ -946,8 +1008,16 @@ function RagDashboard() {
             titleIcon={
               <MoodOutlinedIcon fontSize="large" sx={{ color: "#ff8f00" }} />
             }
-            value={ragCountDataMemo.amber?.count}
-            subDescription={ragCountDataMemo.amber?.percentage + "%"}
+            value={
+              ragCountDataMemo.amber?.count
+                ? ragCountDataMemo.amber?.count
+                : ragAllCountDataMemo.amber?.count
+            }
+            subDescription={
+              ragCountDataMemo.amber?.percentage
+                ? ragCountDataMemo.amber?.percentage
+                : ragAllCountDataMemo.amber?.percentage + "%"
+            }
           />
         </Box>
         <Box
@@ -966,8 +1036,16 @@ function RagDashboard() {
                 sx={{ color: "green" }}
               />
             }
-            value={ragCountDataMemo.green?.count}
-            subDescription={ragCountDataMemo.green?.percentage + "%"}
+            value={
+              ragCountDataMemo.green?.count
+                ? ragCountDataMemo.green?.count
+                : ragAllCountDataMemo.green?.count
+            }
+            subDescription={
+              ragCountDataMemo.green?.percentage
+                ? ragCountDataMemo.green?.percentage
+                : ragAllCountDataMemo.green?.percentage + "%"
+            }
           />
         </Box>
       </Box>
@@ -1003,7 +1081,11 @@ function RagDashboard() {
 
           <ResponsiveContainer width="100%" height={500}>
             <BarChart
-              data={ragCountBarDataMemo}
+              data={
+                dateRangeFrom && dateRangeTo
+                  ? ragCountBarDataMemo
+                  : ragAllCountBarDataMemo
+              }
               width={800}
               height={400}
               barCategoryGap={40}
@@ -1044,7 +1126,11 @@ function RagDashboard() {
           >
             <>
               <CustomPieChart
-                data={ragGenderCountDataMemo}
+                data={
+                  dateRangeFrom && dateRangeTo
+                    ? ragGenderCountDataMemo
+                    : ragGenderAllCountDataMemo
+                }
                 title="Gender Total"
                 centerLabel="Gender"
               />
