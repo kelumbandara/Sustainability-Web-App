@@ -151,7 +151,7 @@ const EnvironmentDashBoard = React.lazy(
 );
 
 //RAG
-const RAGDashBoard = React.lazy(() => import("./views/Environment/Dashboard"));
+const RAGDashBoard = React.lazy(() => import("./views/RAG/Dashboard"));
 const RAGRegisterTable = React.lazy(
   () => import("./views/RAG/RagRegisterTable")
 );
@@ -607,9 +607,13 @@ const AppRoutes = () => {
         />
         <Route
           path="/rag/dashboard"
-          element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="RAG > RAG Dashboard" />
-          ))}
+          element={withLayout(
+            MainLayout,
+            RAGDashBoard,
+            !userPermissionObject?.[
+              PermissionKeys.RAG_DASHBOARD_VIEW
+            ]
+          )}
         />
 
         <Route
