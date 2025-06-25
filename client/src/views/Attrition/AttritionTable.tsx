@@ -20,7 +20,7 @@ import {
 import theme from "../../theme";
 import PageTitle from "../../components/PageTitle";
 import Breadcrumb from "../../components/BreadCrumb";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import AddIcon from "@mui/icons-material/Add";
 import {
@@ -78,7 +78,7 @@ function DocumentTable() {
     theme.breakpoints.down("md")
   );
 
-  const { data: attritionData, isFetching: isDocumentDataFetching } = useQuery({
+  const { data: attritionData, isFetching: isAttritionDataFetching } = useQuery({
     queryKey: ["attrition-data"],
     queryFn: fetchAttritionRecord,
   });
@@ -100,16 +100,16 @@ function DocumentTable() {
     },
   });
 
-  //   const paginatedDocumentData = useMemo(() => {
-  //     if (!documents) return [];
-  //     if (rowsPerPage === -1) {
-  //       return documents;
-  //     }
-  //     return documents.slice(
-  //       page * rowsPerPage,
-  //       page * rowsPerPage + rowsPerPage
-  //     );
-  //   }, [documents, page, rowsPerPage]);
+    const paginatedAttritionData = useMemo(() => {
+      if (!attritionData) return [];
+      if (rowsPerPage === -1) {
+        return attritionData;
+      }
+      return attritionData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
+    }, [attritionData, page, rowsPerPage]);
 
   return (
     <Stack>
@@ -158,7 +158,7 @@ function DocumentTable() {
               Add New Attrition Detail
             </Button>
           </Box>
-          {isDocumentDataFetching && <LinearProgress sx={{ width: "100%" }} />}
+          {isAttritionDataFetching && <LinearProgress sx={{ width: "100%" }} />}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -175,8 +175,8 @@ function DocumentTable() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {attritionData?.length > 0 ? (
-                attritionData.map((row) => (
+              {paginatedAttritionData?.length > 0 ? (
+                paginatedAttritionData.map((row) => (
                   <TableRow
                     key={`${row.id}${row.referenceNumber}`}
                     sx={{
