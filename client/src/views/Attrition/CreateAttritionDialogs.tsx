@@ -382,11 +382,11 @@ export const AddNewStateDialog = ({
   const { register, handleSubmit, reset } = useForm<Attrition>();
   const { isMobile } = useIsMobile();
 
-  const handleCreateState = (data: { stateName: string }) => {
+  const handleCreateState = (data: { state: string }) => {
     const parsedId = Number(countryId);
     createStateMutation({
       countryId: parsedId,
-      stateName: data.stateName,
+      stateName: data.state,
     });
   };
 
@@ -455,7 +455,7 @@ export const AddNewStateDialog = ({
           }}
         >
           <TextField
-            {...register("stateName", { required: true })}
+            {...register("state", { required: true })}
             required
             id="stateName"
             name="stateName"

@@ -217,8 +217,11 @@ function ViewRAGContent({
               />
             </Box>
             <DrawerContentItem label="Gender" value={attrition.gender} />
-            <DrawerContentItem label="Country" value={attrition.countryName.countryName} />
-            <DrawerContentItem label="State" value={attrition.stateName} />
+            <DrawerContentItem
+              label="Country"
+              value={attrition.countryName.countryName}
+            />
+            <DrawerContentItem label="State" value={attrition.state} />
           </Stack>
         </TabPanel>
         <TabPanel value={activeTab} index={1} dir={theme.direction}>
@@ -270,10 +273,7 @@ function ViewRAGContent({
               label="Resignation Reason"
               value={attrition.resignationReason}
             />
-            <DrawerContentItem
-              label="Designation"
-              value={attrition.attritionDesignation}
-            />
+
             <DrawerContentItem
               label="Service Period"
               value={attrition.servicePeriod}

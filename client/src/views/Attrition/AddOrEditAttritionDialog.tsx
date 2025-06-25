@@ -131,6 +131,7 @@ export default function AddOrEditRAGDialog({
     watch,
     trigger,
   } = useForm<Attrition>({
+    defaultValues,
     reValidateMode: "onChange",
     mode: "onChange",
   });
@@ -200,23 +201,17 @@ export default function AddOrEditRAGDialog({
       !errors.employeeName &&
       !errors.gender &&
       !errors.countryName &&
-      !errors.stateName
+      !errors.state
     );
   }, [
     errors.employeeId,
     errors.employeeName,
     errors.gender,
     errors.countryName,
-    errors.stateName,
+    errors.state,
   ]);
   const triggerPersonalDetailsSection = () => {
-    trigger([
-      "employeeId",
-      "employeeName",
-      "gender",
-      "countryName",
-      "stateName",
-    ]);
+    trigger(["employeeId", "employeeName", "gender", "countryName", "state"]);
   };
 
   const isEmploymentDetailsValid = useMemo(() => {
@@ -255,14 +250,12 @@ export default function AddOrEditRAGDialog({
     return (
       !errors.resignationType &&
       !errors.resignationReason &&
-      !errors.attritionDesignation &&
       !errors.servicePeriod &&
       !errors.tenureSplit
     );
   }, [
     errors.resignationType,
     errors.resignationReason,
-    errors.attritionDesignation,
     errors.servicePeriod,
     errors.tenureSplit,
   ]);
@@ -271,7 +264,6 @@ export default function AddOrEditRAGDialog({
     trigger([
       "resignationType",
       "resignationReason",
-      "attritionDesignation",
       "servicePeriod",
       "tenureSplit",
     ]);
@@ -313,25 +305,27 @@ export default function AddOrEditRAGDialog({
     },
   });
 
-  const { mutate: updateAttritionReportMutation, isPending: isRagReportUpdating } =
-    useMutation({
-      mutationFn: updateAttritionRecord,
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: ["attrition-data"],
-        });
-        enqueueSnackbar("Attrition Report Updated Successfully!", {
-          variant: "success",
-        });
-        reset();
-        handleClose();
-      },
-      onError: () => {
-        enqueueSnackbar(`Attrition Updated Create Failed`, {
-          variant: "error",
-        });
-      },
-    });
+  const {
+    mutate: updateAttritionReportMutation,
+    isPending: isRagReportUpdating,
+  } = useMutation({
+    mutationFn: updateAttritionRecord,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["attrition-data"],
+      });
+      enqueueSnackbar("Attrition Report Updated Successfully!", {
+        variant: "success",
+      });
+      reset();
+      handleClose();
+    },
+    onError: () => {
+      enqueueSnackbar(`Attrition Updated Create Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   const handleSubmitAttritionReport = (data: Attrition) => {
     const submitData: Partial<Attrition> = data;
@@ -741,7 +735,7 @@ export default function AddOrEditRAGDialog({
                           {...field}
                           onChange={(event, newValue) => {
                             field.onChange(newValue);
-                            setValue("stateName", "");
+                            setValue("state", "");
                           }}
                           value={field.value || null}
                           getOptionLabel={(option) =>
@@ -781,10 +775,10 @@ export default function AddOrEditRAGDialog({
                       )}
                     />
                     <Controller
-                      name="stateName"
+                      name="state"
                       control={control}
                       rules={{ required: "required" }}
-                      defaultValue={defaultValues?.stateName ?? ""}
+                      defaultValue={defaultValues?.state ?? ""}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -819,7 +813,7 @@ export default function AddOrEditRAGDialog({
                           renderInput={(params) => (
                             <TextField
                               {...params}
-                              error={!!errors.stateName}
+                              error={!!errors.state}
                               label="State"
                             />
                           )}
@@ -1273,54 +1267,7 @@ export default function AddOrEditRAGDialog({
                     sx={{ flex: 1, margin: "0.5rem" }}
                     {...register("servicePeriod", { required: true })}
                   />
-                  <Controller
-                    name="attritionDesignation"
-                    control={control}
-                    rules={{ required: "required" }}
-                    defaultValue={defaultValues?.attritionDesignation ?? ""}
-                    render={({ field }) => (
-                      <Autocomplete
-                        {...field}
-                        onChange={(_, value) => field.onChange(value)}
-                        value={field.value || ""}
-                        size="small"
-                        noOptionsText={
-                          <Typography
-                            variant="body2"
-                            color="inherit"
-                            gutterBottom
-                          >
-                            No matching Items
-                          </Typography>
-                        }
-                        options={[
-                          ...(DesignationData?.length
-                            ? DesignationData.map(
-                                (designation) => designation.designationName
-                              )
-                            : []),
-                          "$ADD_NEW_ITEM",
-                        ]}
-                        renderOption={(props, option) =>
-                          option === "$ADD_NEW_ITEM" ? (
-                            <AddNewDesignationButton {...props} />
-                          ) : (
-                            <li {...props} key={option}>
-                              {option}
-                            </li>
-                          )
-                        }
-                        sx={{ flex: 1, margin: "0.5rem" }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            error={!!errors.attritionDesignation}
-                            label="Attrition Designation"
-                          />
-                        )}
-                      />
-                    )}
-                  />
+
                   <Controller
                     name="tenureSplit"
                     control={control}
@@ -1482,8 +1429,12 @@ export default function AddOrEditRAGDialog({
               backgroundColor: "var(--pallet-blue)",
             }}
             size="medium"
-            disabled={isLoading}
-            startIcon={isLoading ? <CircularProgress size={24} /> : null}
+            disabled={isRagReportUpdating || isRagReportCreating}
+            startIcon={
+              isRagReportUpdating || isRagReportCreating ? (
+                <CircularProgress size={24} />
+              ) : null
+            }
             onClick={handleSubmit((data) => {
               handleSubmitAttritionReport(data);
             })}
