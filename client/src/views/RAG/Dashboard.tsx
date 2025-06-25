@@ -70,10 +70,14 @@ import UpcomingOutlinedIcon from "@mui/icons-material/UpcomingOutlined";
 import FilterListOutlinedIcon from "@mui/icons-material/FilterListOutlined";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
 import RadialStrokeBarChart from "../../components/RadialStrokedBarChart";
+import SentimentSatisfiedAltOutlinedIcon from "@mui/icons-material/SentimentSatisfiedAltOutlined";
+import MoodOutlinedIcon from "@mui/icons-material/MoodOutlined";
+import SentimentVerySatisfiedOutlinedIcon from "@mui/icons-material/SentimentVerySatisfiedOutlined";
+import HourglassEmptyOutlinedIcon from "@mui/icons-material/HourglassEmptyOutlined";
 
 const breadcrumbItems = [
   { title: "Home", href: "/home" },
-  { title: "Chemical Management" },
+  { title: "RAG Management" },
 ];
 
 interface TabPanelProps {
@@ -120,7 +124,7 @@ function a11yProps3(indexTwo: number) {
   };
 }
 
-function ChemicalDashboard() {
+function RagDashboard() {
   const { isMobile, isTablet } = useIsMobile();
   const {
     register,
@@ -614,7 +618,7 @@ function ChemicalDashboard() {
           overflowX: "hidden",
         }}
       >
-        <PageTitle title="Chemical Management Dashboard" />
+        <PageTitle title="RAG System" />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
 
@@ -696,15 +700,15 @@ function ChemicalDashboard() {
           }}
         >
           <DashboardCard
-            title="In Stock"
-            titleIcon={<ScienceOutlinedIcon fontSize="large" />}
+            title="Total"
+            titleIcon={<HourglassEmptyOutlinedIcon fontSize="large" />}
             value={
               chemicalStockAmountDataMemo?.inStockCount ||
               0 ||
               chemicalDashboardSummeryDataMemo?.inStockCount ||
               0
             }
-            subDescription="Chemicals in Stock"
+            subDescription="Total RAG Count"
           />
         </Box>
         <Box
@@ -716,15 +720,20 @@ function ChemicalDashboard() {
           }}
         >
           <DashboardCard
-            title="Delivered"
-            titleIcon={<LocalShippingOutlinedIcon fontSize="large" />}
+            title="Red"
+            titleIcon={
+              <SentimentSatisfiedAltOutlinedIcon
+                fontSize="large"
+                sx={{ color: "red" }}
+              />
+            }
             value={
               chemicalStockAmountDataMemo?.deliveredTotal ||
               0 ||
               chemicalDashboardSummeryDataMemo?.deliveredTotal ||
               0
             }
-            subDescription="Delivered Chemical Quantity"
+            subDescription="Red Count"
           />
         </Box>
 
@@ -737,15 +746,42 @@ function ChemicalDashboard() {
           }}
         >
           <DashboardCard
-            title="Amount"
-            titleIcon={<PaidOutlinedIcon fontSize="large" />}
+            title="Amber"
+            titleIcon={
+              <MoodOutlinedIcon fontSize="large" sx={{ color: "#ff8f00" }} />
+            }
             value={
               chemicalStockAmountDataMemo?.purchaseAmount ||
               0 ||
               chemicalDashboardSummeryDataMemo?.purchaseAmount ||
               0
             }
-            subDescription="Amount Of the Stocked Chemicals"
+            subDescription="Amber Count"
+          />
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            flex: 1,
+            margin: "0.5rem",
+            minWidth: "150px",
+          }}
+        >
+          <DashboardCard
+            title="Green"
+            titleIcon={
+              <SentimentVerySatisfiedOutlinedIcon
+                fontSize="large"
+                sx={{ color: "green" }}
+              />
+            }
+            value={
+              chemicalStockAmountDataMemo?.purchaseAmount ||
+              0 ||
+              chemicalDashboardSummeryDataMemo?.purchaseAmount ||
+              0
+            }
+            subDescription="Green Count"
           />
         </Box>
       </Box>
@@ -2099,4 +2135,4 @@ function ChemicalDashboard() {
   );
 }
 
-export default ChemicalDashboard;
+export default RagDashboard;
