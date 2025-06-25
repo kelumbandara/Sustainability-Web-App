@@ -224,7 +224,7 @@ export default function AddOrEditRAGDialog({
 
   const handleSubmitRagReport = (data: RAG) => {
     const submitData: Partial<RAG> = data;
-    submitData.country = selectedCountry.id;
+    submitData.country = selectedCountry.countryName;
     console.log(submitData);
     if (defaultValues) {
       submitData.id = defaultValues.id;

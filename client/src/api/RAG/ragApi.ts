@@ -38,7 +38,7 @@ export const RAGSchema = z.object({
   function: z.string(),
   reportingManager: z.string(),
   employmentType: z.string(),
-  country: z.number(),
+  country: z.string(),
   countryName: CountrySchema,
   state: z.string(),
   origin: z.string(),
