@@ -1237,22 +1237,7 @@ export default function AddOrEditRAGDialog({
                         isOptionEqualToValue={(option, value) =>
                           option.id === value.id
                         }
-                        options={[
-                          ...(countryData?.length ? countryData : []),
-                          {
-                            id: "$ADD_NEW_COUNTRY",
-                            countryName: "$ADD_NEW_COUNTRY",
-                          },
-                        ]}
-                        renderOption={(props, option) =>
-                          option.countryName === "$ADD_NEW_COUNTRY" ? (
-                            <AddNewCountryButton {...props} />
-                          ) : (
-                            <li {...props} key={option.id}>
-                              {option.countryName}
-                            </li>
-                          )
-                        }
+                        options={[...(countryData?.length ? countryData : [])]}
                         size="small"
                         sx={{ flex: 1, margin: "0.5rem" }}
                         renderInput={(params) => (
@@ -1291,17 +1276,7 @@ export default function AddOrEditRAGDialog({
                             ...(stateData?.length
                               ? stateData.map((state) => state.stateName)
                               : []),
-                            "$ADD_NEW_ITEM",
                           ]}
-                          renderOption={(props, option) =>
-                            option === "$ADD_NEW_ITEM" ? (
-                              <AddNewStateButton {...props} />
-                            ) : (
-                              <li {...props} key={option}>
-                                {option}
-                              </li>
-                            )
-                          }
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField

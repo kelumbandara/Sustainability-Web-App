@@ -347,12 +347,12 @@ export const fetchRagEmployee = async () => {
 };
 
 export const fetchRagCountryNames = async () => {
-  const res = await axios.get(`/api/rag-country-names`);
+  const res = await axios.get(`https://sl.perahara.lk/CountryAndState/public/api/country`);
   return res.data;
 };
 
 export const fetchRagStateNames = async (id: number) => {
-  const res = await axios.get(`/api/rag-state-names/${id}`);
+  const res = await axios.get(`https://sl.perahara.lk/CountryAndState/public/api/state/${id}`);
   return res.data;
 };
 
