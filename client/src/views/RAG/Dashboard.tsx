@@ -38,6 +38,7 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
+  Cell,
 } from "recharts";
 import React, { useMemo, useState } from "react";
 import CircularProgressWithLabel from "../../components/CircularProgress";
@@ -74,6 +75,12 @@ import SentimentSatisfiedAltOutlinedIcon from "@mui/icons-material/SentimentSati
 import MoodOutlinedIcon from "@mui/icons-material/MoodOutlined";
 import SentimentVerySatisfiedOutlinedIcon from "@mui/icons-material/SentimentVerySatisfiedOutlined";
 import HourglassEmptyOutlinedIcon from "@mui/icons-material/HourglassEmptyOutlined";
+import {
+  fetchRagCategoryRecord,
+  fetchRagGenderTotalRecord,
+  fetchRagStatusTotalRecord,
+  fetchRagTotalRecord,
+} from "../../api/RAG/ragApi";
 
 const breadcrumbItems = [
   { title: "Home", href: "/home" },
@@ -594,17 +601,143 @@ function RagDashboard() {
     return chemicalDashboardSummeryData?.latestTransactions || [];
   }, [chemicalDashboardSummeryData]);
 
+  const COLORS = [
+    "#82ca9d",
+    "#8884d8",
+    "#ffc658",
+    "#ff4d4f",
+    "#00bcd4",
+    "#a83279",
+  ]; // Add more if needed
+
+  const {
+    data: ragTotalCount,
+    refetch: refetchRagTotalCount,
+    isFetching: isRagTotalCount,
+  } = useQuery({
+    queryKey: ["rag-total", formattedDateFrom, formattedDateTo],
+    queryFn: () => fetchRagTotalRecord(formattedDateFrom, formattedDateTo),
+    enabled: false,
+  });
+
+  const {
+    data: ragCategoryTotalCount,
+    refetch: refetchRagCategoryTotalCount,
+    isFetching: isRagCategoryTotalCount,
+  } = useQuery({
+    queryKey: ["rag-category", formattedDateFrom, formattedDateTo],
+    queryFn: () => fetchRagCategoryRecord(formattedDateFrom, formattedDateTo),
+    enabled: false,
+  });
+
+  const {
+    data: ragGenderTotalCount,
+    refetch: refetchRagGenderTotalCount,
+    isFetching: isRagGenderTotalCount,
+  } = useQuery({
+    queryKey: ["rag-gender", formattedDateFrom, formattedDateTo],
+    queryFn: () =>
+      fetchRagGenderTotalRecord(formattedDateFrom, formattedDateTo),
+    enabled: false,
+  });
+
+  const {
+    data: ragStatusTotalCount,
+    refetch: refetchRagStatusTotalCount,
+    isFetching: isRagStatusTotalCount,
+  } = useQuery({
+    queryKey: ["rag-status", formattedDateFrom, formattedDateTo],
+    queryFn: () =>
+      fetchRagStatusTotalRecord(formattedDateFrom, formattedDateTo),
+    enabled: false,
+  });
+
+  const ragStatusCountDataMemo = useMemo(() => {
+    if (
+      !ragStatusTotalCount ||
+      !Array.isArray(ragStatusTotalCount) ||
+      ragStatusTotalCount.length === 0
+    ) {
+      return [];
+    }
+
+    const rawData = ragStatusTotalCount[0] as Record<
+      string,
+      { count: number; percentage: number }
+    >;
+
+    return Object.entries(rawData).map(([status, data]) => ({
+      name: status.charAt(0).toUpperCase() + status.slice(1), // Capitalize
+      value: data.count,
+    }));
+  }, [ragStatusTotalCount]);
+
+  const ragGenderCountDataMemo = useMemo(() => {
+    if (
+      !ragGenderTotalCount ||
+      !Array.isArray(ragGenderTotalCount) ||
+      ragGenderTotalCount.length === 0
+    ) {
+      return [];
+    }
+
+    const rawData = ragGenderTotalCount[0] as Record<
+      string,
+      { count: number; percentage: number }
+    >;
+    const allowedCategories = ["Male", "Female", "Other"];
+
+    return Object.entries(rawData)
+      .filter(([key]) => allowedCategories.includes(key))
+      .map(([category, data]) => ({
+        name: category,
+        value: data.count,
+      }));
+  }, [ragGenderTotalCount]);
+
+  const ragCategoryCountDataMemo = useMemo(() => {
+    if (
+      !ragCategoryTotalCount ||
+      !Array.isArray(ragCategoryTotalCount) ||
+      ragCategoryTotalCount.length === 0
+    ) {
+      return [];
+    }
+
+    const rawData = ragCategoryTotalCount[0] as Record<
+      string,
+      { count: number; percentage: number }
+    >;
+
+    return Object.entries(rawData).map(([category, data]) => ({
+      category,
+      count: data.count,
+      percentage: data.percentage,
+    }));
+  }, [ragCategoryTotalCount]);
+
+  const ragCountDataMemo = useMemo(() => {
+    return ragTotalCount || {};
+  }, [ragTotalCount]);
+
+  const ragCountBarDataMemo = useMemo(() => {
+    if (!ragTotalCount || typeof ragTotalCount !== "object") return [];
+
+    return [
+      {
+        name: "RAG Count",
+        red: ragTotalCount.red?.count || 0,
+        amber: ragTotalCount.amber?.count || 0,
+        green: ragTotalCount.green?.count || 0,
+      },
+    ];
+  }, [ragTotalCount]);
+
   const handleFetch = () => {
-    refetchChemicalStockAmount();
-    refetchChemicalMonthlyDelivery();
-    refetchChemicalMonthlyLatestRecord();
-    refetchChemicalTransactionLatestRecord();
-    refetchChemicalThreshold();
-    refetchChemicalHighestStock();
-    refetchChemicalStatusSummery();
-    refetchChemicalInventoryInsights();
-    refetchChemicalClassification();
-    refetchMsdsCount();
+    refetchRagTotalCount();
+    refetchRagCategoryTotalCount();
+    refetchRagGenderTotalCount();
+    refetchRagStatusTotalCount();
   };
 
   return (
@@ -702,13 +835,8 @@ function RagDashboard() {
           <DashboardCard
             title="Total"
             titleIcon={<HourglassEmptyOutlinedIcon fontSize="large" />}
-            value={
-              chemicalStockAmountDataMemo?.inStockCount ||
-              0 ||
-              chemicalDashboardSummeryDataMemo?.inStockCount ||
-              0
-            }
-            subDescription="Total RAG Count"
+            value={ragCountDataMemo?.totalRag}
+            subDescription={ragCountDataMemo?.ragPercentage + "%"}
           />
         </Box>
         <Box
@@ -727,13 +855,8 @@ function RagDashboard() {
                 sx={{ color: "red" }}
               />
             }
-            value={
-              chemicalStockAmountDataMemo?.deliveredTotal ||
-              0 ||
-              chemicalDashboardSummeryDataMemo?.deliveredTotal ||
-              0
-            }
-            subDescription="Red Count"
+            value={ragCountDataMemo.red?.count}
+            subDescription={ragCountDataMemo.red?.percentage + "%"}
           />
         </Box>
 
@@ -750,13 +873,8 @@ function RagDashboard() {
             titleIcon={
               <MoodOutlinedIcon fontSize="large" sx={{ color: "#ff8f00" }} />
             }
-            value={
-              chemicalStockAmountDataMemo?.purchaseAmount ||
-              0 ||
-              chemicalDashboardSummeryDataMemo?.purchaseAmount ||
-              0
-            }
-            subDescription="Amber Count"
+            value={ragCountDataMemo.amber?.count}
+            subDescription={ragCountDataMemo.amber?.percentage + "%"}
           />
         </Box>
         <Box
@@ -775,13 +893,8 @@ function RagDashboard() {
                 sx={{ color: "green" }}
               />
             }
-            value={
-              chemicalStockAmountDataMemo?.purchaseAmount ||
-              0 ||
-              chemicalDashboardSummeryDataMemo?.purchaseAmount ||
-              0
-            }
-            subDescription="Green Count"
+            value={ragCountDataMemo.green?.count}
+            subDescription={ragCountDataMemo.green?.percentage + "%"}
           />
         </Box>
       </Box>
@@ -811,39 +924,25 @@ function RagDashboard() {
                 textAlign: "center",
               }}
             >
-              Delivery Counts By Month
+              RAG Comparison
             </Typography>
           </Box>
 
           <ResponsiveContainer width="100%" height={500}>
             <BarChart
+              data={ragCountBarDataMemo}
+              width={800}
               height={400}
-              data={
-                chemicalMonthlyDeliveryDataMemo.length > 0
-                  ? chemicalMonthlyDeliveryDataMemo
-                  : chemicalAllMonthlyDeliveryDataMemo
-              }
+              barCategoryGap={40}
+              barGap={100}
             >
               <XAxis dataKey="month" />
               <YAxis fontSize={12} />
               <Tooltip />
               <Legend />
-              {(chemicalMonthlyDeliveryDataMemo.length > 0
-                ? chemicalKeys
-                : chemicalAllKeys
-              ).map((chemical, index) => (
-                <Bar
-                  key={chemical}
-                  dataKey={chemical}
-                  barSize={15}
-                  stackId="a"
-                  fill={
-                    ["#8884d8", "#82ca9d", "#ffc658", "#ff7f50", "#a0522d"][
-                      index % 5
-                    ]
-                  }
-                />
-              ))}
+              <Bar dataKey="red" name="Red" fill="red" barSize={20} />
+              <Bar dataKey="amber" name="Amber" fill="#faad14" barSize={20} />
+              <Bar dataKey="green" name="Green" fill="green" barSize={20} />
             </BarChart>
           </ResponsiveContainer>
         </Box>
@@ -881,260 +980,11 @@ function RagDashboard() {
             }}
           >
             <>
-              <AppBar
-                position="sticky"
-                sx={{
-                  display: "flex",
-                  mt: "1rem",
-                }}
-              >
-                <Tabs
-                  value={activeTab}
-                  onChange={handleChange}
-                  indicatorColor="secondary"
-                  TabIndicatorProps={{
-                    style: {
-                      backgroundColor: "var(--pallet-blue)",
-                      height: "3px",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    },
-                  }}
-                  sx={{
-                    backgroundColor: "var(--pallet-lighter-grey)",
-                    color: "var(--pallet-blue)",
-                    display: "flex",
-                  }}
-                  textColor="inherit"
-                  variant="scrollable"
-                  scrollButtons={true}
-                >
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <FilterListOutlinedIcon fontSize="small" />
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Threshold
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps(0)}
-                  />
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <TrendingUpOutlinedIcon fontSize="small" />
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Highest Stock
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps(1)}
-                  />
-                </Tabs>
-              </AppBar>
-              <TabPanel value={activeTab} index={0} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      gap={4}
-                      width={"100%"}
-                    >
-                      {chemicalThresholdDataMemo.length != 0
-                        ? chemicalThresholdDataMemo?.data?.map(
-                            (item, index) => (
-                              <>
-                                <Box
-                                  key={index}
-                                  display="flex"
-                                  justifyContent="space-between"
-                                >
-                                  <Box flex={2}>
-                                    <Typography
-                                      variant="button"
-                                      fontSize="1.2rem"
-                                    >
-                                      {item.chemicalName}
-                                    </Typography>
-                                    <Box>
-                                      <Typography
-                                        variant="caption"
-                                        color="gray"
-                                      >
-                                        LIMIT: {item.totalLimit}
-                                      </Typography>
-                                    </Box>
-                                  </Box>
-                                  <Box flex={1}>
-                                    <Box
-                                      sx={{
-                                        display: "flex",
-                                        flexDirection: "row",
-                                        gap: "3rem",
-                                        justifyContent: "space-between",
-                                      }}
-                                    >
-                                      <CircularProgressWithLabel
-                                        size={60}
-                                        value={item.percentage}
-                                      />
-                                    </Box>
-                                  </Box>
-                                </Box>
-                                <Divider />
-                              </>
-                            )
-                          )
-                        : chemicalAllThresholdDataMemo?.stockThreshold?.map(
-                            (item, index) => (
-                              <>
-                                <Box
-                                  key={index}
-                                  display="flex"
-                                  justifyContent="space-between"
-                                >
-                                  <Box flex={2}>
-                                    <Typography
-                                      variant="button"
-                                      fontSize="1.2rem"
-                                    >
-                                      {item.chemicalName}
-                                    </Typography>
-                                    <Box>
-                                      <Typography
-                                        variant="caption"
-                                        color="gray"
-                                      >
-                                        LIMIT: {item.totalLimit}
-                                      </Typography>
-                                    </Box>
-                                  </Box>
-                                  <Box flex={1}>
-                                    <Box
-                                      sx={{
-                                        display: "flex",
-                                        flexDirection: "row",
-                                        gap: "3rem",
-                                        justifyContent: "space-between",
-                                      }}
-                                    >
-                                      <CircularProgressWithLabel
-                                        size={60}
-                                        value={item.percentage}
-                                      />
-                                    </Box>
-                                  </Box>
-                                </Box>
-                                <Divider />
-                              </>
-                            )
-                          )}
-                    </Box>
-                  </Box>
-                </Box>
-              </TabPanel>
-              <TabPanel value={activeTab} index={1} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      gap={4}
-                      width={"100%"}
-                    >
-                      {chemicalHighestDataMemo.length != 0
-                        ? chemicalHighestDataMemo?.data?.map((item, index) => (
-                            <>
-                              <Box
-                                key={index}
-                                display="flex"
-                                justifyContent="space-between"
-                                alignItems={"center"}
-                              >
-                                <Box flex={2}>
-                                  <Typography
-                                    variant="button"
-                                    fontSize="1.2rem"
-                                  >
-                                    {item.chemicalName}
-                                  </Typography>
-                                </Box>
-                                <Box flex={1}>
-                                  <Typography
-                                    variant="caption"
-                                    fontSize="1.2rem"
-                                    color="gray"
-                                  >
-                                    {" "}
-                                    Total Quantity: {item.totalQuantity}
-                                  </Typography>
-                                </Box>
-                              </Box>
-                              <Divider />
-                            </>
-                          ))
-                        : chemicalAllHighestDataMemo?.highestStock?.map(
-                            (item, index) => (
-                              <>
-                                <Box
-                                  key={index}
-                                  display="flex"
-                                  justifyContent="space-between"
-                                  alignItems={"center"}
-                                >
-                                  <Box flex={2}>
-                                    <Typography
-                                      variant="button"
-                                      fontSize="1.2rem"
-                                    >
-                                      {item.chemicalName}
-                                    </Typography>
-                                  </Box>
-                                  <Box flex={1}>
-                                    <Typography
-                                      variant="caption"
-                                      fontSize="1.2rem"
-                                      color="gray"
-                                    >
-                                      {" "}
-                                      Total Quantity: {item.totalQuantity}
-                                    </Typography>
-                                  </Box>
-                                </Box>
-                                <Divider />
-                              </>
-                            )
-                          )}
-                    </Box>
-                  </Box>
-                </Box>
-              </TabPanel>
+              <CustomPieChart
+                data={ragGenderCountDataMemo}
+                title="Gender Total"
+                centerLabel="Gender"
+              />
             </>
           </ResponsiveContainer>
         </Box>
@@ -1167,75 +1017,37 @@ function RagDashboard() {
                 textAlign: "center",
               }}
             >
-              Latest Inventory Transaction
+              Category
             </Typography>
           </Box>
-          <TableContainer
-            component={Paper}
-            elevation={2}
-            sx={{
-              overflowX: "auto",
-              maxWidth: isMobile ? "80vw" : "100%",
+          <ResponsiveContainer
+            width="100%"
+            height={500}
+            style={{
+              overflowY: "scroll",
+              scrollbarWidth: "none",
             }}
           >
-            {isChemicalLatestDeliveryData ? (
-              <Box
-                width="100%"
-                height="400px"
-                mt={5}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
-              </Box>
-            ) : chemicalLatestTransactionDataMemo ||
-              chemicalAllLatestTransactionDataMemo ? (
-              <Table>
-                <TableHead
-                  sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}
-                >
-                  <TableRow>
-                    <TableCell align="left"></TableCell>
-                    <TableCell align="left">Reference Number</TableCell>
-                    <TableCell align="left">Delivered Date</TableCell>
-                    <TableCell align="left">Commercial Name</TableCell>
-                    <TableCell align="left">ZDHC level</TableCell>
-                    <TableCell align="left">Delivered</TableCell>
-                    <TableCell align="left">Status</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {(dateRangeFrom && dateRangeTo && division
-                    ? chemicalLatestTransactionDataMemo
-                    : chemicalAllLatestTransactionDataMemo || []
-                  ).map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell align="left">
-                        <UpcomingOutlinedIcon fontSize="small" color="error" />
-                      </TableCell>
-                      <TableCell align="left">
-                        {item.transactionsRefferenceNumber}
-                      </TableCell>
-                      <TableCell align="left">
-                        {new Date(item.deliveryDate).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell align="left">{item.commercialName}</TableCell>
-                      <TableCell align="left">{item.zdhcLevel}</TableCell>
-                      <TableCell align="left">
-                        {item.deliveryQuantity}
-                      </TableCell>
-                      <TableCell align="left">{item.status}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <Typography textAlign="center">
-                Please select filters to display data
-              </Typography>
-            )}
-          </TableContainer>
+            <BarChart
+              data={ragCategoryCountDataMemo}
+              width={800}
+              height={400}
+              barCategoryGap={40}
+              barGap={100}
+            >
+              <XAxis dataKey="category" />
+              <YAxis fontSize={12} />
+              <Tooltip />
+              <Bar dataKey="count" barSize={35}>
+                {ragCategoryCountDataMemo.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </Box>
         <Box
           sx={{
@@ -1269,258 +1081,11 @@ function RagDashboard() {
             }}
           >
             <>
-              <AppBar
-                position="sticky"
-                sx={{
-                  display: "flex",
-                  mt: "1rem",
-                }}
-              >
-                <Tabs
-                  value={activeTabThree}
-                  onChange={handleChangeTabThree}
-                  indicatorColor="secondary"
-                  TabIndicatorProps={{
-                    style: {
-                      backgroundColor: "var(--pallet-blue)",
-                      height: "3px",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    },
-                  }}
-                  sx={{
-                    backgroundColor: "var(--pallet-lighter-grey)",
-                    color: "var(--pallet-blue)",
-                    display: "flex",
-                  }}
-                  textColor="inherit"
-                  variant="scrollable"
-                  scrollButtons={true}
-                >
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Hazards
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps3(0)}
-                  />
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          GHS
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps3(1)}
-                  />
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          GHS ZDHC Level
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps3(2)}
-                  />
-                </Tabs>
-              </AppBar>
-              <TabPanel value={activeTabThree} index={0} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      gap={4}
-                      width={"100%"}
-                    >
-                      {(dateRangeFrom && dateRangeTo && division
-                        ? chemicalClassificationHazardTypeSummaryMemo
-                        : chemicalAllClassificationHazardTypeSummaryMemo
-                      )?.map((item, index) => (
-                        <>
-                          <Box
-                            key={index}
-                            display="flex"
-                            justifyContent="space-between"
-                          >
-                            <Box flex={2}>
-                              <Typography variant="button" fontSize="1.2rem">
-                                {item.hazardType}
-                              </Typography>
-                              <Box>
-                                <Typography variant="caption" color="gray">
-                                  Count: {item.count}
-                                </Typography>
-                              </Box>
-                            </Box>
-                            <Box flex={1}>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  flexDirection: "row",
-                                  gap: "3rem",
-                                  justifyContent: "space-between",
-                                }}
-                              >
-                                <CircularProgressWithLabel
-                                  size={60}
-                                  value={item.percentage}
-                                />
-                              </Box>
-                            </Box>
-                          </Box>
-                          <Divider />
-                        </>
-                      ))}
-                    </Box>
-                  </Box>
-                </Box>
-              </TabPanel>
-              <TabPanel value={activeTabThree} index={1} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      gap={4}
-                      width={"100%"}
-                    >
-                      {(dateRangeFrom && dateRangeTo && division
-                        ? chemicalGhsClassificationHazardTypeSummaryMemo
-                        : chemicalAllGhsClassificationHazardTypeSummaryMemo
-                      )?.map((item, index) => (
-                        <>
-                          <Box
-                            key={index}
-                            display="flex"
-                            justifyContent="space-between"
-                          >
-                            <Box flex={2}>
-                              <Typography variant="button" fontSize="1.2rem">
-                                {item.ghsClassification}
-                              </Typography>
-                              <Box>
-                                <Typography variant="caption" color="gray">
-                                  Count: {item.count}
-                                </Typography>
-                              </Box>
-                            </Box>
-                            <Box flex={1}>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  flexDirection: "row",
-                                  gap: "3rem",
-                                  justifyContent: "space-between",
-                                }}
-                              >
-                                <CircularProgressWithLabel
-                                  size={60}
-                                  value={item.percentage}
-                                />
-                              </Box>
-                            </Box>
-                          </Box>
-                          <Divider />
-                        </>
-                      ))}
-                    </Box>
-                  </Box>
-                </Box>
-              </TabPanel>
-              <TabPanel value={activeTabThree} index={2} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      gap={4}
-                      width={"100%"}
-                    >
-                      {(dateRangeFrom && dateRangeTo && division
-                        ? chemicalZdhcClassificationHazardTypeSummaryMemo
-                        : chemicalAllZdhcClassificationHazardTypeSummaryMemo
-                      )?.map((item, index) => (
-                        <>
-                          <Box
-                            key={index}
-                            display="flex"
-                            justifyContent="space-between"
-                          >
-                            <Box flex={2}>
-                              <Typography variant="button" fontSize="1.2rem">
-                                {item.zdhcLevel}
-                              </Typography>
-                              <Box>
-                                <Typography variant="caption" color="gray">
-                                  Count: {item.count}
-                                </Typography>
-                              </Box>
-                            </Box>
-                            <Box flex={1}>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  flexDirection: "row",
-                                  gap: "3rem",
-                                  justifyContent: "space-between",
-                                }}
-                              >
-                                <CircularProgressWithLabel
-                                  size={60}
-                                  value={item.percentage}
-                                />
-                              </Box>
-                            </Box>
-                          </Box>
-                          <Divider />
-                        </>
-                      ))}
-                    </Box>
-                  </Box>
-                </Box>
-              </TabPanel>
+              <CustomPieChart
+                data={ragStatusCountDataMemo}
+                title="Gender Total"
+                centerLabel="Gender"
+              />
             </>
           </ResponsiveContainer>
         </Box>
@@ -1982,13 +1547,9 @@ function RagDashboard() {
           <ResponsiveContainer width="100%" height={500}>
             <>
               <CustomPieChart
-                data={
-                  dateRangeFrom && dateRangeTo && division
-                    ? chemicalStatusSummeryDataMemo
-                    : chemicalAllStatusSummeryDataMemo
-                }
-                title="Chemical Status Summary"
-                centerLabel="Status"
+                data={ragGenderCountDataMemo}
+                title="Gender Total"
+                centerLabel="Gender"
               />
             </>
           </ResponsiveContainer>

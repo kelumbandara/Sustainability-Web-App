@@ -53,7 +53,7 @@ export const RAGSchema = z.object({
   inprogressBy: z.number(),
   approvedBy: z.number(),
   created_at: z.date(),
-  rag: z.nativeEnum(RagColor)
+  rag: z.nativeEnum(RagColor),
 });
 
 export type RAG = z.infer<typeof RAGSchema>;
@@ -289,7 +289,7 @@ export const updateRagRecord = async (data: RAG) => {
 };
 
 export const deleteRagRecord = async (id: String) => {
-  const res = await axios.delete(`/api/rag-record/${id}/delete`,);
+  const res = await axios.delete(`/api/rag-record/${id}/delete`);
   console.log(id);
   return res.data;
 };
@@ -366,5 +366,43 @@ export const fetchRagEmployment = async () => {
   return res.data;
 };
 
-
 //dashboard
+export const fetchRagTotalRecord = async (
+  startDate: String,
+  endDate: String
+) => {
+  const res = await axios.get(
+    `/api/rag-dashboard/${startDate}/${endDate}/rag-total-record`
+  );
+  return res.data;
+};
+
+export const fetchRagCategoryRecord = async (
+  startDate: String,
+  endDate: String
+) => {
+  const res = await axios.get(
+    `/api/rag-dashboard/${startDate}/${endDate}/category-total-record`
+  );
+  return res.data;
+};
+
+export const fetchRagGenderTotalRecord = async (
+  startDate: String,
+  endDate: String
+) => {
+  const res = await axios.get(
+    `/api/rag-dashboard/${startDate}/${endDate}/gender-total-record`
+  );
+  return res.data;
+};
+
+export const fetchRagStatusTotalRecord = async (
+  startDate: String,
+  endDate: String
+) => {
+  const res = await axios.get(
+    `/api/rag-dashboard/${startDate}/${endDate}/status-total-record`
+  );
+  return res.data;
+};
