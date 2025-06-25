@@ -76,8 +76,11 @@ import MoodOutlinedIcon from "@mui/icons-material/MoodOutlined";
 import SentimentVerySatisfiedOutlinedIcon from "@mui/icons-material/SentimentVerySatisfiedOutlined";
 import HourglassEmptyOutlinedIcon from "@mui/icons-material/HourglassEmptyOutlined";
 import {
+  fetchAllRagRecord,
+  fetchRagAgeGroupRecord,
   fetchRagCategoryRecord,
   fetchRagGenderTotalRecord,
+  fetchRagStateCountRecord,
   fetchRagStatusTotalRecord,
   fetchRagTotalRecord,
 } from "../../api/RAG/ragApi";
@@ -652,6 +655,74 @@ function RagDashboard() {
     enabled: false,
   });
 
+  const {
+    data: ragStateCount,
+    refetch: refetchRagStateCount,
+    isFetching: isRagStateCount,
+  } = useQuery({
+    queryKey: ["rag-states", formattedDateFrom, formattedDateTo],
+    queryFn: () => fetchRagStateCountRecord(formattedDateFrom, formattedDateTo),
+    enabled: false,
+  });
+
+  const {
+    data: ragAgeGroupCount,
+    refetch: refetchRagAgeGroupCount,
+    isFetching: isRagAgeGroupCount,
+  } = useQuery({
+    queryKey: ["rag-age-group", formattedDateFrom, formattedDateTo],
+    queryFn: () => fetchRagAgeGroupRecord(formattedDateFrom, formattedDateTo),
+    enabled: false,
+  });
+
+  const { data: ragAllData, isFetching: isRagAllData } = useQuery({
+    queryKey: ["all-rag-data"],
+    queryFn: fetchAllRagRecord,
+  });
+
+  const ragAgeGroupChartDataMemo = useMemo(() => {
+    if (
+      !ragAgeGroupCount ||
+      typeof ragAgeGroupCount !== "object" ||
+      !ragAgeGroupCount.ageGroupSummary
+    ) {
+      return [];
+    }
+
+    const summary = ragAgeGroupCount.ageGroupSummary as Record<
+      string,
+      { count: number; percentage: number }
+    >;
+
+    return Object.entries(summary)
+      .filter(([, data]) => data.count > 0)
+      .map(([range, data]) => ({
+        name: range,
+        value: data.count,
+      }));
+  }, [ragAgeGroupCount]);
+
+  const ragStateBarChartData = useMemo(() => {
+    if (
+      !ragStateCount ||
+      !Array.isArray(ragStateCount) ||
+      ragStateCount.length === 0
+    ) {
+      return [];
+    }
+
+    const rawData = ragStateCount[0] as Record<
+      string,
+      { count: number; percentage: number }
+    >;
+
+    return Object.entries(rawData).map(([state, data]) => ({
+      state,
+      count: data.count,
+      percentage: data.percentage,
+    }));
+  }, [ragStateCount]);
+
   const ragStatusCountDataMemo = useMemo(() => {
     if (
       !ragStatusTotalCount ||
@@ -738,6 +809,8 @@ function RagDashboard() {
     refetchRagCategoryTotalCount();
     refetchRagGenderTotalCount();
     refetchRagStatusTotalCount();
+    refetchRagStateCount();
+    refetchRagAgeGroupCount();
   };
 
   return (
@@ -961,16 +1034,6 @@ function RagDashboard() {
             marginTop: "1rem",
           }}
         >
-          <Box>
-            <Typography
-              variant="h6"
-              sx={{
-                textAlign: "center",
-              }}
-            >
-              Chemical Inventory Status
-            </Typography>
-          </Box>
           <ResponsiveContainer
             width="100%"
             height={500}
@@ -1061,17 +1124,6 @@ function RagDashboard() {
             border: "1px solid var(--pallet-border-blue)",
           }}
         >
-          <Box>
-            <Typography
-              variant="h6"
-              sx={{
-                textAlign: "center",
-              }}
-            >
-              Category & Classification
-            </Typography>
-          </Box>
-
           <ResponsiveContainer
             width="100%"
             height={500}
@@ -1083,7 +1135,7 @@ function RagDashboard() {
             <>
               <CustomPieChart
                 data={ragStatusCountDataMemo}
-                title="Gender Total"
+                title="Status Total"
                 centerLabel="Gender"
               />
             </>
@@ -1117,7 +1169,7 @@ function RagDashboard() {
                 textAlign: "center",
               }}
             >
-              Chemical Inventory Insights
+              RAG Count By State
             </Typography>
           </Box>
 
@@ -1129,404 +1181,19 @@ function RagDashboard() {
               scrollbarWidth: "none",
             }}
           >
-            <>
-              <AppBar
-                position="sticky"
-                sx={{
-                  display: "flex",
-                  mt: "1rem",
-                  maxWidth: isMobile ? 400 : "auto",
-                }}
-              >
-                <Tabs
-                  value={activeTabTwo}
-                  onChange={handleChangeTabTwo}
-                  indicatorColor="secondary"
-                  TabIndicatorProps={{
-                    style: {
-                      backgroundColor: "var(--pallet-blue)",
-                      height: "3px",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    },
-                  }}
-                  sx={{
-                    backgroundColor: "var(--pallet-lighter-grey)",
-                    color: "var(--pallet-blue)",
-                    display: "flex",
-                  }}
-                  textColor="inherit"
-                  variant="scrollable"
-                  scrollButtons={true}
-                >
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Top Suppliers
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps2(0)}
+            <BarChart width={600} height={400} data={ragStateBarChartData}>
+              <XAxis dataKey="state" angle={290} />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="count" barSize={10}>
+                {ragStateBarChartData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
                   />
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Positive List
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps2(1)}
-                  />
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          MSDS EXpiry
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps2(2)}
-                  />
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Chemical Expiry
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps2(3)}
-                  />
-                  <Tab
-                    label={
-                      <Box
-                        sx={{
-                          color: "var(--pallet-blue)",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                          Certificate Expiry
-                        </Typography>
-                      </Box>
-                    }
-                    {...a11yProps2(4)}
-                  />
-                </Tabs>
-              </AppBar>
-              <TabPanel value={activeTabTwo} index={0} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      gap={4}
-                      width={"100%"}
-                    >
-                      {(dateRangeFrom && dateRangeTo && division
-                        ? chemicalInsightTopSuppliersDataMemo
-                        : chemicalDashboardSummeryTopSuppliersDataMemo
-                      )?.map((item, index) => (
-                        <>
-                          <Box
-                            key={index}
-                            display="flex"
-                            justifyContent="space-between"
-                          >
-                            <Box flex={2}>
-                              <Typography variant="button" fontSize="1.2rem">
-                                {item.name}
-                              </Typography>
-                              <Box>
-                                <Typography variant="caption" color="gray">
-                                  Quantity: {item.totalQuantity}
-                                </Typography>
-                              </Box>
-                            </Box>
-                            <Box flex={1}>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  flexDirection: "row",
-                                  gap: "3rem",
-                                  justifyContent: "space-between",
-                                }}
-                              >
-                                <CircularProgressWithLabel
-                                  size={60}
-                                  value={item.percentageOfTotalRecords}
-                                />
-                              </Box>
-                            </Box>
-                          </Box>
-                          <Divider />
-                        </>
-                      ))}
-                    </Box>
-                  </Box>
-                </Box>
-              </TabPanel>
-              <TabPanel value={activeTabTwo} index={1} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      gap={4}
-                      width={"100%"}
-                    >
-                      {(dateRangeFrom && dateRangeTo && division
-                        ? chemicalInsightPositiveListDataMemo
-                        : chemicalDashboardSummeryPositiveListDataMemo
-                      )?.map((item, index) => (
-                        <>
-                          <Box
-                            key={index}
-                            display="flex"
-                            justifyContent="space-between"
-                          >
-                            <Box flex={2}>
-                              <Typography variant="button" fontSize="1.2rem">
-                                {item.positiveList}
-                              </Typography>
-                              <Box>
-                                <Typography variant="caption" color="gray">
-                                  Count: {item.count}
-                                </Typography>
-                              </Box>
-                            </Box>
-                            <Box flex={1}>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  flexDirection: "row",
-                                  gap: "3rem",
-                                  justifyContent: "space-between",
-                                }}
-                              >
-                                <CircularProgressWithLabel
-                                  size={60}
-                                  value={item.percentageOfTotalCertificates}
-                                />
-                              </Box>
-                            </Box>
-                          </Box>
-                          <Divider />
-                        </>
-                      ))}
-                    </Box>
-                  </Box>
-                </Box>
-              </TabPanel>
-              <TabPanel value={activeTabTwo} index={2} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      gap={4}
-                      width={"100%"}
-                    >
-                      {(dateRangeFrom && dateRangeTo && division
-                        ? chemicalInsightMsdsListDataMemo
-                        : chemicalDashboardSummeryMsdsExpiriesDataMemo
-                      )?.map((item, index) => (
-                        <>
-                          <Box
-                            key={index}
-                            display="flex"
-                            justifyContent="space-between"
-                          >
-                            <Box flex={2}>
-                              <Typography variant="button" fontSize="1.2rem">
-                                {item.referenceNumber}
-                              </Typography>
-                              <Box>
-                                <Typography variant="caption" color="gray">
-                                  Inventory Number: {item.inventoryNumber}
-                                </Typography>
-                              </Box>
-                            </Box>
-                            <Box flex={1}>
-                              <Typography variant="button" fontSize="1.2rem">
-                                {item.commercialName}
-                              </Typography>
-                              <Box>
-                                <Typography variant="caption" color="gray">
-                                  MSDS Expiry Date:{" "}
-                                  {format(
-                                    new Date(item.msdsorsdsExpiryDate),
-                                    "dd-MMM-yyyy"
-                                  )}
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </Box>
-                          <Divider />
-                        </>
-                      ))}
-                    </Box>
-                  </Box>
-                </Box>
-              </TabPanel>
-              <TabPanel value={activeTabTwo} index={3} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      gap={4}
-                      width={"100%"}
-                    >
-                      {(dateRangeFrom && dateRangeTo && division
-                        ? chemicalInsightChemicalExpiryListDataMemo
-                        : chemicalDashboardSummeryChemicalExpiryDataMemo
-                      )?.map((item, index) => (
-                        <>
-                          <Box
-                            key={index}
-                            display="flex"
-                            justifyContent="space-between"
-                          >
-                            <Box flex={2}>
-                              <Typography variant="button" fontSize="1.2rem">
-                                Chemical Name
-                              </Typography>
-                              <Box>
-                                <Typography variant="caption" color="gray">
-                                  {item.molecularFormula}
-                                </Typography>
-                              </Box>
-                            </Box>
-                            <Box flex={1}>
-                              <Typography variant="button" fontSize="1.2rem">
-                                Expiry Date
-                              </Typography>
-                              <Box>
-                                <Typography variant="caption" color="gray">
-                                  {format(
-                                    new Date(item.expiryDate),
-                                    "dd-MMM-yyyy"
-                                  )}
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </Box>
-                          <Divider />
-                        </>
-                      ))}
-                    </Box>
-                  </Box>
-                </Box>
-              </TabPanel>
-              <TabPanel value={activeTabTwo} index={4} dir={theme.direction}>
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      direction: "row",
-                      m: "1rem",
-                    }}
-                  >
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      gap={4}
-                      width={"100%"}
-                    >
-                      {(dateRangeFrom && dateRangeTo && division
-                        ? chemicalInsightCertificateExpiryListDataMemo
-                        : chemicalDashboardSummeryCertificateExpiryDataMemo
-                      )?.map((item, index) => (
-                        <>
-                          <Box
-                            key={index}
-                            display="flex"
-                            justifyContent="space-between"
-                          >
-                            <Box flex={2}>
-                              <Typography variant="button" fontSize="1.2rem">
-                                INV ID: {item.inventoryId}
-                              </Typography>
-                              <Box>
-                                <Typography variant="caption" color="gray">
-                                  {item.testName}
-                                </Typography>
-                              </Box>
-                            </Box>
-                            <Box flex={1}>
-                              <Typography variant="button" fontSize="1.2rem">
-                                {item.positiveList}
-                              </Typography>
-                              <Box>
-                                <Typography variant="caption" color="gray">
-                                  {format(
-                                    new Date(item.expiryDate),
-                                    "dd-MMM-yyyy"
-                                  )}
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </Box>
-                          <Divider />
-                        </>
-                      ))}
-                    </Box>
-                  </Box>
-                </Box>
-              </TabPanel>
-            </>
+                ))}
+              </Bar>
+            </BarChart>
           </ResponsiveContainer>
         </Box>
 
@@ -1547,146 +1214,9 @@ function RagDashboard() {
           <ResponsiveContainer width="100%" height={500}>
             <>
               <CustomPieChart
-                data={ragGenderCountDataMemo}
-                title="Gender Total"
-                centerLabel="Gender"
-              />
-            </>
-          </ResponsiveContainer>
-        </Box>
-      </Box>
-
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: isMobile ? "column" : "row",
-          gap: "1rem",
-        }}
-      >
-        <Box
-          sx={{
-            width: "100%",
-            height: "600px",
-            overflowY: "auto",
-            marginTop: "1rem",
-            flex: 2,
-            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-            padding: "1rem",
-            borderRadius: "0.3rem",
-            border: "1px solid var(--pallet-border-blue)",
-          }}
-        >
-          <Box position="static" mb={3}>
-            <Typography
-              variant="h6"
-              sx={{
-                textAlign: "center",
-              }}
-            >
-              Latest Inventory Delivery
-            </Typography>
-          </Box>
-          <TableContainer
-            component={Paper}
-            elevation={2}
-            sx={{
-              overflowX: "auto",
-              maxWidth: isMobile ? "80vw" : "100%",
-            }}
-          >
-            {isChemicalLatestDeliveryData ? (
-              <Box
-                width="100%"
-                height="400px"
-                mt={5}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <CircularProgress sx={{ color: "var(--pallet-light-blue)" }} />
-              </Box>
-            ) : chemicalLatestDeliveryDataMemo ||
-              chemicalAllLatestDeliveryDataMemo ? (
-              <Table>
-                <TableHead
-                  sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}
-                >
-                  <TableRow>
-                    <TableCell align="left"></TableCell>
-                    <TableCell align="left">Reference Number</TableCell>
-                    <TableCell align="left">Delivered Date</TableCell>
-                    <TableCell align="left">Commercial Name</TableCell>
-                    <TableCell align="left">ZDHC level</TableCell>
-                    <TableCell align="left">Delivered</TableCell>
-                    <TableCell align="left">Status</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {(dateRangeFrom && dateRangeTo && division
-                    ? chemicalLatestDeliveryDataMemo
-                    : chemicalAllLatestDeliveryDataMemo || []
-                  ).map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell align="left">
-                        <UpcomingOutlinedIcon fontSize="small" color="error" />
-                      </TableCell>
-                      <TableCell align="left">{item.referenceNumber}</TableCell>
-                      <TableCell align="left">
-                        {new Date(item.deliveryDate).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell align="left">{item.commercialName}</TableCell>
-                      <TableCell align="left">{item.zdhcLevel}</TableCell>
-                      <TableCell align="left">
-                        {item.deliveryQuantity}
-                      </TableCell>
-                      <TableCell align="left">{item.status}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <Typography textAlign="center">
-                Please select filters to display data
-              </Typography>
-            )}
-          </TableContainer>
-        </Box>
-
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            flex: 1,
-            flexDirection: "column",
-            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-            borderRadius: "0.3rem",
-            border: "1px solid var(--pallet-border-blue)",
-            padding: "1rem",
-            height: "auto",
-            marginTop: "1rem",
-          }}
-        >
-          <Box>
-            <Typography
-              variant="h6"
-              sx={{
-                textAlign: "center",
-                mb: 5,
-              }}
-            >
-              MSDS Chemical Percentage
-            </Typography>
-          </Box>
-          <ResponsiveContainer width="100%" height={500}>
-            <>
-              <RadialStrokeBarChart
-                value={
-                  dateRangeFrom && dateRangeTo && division
-                    ? chemicalMsdsDataMemo
-                    : msdsPercentageMemo
-                }
-                label="MSDS Count"
-                size={400}
+                data={ragAgeGroupChartDataMemo}
+                title="Age Group Distribution"
+                centerLabel="Age Group"
               />
             </>
           </ResponsiveContainer>

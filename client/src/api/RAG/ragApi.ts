@@ -406,3 +406,29 @@ export const fetchRagStatusTotalRecord = async (
   );
   return res.data;
 };
+
+export const fetchRagStateCountRecord = async (
+  startDate: String,
+  endDate: String
+) => {
+  const res = await axios.get(
+    `/api/rag-dashboard/${startDate}/${endDate}/state-total-record`
+  );
+  return res.data;
+};
+
+export const fetchRagAgeGroupRecord = async (
+  startDate: String,
+  endDate: String
+) => {
+  const res = await axios.get(
+    `/api/rag-dashboard/${startDate}/${endDate}/age-total-record`
+  );
+  return res.data;
+};
+
+export const fetchAllRagRecord = async () => {
+  const year = new Date().getFullYear();
+  const res = await axios.get(`/api/rag-dashboard/${year}/all-summary`);
+  return res.data;
+};
