@@ -701,3 +701,9 @@ export async function fetchChemicalAssignedRequest() {
   const res = await axios.get(`/api/purchase-inventory-records-assign-task`);
   return res.data;
 }
+
+
+export async function fetchChemicalAssignees() {
+  const res = await axios.get(`/api/chemical-records-assignee`);
+  return res.data;
+}

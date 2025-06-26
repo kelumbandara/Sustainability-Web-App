@@ -21,6 +21,7 @@ import { v4 as uuidv4 } from "uuid";
 import {
   ChemicalRequest,
   createChemicalRequest,
+  fetchChemicalAssignees,
   fetchChemicalCommercialNames,
   fetchProductStandards,
   updateChemicalRequest,
@@ -77,8 +78,8 @@ export default function AddOrEditChemicalRequestDialog({
   });
 
   const { data: userData, isFetching: isUserDataFetching } = useQuery({
-    queryKey: ["users"],
-    queryFn: fetchAllUsers,
+    queryKey: ["chemical-assignees"],
+    queryFn: fetchChemicalAssignees,
   });
 
   const { data: chemicalData } = useQuery({

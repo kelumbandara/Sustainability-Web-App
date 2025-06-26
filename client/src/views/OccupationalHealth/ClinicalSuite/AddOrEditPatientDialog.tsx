@@ -6,6 +6,7 @@ import DialogActions from "@mui/material/DialogActions";
 import {
   Autocomplete,
   Box,
+  CircularProgress,
   Divider,
   IconButton,
   Stack,
@@ -15,9 +16,10 @@ import {
 import { Controller, useForm } from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
 import { grey } from "@mui/material/colors";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
+  createDoctors,
   Designation,
   Gender,
   Patient,
@@ -33,11 +35,14 @@ import DatePickerComponent from "../../../components/DatePickerComponent";
 import RichTextComponent from "../../../components/RichTextComponent";
 import TimePickerComponent from "../../../components/TimePickerComponent";
 import { sampleDoctorData } from "../../../api/sampleData/patientData";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { fetchAllDoctors } from "../../../api/OccupationalHealth/consultingDoctorsAPi";
 import { fetchDivision } from "../../../api/divisionApi";
 import { fetchDepartmentData } from "../../../api/departmentApi";
 import { fetchDesignation } from "../../../api/OccupationalHealth/patientDesignationApi";
+import AddIcon from "@mui/icons-material/Add";
+import queryClient from "../../../state/queryClient";
+import { enqueueSnackbar } from "notistack";
 
 type DialogProps = {
   open: boolean;
@@ -105,6 +110,146 @@ export default function AddOrEditPatientDialog({
     resetForm();
   };
 
+  const [addNewContactDialogOpen, setAddNewContactDialogOpen] = useState(false);
+
+  const AddNewDoctorButton = (props) => (
+    <li
+      {...props}
+      variant="contained"
+      style={{
+        backgroundColor: "var(--pallet-lighter-blue)",
+        color: "var(--pallet-blue)",
+        textTransform: "none",
+        margin: "0.5rem",
+        borderRadius: "0.3rem",
+        display: "flex",
+        flexDirection: "row",
+      }}
+      size="small"
+      // onClick closes the menu
+      onMouseDown={() => {
+        setAddNewContactDialogOpen(true);
+      }}
+    >
+      <AddIcon />
+      <Typography variant="body2" component="div">
+        Add a new Doctor
+      </Typography>
+    </li>
+  );
+
+  const AddNewDoctorDialog = () => {
+    const { register, handleSubmit, watch } = useForm<Patient>({});
+    const {
+      mutate: addNewDoctorMutation,
+      isPending: isAddNewJobPositionMutation,
+    } = useMutation({
+      mutationFn: createDoctors,
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["doctors"],
+        });
+        enqueueSnackbar("Doctor Created Successfully!", {
+          variant: "success",
+        });
+        reset();
+        setAddNewContactDialogOpen(false);
+      },
+      onError: () => {
+        enqueueSnackbar(`Doctor Created Failed`, {
+          variant: "error",
+        });
+      },
+    });
+
+    const handleCreateDoctors = (data: Patient) => {
+      addNewDoctorMutation(data);
+    };
+    
+
+    return (
+      <Dialog
+        open={addNewContactDialogOpen}
+        onClose={() => setAddNewContactDialogOpen(false)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          style: {
+            backgroundColor: grey[50],
+          },
+          component: "form",
+        }}
+      >
+        <DialogTitle
+          sx={{
+            paddingY: "1rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Typography variant="h6" component="div">
+            Add a New Doctor
+          </Typography>
+          <IconButton
+            aria-label="open drawer"
+            onClick={() => setAddNewContactDialogOpen(false)}
+            edge="start"
+            sx={{
+              color: "#024271",
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <Divider />
+        <DialogContent>
+          <Stack
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <TextField
+              {...register("consultingDoctor", { required: true })}
+              required
+              id="consultingDoctor"
+              label="Doctor"
+              size="small"
+              fullWidth
+              sx={{ marginBottom: "0.5rem" }}
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ padding: "1rem" }}>
+          <Button
+            onClick={() => setAddNewContactDialogOpen(false)}
+            sx={{ color: "var(--pallet-blue)" }}
+          >
+            Cancel
+          </Button>
+
+          <CustomButton
+            variant="contained"
+            sx={{
+              backgroundColor: "var(--pallet-blue)",
+            }}
+            size="medium"
+            disabled={isAddNewJobPositionMutation}
+            endIcon={
+              isAddNewJobPositionMutation ? (
+                <CircularProgress size={20} />
+              ) : null
+            }
+            onClick={handleSubmit(handleCreateDoctors)}
+          >
+            Add New Doctor
+          </CustomButton>
+        </DialogActions>
+      </Dialog>
+    );
+  };
+
   return (
     <Dialog
       open={open}
@@ -120,6 +265,7 @@ export default function AddOrEditPatientDialog({
         component: "form",
       }}
     >
+      <AddNewDoctorDialog/>
       <DialogTitle
         sx={{
           paddingY: "1rem",
@@ -526,23 +672,45 @@ export default function AddOrEditPatientDialog({
               />
             </Box>
             <Box sx={{ margin: "0.5rem" }}>
-              <Autocomplete
-                {...register("consultingDoctor", { required: true })}
-                size="small"
-                options={
-                  doctorData?.length
-                    ? doctorData.map((doctor) => doctor.doctorName)
-                    : []
-                }
-                defaultValue={defaultValues?.consultingDoctor}
-                sx={{ flex: 1, margin: "0.5rem" }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    required
-                    error={!!errors.consultingDoctor}
-                    label="Consulting Doctor"
-                    name="consultingDoctor"
+              <Controller
+                name="consultingDoctor"
+                control={control}
+                defaultValue={defaultValues?.consultingDoctor ?? ""}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <Autocomplete
+                    {...field}
+                    onChange={(event, newValue) => field.onChange(newValue)}
+                    value={field.value || ""}
+                    size="small"
+                    options={[
+                      ...(doctorData?.length
+                        ? doctorData.map((item) => item.doctorName)
+                        : []),
+                      "$ADD_NEW_JOB_POSITION",
+                    ]}
+                    getOptionLabel={(option) => option}
+                    isOptionEqualToValue={(option, value) => option === value}
+                    renderOption={(props, option) =>
+                      option === "$ADD_NEW_JOB_POSITION" ? (
+                        <AddNewDoctorButton {...props} />
+                      ) : (
+                        <li {...props} key={option}>
+                          {option}
+                        </li>
+                      )
+                    }
+                    sx={{ flex: 1, margin: "0.5rem" }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        required
+                        error={!!errors.consultingDoctor}
+                        helperText={errors.consultingDoctor && "Required"}
+                        label="Consulting Doctor"
+                        name="consultingDoctor"
+                      />
+                    )}
                   />
                 )}
               />

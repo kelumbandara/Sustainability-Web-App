@@ -167,3 +167,11 @@ export const deleteMedicineInventory = async (id: string) => {
   const res = await axios.delete(`/api/medicine-inventory/${id}/delete`);
   return res.data;
 };
+
+export async function createSupplier(supplier: MedicineInventory) {
+  const supplierName = supplier.supplierName;
+  const res = await axios.post("/api/supplier-name", {
+    supplierName,
+  });
+  return res.data;
+}

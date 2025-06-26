@@ -163,6 +163,11 @@ export async function fetchAuditType() {
   return res.data;
 }
 
+export async function fetchAuditApprover() {
+  const res = await axios.get("/api/external-audit-assignee");
+  return res.data;
+}
+
 export async function fetchAuditCategory() {
   const res = await axios.get("/api/external-audit-category");
   return res.data;

@@ -175,3 +175,11 @@ export const deletePatient = async (id: string) => {
   const res = await axios.delete(`/api/patient-records/${id}/delete`);
   return res.data;
 };
+
+export async function createDoctors(doctor: Patient) {
+  const doctorName = doctor.consultingDoctor;
+  const res = await axios.post("/api/consulting-doctors", {
+    doctorName,
+  });
+  return res.data;
+}

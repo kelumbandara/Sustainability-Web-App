@@ -8,6 +8,7 @@ import {
   Autocomplete,
   Box,
   Chip,
+  CircularProgress,
   Divider,
   IconButton,
   Stack,
@@ -31,6 +32,7 @@ import RichTextComponent from "../../../../components/RichTextComponent";
 import useIsMobile from "../../../../customHooks/useIsMobile";
 import theme from "../../../../theme";
 import {
+  createSupplier,
   MedicineInventory,
   publishMedicineInventory,
 } from "../../../../api/OccupationalHealth/medicineInventoryApi";
@@ -45,8 +47,10 @@ import { fetchAllSupplierTypes } from "../../../../api/OccupationalHealth/suppli
 import SaveIcon from "@mui/icons-material/Save";
 import PublishIcon from "@mui/icons-material/Publish";
 import ApproveConfirmationModal from "../MedicineRequest/ApproveConfirmationModal";
-import queryClient from "../../../../state/queryClient";
 import { useSnackbar } from "notistack";
+import AddIcon from "@mui/icons-material/Add";
+import queryClient from "../../../../state/queryClient";
+import { enqueueSnackbar } from "notistack";
 
 type DialogProps = {
   open: boolean;
@@ -278,6 +282,147 @@ export default function AddOrEditPurchaseAndInventoryDialog({
     setActiveTab(newValue);
   };
 
+  const [addNewSupplierDialogOpen, setAddNewSupplierDialogOpen] =
+    useState(false);
+
+  const AddNewSupplierButton = (props) => (
+    <li
+      {...props}
+      variant="contained"
+      style={{
+        backgroundColor: "var(--pallet-lighter-blue)",
+        color: "var(--pallet-blue)",
+        textTransform: "none",
+        margin: "0.5rem",
+        borderRadius: "0.3rem",
+        display: "flex",
+        flexDirection: "row",
+      }}
+      size="small"
+      // onClick closes the menu
+      onMouseDown={() => {
+        setAddNewSupplierDialogOpen(true);
+      }}
+    >
+      <AddIcon />
+      <Typography variant="body2" component="div">
+        Add a new Supplier
+      </Typography>
+    </li>
+  );
+
+  const AddNewSupplierDialog = () => {
+    const { register, handleSubmit } = useForm<MedicineInventory>({});
+    const {
+      mutate: addNewMedicineMutation,
+      isPending: isAddNewJobPositionMutation,
+    } = useMutation({
+      mutationFn: createSupplier,
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["supplierName"],
+        });
+        enqueueSnackbar("Supplier Created Successfully!", {
+          variant: "success",
+        });
+        reset();
+        setAddNewSupplierDialogOpen(false);
+      },
+      onError: () => {
+        enqueueSnackbar(`Supplier Created Failed`, {
+          variant: "error",
+        });
+      },
+    });
+
+    const handleCreateMedicine = (data: MedicineInventory) => {
+      addNewMedicineMutation(data);
+    };
+
+    return (
+      <Dialog
+        open={addNewSupplierDialogOpen}
+        onClose={() => setAddNewSupplierDialogOpen(false)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          style: {
+            backgroundColor: grey[50],
+          },
+          component: "form",
+        }}
+      >
+        
+        <DialogTitle
+          sx={{
+            paddingY: "1rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Typography variant="h6" component="div">
+            Add a New Supplier
+          </Typography>
+          <IconButton
+            aria-label="open drawer"
+            onClick={() => setAddNewSupplierDialogOpen(false)}
+            edge="start"
+            sx={{
+              color: "#024271",
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <Divider />
+        <DialogContent>
+          <Stack
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <TextField
+              {...register("supplierName", { required: true })}
+              required
+              id="supplierName"
+              label="Supplier Name"
+              size="small"
+              fullWidth
+              sx={{ marginBottom: "0.5rem" }}
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ padding: "1rem" }}>
+          <Button
+            onClick={() => setAddNewSupplierDialogOpen(false)}
+            sx={{ color: "var(--pallet-blue)" }}
+          >
+            Cancel
+          </Button>
+
+          <CustomButton
+            variant="contained"
+            sx={{
+              backgroundColor: "var(--pallet-blue)",
+            }}
+            size="medium"
+            disabled={isAddNewJobPositionMutation}
+            endIcon={
+              isAddNewJobPositionMutation ? (
+                <CircularProgress size={20} />
+              ) : null
+            }
+            onClick={handleSubmit(handleCreateMedicine)}
+          >
+            Add New Supplier
+          </CustomButton>
+        </DialogActions>
+      </Dialog>
+    );
+  };
+
   return (
     <>
       <Dialog
@@ -294,6 +439,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
           component: "form",
         }}
       >
+        <AddNewSupplierDialog />
         <DialogTitle
           sx={{
             paddingY: "1rem",
@@ -668,21 +814,36 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                     <Controller
                       name="supplierName"
                       control={control}
-                      defaultValue={defaultValues?.supplierName}
-                      {...register("supplierName", { required: true })}
+                      defaultValue={defaultValues?.supplierName ?? ""}
+                      rules={{ required: true }}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
                           onChange={(event, newValue) =>
                             field.onChange(newValue)
                           }
+                          value={field.value || ""}
                           size="small"
-                          options={
-                            supplierNameData?.length
+                          options={[
+                            ...(supplierNameData?.length
                               ? supplierNameData.map(
-                                  (supplier) => supplier.supplierName
+                                  (item) => item.supplierName
                                 )
-                              : []
+                              : []),
+                            "$ADD_NEW_JOB_POSITION",
+                          ]}
+                          getOptionLabel={(option) => option}
+                          isOptionEqualToValue={(option, value) =>
+                            option === value
+                          }
+                          renderOption={(props, option) =>
+                            option === "$ADD_NEW_JOB_POSITION" ? (
+                              <AddNewSupplierButton {...props} />
+                            ) : (
+                              <li {...props} key={option}>
+                                {option}
+                              </li>
+                            )
                           }
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
@@ -690,6 +851,7 @@ export default function AddOrEditPurchaseAndInventoryDialog({
                               {...params}
                               required
                               error={!!errors.supplierName}
+                              helperText={errors.supplierName && "Required"}
                               label="Supplier Name"
                               name="supplierName"
                             />

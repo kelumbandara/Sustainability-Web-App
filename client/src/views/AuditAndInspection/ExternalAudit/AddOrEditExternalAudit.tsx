@@ -26,12 +26,12 @@ import { Controller, useForm } from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
 import { grey } from "@mui/material/colors";
 import { useEffect, useMemo, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {
   Announcement,
   ExternalAudit,
+  fetchAuditApprover,
   fetchAuditCategory,
   fetchAuditFirm,
   fetchAuditStandard,
@@ -49,7 +49,6 @@ import DropzoneComponent from "../../../components/DropzoneComponent";
 import { StorageFile } from "../../../utils/StorageFiles.util";
 import DatePickerComponent from "../../../components/DatePickerComponent";
 import UserAutoComplete from "../../../components/UserAutoComplete";
-import { fetchHazardRiskAssignee } from "../../../api/userApi";
 import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import ListIcon from "@mui/icons-material/List";
 import Diversity3Icon from "@mui/icons-material/Diversity3";
@@ -104,8 +103,8 @@ export default function AddOrEditExternalAuditDialog({
   const [activeTab, setActiveTab] = useState(0);
 
   const { data: assigneeData, isFetching: isAssigneeDataFetching } = useQuery({
-    queryKey: ["hr-assignee"],
-    queryFn: fetchHazardRiskAssignee, //need to change
+    queryKey: ["external-assignee"],
+    queryFn: fetchAuditApprover,
   });
 
   const {
