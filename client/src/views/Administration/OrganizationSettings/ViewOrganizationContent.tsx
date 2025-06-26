@@ -46,9 +46,9 @@ function ViewOrganizationContent({
   const [activeTab, setActiveTab] = useState(0);
   const { isTablet } = useIsMobile();
 
-  const insightImage = Array.isArray(organizationSettings.insightImage)
+  const insightImage = Array.isArray(organizationSettings?.insightImage)
     ? organizationSettings.insightImage[0]
-    : organizationSettings.insightImage;
+    : organizationSettings?.insightImage;
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);

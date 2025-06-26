@@ -687,7 +687,11 @@ function EnvironmentDashboard() {
               <Autocomplete
                 {...register("division", { required: true })}
                 size="small"
-                options={divisionData?.map((division) => division.divisionName)}
+                options={
+                  divisionData?.length
+                    ? divisionData.map((division) => division.divisionName)
+                    : []
+                }
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (
                   <TextField
@@ -2239,7 +2243,9 @@ function EnvironmentDashboard() {
                 <Box display={"flex"} justifyContent={"center"}>
                   <PieArcLabelChart
                     data={
-                      month && division ? statusSummeryDataMemo : statusSummeryAllDataMemo
+                      month && division
+                        ? statusSummeryDataMemo
+                        : statusSummeryAllDataMemo
                     }
                     width={400}
                     height={400}

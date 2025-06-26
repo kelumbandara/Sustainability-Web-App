@@ -873,8 +873,9 @@ function EnvironmentDashboard() {
                     onChange={(e, value) => field.onChange(value)}
                     value={field.value || ""}
                     options={
-                      divisionData?.map((division) => division.divisionName) ||
-                      []
+                      divisionData?.length
+                        ? divisionData.map((division) => division.divisionName)
+                        : []
                     }
                     size="small"
                     sx={{ flex: 1, margin: "0.5rem" }}

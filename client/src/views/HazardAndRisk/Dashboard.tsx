@@ -59,6 +59,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import CircularProgressWithLabel from "../../components/CircularProgress";
+import { fetchDivision } from "../../api/divisionApi";
 
 const breadcrumbItems = [
   { title: "Home", href: "/home" },
@@ -347,6 +348,11 @@ function HazardAndRiskDashboard() {
     { name: "Pending", value: pendingRisks },
   ];
 
+  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
+    queryKey: ["divisions"],
+    queryFn: fetchDivision,
+  });
+
   return (
     <Stack>
       <Box
@@ -441,7 +447,11 @@ function HazardAndRiskDashboard() {
               <Autocomplete
                 {...register("division", { required: false })}
                 size="small"
-                options={sampleDivisions?.map((division) => division.name)}
+                options={
+                  divisionData?.length
+                    ? divisionData.map((division) => division.divisionName)
+                    : []
+                }
                 sx={{ flex: 1, margin: "0.5rem" }}
                 renderInput={(params) => (
                   <TextField

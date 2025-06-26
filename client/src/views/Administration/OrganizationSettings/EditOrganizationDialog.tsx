@@ -58,14 +58,14 @@ const EditOrganizationDialog = ({
   const [files, setFiles] = useState<File[]>([]);
 
   const [logoUrls, setLogoUrls] = useState<(StorageFile | File)[]>(() => {
-    const logos = defaultValues.logoUrl;
+    const logos = defaultValues?.logoUrl;
     if (Array.isArray(logos)) return logos;
     if (logos) return [logos];
     return [];
   });
 
   const [insightUrl, setInsightUrl] = useState<(StorageFile | File)[]>(() => {
-    const insight = defaultValues.insightImage;
+    const insight = defaultValues?.insightImage;
     if (Array.isArray(insight)) return insight;
     if (insight) return [insight];
     return [];

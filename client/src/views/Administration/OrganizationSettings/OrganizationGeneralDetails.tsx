@@ -47,9 +47,9 @@ function OrganizationGeneralDetails({
       .filter((pallet): pallet is ColorPallet => pallet !== null);
   }, [organizationSettings]);
 
-  const logo = Array.isArray(organizationSettings.logoUrl)
+  const logo = Array.isArray(organizationSettings?.logoUrl)
     ? organizationSettings.logoUrl[0]
-    : organizationSettings.logoUrl;
+    : organizationSettings?.logoUrl;
 
   return (
     <Stack
