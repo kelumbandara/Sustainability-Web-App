@@ -2,29 +2,15 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  AppBar,
-  Autocomplete,
   Box,
   Button,
-  CircularProgress,
-  Divider,
-  Paper,
   Stack,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  TextField,
   Typography,
 } from "@mui/material";
 import theme from "../../theme";
 import PageTitle from "../../components/PageTitle";
 import Breadcrumb from "../../components/BreadCrumb";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import useIsMobile from "../../customHooks/useIsMobile";
 import DateRangePicker from "../../components/DateRangePicker";
 import CustomButton from "../../components/CustomButton";
@@ -40,37 +26,12 @@ import {
   Bar,
   Cell,
 } from "recharts";
-import React, { useMemo, useState } from "react";
-import CircularProgressWithLabel from "../../components/CircularProgress";
+import { useMemo } from "react";
 
-import PaidOutlinedIcon from "@mui/icons-material/PaidOutlined";
-
-import { yearData } from "../../api/sampleData/consumptionData";
 import { useQuery } from "@tanstack/react-query";
-import { fetchDivision } from "../../api/divisionApi";
 import { dateFormatter } from "../../util/dateFormat.util";
 import CustomPieChart from "../../components/CustomPieChart";
-import { format } from "date-fns";
 
-import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
-import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
-import {
-  fetchChemicalClassification,
-  fetchChemicalDashboardAllSummary,
-  fetchChemicalHighestStock,
-  fetchChemicalInventoryInsights,
-  fetchChemicalMonthlyDelivery,
-  fetchChemicalMonthlyLatestRecord,
-  fetchChemicalStatusSummery,
-  fetchChemicalStockAmount,
-  fetchChemicalThreshold,
-  fetchChemicalTransactionLatestRecord,
-  fetchMsdsCount,
-} from "../../api/ChemicalManagement/chemicalDashboardApi";
-import UpcomingOutlinedIcon from "@mui/icons-material/UpcomingOutlined";
-import FilterListOutlinedIcon from "@mui/icons-material/FilterListOutlined";
-import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
-import RadialStrokeBarChart from "../../components/RadialStrokedBarChart";
 import SentimentSatisfiedAltOutlinedIcon from "@mui/icons-material/SentimentSatisfiedAltOutlined";
 import MoodOutlinedIcon from "@mui/icons-material/MoodOutlined";
 import SentimentVerySatisfiedOutlinedIcon from "@mui/icons-material/SentimentVerySatisfiedOutlined";
@@ -90,50 +51,6 @@ const breadcrumbItems = [
   { title: "RAG Management" },
 ];
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  dir?: string;
-  index: number;
-  value: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`full-width-tabpanel-${index}`}
-      aria-labelledby={`full-width-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-}
-
-function a11yProps(index: number) {
-  return {
-    id: `full-width-tab-${index}`,
-    "aria-controls": `full-width-tabpanel-${index}`,
-  };
-}
-
-function a11yProps2(indexTwo: number) {
-  return {
-    id: `full-width-tab-${indexTwo}`,
-    "aria-controls": `full-width-TabPanelTwo-${indexTwo}`,
-  };
-}
-
-function a11yProps3(indexTwo: number) {
-  return {
-    id: `full-width-tab-${indexTwo}`,
-    "aria-controls": `full-width-TabPanelTwo-${indexTwo}`,
-  };
-}
-
 function RagDashboard() {
   const { isMobile, isTablet } = useIsMobile();
   const {
@@ -143,466 +60,15 @@ function RagDashboard() {
     reset,
     control,
     formState: { errors },
-    setValue,
   } = useForm();
 
   const year = watch("year");
-
-  const auditType = watch("auditType");
-  const division = watch("division");
 
   const dateRangeFrom = watch("dateRangeFrom");
   const formattedDateFrom = dateFormatter(dateRangeFrom);
 
   const dateRangeTo = watch("dateRangeTo");
   const formattedDateTo = dateFormatter(dateRangeTo);
-
-  const [activeTab, setActiveTab] = useState(0);
-  const [activeTabTwo, setActiveTabTwo] = useState(0);
-  const [activeTabThree, setActiveTabThree] = useState(0);
-
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    console.log("event", event);
-    setActiveTab(newValue);
-  };
-
-  const handleChangeTabTwo = (
-    eventTwo: React.SyntheticEvent,
-    newValueTwo: number
-  ) => {
-    console.log("event", eventTwo);
-    setActiveTabTwo(newValueTwo);
-  };
-
-  const handleChangeTabThree = (
-    eventTwo: React.SyntheticEvent,
-    newValueTwo: number
-  ) => {
-    console.log("event", eventTwo);
-    setActiveTabThree(newValueTwo);
-  };
-
-  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
-    queryKey: ["divisions"],
-    queryFn: fetchDivision,
-  });
-
-  //Dashboard API
-  const {
-    data: chemicalStockAmountData,
-    refetch: refetchChemicalStockAmount,
-    isFetching: isChemicalStockAmountData,
-  } = useQuery({
-    queryKey: [
-      "stock-amount",
-      formattedDateFrom,
-      formattedDateTo,
-      division,
-      auditType,
-    ],
-    queryFn: () =>
-      fetchChemicalStockAmount(formattedDateFrom, formattedDateTo, division),
-    enabled: false,
-  });
-
-  const {
-    data: chemicalMonthlyDeliveryData,
-    refetch: refetchChemicalMonthlyDelivery,
-    isFetching: isChemicalMonthlyDeliveryData,
-  } = useQuery({
-    queryKey: [
-      "monthly-delivery",
-      formattedDateFrom,
-      formattedDateTo,
-      division,
-      auditType,
-    ],
-    queryFn: () =>
-      fetchChemicalMonthlyDelivery(
-        formattedDateFrom,
-        formattedDateTo,
-        division
-      ),
-    enabled: false,
-  });
-
-  const {
-    data: chemicalLatestDeliveryData,
-    refetch: refetchChemicalMonthlyLatestRecord,
-    isFetching: isChemicalLatestDeliveryData,
-  } = useQuery({
-    queryKey: [
-      "latest-record",
-      formattedDateFrom,
-      formattedDateTo,
-      division,
-      auditType,
-    ],
-    queryFn: () =>
-      fetchChemicalMonthlyLatestRecord(
-        formattedDateFrom,
-        formattedDateTo,
-        division
-      ),
-    enabled: false,
-  });
-
-  const {
-    data: chemicalLatestTransactionData,
-    refetch: refetchChemicalTransactionLatestRecord,
-    isFetching: isChemicalLatestTransactionData,
-  } = useQuery({
-    queryKey: [
-      "latest-transaction-record",
-      formattedDateFrom,
-      formattedDateTo,
-      division,
-      auditType,
-    ],
-    queryFn: () =>
-      fetchChemicalTransactionLatestRecord(
-        formattedDateFrom,
-        formattedDateTo,
-        division
-      ),
-    enabled: false,
-  });
-
-  const {
-    data: chemicalThresholdData,
-    refetch: refetchChemicalThreshold,
-    isFetching: isChemicalThresholdData,
-  } = useQuery({
-    queryKey: [
-      "chemical-threshold",
-      formattedDateFrom,
-      formattedDateTo,
-      division,
-      auditType,
-    ],
-    queryFn: () =>
-      fetchChemicalThreshold(formattedDateFrom, formattedDateTo, division),
-    enabled: false,
-  });
-
-  const {
-    data: chemicalHighestData,
-    refetch: refetchChemicalHighestStock,
-    isFetching: isChemicalHighestData,
-  } = useQuery({
-    queryKey: [
-      "highest-chemical",
-      formattedDateFrom,
-      formattedDateTo,
-      division,
-      auditType,
-    ],
-    queryFn: () =>
-      fetchChemicalHighestStock(formattedDateFrom, formattedDateTo, division),
-    enabled: false,
-  });
-
-  const {
-    data: chemicalStatusSummeryData,
-    refetch: refetchChemicalStatusSummery,
-    isFetching: isChemicalStatusSummeryData,
-  } = useQuery({
-    queryKey: [
-      "chemical-status-summery",
-      formattedDateFrom,
-      formattedDateTo,
-      division,
-      auditType,
-    ],
-    queryFn: () =>
-      fetchChemicalStatusSummery(formattedDateFrom, formattedDateTo, division),
-    enabled: false,
-  });
-
-  const {
-    data: chemicalInsightData,
-    refetch: refetchChemicalInventoryInsights,
-    isFetching: isChemicalInsightData,
-  } = useQuery({
-    queryKey: [
-      "chemical-insight",
-      formattedDateFrom,
-      formattedDateTo,
-      division,
-      auditType,
-    ],
-    queryFn: () =>
-      fetchChemicalInventoryInsights(
-        formattedDateFrom,
-        formattedDateTo,
-        division
-      ),
-    enabled: false,
-  });
-
-  const {
-    data: chemicalClassificationData,
-    refetch: refetchChemicalClassification,
-    isFetching: isChemicalClassificationData,
-  } = useQuery({
-    queryKey: [
-      "chemical-classification",
-      formattedDateFrom,
-      formattedDateTo,
-      division,
-      auditType,
-    ],
-    queryFn: () =>
-      fetchChemicalClassification(formattedDateFrom, formattedDateTo, division),
-    enabled: false,
-  });
-
-  const {
-    data: chemicalMsdsData,
-    refetch: refetchMsdsCount,
-    isFetching: isChemicalMsdsData,
-  } = useQuery({
-    queryKey: [
-      "chemical-msds",
-      formattedDateFrom,
-      formattedDateTo,
-      division,
-      auditType,
-    ],
-    queryFn: () => fetchMsdsCount(formattedDateFrom, formattedDateTo, division),
-    enabled: false,
-  });
-
-  //Dashboard useMemo
-  const chemicalMsdsDataMemo = useMemo(() => {
-    return chemicalMsdsData?.percentage || [];
-  }, [chemicalMsdsData]);
-
-  const chemicalClassificationHazardTypeSummaryMemo = useMemo(() => {
-    return chemicalClassificationData?.hazardTypeSummary || [];
-  }, [chemicalClassificationData]);
-
-  const chemicalGhsClassificationHazardTypeSummaryMemo = useMemo(() => {
-    return chemicalClassificationData?.ghsClassificationSummary || [];
-  }, [chemicalClassificationData]);
-
-  const chemicalZdhcClassificationHazardTypeSummaryMemo = useMemo(() => {
-    return chemicalClassificationData?.zdhcLevelSummary || [];
-  }, [chemicalClassificationData]);
-
-  const chemicalInsightTopSuppliersDataMemo = useMemo(() => {
-    return chemicalInsightData?.topSuppliers || [];
-  }, [chemicalInsightData]);
-  const chemicalInsightPositiveListDataMemo = useMemo(() => {
-    return chemicalInsightData?.positiveList || [];
-  }, [chemicalInsightData]);
-  const chemicalInsightMsdsListDataMemo = useMemo(() => {
-    return chemicalInsightData?.msdsExpiries || [];
-  }, [chemicalInsightData]);
-  const chemicalInsightChemicalExpiryListDataMemo = useMemo(() => {
-    return chemicalInsightData?.chemicalExpiry || [];
-  }, [chemicalInsightData]);
-  const chemicalInsightCertificateExpiryListDataMemo = useMemo(() => {
-    return chemicalInsightData?.certificateExpiry || [];
-  }, [chemicalInsightData]);
-
-  const chemicalStatusSummeryDataMemo = useMemo(() => {
-    return (
-      chemicalStatusSummeryData?.data?.map(
-        (item: { status: string; count: number }) => ({
-          name: item.status,
-          value: item.count,
-        })
-      ) || []
-    );
-  }, [chemicalStatusSummeryData]);
-
-  const chemicalHighestDataMemo = useMemo(() => {
-    return chemicalHighestData || [];
-  }, [chemicalHighestData]);
-
-  const chemicalThresholdDataMemo = useMemo(() => {
-    return chemicalThresholdData || [];
-  }, [chemicalThresholdData]);
-  console.log(chemicalThresholdDataMemo.length);
-
-  const chemicalMonthlyDeliveryDataMemo = useMemo(() => {
-    if (
-      !chemicalMonthlyDeliveryData ||
-      !Array.isArray(chemicalMonthlyDeliveryData.data)
-    ) {
-      return [];
-    }
-
-    const groupedByMonth: Record<string, Record<string, any>> = {};
-
-    chemicalMonthlyDeliveryData.data.forEach((entry) => {
-      const { month, chemical, quantity } = entry;
-
-      if (!groupedByMonth[month]) {
-        groupedByMonth[month] = { month };
-      }
-
-      groupedByMonth[month][chemical] = quantity;
-    });
-
-    return Object.values(groupedByMonth);
-  }, [chemicalMonthlyDeliveryData]);
-
-  const chemicalKeys = useMemo(() => {
-    const set = new Set<string>();
-    chemicalMonthlyDeliveryData?.data?.forEach((entry) =>
-      set.add(entry.chemical)
-    );
-    return Array.from(set);
-  }, [chemicalMonthlyDeliveryData]);
-
-  const chemicalLatestTransactionDataMemo = useMemo(() => {
-    return chemicalLatestTransactionData || [];
-  }, [chemicalLatestTransactionData]);
-
-  const chemicalLatestDeliveryDataMemo = useMemo(() => {
-    return chemicalLatestDeliveryData || [];
-  }, [chemicalLatestDeliveryData]);
-
-  const chemicalStockAmountDataMemo = useMemo(() => {
-    return chemicalStockAmountData || {};
-  }, [chemicalStockAmountData]);
-
-  //Dashboard All Summary API
-  const {
-    data: chemicalDashboardSummeryData,
-    isFetching: isChemicalDashboardSummeryData,
-  } = useQuery({
-    queryKey: ["chemical-dashboard-data", new Date().getFullYear()],
-    queryFn: () => fetchChemicalDashboardAllSummary(new Date().getFullYear()),
-  });
-
-  //Dashboard All Summary useMemo
-  const msdsPercentageMemo = useMemo(() => {
-    return chemicalDashboardSummeryData?.msdsSummary?.percentage || 0;
-  }, [chemicalDashboardSummeryData]);
-
-  console.log("summary", msdsPercentageMemo);
-
-  const chemicalAllStatusSummeryDataMemo = useMemo(() => {
-    return (
-      chemicalDashboardSummeryData?.statusSummary?.map(
-        (item: { status: string; count: number }) => ({
-          name: item.status,
-          value: item.count,
-        })
-      ) || []
-    );
-  }, [chemicalDashboardSummeryData]);
-  console.log(chemicalAllStatusSummeryDataMemo);
-
-  const chemicalAllZdhcClassificationHazardTypeSummaryMemo = useMemo(() => {
-    return (
-      chemicalDashboardSummeryData?.categoryClassificationSummary
-        ?.zdhcLevelSummary || []
-    );
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalAllClassificationHazardTypeSummaryMemo = useMemo(() => {
-    return (
-      chemicalDashboardSummeryData?.categoryClassificationSummary
-        ?.hazardTypeSummary || []
-    );
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalAllGhsClassificationHazardTypeSummaryMemo = useMemo(() => {
-    return (
-      chemicalDashboardSummeryData?.categoryClassificationSummary
-        ?.ghsClassificationSummary || []
-    );
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalDashboardSummeryTopSuppliersDataMemo = useMemo(() => {
-    return (
-      chemicalDashboardSummeryData?.chemicalInventoryInsights?.topSuppliers ||
-      []
-    );
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalDashboardSummeryPositiveListDataMemo = useMemo(() => {
-    return (
-      chemicalDashboardSummeryData?.chemicalInventoryInsights?.positiveList ||
-      []
-    );
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalDashboardSummeryMsdsExpiriesDataMemo = useMemo(() => {
-    return (
-      chemicalDashboardSummeryData?.chemicalInventoryInsights?.msdsExpiries ||
-      []
-    );
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalDashboardSummeryChemicalExpiryDataMemo = useMemo(() => {
-    return (
-      chemicalDashboardSummeryData?.chemicalInventoryInsights?.chemicalExpiry ||
-      []
-    );
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalDashboardSummeryCertificateExpiryDataMemo = useMemo(() => {
-    return (
-      chemicalDashboardSummeryData?.chemicalInventoryInsights
-        ?.certificateExpiry || []
-    );
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalDashboardSummeryDataMemo = useMemo(() => {
-    return chemicalDashboardSummeryData || {};
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalAllMonthlyDeliveryDataMemo = useMemo(() => {
-    if (
-      !chemicalDashboardSummeryData ||
-      !Array.isArray(chemicalDashboardSummeryData.monthlyDelivery)
-    ) {
-      return [];
-    }
-
-    const groupedByMonth: Record<string, Record<string, any>> = {};
-
-    chemicalDashboardSummeryData.monthlyDelivery.forEach((entry) => {
-      const { month, chemical, quantity } = entry;
-
-      if (!groupedByMonth[month]) {
-        groupedByMonth[month] = { month };
-      }
-
-      groupedByMonth[month][chemical] = quantity;
-    });
-
-    return Object.values(groupedByMonth);
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalAllKeys = useMemo(() => {
-    const set = new Set<string>();
-    chemicalDashboardSummeryData?.monthlyDelivery?.forEach((entry) =>
-      set.add(entry.chemical)
-    );
-    return Array.from(set);
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalAllThresholdDataMemo = useMemo(() => {
-    return chemicalDashboardSummeryData || [];
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalAllHighestDataMemo = useMemo(() => {
-    return chemicalDashboardSummeryData || [];
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalAllLatestDeliveryDataMemo = useMemo(() => {
-    return chemicalDashboardSummeryData?.latestRecords || [];
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalAllLatestTransactionDataMemo = useMemo(() => {
-    return chemicalDashboardSummeryData?.latestTransactions || [];
-  }, [chemicalDashboardSummeryData]);
 
   const COLORS = [
     "#82ca9d",
@@ -611,7 +77,7 @@ function RagDashboard() {
     "#ff4d4f",
     "#00bcd4",
     "#a83279",
-  ]; // Add more if needed
+  ];
 
   const {
     data: ragTotalCount,
@@ -679,6 +145,91 @@ function RagDashboard() {
     queryKey: ["all-rag-data"],
     queryFn: fetchAllRagRecord,
   });
+
+  const ragAgeAllGroupChartDataMemo = useMemo(() => {
+    if (
+      !ragAllData ||
+      typeof ragAllData !== "object" ||
+      !ragAllData.ageGroupSummary ||
+      !ragAllData.ageGroupSummary.groups
+    ) {
+      return [];
+    }
+
+    const summary = ragAllData.ageGroupSummary.groups as Record<
+      string,
+      { count: number; percentage: number }
+    >;
+
+    return Object.entries(summary)
+      .filter(([, data]) => data.count > 0)
+      .map(([range, data]) => ({
+        name: range,
+        value: data.count,
+      }));
+  }, [ragAllData]);
+
+  const ragStateAllBarChartData = useMemo(() => {
+    if (
+      !ragAllData ||
+      typeof ragAllData !== "object" ||
+      !("stateSummary" in ragAllData)
+    ) {
+      return [];
+    }
+
+    const rawData = ragAllData.stateSummary as Record<
+      string,
+      { count: number; percentage: number }
+    >;
+
+    return Object.entries(rawData).map(([state, data]) => ({
+      state,
+      count: data.count,
+      percentage: data.percentage,
+    }));
+  }, [ragAllData]);
+
+  const ragStatusAllCountDataMemo = useMemo(() => {
+    if (
+      !ragAllData ||
+      typeof ragAllData !== "object" ||
+      !("statusSummary" in ragAllData)
+    ) {
+      return [];
+    }
+
+    const rawData = ragAllData.statusSummary as Record<
+      string,
+      { count: number; percentage: number }
+    >;
+
+    return Object.entries(rawData).map(([status, data]) => ({
+      name: status.charAt(0).toUpperCase() + status.slice(1),
+      value: data.count,
+    }));
+  }, [ragAllData]);
+
+  const ragCategoryAllCountDataMemo = useMemo(() => {
+    if (
+      !ragAllData ||
+      typeof ragAllData !== "object" ||
+      !("categorySummary" in ragAllData)
+    ) {
+      return [];
+    }
+
+    const rawData = ragAllData.categorySummary as Record<
+      string,
+      { count: number; percentage: number }
+    >;
+
+    return Object.entries(rawData).map(([category, data]) => ({
+      category,
+      count: data.count,
+      percentage: data.percentage,
+    }));
+  }, [ragAllData]);
 
   const ragAllCountDataMemo = useMemo(() => {
     if (
@@ -1178,7 +729,11 @@ function RagDashboard() {
             }}
           >
             <BarChart
-              data={ragCategoryCountDataMemo}
+              data={
+                dateRangeFrom && dateRangeTo
+                  ? ragCategoryCountDataMemo
+                  : ragCategoryAllCountDataMemo
+              }
               width={800}
               height={400}
               barCategoryGap={40}
@@ -1188,7 +743,10 @@ function RagDashboard() {
               <YAxis fontSize={12} />
               <Tooltip />
               <Bar dataKey="count" barSize={35}>
-                {ragCategoryCountDataMemo.map((entry, index) => (
+                {(dateRangeFrom && dateRangeTo
+                  ? ragCategoryCountDataMemo
+                  : ragCategoryAllCountDataMemo
+                ).map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={COLORS[index % COLORS.length]}
@@ -1220,7 +778,11 @@ function RagDashboard() {
           >
             <>
               <CustomPieChart
-                data={ragStatusCountDataMemo}
+                data={
+                  dateRangeFrom && dateRangeTo
+                    ? ragStatusCountDataMemo
+                    : ragStatusAllCountDataMemo
+                }
                 title="Status Total"
                 centerLabel="Gender"
               />
@@ -1267,12 +829,23 @@ function RagDashboard() {
               scrollbarWidth: "none",
             }}
           >
-            <BarChart width={600} height={400} data={ragStateBarChartData}>
+            <BarChart
+              width={600}
+              height={400}
+              data={
+                dateRangeFrom && dateRangeTo
+                  ? ragStateBarChartData
+                  : ragStateAllBarChartData
+              }
+            >
               <XAxis dataKey="state" angle={290} />
               <YAxis />
               <Tooltip />
               <Bar dataKey="count" barSize={10}>
-                {ragStateBarChartData.map((entry, index) => (
+                {(dateRangeFrom && dateRangeTo
+                  ? ragStateBarChartData
+                  : ragStateAllBarChartData
+                ).map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={COLORS[index % COLORS.length]}
@@ -1300,7 +873,11 @@ function RagDashboard() {
           <ResponsiveContainer width="100%" height={500}>
             <>
               <CustomPieChart
-                data={ragAgeGroupChartDataMemo}
+                data={
+                  dateRangeFrom && dateRangeTo
+                    ? ragAgeGroupChartDataMemo
+                    : ragAgeAllGroupChartDataMemo
+                }
                 title="Age Group Distribution"
                 centerLabel="Age Group"
               />
