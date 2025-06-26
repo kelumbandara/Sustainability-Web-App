@@ -243,6 +243,7 @@ export const sidebarItems: Array<SidebarItem> = [
         title: "Chemical Requests",
         href: "/chemical-mng/chemical-requests",
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+        accessKey: PermissionKeys.CHEMICAL_MNG_REQUEST_REGISTER_VIEW,
       },
       {
         title: "Purchase & Inventory",

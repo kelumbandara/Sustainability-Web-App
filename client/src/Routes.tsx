@@ -21,7 +21,10 @@ const AccessManagementTable = React.lazy(
   () => import("./views/Administration/AccessManagementTable")
 );
 const OrganizationTable = React.lazy(
-  () => import("./views/Administration/OrganizationSettings/OrganizationSettingsTable")
+  () =>
+    import(
+      "./views/Administration/OrganizationSettings/OrganizationSettingsTable"
+    )
 );
 
 const UnderDevelopment = React.lazy(
@@ -147,7 +150,6 @@ const EnvironmentDashBoard = React.lazy(
   () => import("./views/Environment/Dashboard")
 );
 
-
 function withLayout(Layout: any, Component: any, restrictAccess = false) {
   return (
     <Layout>
@@ -244,7 +246,7 @@ const AppRoutes = () => {
             !userPermissionObject?.[PermissionKeys.ADMIN_ACCESS_MNG_VIEW]
           )}
         />
-        
+
         {/* Audit & Inspection */}
         <Route
           path="/audit-inspection/dashboard"
@@ -299,21 +301,22 @@ const AppRoutes = () => {
           )}
         />
 
-        {/* sustainability apps */}
         {/* chemical management */}
         <Route
           path="/chemical-mng/dashboard"
           element={withLayout(
             MainLayout,
             ChemicalDashboard,
-            !userPermissionObject?.[
-              PermissionKeys.CHEMICAL_MNG_DASHBOARD_VIEW
-            ]
+            !userPermissionObject?.[PermissionKeys.CHEMICAL_MNG_DASHBOARD_VIEW]
           )}
         />
         <Route
           path="/chemical-mng/chemical-requests"
-          element={withLayout(MainLayout, ChemicalRequestTable)}
+          element={withLayout(
+            MainLayout,
+            ChemicalRequestTable,
+            !userPermissionObject?.[PermissionKeys.CHEMICAL_MNG_REQUEST_REGISTER_VIEW]
+          )}
         />
         <Route
           path="/chemical-mng/purchase-inventory"
@@ -327,7 +330,6 @@ const AppRoutes = () => {
           path="/chemical-mng/assigned-tasks"
           element={withLayout(MainLayout, () => (
             <ChemicalRequestTable isAssignedTasks={true} />
-
           ))}
         />
 
