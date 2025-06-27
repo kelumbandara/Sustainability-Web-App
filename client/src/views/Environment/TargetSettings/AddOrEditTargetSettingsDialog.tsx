@@ -358,7 +358,7 @@ export default function AddOrEditTargetSettingsDialog({
                   color: "var(--pallet-blue)",
                 }}
                 textColor="inherit"
-                variant="fullWidth"
+                variant="scrollable"
               >
                 <Tab
                   label={
