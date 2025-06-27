@@ -224,7 +224,6 @@ export default function AddOrEditRAGDialog({
 
   const handleSubmitRagReport = (data: RAG) => {
     const submitData: Partial<RAG> = data;
-    submitData.country = selectedCountry.countryName;
     console.log(submitData);
     if (defaultValues) {
       submitData.id = defaultValues.id;
@@ -378,54 +377,6 @@ export default function AddOrEditRAGDialog({
       <AddIcon />
       <Typography variant="body2" component="div">
         Add New Function
-      </Typography>
-    </li>
-  );
-  const AddNewCountryButton = (props) => (
-    <li
-      {...props}
-      variant="contained"
-      style={{
-        backgroundColor: "var(--pallet-lighter-blue)",
-        color: "var(--pallet-blue)",
-        textTransform: "none",
-        margin: "0.5rem",
-        borderRadius: "0.3rem",
-        display: "flex",
-        flexDirection: "row",
-      }}
-      size="small"
-      onMouseDown={() => {
-        setOpenAddNewCountryDialog(true);
-      }}
-    >
-      <AddIcon />
-      <Typography variant="body2" component="div">
-        Add New Country
-      </Typography>
-    </li>
-  );
-  const AddNewStateButton = (props) => (
-    <li
-      {...props}
-      variant="contained"
-      style={{
-        backgroundColor: "var(--pallet-lighter-blue)",
-        color: "var(--pallet-blue)",
-        textTransform: "none",
-        margin: "0.5rem",
-        borderRadius: "0.3rem",
-        display: "flex",
-        flexDirection: "row",
-      }}
-      size="small"
-      onMouseDown={() => {
-        setOpenAddNewStateDialog(true);
-      }}
-    >
-      <AddIcon />
-      <Typography variant="body2" component="div">
-        Add New State
       </Typography>
     </li>
   );

@@ -258,7 +258,7 @@ export const AddNewFunctionDialog = ({
           endIcon={isFunctionCreating ? <CircularProgress size={20} /> : null}
           onClick={handleSubmit(handleCreateFunction)}
         >
-          Add Country
+          Add Function
         </CustomButton>
       </DialogActions>
     </Dialog>
