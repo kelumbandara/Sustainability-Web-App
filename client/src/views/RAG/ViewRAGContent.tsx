@@ -275,7 +275,7 @@ function ViewRAGContent({
           <Stack>
             <DrawerContentItem
               label="Country"
-              value={rag.countryName.countryName}
+              value={rag.country}
             />
             <DrawerContentItem label="State" value={rag.state} />
             <DrawerContentItem label="Origin" value={rag.origin} />
