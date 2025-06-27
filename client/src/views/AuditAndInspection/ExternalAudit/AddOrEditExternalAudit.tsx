@@ -402,7 +402,7 @@ export default function AddOrEditExternalAuditDialog({
                     gap={1}
                     sx={{
                       display: "flex",
-                      flexDirection: "row",
+                      flexDirection: isMobile ? "column" : "row",
                       backgroundColor: "#fff",
                       flex: { lg: 3, md: 1 },
                       borderRadius: "0.3rem",
@@ -536,7 +536,7 @@ export default function AddOrEditExternalAuditDialog({
                     gap={1}
                     sx={{
                       display: "flex",
-                      flexDirection: "row",
+                      flexDirection: isMobile ? "column" : "row",
                       backgroundColor: "#fff",
                       flex: { lg: 3, md: 1 },
                       borderRadius: "0.3rem",
@@ -668,7 +668,7 @@ export default function AddOrEditExternalAuditDialog({
                     gap={1}
                     sx={{
                       display: "flex",
-                      flexDirection: "row",
+                      flexDirection: isMobile ? "column" : "row",
                       backgroundColor: "#fff",
                       flex: { lg: 3, md: 1 },
                       borderRadius: "0.3rem",
@@ -722,7 +722,7 @@ export default function AddOrEditExternalAuditDialog({
                     gap={1}
                     sx={{
                       display: "flex",
-                      flexDirection: "row",
+                      flexDirection: isMobile ? "column" : "row",
                       backgroundColor: "#fff",
                       flex: { lg: 3, md: 1 },
                       borderRadius: "0.3rem",

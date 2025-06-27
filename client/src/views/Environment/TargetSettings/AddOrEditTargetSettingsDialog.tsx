@@ -840,11 +840,13 @@ export default function AddOrEditTargetSettingsDialog({
                       margin: "0.5rem",
                       justifyContent: "flex-end",
                     }}
+                    gap={isMobile ? 2 : 0}
                   >
                     <CustomButton
                       variant="contained"
                       sx={{
                         backgroundColor: "var(--pallet-blue)",
+                        width: isMobile ? "100%" : "full",
                       }}
                       size="medium"
                       onClick={() => {
@@ -858,7 +860,8 @@ export default function AddOrEditTargetSettingsDialog({
                       variant="contained"
                       sx={{
                         backgroundColor: "var(--pallet-blue)",
-                        marginLeft: "0.5rem",
+                        marginLeft: isMobile ? "" : "0.5rem",
+                        width: isMobile ? "100%" : "full",
                       }}
                       size="medium"
                       onClick={() => {

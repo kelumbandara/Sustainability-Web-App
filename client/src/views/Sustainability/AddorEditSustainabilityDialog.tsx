@@ -496,13 +496,14 @@ export default function AddOrEditSustainabilityDialog({
                     error={!!errors.title}
                     size="small"
                     sx={{ flex: 1, margin: "0.5rem" }}
+                    helperText={errors.title && "Required"}
                     {...register("title", { required: true })}
                   />
                   <Stack
                     gap={1}
                     sx={{
                       display: "flex",
-                      flexDirection: "row",
+                      flexDirection: isMobile ? "column" : "row",
                       backgroundColor: "#fff",
                       flex: { lg: 3, md: 1 },
                       borderRadius: "0.3rem",
@@ -511,7 +512,6 @@ export default function AddOrEditSustainabilityDialog({
                     <Box
                       sx={{
                         margin: "0.5rem",
-                        width: "100%",
                       }}
                     >
                       <AutoCheckBox
@@ -531,7 +531,6 @@ export default function AddOrEditSustainabilityDialog({
                     <Box
                       sx={{
                         margin: "0.5rem",
-                        width: "100%",
                       }}
                     >
                       <AutoCheckBox
@@ -724,11 +723,13 @@ export default function AddOrEditSustainabilityDialog({
                       margin: "0.5rem",
                       justifyContent: "flex-end",
                     }}
+                    gap={isMobile ? 2 : 0}
                   >
                     <CustomButton
                       variant="contained"
                       sx={{
                         backgroundColor: "var(--pallet-blue)",
+                        width: isMobile ? "100%" : "full",
                       }}
                       size="medium"
                       onClick={() => {
@@ -742,7 +743,8 @@ export default function AddOrEditSustainabilityDialog({
                       variant="contained"
                       sx={{
                         backgroundColor: "var(--pallet-blue)",
-                        marginLeft: "0.5rem",
+                        marginLeft: isMobile ? "" : "0.5rem",
+                        width: isMobile ? "100%" : "full",
                       }}
                       size="medium"
                       onClick={() => {
@@ -768,7 +770,7 @@ export default function AddOrEditSustainabilityDialog({
                   <Stack
                     sx={{
                       display: "flex",
-                      flexDirection: "row",
+                      flexDirection: isMobile ? "column" : "row",
                       backgroundColor: "#fff",
                       flex: { lg: 3, md: 1 },
                       borderRadius: "0.3rem",
@@ -851,11 +853,13 @@ export default function AddOrEditSustainabilityDialog({
                       justifyContent: "flex-end",
                       marginTop: "1.2rem",
                     }}
+                    gap={isMobile ? 2 : 0}
                   >
                     <CustomButton
                       variant="contained"
                       sx={{
                         backgroundColor: "var(--pallet-blue)",
+                        width: isMobile ? "100%" : "full",
                       }}
                       size="medium"
                       onClick={() => {
@@ -869,7 +873,8 @@ export default function AddOrEditSustainabilityDialog({
                       variant="contained"
                       sx={{
                         backgroundColor: "var(--pallet-blue)",
-                        marginLeft: "0.5rem",
+                        marginLeft: isMobile ? "" : "0.5rem",
+                        width: isMobile ? "100%" : "full",
                       }}
                       size="medium"
                       onClick={() => {
@@ -1000,11 +1005,13 @@ export default function AddOrEditSustainabilityDialog({
                       justifyContent: "flex-end",
                       marginTop: "1.2rem",
                     }}
+                    gap={isMobile ? 2 : 0}
                   >
                     <CustomButton
                       variant="contained"
                       sx={{
                         backgroundColor: "var(--pallet-blue)",
+                        width: isMobile ? "100%" : "full",
                       }}
                       size="medium"
                       onClick={() => {
@@ -1018,7 +1025,8 @@ export default function AddOrEditSustainabilityDialog({
                       variant="contained"
                       sx={{
                         backgroundColor: "var(--pallet-blue)",
-                        marginLeft: "0.5rem",
+                        marginLeft: isMobile ? "" : "0.5rem",
+                        width: isMobile ? "100%" : "full",
                       }}
                       size="medium"
                       onClick={() => {
@@ -1162,6 +1170,7 @@ export default function AddOrEditSustainabilityDialog({
                   required
                   size="small"
                   sx={{ width: "100%" }}
+                  helperText={errors.location && "Required"}
                   {...register("location", { required: true })}
                 />
               </Box>
