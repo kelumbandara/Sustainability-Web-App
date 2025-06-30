@@ -210,6 +210,7 @@ export default function AddOrEditGrievanceDialog({
   const scaleWatch = watch("scale");
   const assignee = watch("assignee");
   const personTypeWatch = watch("personType");
+  const isAnonymousWatch = watch("isAnonymous");
 
   const severityScoreValue = useMemo(() => {
     if (!humanRightsViolationWatch || !frequencyRateWatch || !scaleWatch) {
@@ -260,7 +261,7 @@ export default function AddOrEditGrievanceDialog({
     if (!defaultValues || defaultValues.status === GrievanceStatus.draft) {
       submitData.status = GrievanceStatus.draft;
     }
-    if (defaultValues.status === GrievanceStatus.open) {
+    if (defaultValues?.status === GrievanceStatus.open) {
       submitData.status = GrievanceStatus.inprogress;
     }
     submitData.type = grievanceType;
@@ -2107,21 +2108,6 @@ export default function AddOrEditGrievanceDialog({
                   )}
                 />
               </Box>
-              <Box sx={{ margin: "0.5rem" }}>
-                <Controller
-                  control={control}
-                  name="isAnonymous"
-                  defaultValue={0 as 0 | 1}
-                  render={({ field }) => (
-                    <FormDataSwitchButton
-                      label="Is Anonymous?"
-                      onChange={field.onChange}
-                      value={field.value as 0 | 1}
-                    />
-                  )}
-                />
-              </Box>
-
               <Box>
                 <UserAutoComplete
                   name="assignee"
@@ -2156,6 +2142,24 @@ export default function AddOrEditGrievanceDialog({
                     />
                   </Box>
                 )}
+              <Box sx={{ margin: "0.5rem" }}>
+                {isAnonymousWatch === 1 ? (
+                  <Alert severity="info">This is an anonymous grievance.</Alert>
+                ) : (
+                  <Controller
+                    control={control}
+                    name="isAnonymous"
+                    defaultValue={0 as 0 | 1}
+                    render={({ field }) => (
+                      <FormDataSwitchButton
+                        label="Is Anonymous?"
+                        onChange={field.onChange}
+                        value={field.value as 0 | 1}
+                      />
+                    )}
+                  />
+                )}
+              </Box>
             </Stack>
           </Stack>
         </DialogContent>
