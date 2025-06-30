@@ -586,8 +586,8 @@ function ViewGrievanceContent({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {grievance?.respondentDetails?.length > 0 ? (
-                  grievance?.respondentDetails.map((row) => (
+                {grievance?.respondents?.length > 0 ? (
+                  grievance?.respondents.map((row) => (
                     <TableRow
                       key={`${row.employeeId}`}
                       sx={{
@@ -634,8 +634,8 @@ function ViewGrievanceContent({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {grievance?.committeeMemberDetails?.length > 0 ? (
-                  grievance?.committeeMemberDetails.map((row) => (
+                {grievance?.committeeMembers?.length > 0 ? (
+                  grievance?.committeeMembers.map((row) => (
                     <TableRow
                       key={`${row.employeeId}`}
                       sx={{
@@ -682,8 +682,8 @@ function ViewGrievanceContent({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {grievance?.nomineeDetails?.length > 0 ? (
-                  grievance?.nomineeDetails.map((row) => (
+                {grievance?.nominees?.length > 0 ? (
+                  grievance?.nominees.map((row) => (
                     <TableRow
                       key={`${row.employeeId}`}
                       sx={{
@@ -730,8 +730,8 @@ function ViewGrievanceContent({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {grievance?.legalAdvisorDetails?.length > 0 ? (
-                  grievance?.legalAdvisorDetails.map((row) => (
+                {grievance?.legalAdvisors?.length > 0 ? (
+                  grievance?.legalAdvisors.map((row) => (
                     <TableRow
                       key={`${row.id}`}
                       sx={{
@@ -850,7 +850,7 @@ function ViewGrievanceContent({
             >
               <DrawerContentItem
                 label="Solution Remarks"
-                value={grievance.solutionRemarks}
+                value={grievance.solutionRemark}
                 isRichText={true}
                 sx={{ flex: 1 }}
               />

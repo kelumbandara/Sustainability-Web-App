@@ -112,7 +112,17 @@ const AddOrEditLegalAdvisorDialog = ({
               size="small"
               type="email"
               sx={{ margin: "0.5rem" }}
-              {...register("email", { required: true })}
+              {...register("email", {
+                required: {
+                  value: true,
+                  message: "Email is required",
+                },
+                pattern: {
+                  value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                  message: "Invalid email format",
+                },
+              })}
+              helperText={errors.email ? errors.email.message : ""}
               defaultValue={defaultLegalAdvisor?.email || ""}
             />
             <TextField

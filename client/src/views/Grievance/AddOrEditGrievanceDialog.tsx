@@ -135,12 +135,14 @@ export default function AddOrEditGrievanceDialog({
   const [existingEvidence, setExistingEvidence] = useState<StorageFile[]>(
     defaultValues?.evidence as StorageFile[]
   );
-  const [evidenceToRemove, setEvidenceToRemove] = useState<string[]>([]);
+  const [removeEvidence, setEvidenceToRemove] = useState<string[]>([]);
   const [statements, setStatements] = useState<File[]>([]);
   const [existingStatements, setExistingStatements] = useState<StorageFile[]>(
     defaultValues?.statementDocuments as StorageFile[]
   );
-  const [statementsToRemove, setStatementsToRemove] = useState<string[]>([]);
+  const [removeStatementsDocuments, setStatementsToRemove] = useState<string[]>(
+    []
+  );
 
   const [
     investigationCommitteeStatements,
@@ -201,10 +203,10 @@ export default function AddOrEditGrievanceDialog({
     mode: "onChange",
   });
 
-  const respondentWatch = watch("respondentDetails");
-  const committeeMemberWatch = watch("committeeMemberDetails");
-  const nomineeWatch = watch("nomineeDetails");
-  const legalAdvisorWatch = watch("legalAdvisorDetails");
+  const respondentWatch = watch("respondents");
+  const committeeMemberWatch = watch("committeeMembers");
+  const nomineeWatch = watch("nominees");
+  const legalAdvisorWatch = watch("legalAdvisors");
   const humanRightsViolationWatch = watch("humanRightsViolation");
   const frequencyRateWatch = watch("frequencyRate");
   const scaleWatch = watch("scale");
@@ -295,16 +297,15 @@ export default function AddOrEditGrievanceDialog({
     }
 
     submitData.evidence = evidence;
-    if (evidenceToRemove?.length > 0)
-      submitData.evidenceToRemove = evidenceToRemove;
+    if (removeEvidence?.length > 0) submitData.removeEvidence = removeEvidence;
 
     submitData.statementDocuments = statements;
-    if (statementsToRemove?.length > 0)
-      submitData.statementsToRemove = statementsToRemove;
+    if (removeStatementsDocuments?.length > 0)
+      submitData.removeStatementsDocuments = removeStatementsDocuments;
     submitData.investigationCommitteeStatementDocuments =
       investigationCommitteeStatements;
     if (investigationCommitteeStatementsToRemove?.length > 0)
-      submitData.investigationCommitteeStatementDocumentsToRemove =
+      submitData.removeInvestigationCommitteeStatementDocuments =
         investigationCommitteeStatementsToRemove;
     console.log("submitData", JSON.stringify(submitData));
     onSubmit(submitData as Grievance);
@@ -1279,10 +1280,7 @@ export default function AddOrEditGrievanceDialog({
                     files={existingEvidence}
                     sx={{ marginY: "1rem" }}
                     handleRemoveItem={(file) => {
-                      setEvidenceToRemove([
-                        ...evidenceToRemove,
-                        file.gsutil_uri,
-                      ]);
+                      setEvidenceToRemove([...removeEvidence, file.gsutil_uri]);
                       setExistingEvidence(
                         existingEvidence.filter(
                           (f) => f.gsutil_uri !== file.gsutil_uri
@@ -1448,7 +1446,7 @@ export default function AddOrEditGrievanceDialog({
                                   <IconButton
                                     onClick={() => {
                                       setValue(
-                                        "respondentDetails",
+                                        "respondents",
                                         (respondentWatch ?? []).filter(
                                           (item) =>
                                             item.respondentId !==
@@ -1561,7 +1559,7 @@ export default function AddOrEditGrievanceDialog({
                                   <IconButton
                                     onClick={() => {
                                       setValue(
-                                        "committeeMemberDetails",
+                                        "committeeMembers",
                                         (committeeMemberWatch ?? []).filter(
                                           (item) =>
                                             item.memberId !== row.memberId
@@ -1673,7 +1671,7 @@ export default function AddOrEditGrievanceDialog({
                                   <IconButton
                                     onClick={() => {
                                       setValue(
-                                        "nomineeDetails",
+                                        "nominees",
                                         (nomineeWatch ?? []).filter(
                                           (item) =>
                                             item.nomineeId !== row.nomineeId
@@ -1783,7 +1781,7 @@ export default function AddOrEditGrievanceDialog({
                                   <IconButton
                                     onClick={() => {
                                       setValue(
-                                        "legalAdvisorDetails",
+                                        "legalAdvisors",
                                         (legalAdvisorWatch ?? []).filter(
                                           (item) =>
                                             item.legalAdvisorId !==
@@ -1855,7 +1853,7 @@ export default function AddOrEditGrievanceDialog({
                     sx={{ marginY: "1rem" }}
                     handleRemoveItem={(file) => {
                       setStatementsToRemove([
-                        ...statementsToRemove,
+                        ...removeStatementsDocuments,
                         file.gsutil_uri,
                       ]);
                       setExistingStatements(
@@ -1970,8 +1968,8 @@ export default function AddOrEditGrievanceDialog({
                     </Typography>
                     <Controller
                       control={control}
-                      name={"solutionRemarks"}
-                      {...register("solutionRemarks")}
+                      name={"solutionRemark"}
+                      {...register("solutionRemark")}
                       render={({ field }) => {
                         return (
                           <RichTextComponent
@@ -2210,7 +2208,7 @@ export default function AddOrEditGrievanceDialog({
           grievanceId={defaultValues?.id || null}
           onSubmit={(data) => {
             if (selectedRespondent) {
-              setValue("respondentDetails", [
+              setValue("respondents", [
                 ...(respondentWatch ?? []).map((item) => {
                   if (item.respondentId === selectedRespondent.respondentId) {
                     return data;
@@ -2219,7 +2217,7 @@ export default function AddOrEditGrievanceDialog({
                 }),
               ]);
             } else {
-              setValue("respondentDetails", [...(respondentWatch ?? []), data]);
+              setValue("respondents", [...(respondentWatch ?? []), data]);
             }
             setAddRespondentDialogOpen(false);
           }}
@@ -2233,7 +2231,7 @@ export default function AddOrEditGrievanceDialog({
           grievanceId={defaultValues?.id || null}
           onSubmit={(data) => {
             if (selectedCommitteeMember) {
-              setValue("committeeMemberDetails", [
+              setValue("committeeMembers", [
                 ...(committeeMemberWatch ?? []).map((item) => {
                   if (item.memberId === selectedCommitteeMember.memberId) {
                     return data;
@@ -2242,7 +2240,7 @@ export default function AddOrEditGrievanceDialog({
                 }),
               ]);
             } else {
-              setValue("committeeMemberDetails", [
+              setValue("committeeMembers", [
                 ...(committeeMemberWatch ?? []),
                 data,
               ]);
@@ -2259,7 +2257,7 @@ export default function AddOrEditGrievanceDialog({
           onClose={() => setAddNomineeDialogOpen(false)}
           onSubmit={(data) => {
             if (selectedNominee) {
-              setValue("nomineeDetails", [
+              setValue("nominees", [
                 ...(nomineeWatch ?? []).map((item) => {
                   if (item.nomineeId === selectedNominee.nomineeId) {
                     return data;
@@ -2268,7 +2266,7 @@ export default function AddOrEditGrievanceDialog({
                 }),
               ]);
             } else {
-              setValue("nomineeDetails", [...(nomineeWatch ?? []), data]);
+              setValue("nominees", [...(nomineeWatch ?? []), data]);
             }
             setAddNomineeDialogOpen(false);
           }}
@@ -2281,7 +2279,7 @@ export default function AddOrEditGrievanceDialog({
         onClose={() => setAddLegalAdvisorDialogOpen(false)}
         onSubmit={(data) => {
           if (selectedLegalAdvisor) {
-            setValue("legalAdvisorDetails", [
+            setValue("legalAdvisors", [
               ...(legalAdvisorWatch ?? []).map((item) => {
                 if (
                   item.legalAdvisorId === selectedLegalAdvisor.legalAdvisorId
@@ -2292,10 +2290,7 @@ export default function AddOrEditGrievanceDialog({
               }),
             ]);
           } else {
-            setValue("legalAdvisorDetails", [
-              ...(legalAdvisorWatch ?? []),
-              data,
-            ]);
+            setValue("legalAdvisors", [...(legalAdvisorWatch ?? []), data]);
           }
           setAddLegalAdvisorDialogOpen(false);
         }}

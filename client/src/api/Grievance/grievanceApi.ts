@@ -210,16 +210,14 @@ export const GrievanceSchema = z.object({
   department: z.string().optional(),
   assigneeId: z.number().optional(),
   assignee: userSchema.optional(),
-  respondentDetails: z.array(GrievanceRespondentDetailsSchema).optional(),
-  committeeMemberDetails: z
-    .array(GrievanceCommitteeMemberDetailsSchema)
-    .optional(),
-  nomineeDetails: z.array(GrievanceNomineeDetailsSchema).optional(),
-  legalAdvisorDetails: z.array(GrievanceLegalAdvisorDetailsSchema).optional(),
-  solutionRemarks: z.string().optional(),
-  evidenceToRemove: z.array(z.string()).optional(),
-  statementsToRemove: z.array(z.string()).optional(),
-  investigationCommitteeStatementDocumentsToRemove: z.array(z.string()),
+  respondents: z.array(GrievanceRespondentDetailsSchema).optional(),
+  committeeMembers: z.array(GrievanceCommitteeMemberDetailsSchema).optional(),
+  nominees: z.array(GrievanceNomineeDetailsSchema).optional(),
+  legalAdvisors: z.array(GrievanceLegalAdvisorDetailsSchema).optional(),
+  solutionRemark: z.string().optional(),
+  removeEvidence: z.array(z.string()).optional(),
+  removeStatementsDocuments: z.array(z.string()).optional(),
+  removeInvestigationCommitteeStatementDocuments: z.array(z.string()),
 });
 
 export type Grievance = z.infer<typeof GrievanceSchema>;
@@ -274,10 +272,10 @@ export const createGrievance = async (grievance: Grievance) => {
     } else if (Array.isArray(value)) {
       value.forEach((item, index) => {
         if (
-          (key === "respondentDetails" ||
-            key === "committeeMemberDetails" ||
-            key === "nomineeDetails" ||
-            key === "legalAdvisorDetails") &&
+          (key === "respondents" ||
+            key === "committeeMembers" ||
+            key === "nominees" ||
+            key === "legalAdvisors") &&
           typeof item === "object"
         ) {
           Object.keys(item).forEach((nestedKey) => {
@@ -336,10 +334,10 @@ export const updateGrievance = async (grievance: Grievance) => {
     } else if (Array.isArray(value)) {
       value.forEach((item, index) => {
         if (
-          (key === "respondentDetails" ||
-            key === "committeeMemberDetails" ||
-            key === "nomineeDetails" ||
-            key === "legalAdvisorDetails") &&
+          (key === "respondents" ||
+            key === "committeeMembers" ||
+            key === "nominees" ||
+            key === "legalAdvisors") &&
           typeof item === "object"
         ) {
           Object.keys(item).forEach((nestedKey) => {
