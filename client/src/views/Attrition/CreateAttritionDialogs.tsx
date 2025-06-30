@@ -22,6 +22,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import {
   Attrition,
   Country,
+  createAttritionDesignation,
+  CreateAttritionResignation,
   createDesignation,
   createState,
 } from "../../api/Attrition/attritionApi";
@@ -38,7 +40,7 @@ export const AddNewDesignationDialog = ({
   const { isMobile } = useIsMobile();
 
   const handleCreateDesignation = (data: { designation: string }) => {
-    //   createDesignationMutation(data.designation);
+    createAttritionDesignation(data.designation);
   };
   const {
     mutate: createDesignationMutation,
@@ -154,24 +156,24 @@ export const AddNewResignationTypeDialog = ({
   const { register, handleSubmit, reset } = useForm<Attrition>();
   const { isMobile } = useIsMobile();
 
-  const handleCreateFunction = (data: { designation: string }) => {
-    //   createFunctionMutation(data.designation);
+  const handleCreateFunction = (data: { resignationType: string }) => {
+    createResignationMutation(data.resignationType);
   };
-  const { mutate: createFunctionMutation, isPending: isFunctionCreating } =
+  const { mutate: createResignationMutation, isPending: isFunctionCreating } =
     useMutation({
-      mutationFn: createDesignation, //change this
+      mutationFn: CreateAttritionResignation, //change this
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ["function"],
+          queryKey: ["resignation"],
         });
-        enqueueSnackbar("Function Created Successfully!", {
+        enqueueSnackbar("Resignation Type Created Successfully!", {
           variant: "success",
         });
         reset();
         setOpen(false);
       },
       onError: () => {
-        enqueueSnackbar(`Function Create Failed`, {
+        enqueueSnackbar(`Resignation Type Create Failed`, {
           variant: "error",
         });
       },
@@ -200,7 +202,7 @@ export const AddNewResignationTypeDialog = ({
         }}
       >
         <Typography variant="h6" component="div">
-          Add New Registration Type
+          Add New Resignation Type
         </Typography>
         <IconButton
           aria-label="open drawer"
@@ -249,7 +251,7 @@ export const AddNewResignationTypeDialog = ({
           endIcon={isFunctionCreating ? <CircularProgress size={20} /> : null}
           onClick={handleSubmit(handleCreateFunction)}
         >
-          Add Country
+          Add New Resignation
         </CustomButton>
       </DialogActions>
     </Dialog>

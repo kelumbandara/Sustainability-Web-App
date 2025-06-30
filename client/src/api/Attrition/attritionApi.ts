@@ -266,6 +266,33 @@ export const StateData = [
   },
 ];
 
+export const tenureSplitData = [
+  {
+    id: "1",
+    tenureSplit: "Above 5 Years",
+  },
+  {
+    id: "2",
+    tenureSplit: "4-5 Years",
+  },
+  {
+    id: "3",
+    tenureSplit: "3-4 Years",
+  },
+  {
+    id: "4",
+    tenureSplit: "2-3 Years",
+  },
+  {
+    id: "5",
+    tenureSplit: "1-2 Years",
+  },
+  {
+    id: "6",
+    tenureSplit: "7-12 Months",
+  },
+];
+
 export const createState = async (data: {
   countryId: number;
   stateName: String;
@@ -295,7 +322,7 @@ export const updateAttritionRecord = async (data: Attrition) => {
 };
 
 export const deleteAttritionRecord = async (id: String) => {
-  const res = await axios.delete(`/api/attrition-record/${id}/delete`,);
+  const res = await axios.delete(`/api/attrition-record/${id}/delete`);
   console.log(id);
   return res.data;
 };
@@ -329,22 +356,44 @@ export const fetchRagEmployee = async () => {
   return res.data;
 };
 
-export const fetchRagCountryNames = async () => {
-  const res = await axios.get(`/api/rag-country-names`);
+export const fetchAttritionResignation = async () => {
+  const res = await axios.get("/api/attrition-resignation-types");
   return res.data;
 };
 
-export const fetchRagStateNames = async (id: number) => {
-  const res = await axios.get(`/api/rag-state-names/${id}`);
+export const CreateAttritionResignation = async (
+  resignationTypeName: string
+) => {
+  const res = await axios.post("/api/attrition-resignation-types", {
+    resignationTypeName,
+  });
   return res.data;
 };
 
-export const fetchRagCategory = async () => {
-  const res = await axios.get("/api/rag-category-names");
+export const createAttritionDesignation = async (
+  designationName: string
+) => {
+  const res = await axios.post("/api/attrition-designation-names", {
+    designationName,
+  });
   return res.data;
 };
 
-export const fetchRagEmployment = async () => {
-  const res = await axios.get("/api/rag-employment-types");
+export const fetchAttritionEmployment = async () => {
+  const res = await axios.get("/api/attrition-employment-classifications");
+  return res.data;
+};
+
+export const fetchCountryNames = async () => {
+  const res = await axios.get(
+    `https://sl.perahara.lk/CountryAndState/public/api/country`
+  );
+  return res.data;
+};
+
+export const fetchStateNames = async (id: number) => {
+  const res = await axios.get(
+    `https://sl.perahara.lk/CountryAndState/public/api/state/${id}`
+  );
   return res.data;
 };

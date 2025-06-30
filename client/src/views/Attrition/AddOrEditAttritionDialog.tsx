@@ -57,16 +57,17 @@ import {
   CountryData,
   createAttritionReport,
   DesignationData,
-  fetchRagCategory,
-  fetchRagCountryNames,
+  fetchAttritionEmployment,
+  fetchAttritionResignation,
+  fetchCountryNames,
   fetchRagDesignationNames,
   fetchRagEmployee,
-  fetchRagEmployment,
   fetchRagFunction,
   fetchRagSource,
-  fetchRagStateNames,
+  fetchStateNames,
   genderData,
   StateData,
+  tenureSplitData,
   updateAttritionRecord,
 } from "../../api/Attrition/attritionApi";
 import SwitchButton from "../../components/SwitchButton";
@@ -176,23 +177,23 @@ export default function AddOrEditRAGDialog({
 
   const { data: countryData } = useQuery({
     queryKey: ["country-data"],
-    queryFn: fetchRagCountryNames,
+    queryFn: fetchCountryNames,
   });
 
   const { data: stateData } = useQuery({
     queryKey: ["state-data", countryId],
-    queryFn: () => fetchRagStateNames(countryId),
+    queryFn: () => fetchStateNames(countryId),
     enabled: !!countryId,
-  });
-
-  const { data: categoryData } = useQuery({
-    queryKey: ["category-data"],
-    queryFn: fetchRagCategory,
   });
 
   const { data: employmentData } = useQuery({
     queryKey: ["employment-data"],
-    queryFn: fetchRagEmployment,
+    queryFn: fetchAttritionEmployment,
+  });
+
+  const { data: resignationData } = useQuery({
+    queryKey: ["resignation-data"],
+    queryFn: fetchAttritionResignation,
   });
 
   const isPersonalDetailsValid = useMemo(() => {
@@ -329,7 +330,6 @@ export default function AddOrEditRAGDialog({
 
   const handleSubmitAttritionReport = (data: Attrition) => {
     const submitData: Partial<Attrition> = data;
-    submitData.country = selectedCountry.id;
     console.log(submitData);
     if (defaultValues) {
       submitData.id = defaultValues.id;
@@ -748,20 +748,7 @@ export default function AddOrEditRAGDialog({
                           }
                           options={[
                             ...(countryData?.length ? countryData : []),
-                            {
-                              id: "$ADD_NEW_COUNTRY",
-                              countryName: "$ADD_NEW_COUNTRY",
-                            },
                           ]}
-                          renderOption={(props, option) =>
-                            option.countryName === "$ADD_NEW_COUNTRY" ? (
-                              <AddNewCountryButton {...props} />
-                            ) : (
-                              <li {...props} key={option.id}>
-                                {option.countryName}
-                              </li>
-                            )
-                          }
                           size="small"
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
@@ -774,52 +761,44 @@ export default function AddOrEditRAGDialog({
                         />
                       )}
                     />
-                    <Controller
-                      name="state"
-                      control={control}
-                      rules={{ required: "required" }}
-                      defaultValue={defaultValues?.state ?? ""}
-                      render={({ field }) => (
-                        <Autocomplete
-                          {...field}
-                          onChange={(_, value) => field.onChange(value)}
-                          value={field.value || ""}
-                          size="small"
-                          noOptionsText={
-                            <Typography
-                              variant="body2"
-                              color="inherit"
-                              gutterBottom
-                            >
-                              No matching Items
-                            </Typography>
-                          }
-                          options={[
-                            ...(StateData?.length
-                              ? StateData.map((state) => state.stateName)
-                              : []),
-                            "$ADD_NEW_ITEM",
-                          ]}
-                          renderOption={(props, option) =>
-                            option === "$ADD_NEW_ITEM" ? (
-                              <AddNewStateButton {...props} />
-                            ) : (
-                              <li {...props} key={option}>
-                                {option}
-                              </li>
-                            )
-                          }
-                          sx={{ flex: 1, margin: "0.5rem" }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              error={!!errors.state}
-                              label="State"
-                            />
-                          )}
-                        />
-                      )}
-                    />
+                    {selectedCountry && (
+                      <Controller
+                        name="state"
+                        control={control}
+                        rules={{ required: "required" }}
+                        defaultValue={defaultValues?.state ?? ""}
+                        render={({ field }) => (
+                          <Autocomplete
+                            {...field}
+                            onChange={(_, value) => field.onChange(value)}
+                            value={field.value || ""}
+                            size="small"
+                            noOptionsText={
+                              <Typography
+                                variant="body2"
+                                color="inherit"
+                                gutterBottom
+                              >
+                                No matching Items
+                              </Typography>
+                            }
+                            options={[
+                              ...(stateData?.length
+                                ? stateData.map((state) => state.stateName)
+                                : []),
+                            ]}
+                            sx={{ flex: 1, margin: "0.5rem" }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                error={!!errors.state}
+                                label="State"
+                              />
+                            )}
+                          />
+                        )}
+                      />
+                    )}
                   </Box>
                   <Box
                     sx={{
@@ -1041,9 +1020,9 @@ export default function AddOrEditRAGDialog({
                           }
                           size="small"
                           options={
-                            departmentData?.length
-                              ? departmentData.map(
-                                  (department) => department.department
+                            employmentData?.length
+                              ? employmentData.map(
+                                  (employee) => employee.employmentClassificationName
                                 )
                               : []
                           }
@@ -1076,9 +1055,9 @@ export default function AddOrEditRAGDialog({
                           }
                           size="small"
                           options={
-                            departmentData?.length
-                              ? departmentData.map(
-                                  (department) => department.department
+                            employmentData?.length
+                              ? employmentData.map(
+                                  (employee) => employee.employmentClassificationName
                                 )
                               : []
                           }
@@ -1206,8 +1185,10 @@ export default function AddOrEditRAGDialog({
                           </Typography>
                         }
                         options={[
-                          ...(CountryData?.length
-                            ? CountryData.map((country) => country.countryName)
+                          ...(resignationData?.length
+                            ? resignationData.map(
+                                (resignation) => resignation.resignationTypeName
+                              )
                             : []),
                           "$ADD_NEW_COUNTRY",
                         ]}
@@ -1279,9 +1260,9 @@ export default function AddOrEditRAGDialog({
                         onChange={(event, newValue) => field.onChange(newValue)}
                         size="small"
                         options={
-                          departmentData?.length
-                            ? departmentData.map(
-                                (department) => department.department
+                          tenureSplitData?.length
+                            ? tenureSplitData.map(
+                                (split) => split.tenureSplit
                               )
                             : []
                         }
