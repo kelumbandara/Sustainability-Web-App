@@ -70,7 +70,6 @@ import {
   AddNewGrievanceSubmissionButton,
   AddNewSubmissionDialog,
 } from "./AddNewSubmissionDialog";
-import SwitchButton from "../../components/SwitchButton";
 import AddOrEditRespondentDialog from "./AddOrEditRespondentDialog";
 import AddOrEditCommitteeMemberDialog from "./AddOrEditCommitteeMemberDialog";
 import AddOrEditNomineeDialog from "./AddOrEditNomineeDialog";
@@ -78,16 +77,10 @@ import AddOrEditLegalAdvisorDialog from "./AddOrEditLegalAdvisorDialog";
 import { ExistingFileItemsEdit } from "../../components/ExistingFileItemsEdit";
 import DatePickerComponent from "../../components/DatePickerComponent";
 import UserAutoComplete from "../../components/UserAutoComplete";
-import {
-  fetchGrievanceAssignee,
-  fetchHazardRiskAssignee,
-} from "../../api/userApi";
+import { fetchGrievanceAssignee } from "../../api/userApi";
 import { fetchDivision } from "../../api/divisionApi";
-import useCurrentUser from "../../hooks/useCurrentUser";
 import { DrawerContentItem } from "../../components/ViewDataDrawer";
 import { getSeverityLevel } from "./GrievanceUtils";
-import { sub } from "date-fns";
-import { generateRandomNumberId } from "../../util/numbers.util";
 import FormDataSwitchButton from "../../components/FormDataSwitchButton";
 
 type DialogProps = {
@@ -229,14 +222,12 @@ export default function AddOrEditGrievanceDialog({
     );
   }, [humanRightsViolationWatch, scaleWatch, frequencyRateWatch]);
 
-  const { user } = useCurrentUser();
-
   const { data: assigneeData } = useQuery({
     queryKey: ["gr-assignee"],
     queryFn: fetchGrievanceAssignee,
   });
 
-  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
+  const { data: divisionData } = useQuery({
     queryKey: ["divisions"],
     queryFn: fetchDivision,
   });

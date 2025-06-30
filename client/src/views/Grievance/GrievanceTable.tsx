@@ -31,21 +31,10 @@ import AddIcon from "@mui/icons-material/Add";
 import { format } from "date-fns";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
-import {
-  Accident,
-  createAccident,
-  deleteAccident,
-  getAccidentsAssignedTaskList,
-  getAccidentsList,
-  updateAccident,
-} from "../../api/accidentAndIncidentApi";
-// import ViewAccidentContent from "./ViewAccidentContent";
-// import AddOrEditAccidentDialog from "./AddOrEditAccidentDialog";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../state/queryClient";
 import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
 import { PermissionKeys } from "../Administration/SectionList";
-import { sampleGrievances } from "../../api/sampleData/grievanceSampleData";
 import {
   createGrievance,
   deleteGrievance,
@@ -356,9 +345,7 @@ function GrievanceTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
                 <TableCell align="right">Type</TableCell>
                 <TableCell align="right">Submission Date</TableCell>
                 <TableCell align="right">Anonymous</TableCell>
-                {/* <TableCell align="right">Employee ID</TableCell> */}
                 <TableCell align="right">Name</TableCell>
-                {/* <TableCell align="right">Gender</TableCell> */}
                 <TableCell align="right">Business Unit</TableCell>
                 <TableCell align="right">Business Unit</TableCell>
                 <TableCell align="right">Category</TableCell>

@@ -33,7 +33,6 @@ import { FileItemsViewer } from "../../components/FileItemsViewer";
 import { StorageFile } from "../../utils/StorageFiles.util";
 import DeskIcon from "@mui/icons-material/Desk";
 import LightbulbIcon from "@mui/icons-material/Lightbulb";
-import useCurrentUser from "../../hooks/useCurrentUser";
 import { getSeverityLevel } from "./GrievanceUtils";
 import CustomButton from "../../components/CustomButton";
 import ApproveConfirmationModal from "../OccupationalHealth/MedicineInventory/MedicineRequest/ApproveConfirmationModal";
