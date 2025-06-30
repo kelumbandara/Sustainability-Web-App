@@ -21,8 +21,6 @@ import {
   TableRow,
   Tabs,
   TextField,
-  ToggleButton,
-  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
 import useIsMobile from "../../customHooks/useIsMobile";
@@ -30,47 +28,73 @@ import { Controller, useForm } from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
 import DropzoneComponent from "../../components/DropzoneComponent";
 import { grey } from "@mui/material/colors";
-import DatePickerComponent from "../../components/DatePickerComponent";
 import CustomButton from "../../components/CustomButton";
 import { useMemo, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
-import { HazardAndRiskStatus } from "../../api/hazardRiskApi";
-import {
-  Accident,
-  AccidentEffectedIndividual,
-  AccidentWitness,
-  BodyPrimaryRegion,
-  InjuryType,
-  Severity,
-} from "../../api/accidentAndIncidentApi";
 import TextSnippetIcon from "@mui/icons-material/TextSnippet";
-import WarningIcon from "@mui/icons-material/Warning";
 import theme from "../../theme";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import TimePickerComponent from "../../components/TimePickerComponent";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { accidentTypesOptions } from "../../constants/accidentConstants";
 import RichTextComponent from "../../components/RichTextComponent";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useQuery } from "@tanstack/react-query";
-import { fetchDivision } from "../../api/divisionApi";
 import { fetchDepartmentData } from "../../api/departmentApi";
-import {
-  fetchAccidentSubCategory,
-  fetchMainAccidentCategory,
-} from "../../api/accidentCategory";
-import useCurrentUser from "../../hooks/useCurrentUser";
-import { fetchAccidentAssignee, fetchAllUsers } from "../../api/userApi";
-import UserAutoComplete from "../../components/UserAutoComplete";
 import { StorageFile } from "../../utils/StorageFiles.util";
+import {
+  fetchGrievanceSubmissions,
+  fetchGrievanceTopic,
+  Frequency,
+  Grievance,
+  GrievanceCategory,
+  GrievanceChannel,
+  GrievanceCommitteeMemberDetails,
+  GrievanceEmployeeShift,
+  GrievanceLegalAdvisorDetails,
+  GrievanceNomineeDetails,
+  GrievancePersonType,
+  GrievanceRespondentDetails,
+  GrievanceStatus,
+  GrievanceType,
+  HumanRightViolation,
+  Scale,
+} from "../../api/Grievance/grievanceApi";
+import DeskIcon from "@mui/icons-material/Desk";
+import LightbulbIcon from "@mui/icons-material/Lightbulb";
+import { Gender } from "../../api/OccupationalHealth/patientApi";
+import {
+  AddNewGrievanceTopicButton,
+  AddNewTopicDialog,
+} from "./AddNewTopicDialog";
+import {
+  AddNewGrievanceSubmissionButton,
+  AddNewSubmissionDialog,
+} from "./AddNewSubmissionDialog";
+import SwitchButton from "../../components/SwitchButton";
+import AddOrEditRespondentDialog from "./AddOrEditRespondentDialog";
+import AddOrEditCommitteeMemberDialog from "./AddOrEditCommitteeMemberDialog";
+import AddOrEditNomineeDialog from "./AddOrEditNomineeDialog";
+import AddOrEditLegalAdvisorDialog from "./AddOrEditLegalAdvisorDialog";
 import { ExistingFileItemsEdit } from "../../components/ExistingFileItemsEdit";
-import { Grievance } from "../../api/Grievance/grievanceApi";
+import DatePickerComponent from "../../components/DatePickerComponent";
+import UserAutoComplete from "../../components/UserAutoComplete";
+import {
+  fetchGrievanceAssignee,
+  fetchHazardRiskAssignee,
+} from "../../api/userApi";
+import { fetchDivision } from "../../api/divisionApi";
+import useCurrentUser from "../../hooks/useCurrentUser";
+import { DrawerContentItem } from "../../components/ViewDataDrawer";
+import { getSeverityLevel } from "./GrievanceUtils";
+import { sub } from "date-fns";
+import { generateRandomNumberId } from "../../util/numbers.util";
+import FormDataSwitchButton from "../../components/FormDataSwitchButton";
 
 type DialogProps = {
   open: boolean;
   handleClose: () => void;
   defaultValues?: Grievance;
+  grievanceType: GrievanceType;
   onSubmit?: (data: Grievance) => void;
   isLoading?: boolean;
 };
@@ -109,22 +133,58 @@ export default function AddOrEditGrievanceDialog({
   open,
   handleClose,
   defaultValues,
+  grievanceType,
   onSubmit,
   isLoading,
 }: DialogProps) {
   const { isMobile, isTablet } = useIsMobile();
-  const [files, setFiles] = useState<File[]>([]);
-  const [existingFiles, setExistingFiles] = useState<StorageFile[]>(
+  const [evidence, setEvidence] = useState<File[]>([]);
+  const [existingEvidence, setExistingEvidence] = useState<StorageFile[]>(
     defaultValues?.evidence as StorageFile[]
   );
-  const [filesToRemove, setFilesToRemove] = useState<string[]>([]);
+  const [evidenceToRemove, setEvidenceToRemove] = useState<string[]>([]);
+  const [statements, setStatements] = useState<File[]>([]);
+  const [existingStatements, setExistingStatements] = useState<StorageFile[]>(
+    defaultValues?.statementDocuments as StorageFile[]
+  );
+  const [statementsToRemove, setStatementsToRemove] = useState<string[]>([]);
+
+  const [
+    investigationCommitteeStatements,
+    setInvestigationCommitteeStatements,
+  ] = useState<File[]>([]);
+  const [
+    existingInvestigationCommitteeStatements,
+    setExistingInvestigationCommitteeStatements,
+  ] = useState<StorageFile[]>(
+    defaultValues?.investigationCommitteeStatementDocuments as StorageFile[]
+  );
+  const [
+    investigationCommitteeStatementsToRemove,
+    setInvestigationCommitteeStatementsToRemove,
+  ] = useState<string[]>([]);
+
   const [activeTab, setActiveTab] = useState(0);
-  const [addWitnessDialogOpen, setAddWitnessDialogOpen] = useState(false);
-  const [openAddOrEditPersonDialog, setOpenAddOrEditPersonDialog] =
+  const [addTopicDialogOpen, setAddTopicDialogOpen] = useState(false);
+  const [addSubmissionDialog, setAddSubmissionDialog] = useState(false);
+
+  const [selectedRespondent, setSelectedRespondent] =
+    useState<GrievanceRespondentDetails>(null);
+  const [addRespondentDialogOpen, setAddRespondentDialogOpen] = useState(false);
+
+  const [selectedCommitteeMember, setSelectedCommitteeMember] =
+    useState<GrievanceCommitteeMemberDetails>(null);
+  const [addCommitteeMemberDialogOpen, setAddCommitteeMemberDialogOpen] =
     useState(false);
-  // const [selectedWitness, setSelectedWitness] = useState<AccidentWitness>(null);
-  // const [selectedPerson, setSelectedPerson] =
-  //   useState<AccidentEffectedIndividual>(null);
+
+  const [selectedNominee, setSelectedNominee] =
+    useState<GrievanceNomineeDetails>(null);
+  const [addNomineeDialogOpen, setAddNomineeDialogOpen] = useState(false);
+
+  const [selectedLegalAdvisor, setSelectedLegalAdvisor] =
+    useState<GrievanceLegalAdvisorDetails>(null);
+  const [addLegalAdvisorDialogOpen, setAddLegalAdvisorDialogOpen] =
+    useState(false);
 
   const {
     register,
@@ -139,134 +199,211 @@ export default function AddOrEditGrievanceDialog({
     defaultValues: {
       evidence: [],
       ...defaultValues,
+      isAnonymous: defaultValues?.isAnonymous ? 1 : 0,
+      isAppeal: defaultValues?.isAppeal ? 1 : 0,
+      isFollowUp: defaultValues?.isFollowUp ? 1 : 0,
+      isIssuesPreviouslyRaised: defaultValues?.isIssuesPreviouslyRaised ? 1 : 0,
     },
     reValidateMode: "onChange",
     mode: "onChange",
   });
 
-  // const witnessesWatch = watch("witnesses");
-  // const categoryWatch = watch("category");
-  // const effectedIndividualsWatch = watch("effectedIndividuals");
-  // const { user } = useCurrentUser();
+  const respondentWatch = watch("respondentDetails");
+  const committeeMemberWatch = watch("committeeMemberDetails");
+  const nomineeWatch = watch("nomineeDetails");
+  const legalAdvisorWatch = watch("legalAdvisorDetails");
+  const humanRightsViolationWatch = watch("humanRightsViolation");
+  const frequencyRateWatch = watch("frequencyRate");
+  const scaleWatch = watch("scale");
+  const assignee = watch("assignee");
+  const personTypeWatch = watch("personType");
 
-  const resetForm = () => {
-    reset();
-    setFiles([]);
-  };
+  const severityScoreValue = useMemo(() => {
+    if (!humanRightsViolationWatch || !frequencyRateWatch || !scaleWatch) {
+      return null;
+    }
+    return getSeverityLevel(
+      humanRightsViolationWatch,
+      scaleWatch,
+      frequencyRateWatch
+    );
+  }, [humanRightsViolationWatch, scaleWatch, frequencyRateWatch]);
 
-  const { data: divisionData } = useQuery({
+  const { user } = useCurrentUser();
+
+  const { data: assigneeData } = useQuery({
+    queryKey: ["gr-assignee"],
+    queryFn: fetchGrievanceAssignee,
+  });
+
+  const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
     queryKey: ["divisions"],
     queryFn: fetchDivision,
   });
+
+  const resetForm = () => {
+    reset();
+    setEvidence([]);
+    setStatements([]);
+    setInvestigationCommitteeStatements([]);
+  };
 
   const { data: departmentData } = useQuery({
     queryKey: ["departments"],
     queryFn: fetchDepartmentData,
   });
 
-  const { data: userData } = useQuery({
-    queryKey: ["users"],
-    queryFn: fetchAllUsers,
+  const { data: grievanceTopicData } = useQuery({
+    queryKey: ["grievance-topics"],
+    queryFn: fetchGrievanceTopic,
   });
 
-  const { data: asigneeData, isFetching: isAssigneeDataFetching } = useQuery({
-    queryKey: ["accident-assignee"],
-    queryFn: fetchAccidentAssignee,
+  const { data: grievanceSubmissionsData } = useQuery({
+    queryKey: ["grievance-submissions"],
+    queryFn: fetchGrievanceSubmissions,
   });
 
-  const category = watch("category");
-  const assignee = watch("assignee");
+  const handleSubmitGrievanceRecord = (data: Grievance) => {
+    const submitData: Partial<Grievance> = data;
+    submitData.assigneeId = assignee?.id;
+    if (!defaultValues || defaultValues.status === GrievanceStatus.draft) {
+      submitData.status = GrievanceStatus.draft;
+    }
+    if (defaultValues.status === GrievanceStatus.open) {
+      submitData.status = GrievanceStatus.inprogress;
+    }
+    submitData.type = grievanceType;
 
-  const { data: accidentCategoryData } = useQuery({
-    queryKey: ["accidentCategory"],
-    queryFn: fetchMainAccidentCategory,
-  });
+    if (defaultValues) {
+      submitData.id = defaultValues.id;
+    }
 
-  const { data: accidentSubCategoryData } = useQuery({
-    queryKey: ["accidentSubCategory", category],
-    queryFn: () => fetchAccidentSubCategory(category),
-    enabled: !!category,
-  });
+    if (data.isAnonymous) {
+      submitData.isAnonymous = 1;
+    } else {
+      submitData.isAnonymous = 0;
+    }
 
-  const handleSubmitAccidentRecord = (data: Grievance) => {
-    // const submitData: Partial<Grievance> = data;
-    // submitData.assigneeId = assignee?.id;
-    // submitData.status = defaultValues?.status ?? HazardAndRiskStatus.DRAFT;
-    // submitData.evidence = files;
-    // if (filesToRemove?.length > 0) submitData.removeDoc = filesToRemove;
-    // onSubmit(submitData as Grievance);
+    if (data.isAppeal) {
+      submitData.isAppeal = 1;
+    } else {
+      submitData.isAppeal = 0;
+    }
+
+    if (data.isFollowUp) {
+      submitData.isFollowUp = 1;
+    } else {
+      submitData.isFollowUp = 0;
+    }
+
+    if (data.isIssuesPreviouslyRaised) {
+      submitData.isIssuesPreviouslyRaised = 1;
+    } else {
+      submitData.isIssuesPreviouslyRaised = 0;
+    }
+
+    submitData.evidence = evidence;
+    if (evidenceToRemove?.length > 0)
+      submitData.evidenceToRemove = evidenceToRemove;
+
+    submitData.statementDocuments = statements;
+    if (statementsToRemove?.length > 0)
+      submitData.statementsToRemove = statementsToRemove;
+    submitData.investigationCommitteeStatementDocuments =
+      investigationCommitteeStatements;
+    if (investigationCommitteeStatementsToRemove?.length > 0)
+      submitData.investigationCommitteeStatementDocumentsToRemove =
+        investigationCommitteeStatementsToRemove;
+    console.log("submitData", JSON.stringify(submitData));
+    onSubmit(submitData as Grievance);
   };
 
-  // const isGeneralDetailsValid = useMemo(() => {
-  //   return (
-  //     !errors.division &&
-  //     !errors.location &&
-  //     !errors.department &&
-  //     !errors.supervisorName
-  //   );
-  // }, [
-  //   errors.division,
-  //   errors.location,
-  //   errors.department,
-  //   errors.supervisorName,
-  // ]);
+  const isPersonalAndEmploymentDetailsValid = useMemo(() => {
+    return !errors.personType && !errors.name && !errors.gender;
+  }, [errors.personType, errors.name, errors.gender]);
 
-  // const isAccidentDetailsValid = useMemo(() => {
-  //   return (
-  //     !errors.category &&
-  //     !errors.subCategory &&
-  //     !errors.accidentType &&
-  //     !errors.affectedPrimaryRegion &&
-  //     !errors.affectedSecondaryRegion &&
-  //     !errors.affectedTertiaryRegion &&
-  //     !errors.injuryCause &&
-  //     !errors.rootCause &&
-  //     !errors.consultedHospital &&
-  //     !errors.consultedDoctor &&
-  //     !errors.description
-  //   );
-  // }, [
-  //   errors.category,
-  //   errors.subCategory,
-  //   errors.accidentType,
-  //   errors.affectedPrimaryRegion,
-  //   errors.affectedSecondaryRegion,
-  //   errors.affectedTertiaryRegion,
-  //   errors.injuryCause,
-  //   errors.rootCause,
-  //   errors.consultedHospital,
-  //   errors.consultedDoctor,
-  //   errors.description,
-  // ]);
+  const isHelpdeskDetailsValid = useMemo(() => {
+    if (
+      grievanceType === GrievanceType.appreciation ||
+      grievanceType === GrievanceType.suggestion ||
+      grievanceType === GrievanceType.question
+    ) {
+      return (
+        !errors.channel &&
+        !errors.category &&
+        !errors.helpDeskPerson &&
+        !errors.responsibleDepartment
+      );
+    } else {
+      return (
+        !errors.channel &&
+        !errors.category &&
+        !errors.helpDeskPerson &&
+        !errors.responsibleDepartment &&
+        !errors.humanRightsViolation &&
+        !errors.frequencyRate &&
+        !errors.scale
+      );
+    }
+  }, [
+    errors.channel,
+    errors.category,
+    errors.helpDeskPerson,
+    errors.responsibleDepartment,
+    errors.humanRightsViolation,
+    errors.frequencyRate,
+    errors.scale,
+    grievanceType,
+  ]);
 
-  // const triggerGeneralDetailsSection = () => {
-  //   trigger(["division", "location", "department", "supervisorName"]);
-  // };
+  const triggerPersonalAndEmploymentSection = () => {
+    trigger(["personType", "name", "gender"]);
+  };
 
-  // const triggerAccidentDetailsSection = () => {
-  //   trigger([
-  //     "category",
-  //     "subCategory",
-  //     "accidentType",
-  //     "affectedPrimaryRegion",
-  //     "affectedSecondaryRegion",
-  //     "affectedTertiaryRegion",
-  //     "injuryCause",
-  //     "rootCause",
-  //     "consultedHospital",
-  //     "consultedDoctor",
-  //     "description",
-  //   ]);
-  // };
+  const triggerHelpdeskDetailsSection = () => {
+    if (
+      grievanceType === GrievanceType.appreciation ||
+      grievanceType === GrievanceType.suggestion ||
+      grievanceType === GrievanceType.question
+    ) {
+      trigger([
+        "channel",
+        "category",
+        "helpDeskPerson",
+        "responsibleDepartment",
+      ]);
+    } else {
+      trigger([
+        "channel",
+        "category",
+        "helpDeskPerson",
+        "responsibleDepartment",
+        "humanRightsViolation",
+        "frequencyRate",
+        "scale",
+      ]);
+    }
+  };
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    // if (newValue === 1) {
-    //   triggerGeneralDetailsSection();
-    // } else {
-    //   triggerAccidentDetailsSection();
-    // }
+    if (activeTab === 0) {
+      triggerPersonalAndEmploymentSection();
+    } else if (activeTab === 1) {
+      triggerHelpdeskDetailsSection();
+    }
     setActiveTab(newValue);
   };
+
+  const isShowSolutionTab = useMemo(() => {
+    return defaultValues && defaultValues.status !== GrievanceStatus.draft;
+  }, [defaultValues]);
+
+  const isShowPersonalAndEmploymentDetailsTab = useMemo(() => {
+    return (
+      !defaultValues || (defaultValues && defaultValues.isAnonymous === false)
+      // (defaultValues && defaultValues.createdByUserId === user.id)
+    );
+  }, [defaultValues]);
 
   return (
     <>
@@ -293,7 +430,13 @@ export default function AddOrEditGrievanceDialog({
           }}
         >
           <Typography variant="h6" component="div">
-            {defaultValues ? "Edit an Accident" : "Report an Accident"}
+            {defaultValues
+              ? `Edit ${
+                  grievanceType === GrievanceType.appreciation ? "an" : "a"
+                } ${grievanceType}`
+              : `Report ${
+                  grievanceType === GrievanceType.appreciation ? "an" : "a"
+                } ${grievanceType}`}
           </Typography>
           <IconButton
             aria-label="open drawer"
@@ -357,10 +500,11 @@ export default function AddOrEditGrievanceDialog({
                 indicatorColor="secondary"
                 TabIndicatorProps={{
                   style: {
-                    // backgroundColor:
-                    //   isAccidentDetailsValid && isGeneralDetailsValid
-                    //     ? "var(--pallet-blue)"
-                    //     : "var(--pallet-red)",
+                    backgroundColor:
+                      isPersonalAndEmploymentDetailsValid &&
+                      isHelpdeskDetailsValid
+                        ? "var(--pallet-blue)"
+                        : "var(--pallet-red)",
                     height: "3px",
                   },
                 }}
@@ -371,62 +515,338 @@ export default function AddOrEditGrievanceDialog({
                 textColor="inherit"
                 variant="fullWidth"
               >
-                <Tab
-                  label={
-                    <Box
-                      sx={{
-                        // color: isGeneralDetailsValid
-                        //   ? "var(--pallet-blue)"
-                        //   : "var(--pallet-red)",
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                    >
-                      <TextSnippetIcon fontSize="small" />
-                      <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                        General Details
-                      </Typography>
-                      {/* {!isGeneralDetailsValid && (
-                        <Typography
-                          variant="subtitle1"
-                          sx={{ ml: "0.3rem", color: "var(--pallet-red)" }}
-                        >
-                          *
+                {isShowPersonalAndEmploymentDetailsTab && (
+                  <Tab
+                    label={
+                      <Box
+                        sx={{
+                          color: isPersonalAndEmploymentDetailsValid
+                            ? "var(--pallet-blue)"
+                            : "var(--pallet-red)",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <TextSnippetIcon fontSize="small" />
+                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                          Personal and Employement Details
                         </Typography>
-                      )} */}
-                    </Box>
-                  }
-                  {...a11yProps(0)}
-                />
+                        {!isPersonalAndEmploymentDetailsValid && (
+                          <Typography
+                            variant="subtitle1"
+                            sx={{ ml: "0.3rem", color: "var(--pallet-red)" }}
+                          >
+                            *
+                          </Typography>
+                        )}
+                      </Box>
+                    }
+                    {...a11yProps(0)}
+                    tabIndex={0}
+                  />
+                )}
                 <Tab
                   label={
                     <Box
                       sx={{
-                        // color: isAccidentDetailsValid
-                        //   ? "var(--pallet-blue)"
-                        //   : "var(--pallet-red)",
+                        color: isHelpdeskDetailsValid
+                          ? "var(--pallet-blue)"
+                          : "var(--pallet-red)",
                         display: "flex",
                         alignItems: "center",
                       }}
                     >
-                      <WarningIcon fontSize="small" />
+                      <DeskIcon fontSize="small" />
                       <Typography variant="body2" sx={{ ml: "0.3rem" }}>
-                        Accident Details
+                        Helpdesk Details
                       </Typography>{" "}
-                      {/* {!isAccidentDetailsValid && (
+                      {!isHelpdeskDetailsValid && (
                         <Typography
                           variant="subtitle1"
                           sx={{ ml: "0.3rem", color: "var(--pallet-red)" }}
                         >
                           *
                         </Typography>
-                      )} */}
+                      )}
                     </Box>
                   }
-                  {...a11yProps(1)}
+                  {...a11yProps(isShowPersonalAndEmploymentDetailsTab ? 1 : 0)}
+                  tabIndex={isShowPersonalAndEmploymentDetailsTab ? 1 : 0}
                 />
+                {isShowSolutionTab && (
+                  <Tab
+                    label={
+                      <Box
+                        sx={{
+                          color: isHelpdeskDetailsValid
+                            ? "var(--pallet-blue)"
+                            : "var(--pallet-red)",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <LightbulbIcon fontSize="small" />
+                        <Typography variant="body2" sx={{ ml: "0.3rem" }}>
+                          Solution
+                        </Typography>{" "}
+                        {!isHelpdeskDetailsValid && (
+                          <Typography
+                            variant="subtitle1"
+                            sx={{ ml: "0.3rem", color: "var(--pallet-red)" }}
+                          >
+                            *
+                          </Typography>
+                        )}
+                      </Box>
+                    }
+                    {...a11yProps(
+                      isShowPersonalAndEmploymentDetailsTab ? 2 : 1
+                    )}
+                    tabIndex={isShowPersonalAndEmploymentDetailsTab ? 2 : 1}
+                  />
+                )}
               </Tabs>
-              <TabPanel value={activeTab} index={0} dir={theme.direction}>
+              {isShowPersonalAndEmploymentDetailsTab && (
+                <TabPanel value={activeTab} index={0} dir={theme.direction}>
+                  <Stack
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      backgroundColor: "#fff",
+                      flex: { lg: 3, md: 1 },
+                      borderRadius: "0.3rem",
+                    }}
+                  >
+                    <Alert severity="info" sx={{ margin: "0.5rem" }}>
+                      If the grievance is anonymous, the personal and employment
+                      details will not be able to edit or view. This is a one
+                      time action. If you want to change the personal and
+                      employment details, please create a new grievance.
+                    </Alert>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: isMobile ? "column" : "row",
+                      }}
+                    >
+                      <Controller
+                        name="personType"
+                        control={control}
+                        defaultValue={defaultValues?.personType ?? null}
+                        {...register("personType", { required: true })}
+                        render={({ field }) => (
+                          <Autocomplete
+                            {...field}
+                            onChange={(event, newValue) =>
+                              field.onChange(newValue)
+                            }
+                            size="small"
+                            options={Object.values(GrievancePersonType).map(
+                              (personType) => personType
+                            )}
+                            sx={{ flex: 1, margin: "0.5rem" }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                required
+                                error={!!errors.personType}
+                                helperText={errors.personType && "Required"}
+                                label="Person Type"
+                                name="personType"
+                              />
+                            )}
+                          />
+                        )}
+                      />
+                      <Controller
+                        name="gender"
+                        control={control}
+                        defaultValue={defaultValues?.gender ?? null}
+                        {...register("gender", { required: true })}
+                        render={({ field }) => (
+                          <Autocomplete
+                            {...field}
+                            onChange={(event, newValue) =>
+                              field.onChange(newValue)
+                            }
+                            size="small"
+                            options={Object.values(Gender).map(
+                              (gender) => gender
+                            )}
+                            sx={{ flex: 1, margin: "0.5rem" }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                required
+                                error={!!errors.gender}
+                                helperText={errors.gender && "Required"}
+                                label="Gender"
+                                name="gender"
+                              />
+                            )}
+                          />
+                        )}
+                      />
+                    </Box>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: isMobile ? "column" : "row",
+                      }}
+                    >
+                      <TextField
+                        required
+                        id="name"
+                        label="name"
+                        error={!!errors.name}
+                        helperText={errors.name && "Required"}
+                        size="small"
+                        sx={{ flex: 1, margin: "0.5rem" }}
+                        {...register("name", { required: true })}
+                      />
+                      {personTypeWatch === GrievancePersonType.employee && (
+                        <TextField
+                          required
+                          id="employeeId"
+                          label="Employee ID"
+                          size="small"
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          {...register("employeeId")}
+                        />
+                      )}
+                    </Box>
+                    {personTypeWatch === GrievancePersonType.employee && (
+                      <>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: isMobile ? "column" : "row",
+                          }}
+                        >
+                          <Controller
+                            name="employeeShift"
+                            control={control}
+                            defaultValue={defaultValues?.employeeShift ?? null}
+                            {...register("employeeShift")}
+                            render={({ field }) => (
+                              <Autocomplete
+                                {...field}
+                                onChange={(event, newValue) =>
+                                  field.onChange(newValue)
+                                }
+                                size="small"
+                                options={Object.values(
+                                  GrievanceEmployeeShift
+                                ).map((shift) => shift)}
+                                sx={{ flex: 1, margin: "0.5rem" }}
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    label="Employee Shift"
+                                    name="employeeShift"
+                                  />
+                                )}
+                              />
+                            )}
+                          />
+                          <TextField
+                            id="tenureSplit"
+                            label="Tenure Split"
+                            size="small"
+                            sx={{ flex: 1, margin: "0.5rem" }}
+                            {...register("tenureSplit")}
+                          />
+                        </Box>
+                      </>
+                    )}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: isMobile ? "column" : "row",
+                      }}
+                    >
+                      <Box sx={{ flex: 1, margin: "0.5rem" }}>
+                        <Controller
+                          control={control}
+                          {...register("dateOfJoin")}
+                          name={"dateOfJoin"}
+                          render={({ field }) => {
+                            return (
+                              <DatePickerComponent
+                                onChange={(e) => field.onChange(e)}
+                                value={
+                                  field.value
+                                    ? new Date(field.value)
+                                    : undefined
+                                }
+                                label="Date of Join"
+                              />
+                            );
+                          }}
+                        />
+                      </Box>
+                      <TextField
+                        id="servicePeriod"
+                        label="Service Period"
+                        size="small"
+                        sx={{ flex: 1, margin: "0.5rem", marginTop: "1.8rem" }}
+                        {...register("servicePeriod")}
+                      />
+                    </Box>
+                    {(grievanceType === GrievanceType.complaint ||
+                      grievanceType === GrievanceType.grievance) && (
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: isMobile ? "column" : "row",
+                        }}
+                      >
+                        <TextField
+                          id="supervisor"
+                          label="Supervisor"
+                          size="small"
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          {...register("supervisor")}
+                        />
+                        <TextField
+                          id="location"
+                          label="Location"
+                          size="small"
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          {...register("location")}
+                        />
+                      </Box>
+                    )}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: isMobile ? "column" : "row",
+                        margin: "0.5rem",
+                        justifyContent: "flex-end",
+                      }}
+                    >
+                      <CustomButton
+                        variant="contained"
+                        sx={{
+                          backgroundColor: "var(--pallet-blue)",
+                        }}
+                        size="medium"
+                        onClick={() => {
+                          handleTabChange(null, 1);
+                        }}
+                        endIcon={<ArrowForwardIcon />}
+                      >
+                        Next
+                      </CustomButton>
+                    </Box>
+                  </Stack>
+                </TabPanel>
+              )}
+              <TabPanel
+                value={activeTab}
+                index={isShowPersonalAndEmploymentDetailsTab ? 1 : 0}
+                dir={theme.direction}
+              >
                 <Stack
                   sx={{
                     display: "flex",
@@ -443,10 +863,10 @@ export default function AddOrEditGrievanceDialog({
                     }}
                   >
                     <Controller
-                      name="division"
+                      name="channel"
                       control={control}
-                      defaultValue={defaultValues?.division ?? ""}
-                      {...register("division", { required: true })}
+                      defaultValue={defaultValues?.channel ?? null}
+                      {...register("channel", { required: true })}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -454,36 +874,51 @@ export default function AddOrEditGrievanceDialog({
                             field.onChange(newValue)
                           }
                           size="small"
-                          options={
-                            divisionData?.length
-                              ? divisionData.map(
-                                  (division) => division.divisionName
-                                )
-                              : []
-                          }
+                          options={Object.values(GrievanceChannel).map(
+                            (channel) => channel
+                          )}
                           sx={{ flex: 1, margin: "0.5rem" }}
                           renderInput={(params) => (
                             <TextField
                               {...params}
                               required
-                              error={!!errors.division}
-                              helperText={errors.division && "Required"}
-                              label="Division"
-                              name="division"
+                              error={!!errors.channel}
+                              helperText={errors.channel && "Required"}
+                              label="Channel"
+                              name="channel"
                             />
                           )}
                         />
                       )}
                     />
-                    <TextField
-                      required
-                      id="location"
-                      label="Location"
-                      error={!!errors.location}
-                      helperText={errors.location && "Required"}
-                      size="small"
-                      sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("location", { required: true })}
+                    <Controller
+                      name="category"
+                      control={control}
+                      defaultValue={defaultValues?.category ?? null}
+                      {...register("category", { required: true })}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(event, newValue) =>
+                            field.onChange(newValue)
+                          }
+                          size="small"
+                          options={Object.values(GrievanceCategory).map(
+                            (category) => category
+                          )}
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              required
+                              error={!!errors.category}
+                              helperText={errors.category && "Required"}
+                              label="Category"
+                              name="category"
+                            />
+                          )}
+                        />
+                      )}
                     />
                   </Box>
                   <Box
@@ -493,10 +928,209 @@ export default function AddOrEditGrievanceDialog({
                     }}
                   >
                     <Controller
-                      name="department"
+                      name="topic"
                       control={control}
-                      defaultValue={defaultValues?.department ?? ""}
-                      {...register("department", { required: true })}
+                      // defaultValue={defaultValues?.topic ?? null}
+                      {...register("topic", { required: true })}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          size="small"
+                          noOptionsText={
+                            <>
+                              <Typography
+                                variant="body2"
+                                color="inherit"
+                                gutterBottom
+                              >
+                                No matching Items
+                              </Typography>
+                            </>
+                          }
+                          options={[
+                            ...(grievanceTopicData?.length
+                              ? grievanceTopicData.map(
+                                  (topic) => topic.topicName
+                                )
+                              : []),
+                            "$ADD_NEW_TOPIC",
+                          ]}
+                          // getOptionLabel={(option) => option.topicName || ""}
+                          // onChange={(_, data) => {
+                          //   setValue("topic", data.topicName);
+                          // }}
+                          onChange={(event, newValue) =>
+                            field.onChange(newValue)
+                          }
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          renderOption={(props, option) => (
+                            <>
+                              {option === "$ADD_NEW_TOPIC" ? (
+                                <AddNewGrievanceTopicButton
+                                  {...props}
+                                  onMouseDown={() =>
+                                    setAddTopicDialogOpen(true)
+                                  }
+                                />
+                              ) : (
+                                <li {...props} key={option}>
+                                  {option}
+                                </li>
+                              )}
+                            </>
+                          )}
+                          renderInput={(params) => (
+                            <TextField
+                              required
+                              {...params}
+                              error={!!errors.topic}
+                              label="Grievance Topic"
+                              name="topic"
+                            />
+                          )}
+                        />
+                      )}
+                    />
+
+                    <Controller
+                      name="submissions"
+                      control={control}
+                      // defaultValue={defaultValues?.submissions ?? null}
+                      {...register("submissions", { required: true })}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          size="small"
+                          noOptionsText={
+                            <>
+                              <Typography
+                                variant="body2"
+                                color="inherit"
+                                gutterBottom
+                              >
+                                No matching Items
+                              </Typography>
+                            </>
+                          }
+                          options={[
+                            ...(grievanceSubmissionsData?.length
+                              ? grievanceSubmissionsData.map(
+                                  (submission) => submission.submissionName
+                                )
+                              : []),
+                            "$ADD_NEW_SUBMISSION",
+                          ]}
+                          // getOptionLabel={(option) =>
+                          //   option.submissionName || ""
+                          // }
+                          // onChange={(_, data) => {
+                          //   setValue("submissions", data?.submissionName || "");
+                          // }}
+                          onChange={(event, newValue) =>
+                            field.onChange(newValue)
+                          }
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          renderOption={(props, option) => (
+                            <>
+                              {option === "$ADD_NEW_SUBMISSION" ? (
+                                <AddNewGrievanceSubmissionButton
+                                  {...props}
+                                  onMouseDown={() =>
+                                    setAddSubmissionDialog(true)
+                                  }
+                                />
+                              ) : (
+                                <li {...props} key={option}>
+                                  {option}
+                                </li>
+                              )}
+                            </>
+                          )}
+                          renderInput={(params) => (
+                            <TextField
+                              required
+                              {...params}
+                              error={!!errors.topic}
+                              label="Grievance Submission"
+                              name="topic"
+                            />
+                          )}
+                        />
+                      )}
+                    />
+                  </Box>
+
+                  <Box
+                    sx={{
+                      margin: "0.5rem",
+                    }}
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: "bold", marginBottom: "0.5rem" }}
+                    >
+                      Description
+                    </Typography>
+                    <Controller
+                      control={control}
+                      name={"description"}
+                      {...register("description")}
+                      render={({ field }) => {
+                        return (
+                          <RichTextComponent
+                            onChange={(e) => field.onChange(e)}
+                            placeholder={field.value ?? "Description"}
+                          />
+                        );
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      margin: "0.5rem",
+                    }}
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: "bold", marginBottom: "0.5rem" }}
+                    >
+                      Remarks
+                    </Typography>
+                    <Controller
+                      control={control}
+                      name={"remarks"}
+                      {...register("remarks")}
+                      render={({ field }) => {
+                        return (
+                          <RichTextComponent
+                            onChange={(e) => field.onChange(e)}
+                            placeholder={field.value ?? "Remarks"}
+                          />
+                        );
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: isMobile ? "column" : "row",
+                    }}
+                  >
+                    <TextField
+                      required
+                      id="helpdeskPerson"
+                      label="Helpdesk Person"
+                      error={!!errors.helpDeskPerson}
+                      helperText={errors.helpDeskPerson && "Required"}
+                      size="small"
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      {...register("helpDeskPerson", { required: true })}
+                    />
+                    <Controller
+                      name="responsibleDepartment"
+                      control={control}
+                      defaultValue={defaultValues?.responsibleDepartment ?? ""}
+                      {...register("responsibleDepartment", { required: true })}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -516,28 +1150,232 @@ export default function AddOrEditGrievanceDialog({
                             <TextField
                               {...params}
                               required
-                              error={!!errors.department}
-                              helperText={errors.department && "Required"}
-                              label="Department"
-                              name="department"
+                              error={!!errors.responsibleDepartment}
+                              helperText={
+                                errors.responsibleDepartment && "Required"
+                              }
+                              label="Responsible Department"
+                              name="responsibleDepartment"
                             />
                           )}
                         />
                       )}
                     />
-                    {/* <TextField
-                      required
-                      id="supervisorName"
-                      label="Supervisor"
-                      error={!!errors.supervisorName}
-                      helperText={errors.supervisorName && "Required"}
-                      size="small"
-                      sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("supervisorName", { required: true })}
-                    /> */}
                   </Box>
-
-                  {/* <Stack sx={{ alignItems: "center", m: "0.5rem" }}>
+                  {(grievanceType === GrievanceType.complaint ||
+                    grievanceType === GrievanceType.grievance) && (
+                    <>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: isMobile ? "column" : "row",
+                        }}
+                      >
+                        <Controller
+                          name="humanRightsViolation"
+                          control={control}
+                          defaultValue={
+                            defaultValues?.humanRightsViolation ?? null
+                          }
+                          {...register("humanRightsViolation", {
+                            required: true,
+                          })}
+                          render={({ field }) => (
+                            <Autocomplete
+                              {...field}
+                              onChange={(event, newValue) =>
+                                field.onChange(newValue)
+                              }
+                              size="small"
+                              options={Object.values(HumanRightViolation).map(
+                                (violation) => violation
+                              )}
+                              sx={{ flex: 1, margin: "0.5rem" }}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  required
+                                  error={!!errors.humanRightsViolation}
+                                  helperText={
+                                    errors.humanRightsViolation && "Required"
+                                  }
+                                  label="Human Rights Violation"
+                                  name="humanRightsViolation"
+                                />
+                              )}
+                            />
+                          )}
+                        />
+                        <Controller
+                          name="scale"
+                          control={control}
+                          defaultValue={defaultValues?.scale ?? null}
+                          {...register("scale", { required: true })}
+                          render={({ field }) => (
+                            <Autocomplete
+                              {...field}
+                              onChange={(event, newValue) =>
+                                field.onChange(newValue)
+                              }
+                              size="small"
+                              options={Object.values(Scale).map(
+                                (scale) => scale
+                              )}
+                              sx={{ flex: 1, margin: "0.5rem" }}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  required
+                                  error={!!errors.scale}
+                                  helperText={errors.scale && "Required"}
+                                  label="Scale"
+                                  name="scale"
+                                />
+                              )}
+                            />
+                          )}
+                        />
+                      </Box>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: isMobile ? "column" : "row",
+                        }}
+                      >
+                        <Controller
+                          name="frequencyRate"
+                          control={control}
+                          defaultValue={defaultValues?.frequencyRate ?? null}
+                          {...register("frequencyRate", { required: true })}
+                          render={({ field }) => (
+                            <Autocomplete
+                              {...field}
+                              onChange={(event, newValue) =>
+                                field.onChange(newValue)
+                              }
+                              size="small"
+                              options={Object.values(Frequency).map(
+                                (frequency) => frequency
+                              )}
+                              sx={{ flex: 1, margin: "0.5rem" }}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  required
+                                  error={!!errors.frequencyRate}
+                                  helperText={
+                                    errors.frequencyRate && "Required"
+                                  }
+                                  label="Frequency Rate"
+                                  name="frequencyRate"
+                                />
+                              )}
+                            />
+                          )}
+                        />
+                        <DrawerContentItem
+                          label="Severity Score"
+                          value={severityScoreValue}
+                          sx={{ flex: 1 }}
+                        />
+                      </Box>{" "}
+                    </>
+                  )}
+                  <ExistingFileItemsEdit
+                    label="Existing evidence"
+                    files={existingEvidence}
+                    sx={{ marginY: "1rem" }}
+                    handleRemoveItem={(file) => {
+                      setEvidenceToRemove([
+                        ...evidenceToRemove,
+                        file.gsutil_uri,
+                      ]);
+                      setExistingEvidence(
+                        existingEvidence.filter(
+                          (f) => f.gsutil_uri !== file.gsutil_uri
+                        )
+                      );
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: isMobile ? "column" : "row",
+                      margin: "0.5rem",
+                    }}
+                  >
+                    <DropzoneComponent
+                      files={evidence}
+                      setFiles={setEvidence}
+                      dropzoneLabel={"Drop Your Evidence Here"}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: isMobile ? "column" : "row",
+                      margin: "0.5rem",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <CustomButton
+                      variant="contained"
+                      sx={{
+                        backgroundColor: "var(--pallet-blue)",
+                      }}
+                      size="medium"
+                      onClick={() => {
+                        handleTabChange(null, 0);
+                      }}
+                      startIcon={<ArrowBackIcon />}
+                    >
+                      Previous
+                    </CustomButton>
+                    {isShowSolutionTab && (
+                      <CustomButton
+                        variant="contained"
+                        sx={{
+                          backgroundColor: "var(--pallet-blue)",
+                        }}
+                        size="medium"
+                        onClick={() => {
+                          handleTabChange(null, 2);
+                        }}
+                        endIcon={<ArrowForwardIcon />}
+                      >
+                        Next
+                      </CustomButton>
+                    )}
+                  </Box>
+                </Stack>
+              </TabPanel>
+              {isShowSolutionTab && (
+                <TabPanel
+                  value={activeTab}
+                  index={isShowPersonalAndEmploymentDetailsTab ? 2 : 1}
+                  dir={theme.direction}
+                >
+                  <Box>
+                    <Controller
+                      control={control}
+                      name="isIssuesPreviouslyRaised"
+                      defaultValue={0 as 0 | 1}
+                      render={({ field }) => (
+                        <FormDataSwitchButton
+                          label="Is Issues Previously Raised?"
+                          onChange={field.onChange}
+                          value={field.value as 0 | 1}
+                        />
+                      )}
+                    />
+                  </Box>
+                  <Box sx={{ marginX: "0.5rem", marginY: "1rem" }}>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: "bold", marginBottom: "0.5rem" }}
+                    >
+                      Respondent Details
+                    </Typography>
                     <TableContainer
                       component={Paper}
                       elevation={2}
@@ -558,11 +1396,11 @@ export default function AddOrEditGrievanceDialog({
                           sx={{ backgroundColor: "var(--pallet-blue)" }}
                           startIcon={<AddIcon />}
                           onClick={() => {
-                            setSelectedWitness(null);
-                            setAddWitnessDialogOpen(true);
+                            setSelectedRespondent(null);
+                            setAddRespondentDialogOpen(true);
                           }}
                         >
-                          Add Witness
+                          Add Respondent
                         </Button>
                       </Box>
                       <Table aria-label="simple table">
@@ -574,14 +1412,14 @@ export default function AddOrEditGrievanceDialog({
                           <TableRow>
                             <TableCell align="center">Employee ID</TableCell>
                             <TableCell align="center">Name</TableCell>
-                            <TableCell align="center">Division</TableCell>
+                            <TableCell align="center">Designation</TableCell>
                             <TableCell align="center">Department</TableCell>
                             <TableCell align="center"></TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          {witnessesWatch?.length > 0 ? (
-                            witnessesWatch?.map((row) => (
+                          {respondentWatch?.length > 0 ? (
+                            respondentWatch?.map((row) => (
                               <TableRow
                                 // key={`${row.id}`}
                                 sx={{
@@ -600,7 +1438,7 @@ export default function AddOrEditGrievanceDialog({
                                 </TableCell>
                                 <TableCell align="center">{row.name}</TableCell>
                                 <TableCell align="center">
-                                  {row.division}
+                                  {row.designation}
                                 </TableCell>
                                 <TableCell align="center">
                                   {row.department}
@@ -608,8 +1446,8 @@ export default function AddOrEditGrievanceDialog({
                                 <TableCell align="center">
                                   <IconButton
                                     onClick={() => {
-                                      setSelectedWitness(row);
-                                      setAddWitnessDialogOpen(true);
+                                      setSelectedRespondent(row);
+                                      setAddRespondentDialogOpen(true);
                                     }}
                                   >
                                     <EditIcon />
@@ -617,10 +1455,11 @@ export default function AddOrEditGrievanceDialog({
                                   <IconButton
                                     onClick={() => {
                                       setValue(
-                                        "witnesses",
-                                        (witnessesWatch ?? []).filter(
+                                        "respondentDetails",
+                                        (respondentWatch ?? []).filter(
                                           (item) =>
-                                            item.employeeId !== row.employeeId
+                                            item.respondentId !==
+                                            row.respondentId
                                         )
                                       );
                                     }}
@@ -642,20 +1481,395 @@ export default function AddOrEditGrievanceDialog({
                         </TableBody>
                       </Table>
                     </TableContainer>
-                  </Stack>
+                  </Box>
+                  <Box sx={{ marginX: "0.5rem", marginY: "1rem" }}>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: "bold", marginBottom: "0.5rem" }}
+                    >
+                      Committee Member Details
+                    </Typography>
+                    <TableContainer
+                      component={Paper}
+                      elevation={2}
+                      sx={{
+                        overflowX: "auto",
+                        maxWidth: isMobile ? "88vw" : "100%",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          padding: theme.spacing(2),
+                          display: "flex",
+                          justifyContent: "flex-end",
+                        }}
+                      >
+                        <Button
+                          variant="contained"
+                          sx={{ backgroundColor: "var(--pallet-blue)" }}
+                          startIcon={<AddIcon />}
+                          onClick={() => {
+                            setSelectedNominee(null);
+                            setAddCommitteeMemberDialogOpen(true);
+                          }}
+                        >
+                          Add Member
+                        </Button>
+                      </Box>
+                      <Table aria-label="simple table">
+                        <TableHead
+                          sx={{
+                            backgroundColor: "var(--pallet-lighter-grey)",
+                          }}
+                        >
+                          <TableRow>
+                            <TableCell align="center">Employee ID</TableCell>
+                            <TableCell align="center">Name</TableCell>
+                            <TableCell align="center">Designation</TableCell>
+                            <TableCell align="center">Department</TableCell>
+                            <TableCell align="center"></TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {committeeMemberWatch?.length > 0 ? (
+                            committeeMemberWatch?.map((row) => (
+                              <TableRow
+                                // key={`${row.id}`}
+                                sx={{
+                                  "&:last-child td, &:last-child th": {
+                                    border: 0,
+                                  },
+                                  cursor: "pointer",
+                                }}
+                              >
+                                <TableCell
+                                  component="th"
+                                  scope="row"
+                                  align="center"
+                                >
+                                  {row.employeeId}
+                                </TableCell>
+                                <TableCell align="center">{row.name}</TableCell>
+                                <TableCell align="center">
+                                  {row.designation}
+                                </TableCell>
+                                <TableCell align="center">
+                                  {row.department}
+                                </TableCell>
+                                <TableCell align="center">
+                                  <IconButton
+                                    onClick={() => {
+                                      setSelectedCommitteeMember(row);
+                                      setAddCommitteeMemberDialogOpen(true);
+                                    }}
+                                  >
+                                    <EditIcon />
+                                  </IconButton>
+                                  <IconButton
+                                    onClick={() => {
+                                      setValue(
+                                        "committeeMemberDetails",
+                                        (committeeMemberWatch ?? []).filter(
+                                          (item) =>
+                                            item.memberId !== row.memberId
+                                        )
+                                      );
+                                    }}
+                                  >
+                                    <DeleteIcon />
+                                  </IconButton>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={11} align="center">
+                                <Typography variant="body2">
+                                  No Records found
+                                </Typography>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Box>
+                  <Box sx={{ marginX: "0.5rem", marginY: "1rem" }}>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: "bold", marginBottom: "0.5rem" }}
+                    >
+                      Nominee Details
+                    </Typography>
+                    <TableContainer
+                      component={Paper}
+                      elevation={2}
+                      sx={{
+                        overflowX: "auto",
+                        maxWidth: isMobile ? "88vw" : "100%",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          padding: theme.spacing(2),
+                          display: "flex",
+                          justifyContent: "flex-end",
+                        }}
+                      >
+                        <Button
+                          variant="contained"
+                          sx={{ backgroundColor: "var(--pallet-blue)" }}
+                          startIcon={<AddIcon />}
+                          onClick={() => {
+                            setSelectedNominee(null);
+                            setAddNomineeDialogOpen(true);
+                          }}
+                        >
+                          Add Nominee
+                        </Button>
+                      </Box>
+                      <Table aria-label="simple table">
+                        <TableHead
+                          sx={{
+                            backgroundColor: "var(--pallet-lighter-grey)",
+                          }}
+                        >
+                          <TableRow>
+                            <TableCell align="center">Employee ID</TableCell>
+                            <TableCell align="center">Name</TableCell>
+                            <TableCell align="center">Designation</TableCell>
+                            <TableCell align="center">Department</TableCell>
+                            <TableCell align="center"></TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {nomineeWatch?.length > 0 ? (
+                            nomineeWatch?.map((row) => (
+                              <TableRow
+                                // key={`${row.id}`}
+                                sx={{
+                                  "&:last-child td, &:last-child th": {
+                                    border: 0,
+                                  },
+                                  cursor: "pointer",
+                                }}
+                              >
+                                <TableCell
+                                  component="th"
+                                  scope="row"
+                                  align="center"
+                                >
+                                  {row.employeeId}
+                                </TableCell>
+                                <TableCell align="center">{row.name}</TableCell>
+                                <TableCell align="center">
+                                  {row.designation}
+                                </TableCell>
+                                <TableCell align="center">
+                                  {row.department}
+                                </TableCell>
+                                <TableCell align="center">
+                                  <IconButton
+                                    onClick={() => {
+                                      setSelectedNominee(row);
+                                      setAddNomineeDialogOpen(true);
+                                    }}
+                                  >
+                                    <EditIcon />
+                                  </IconButton>
+                                  <IconButton
+                                    onClick={() => {
+                                      setValue(
+                                        "nomineeDetails",
+                                        (nomineeWatch ?? []).filter(
+                                          (item) =>
+                                            item.nomineeId !== row.nomineeId
+                                        )
+                                      );
+                                    }}
+                                  >
+                                    <DeleteIcon />
+                                  </IconButton>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={11} align="center">
+                                <Typography variant="body2">
+                                  No Records found
+                                </Typography>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Box>
+                  <Box sx={{ marginX: "0.5rem", marginY: "1rem" }}>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: "bold", marginBottom: "0.5rem" }}
+                    >
+                      Legal Advisor Details
+                    </Typography>
+                    <TableContainer
+                      component={Paper}
+                      elevation={2}
+                      sx={{
+                        overflowX: "auto",
+                        maxWidth: isMobile ? "88vw" : "100%",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          padding: theme.spacing(2),
+                          display: "flex",
+                          justifyContent: "flex-end",
+                        }}
+                      >
+                        <Button
+                          variant="contained"
+                          sx={{ backgroundColor: "var(--pallet-blue)" }}
+                          startIcon={<AddIcon />}
+                          onClick={() => {
+                            setSelectedLegalAdvisor(null);
+                            setAddLegalAdvisorDialogOpen(true);
+                          }}
+                        >
+                          Add Advisor
+                        </Button>
+                      </Box>
+                      <Table aria-label="simple table">
+                        <TableHead
+                          sx={{
+                            backgroundColor: "var(--pallet-lighter-grey)",
+                          }}
+                        >
+                          <TableRow>
+                            <TableCell align="center">Name</TableCell>
+                            <TableCell align="center">Email</TableCell>
+                            <TableCell align="center">Phone</TableCell>
+                            <TableCell align="center"></TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {legalAdvisorWatch?.length > 0 ? (
+                            legalAdvisorWatch?.map((row) => (
+                              <TableRow
+                                // key={`${row.id}`}
+                                sx={{
+                                  "&:last-child td, &:last-child th": {
+                                    border: 0,
+                                  },
+                                  cursor: "pointer",
+                                }}
+                              >
+                                <TableCell
+                                  component="th"
+                                  scope="row"
+                                  align="center"
+                                >
+                                  {row.name}
+                                </TableCell>
+                                <TableCell align="center">
+                                  {row.email}
+                                </TableCell>
+                                <TableCell align="center">
+                                  {row.phone}
+                                </TableCell>
+                                <TableCell align="center">
+                                  <IconButton
+                                    onClick={() => {
+                                      setSelectedLegalAdvisor(row);
+                                      setAddLegalAdvisorDialogOpen(true);
+                                    }}
+                                  >
+                                    <EditIcon />
+                                  </IconButton>
+                                  <IconButton
+                                    onClick={() => {
+                                      setValue(
+                                        "legalAdvisorDetails",
+                                        (legalAdvisorWatch ?? []).filter(
+                                          (item) =>
+                                            item.legalAdvisorId !==
+                                            row.legalAdvisorId
+                                        )
+                                      );
+                                    }}
+                                  >
+                                    <DeleteIcon />
+                                  </IconButton>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={11} align="center">
+                                <Typography variant="body2">
+                                  No Records found
+                                </Typography>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: isMobile ? "column" : "row",
+                    }}
+                  >
+                    <TextField
+                      id="tradeUnionRepresentative"
+                      label="Trade Union Representative"
+                      size="small"
+                      sx={{ flex: 1, margin: "0.5rem" }}
+                      {...register("tradeUnionRepresentative")}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      margin: "0.5rem",
+                    }}
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: "bold", marginBottom: "0.5rem" }}
+                    >
+                      Grievant Statement
+                    </Typography>
+                    <Controller
+                      control={control}
+                      name={"grievantStatement"}
+                      {...register("grievantStatement")}
+                      render={({ field }) => {
+                        return (
+                          <RichTextComponent
+                            onChange={(e) => field.onChange(e)}
+                            placeholder={field.value ?? "Grievant Statement"}
+                          />
+                        );
+                      }}
+                    />
+                  </Box>
                   <ExistingFileItemsEdit
-                    label="Existing evidence"
-                    files={existingFiles}
+                    label="Existing Statements"
+                    files={existingStatements}
                     sx={{ marginY: "1rem" }}
                     handleRemoveItem={(file) => {
-                      if (file.gsutil_uri) {
-                        setFilesToRemove([...filesToRemove, file.gsutil_uri]);
-                        setExistingFiles(
-                          existingFiles.filter(
-                            (f) => f.gsutil_uri !== file.gsutil_uri
-                          )
-                        );
-                      }
+                      setStatementsToRemove([
+                        ...statementsToRemove,
+                        file.gsutil_uri,
+                      ]);
+                      setExistingStatements(
+                        existingStatements.filter(
+                          (f) => f.gsutil_uri !== file.gsutil_uri
+                        )
+                      );
                     }}
                   />
                   <Box
@@ -666,512 +1880,143 @@ export default function AddOrEditGrievanceDialog({
                     }}
                   >
                     <DropzoneComponent
-                      files={files}
-                      setFiles={setFiles}
-                      dropzoneLabel={"Drop Your Evidence Here"}
+                      files={statements}
+                      setFiles={setStatements}
+                      dropzoneLabel={"Drop Your Statement Here"}
                     />
-                  </Box> */}
-
+                  </Box>
+                  <ExistingFileItemsEdit
+                    label="Existing Investigation Committee Statements"
+                    files={existingInvestigationCommitteeStatements}
+                    sx={{ marginY: "1rem" }}
+                    handleRemoveItem={(file) => {
+                      setInvestigationCommitteeStatementsToRemove([
+                        ...investigationCommitteeStatementsToRemove,
+                        file.gsutil_uri,
+                      ]);
+                      setExistingInvestigationCommitteeStatements(
+                        existingInvestigationCommitteeStatements.filter(
+                          (f) => f.gsutil_uri !== file.gsutil_uri
+                        )
+                      );
+                    }}
+                  />
                   <Box
                     sx={{
                       display: "flex",
                       flexDirection: isMobile ? "column" : "row",
                       margin: "0.5rem",
-                      justifyContent: "flex-end",
                     }}
                   >
-                    <CustomButton
-                      variant="contained"
-                      sx={{
-                        backgroundColor: "var(--pallet-blue)",
-                      }}
-                      size="medium"
-                      onClick={() => {
-                        handleTabChange(null, 1);
-                      }}
-                      endIcon={<ArrowForwardIcon />}
+                    <DropzoneComponent
+                      files={investigationCommitteeStatements}
+                      setFiles={setInvestigationCommitteeStatements}
+                      dropzoneLabel={"Drop Your Statement Here"}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      margin: "0.5rem",
+                    }}
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: "bold", marginBottom: "0.5rem" }}
                     >
-                      Next
-                    </CustomButton>
+                      Committee Statement
+                    </Typography>
+                    <Controller
+                      control={control}
+                      name={"committeeStatement"}
+                      {...register("committeeStatement")}
+                      render={({ field }) => {
+                        return (
+                          <RichTextComponent
+                            onChange={(e) => field.onChange(e)}
+                            placeholder={field.value ?? "Committee Statement"}
+                          />
+                        );
+                      }}
+                    />
                   </Box>
-                </Stack>
-              </TabPanel>
-              {/* <TabPanel value={activeTab} index={1} dir={theme.direction}>
-                <Typography
-                  variant="body2"
-                  sx={{ fontWeight: "bold", marginBottom: "1rem" }}
-                >
-                  Personal Details
-                </Typography>
-                <Stack sx={{ alignItems: "center", m: "0.5rem" }}>
-                  <TableContainer
-                    component={Paper}
-                    elevation={2}
+                  <Box
                     sx={{
-                      overflowX: "auto",
-                      maxWidth: isMobile ? "88vw" : "100%",
+                      margin: "0.5rem",
                     }}
                   >
-                    <Box
-                      sx={{
-                        padding: theme.spacing(2),
-                        display: "flex",
-                        justifyContent: "flex-end",
-                      }}
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: "bold", marginBottom: "0.5rem" }}
                     >
-                      <Button
-                        variant="contained"
-                        sx={{ backgroundColor: "var(--pallet-blue)" }}
-                        startIcon={<AddIcon />}
-                        onClick={() => {
-                          setSelectedPerson(null);
-                          setOpenAddOrEditPersonDialog(true);
-                        }}
-                      >
-                        Add Person
-                      </Button>
-                    </Box>
-                    <Table aria-label="simple table">
-                      <TableHead
-                        sx={{
-                          backgroundColor: "var(--pallet-lighter-grey)",
-                        }}
-                      >
-                        <TableRow>
-                          <TableCell align="center">Person Type</TableCell>
-                          <TableCell align="center">Person Name</TableCell>
-                          <TableCell align="center">Gender</TableCell>
-                          <TableCell align="center">Designation</TableCell>
-                          <TableCell align="center"></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {effectedIndividualsWatch?.length > 0 ? (
-                          effectedIndividualsWatch?.map((row) => (
-                            <TableRow
-                              key={`${row.personId}`}
-                              sx={{
-                                "&:last-child td, &:last-child th": {
-                                  border: 0,
-                                },
-                                cursor: "pointer",
-                              }}
-                            >
-                              <TableCell
-                                component="th"
-                                scope="row"
-                                align="center"
-                              >
-                                {row.personType}
-                              </TableCell>
-                              <TableCell align="center">{row.name}</TableCell>
-                              <TableCell align="center">{row.gender}</TableCell>
-                              <TableCell align="center">
-                                {row.designation}
-                              </TableCell>
-                              <TableCell align="center">
-                                <IconButton
-                                  onClick={() => {
-                                    setSelectedPerson(row);
-                                    setOpenAddOrEditPersonDialog(true);
-                                  }}
-                                >
-                                  <EditIcon />
-                                </IconButton>
-                                <IconButton
-                                  onClick={() => {
-                                    console.log("row", row);
-                                    setValue(
-                                      "effectedIndividuals",
-                                      (effectedIndividualsWatch ?? []).filter(
-                                        (item) => item.personId !== row.personId
-                                      )
-                                    );
-                                  }}
-                                >
-                                  <DeleteIcon />
-                                </IconButton>
-                              </TableCell>
-                            </TableRow>
-                          ))
-                        ) : (
-                          <TableRow>
-                            <TableCell colSpan={11} align="center">
-                              <Typography variant="body2">
-                                No Records found
-                              </Typography>
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Stack>
-                <Stack
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    backgroundColor: "#fff",
-                    flex: { lg: 3, md: 1 },
-                    borderRadius: "0.3rem",
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: "bold", marginY: "0.5rem" }}
-                  >
-                    Accident Details
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: isMobile ? "column" : "row",
-                    }}
-                  >
+                      Solution Provided
+                    </Typography>
                     <Controller
-                      name="category"
                       control={control}
-                      defaultValue={defaultValues?.category ?? ""}
-                      {...register("category", { required: true })}
-                      render={({ field }) => (
-                        <Autocomplete
-                          {...field}
-                          onChange={(event, newValue) => {
-                            field.onChange(newValue);
-                            setValue("subCategory", "");
-                          }}
-                          size="small"
-                          options={
-                            accidentCategoryData?.length
-                              ? accidentCategoryData.map(
-                                  (cat) => cat.categoryName
-                                )
-                              : []
-                          }
-                          sx={{ flex: 1, margin: "0.5rem" }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              required
-                              error={!!errors.category}
-                              helperText={errors.category && "Required"}
-                              label="Category"
-                              name="category"
-                            />
-                          )}
-                        />
-                      )}
-                    />
-                    {category && ( // Correctly using category here
-                      <Controller
-                        name="subCategory"
-                        control={control}
-                        defaultValue={defaultValues?.subCategory ?? ""}
-                        {...register("subCategory", {
-                          required: true,
-                        })}
-                        render={({ field }) => (
-                          <Autocomplete
-                            {...field}
-                            onChange={(event, newValue) => {
-                              field.onChange(newValue);
-                              setValue("subCategory", newValue);
-                            }}
-                            size="small"
-                            options={
-                              accidentSubCategoryData?.length
-                                ? accidentSubCategoryData.map(
-                                    (cat) => cat.subCategoryName
-                                  )
-                                : []
-                            }
-                            sx={{ flex: 1, margin: "0.5rem" }}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                required
-                                error={!!errors.subCategory}
-                                helperText={errors.subCategory && "Required"}
-                                label="Sub Category"
-                                name="subCategory"
-                              />
-                            )}
+                      name={"solutionProvided"}
+                      {...register("solutionProvided")}
+                      render={({ field }) => {
+                        return (
+                          <RichTextComponent
+                            onChange={(e) => field.onChange(e)}
+                            placeholder={field.value ?? "Solution Provided"}
                           />
-                        )}
-                      />
-                    )}
-                  </Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: isMobile ? "column" : "row",
-                    }}
-                  >
-                    <Controller
-                      name="accidentType"
-                      control={control}
-                      defaultValue={defaultValues?.accidentType ?? ""}
-                      {...register("accidentType", { required: true })}
-                      render={({ field }) => (
-                        <Autocomplete
-                          {...field}
-                          onChange={(event, newValue) =>
-                            field.onChange(newValue)
-                          }
-                          size="small"
-                          options={accidentTypesOptions}
-                          sx={{ flex: 1, margin: "0.5rem" }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              required
-                              error={!!errors.accidentType}
-                              helperText={errors.accidentType && "Required"}
-                              label="Accident Type"
-                              name="accidentType"
-                            />
-                          )}
-                        />
-                      )}
-                    />
-                  </Box>
-                  <Box sx={{ margin: "0.5rem" }}>
-                    <Controller
-                      name="affectedPrimaryRegion"
-                      control={control}
-                      defaultValue={defaultValues?.affectedPrimaryRegion ?? ""}
-                      {...register("affectedPrimaryRegion", { required: true })}
-                      render={({ field }) => (
-                        <Autocomplete
-                          {...field}
-                          onChange={(event, newValue) =>
-                            field.onChange(newValue)
-                          }
-                          size="small"
-                          options={Object.values(BodyPrimaryRegion)}
-                          sx={{ flex: 1 }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              required
-                              error={!!errors.affectedPrimaryRegion}
-                              helperText={
-                                errors.affectedPrimaryRegion && "Required"
-                              }
-                              label="Body Primary Region"
-                              name="affectedPrimaryRegion"
-                            />
-                          )}
-                        />
-                      )}
-                    />
-                  </Box>
-
-                  <Box sx={{ margin: "0.5rem" }}>
-                    <Controller
-                      name="affectedSecondaryRegion"
-                      control={control}
-                      defaultValue={
-                        defaultValues?.affectedSecondaryRegion ?? ""
-                      }
-                      {...register("affectedSecondaryRegion", {
-                        required: true,
-                      })}
-                      render={({ field }) => (
-                        <Autocomplete
-                          {...field}
-                          onChange={(event, newValue) =>
-                            field.onChange(newValue)
-                          }
-                          size="small"
-                          options={Object.values(BodyPrimaryRegion)}
-                          sx={{ flex: 1 }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              required
-                              error={!!errors.affectedSecondaryRegion}
-                              helperText={
-                                errors.affectedSecondaryRegion && "Required"
-                              }
-                              label="Body Secondary Region"
-                              name="affectedSecondaryRegion"
-                            />
-                          )}
-                        />
-                      )}
-                    />
-                  </Box>
-                  <Box sx={{ margin: "0.5rem" }}>
-                    <Controller
-                      name="affectedTertiaryRegion"
-                      control={control}
-                      defaultValue={defaultValues?.affectedTertiaryRegion ?? ""}
-                      {...register("affectedTertiaryRegion", {
-                        required: true,
-                      })}
-                      render={({ field }) => (
-                        <Autocomplete
-                          {...field}
-                          onChange={(event, newValue) =>
-                            field.onChange(newValue)
-                          }
-                          size="small"
-                          options={Object.values(BodyPrimaryRegion)}
-                          sx={{ flex: 1 }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              required
-                              error={!!errors.affectedTertiaryRegion}
-                              helperText={
-                                errors.affectedTertiaryRegion && "Required"
-                              }
-                              label="Body Tertiary Region"
-                              name="affectedTertiaryRegion"
-                            />
-                          )}
-                        />
-                      )}
-                    />
-                  </Box>
-                  <Box sx={{ display: "flex" }}>
-                    <Controller
-                      name="injuryCause"
-                      control={control}
-                      defaultValue={defaultValues?.injuryCause ?? ""}
-                      {...register("injuryCause", { required: true })}
-                      render={({ field }) => (
-                        <Autocomplete
-                          {...field}
-                          onChange={(event, newValue) =>
-                            field.onChange(newValue)
-                          }
-                          size="small"
-                          options={Object.values(BodyPrimaryRegion)}
-                          sx={{ flex: 1, margin: "0.5rem" }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              required
-                              error={!!errors.injuryCause}
-                              helperText={errors.injuryCause && "Required"}
-                              label="Injury Cause"
-                              name="injuryCause"
-                            />
-                          )}
-                        />
-                      )}
-                    />
-                    <TextField
-                      required
-                      id="rootCause"
-                      name="rootCause"
-                      label="Cause"
-                      error={!!errors.rootCause}
-                      helperText={errors.rootCause && "Required"}
-                      size="small"
-                      sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("rootCause", { required: true })}
-                    />
-                  </Box>
-                  <Box sx={{ display: "flex" }}>
-                    <TextField
-                      required
-                      id="consultedHospital"
-                      label="Consulted Hospital"
-                      error={!!errors.consultedHospital}
-                      helperText={errors.consultedHospital && "Required"}
-                      size="small"
-                      sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("consultedHospital", { required: true })}
-                    />
-                    <TextField
-                      required
-                      id="consultedDoctor"
-                      label="Consulted Doctor"
-                      error={!!errors.consultedDoctor}
-                      helperText={errors.consultedDoctor && "Required"}
-                      size="small"
-                      sx={{ flex: 1, margin: "0.5rem" }}
-                      {...register("consultedDoctor", { required: true })}
+                        );
+                      }}
                     />
                   </Box>
                   <Box
                     sx={{
-                      display: "flex",
-                      flexDirection: isMobile ? "column" : "row",
                       margin: "0.5rem",
                     }}
                   >
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: "bold", marginBottom: "0.5rem" }}
+                    >
+                      Solution Remarks
+                    </Typography>
                     <Controller
                       control={control}
-                      name={"workPerformed"}
+                      name={"solutionRemarks"}
+                      {...register("solutionRemarks")}
                       render={({ field }) => {
                         return (
                           <RichTextComponent
                             onChange={(e) => field.onChange(e)}
-                            placeholder={field.value ?? "Work Performed"}
+                            placeholder={field.value ?? "Solution Remarks"}
                           />
                         );
                       }}
                     />
                   </Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      padding: "0.3rem",
-                      margin: "0.2rem",
-                      border: errors.description
-                        ? `1px solid ${theme.palette.error.main}`
-                        : "none",
-                      borderRadius: "0.5rem",
-                    }}
-                  >
+                  <Box sx={{ margin: "0.5rem" }}>
                     <Controller
                       control={control}
-                      name={"description"}
-                      {...register("description", { required: true })}
-                      render={({ field }) => {
-                        return (
-                          <RichTextComponent
-                            onChange={(e) => field.onChange(e)}
-                            placeholder={field.value ?? "Description"}
-                          />
-                        );
-                      }}
+                      name="isFollowUp"
+                      defaultValue={0 as 0 | 1}
+                      render={({ field }) => (
+                        <FormDataSwitchButton
+                          label="Follow Up?"
+                          onChange={field.onChange}
+                          value={field.value as 0 | 1}
+                        />
+                      )}
                     />
-                    {errors.description && (
-                      <Typography
-                        variant="caption"
-                        sx={{ color: theme.palette.error.main, ml: "0.5rem" }}
-                      >
-                        Required
-                      </Typography>
-                    )}
                   </Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: isMobile ? "column" : "row",
-                      margin: "0.5rem",
-                    }}
-                  >
+                  <Box sx={{ margin: "0.5rem" }}>
                     <Controller
                       control={control}
-                      name={"actionTaken"}
-                      render={({ field }) => {
-                        return (
-                          <RichTextComponent
-                            onChange={(e) => field.onChange(e)}
-                            placeholder={field.value ?? "Action Taken"}
-                          />
-                        );
-                      }}
+                      name="isAppeal"
+                      defaultValue={0 as 0 | 1}
+                      render={({ field }) => (
+                        <FormDataSwitchButton
+                          label="Appeal?"
+                          onChange={field.onChange}
+                          value={field.value as 0 | 1}
+                        />
+                      )}
                     />
                   </Box>
-
                   <Box
                     sx={{
                       display: "flex",
@@ -1187,42 +2032,43 @@ export default function AddOrEditGrievanceDialog({
                       }}
                       size="medium"
                       onClick={() => {
-                        handleTabChange(null, 0);
+                        handleTabChange(null, 1);
                       }}
                       startIcon={<ArrowBackIcon />}
                     >
                       Previous
                     </CustomButton>
                   </Box>
-                </Stack>
-              </TabPanel> */}
+                </TabPanel>
+              )}
             </Box>
-            <Box
+            <Stack
               sx={{
                 display: "flex",
                 flex: { lg: 1, md: 1 },
                 flexDirection: "column",
                 backgroundColor: "#fff",
                 boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-                padding: "1rem",
+                padding: "0.5rem",
                 borderRadius: "0.3rem",
                 marginY: isTablet ? "0.5rem" : 0,
                 marginLeft: isTablet ? 0 : "0.5rem",
                 height: "fit-content",
               }}
             >
-              {/* <Box sx={{ margin: "0.5rem" }}>
+              <Box sx={{ margin: "0.5rem" }}>
                 <Controller
                   control={control}
-                  {...register("accidentDate", { required: true })}
-                  name={"accidentDate"}
+                  {...register("submissionDate", { required: true })}
+                  name={"submissionDate"}
                   render={({ field }) => {
                     return (
                       <DatePickerComponent
                         onChange={(e) => field.onChange(e)}
-                        value={field.value ? new Date(field.value) : null}
-                        label="Accident Date"
-                        error={errors?.accidentDate ? "Required" : ""}
+                        value={field.value ? new Date(field.value) : undefined}
+                        label="Submission Date"
+                        error={errors?.submissionDate ? "Required" : ""}
+                        disablePast={true}
                       />
                     );
                   }}
@@ -1231,140 +2077,95 @@ export default function AddOrEditGrievanceDialog({
               <Box sx={{ margin: "0.5rem" }}>
                 <Controller
                   control={control}
-                  {...register("accidentTime", { required: true })}
-                  name={"accidentTime"}
+                  {...register("dueDate", { required: true })}
+                  name={"dueDate"}
                   render={({ field }) => {
                     return (
-                      <TimePickerComponent
+                      <DatePickerComponent
                         onChange={(e) => field.onChange(e)}
-                        value={field.value ? new Date(field.value) : null}
-                        label="Accident Time"
-                        error={errors?.accidentTime ? "Required" : ""}
+                        value={field.value ? new Date(field.value) : undefined}
+                        label="Due Date"
+                        error={errors?.dueDate ? "Required" : ""}
+                        disablePast={true}
                       />
                     );
                   }}
                 />
               </Box>
-
               <Box sx={{ margin: "0.5rem" }}>
-                <Typography
-                  variant="caption"
-                  sx={{ marginBottom: "0.1rem", color: grey[700] }}
-                >
-                  Injury Type
-                </Typography>
+                <Autocomplete
+                  {...register("businessUnit", { required: true })}
+                  size="small"
+                  options={
+                    divisionData?.length
+                      ? divisionData.map(
+                          (businessUnit) => businessUnit.divisionName
+                        )
+                      : []
+                  }
+                  defaultValue={defaultValues?.businessUnit}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      required
+                      error={!!errors.businessUnit}
+                      helperText={errors.businessUnit ? "Required" : ""}
+                      label="Business Unit"
+                      name="businessUnit"
+                    />
+                  )}
+                />
+              </Box>
+              <Box sx={{ margin: "0.5rem" }}>
                 <Controller
                   control={control}
-                  name={"injuryType"}
-                  render={({ field }) => {
-                    return (
-                      <ToggleButtonGroup
-                        size="small"
-                        {...control}
-                        aria-label="Small sizes"
-                        color="primary"
-                        value={field.value}
-                        exclusive
-                        orientation="vertical"
-                        fullWidth
-                        onChange={(e, value) => {
-                          field.onChange(value);
-                        }}
-                      >
-                        <ToggleButton
-                          value={InjuryType.FIRST_AID}
-                          key={InjuryType.FIRST_AID}
-                        >
-                          <Typography variant="caption" component="div">
-                            {InjuryType.FIRST_AID}
-                          </Typography>
-                        </ToggleButton>
-                        <ToggleButton
-                          value={InjuryType.REPORTABLE_ACCIDENT}
-                          key={InjuryType.REPORTABLE_ACCIDENT}
-                        >
-                          <Typography variant="caption" component="div">
-                            {InjuryType.REPORTABLE_ACCIDENT}
-                          </Typography>
-                        </ToggleButton>
-                        <ToggleButton
-                          value={InjuryType.NON_REPORTABLE_ACCIDENT}
-                          key={InjuryType.NON_REPORTABLE_ACCIDENT}
-                        >
-                          <Typography variant="caption" component="div">
-                            {InjuryType.NON_REPORTABLE_ACCIDENT}
-                          </Typography>
-                        </ToggleButton>
-                      </ToggleButtonGroup>
-                    );
-                  }}
+                  name="isAnonymous"
+                  defaultValue={0 as 0 | 1}
+                  render={({ field }) => (
+                    <FormDataSwitchButton
+                      label="Is Anonymous?"
+                      onChange={field.onChange}
+                      value={field.value as 0 | 1}
+                    />
+                  )}
                 />
               </Box>
 
-              <Box
-                sx={{
-                  margin: "0.5rem",
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-              >
-                <Typography
-                  variant="caption"
-                  sx={{ marginBottom: "0.1rem", color: grey[700] }}
-                >
-                  Severity
-                </Typography>
-                <Controller
-                  control={control}
-                  name={"severity"}
-                  render={({ field }) => {
-                    return (
-                      <ToggleButtonGroup
-                        size="small"
-                        {...control}
-                        aria-label="Small sizes"
-                        color="primary"
-                        value={field.value}
-                        exclusive
-                        onChange={(e, value) => {
-                          field.onChange(value);
-                        }}
-                      >
-                        <ToggleButton
-                          value={Severity.MAJOR}
-                          key={Severity.MAJOR}
-                        >
-                          <Typography variant="caption" component="div">
-                            {Severity.MAJOR}
-                          </Typography>
-                        </ToggleButton>
-                        <ToggleButton
-                          value={Severity.MINOR}
-                          key={Severity.MINOR}
-                        >
-                          <Typography variant="caption" component="div">
-                            {Severity.MINOR}
-                          </Typography>
-                        </ToggleButton>
-                      </ToggleButtonGroup>
-                    );
-                  }}
-                />
-              </Box>
-
-              <Box sx={{ margin: "0.5rem" }}>
+              <Box>
                 <UserAutoComplete
                   name="assignee"
                   label="Assignee"
                   control={control}
                   register={register}
                   errors={errors}
-                  userData={asigneeData}
+                  userData={assigneeData}
                   defaultValue={defaultValues?.assignee}
                   required={true}
                 />
-              </Box> */}
-            </Box>
+              </Box>
+              {defaultValues &&
+                defaultValues.status !== GrievanceStatus.draft && (
+                  <Box sx={{ margin: "0.5rem" }}>
+                    <Controller
+                      control={control}
+                      {...register("resolutionDate")}
+                      name={"resolutionDate"}
+                      render={({ field }) => {
+                        return (
+                          <DatePickerComponent
+                            onChange={(e) => field.onChange(e)}
+                            value={
+                              field.value ? new Date(field.value) : undefined
+                            }
+                            label="Resolution Date"
+                            disablePast={true}
+                          />
+                        );
+                      }}
+                    />
+                  </Box>
+                )}
+            </Stack>
           </Stack>
         </DialogContent>
         <Divider />
@@ -1387,65 +2188,123 @@ export default function AddOrEditGrievanceDialog({
             disabled={isLoading}
             startIcon={isLoading ? <CircularProgress size={24} /> : null}
             onClick={handleSubmit((data) => {
-              handleSubmitAccidentRecord(data);
+              handleSubmitGrievanceRecord(data);
             })}
           >
-            {defaultValues ? "Update Changes" : "Submit Report"}
+            {defaultValues ? "Update Changes" : `Submit ${grievanceType}`}
           </CustomButton>
         </DialogActions>
       </Dialog>
-      {/* {addWitnessDialogOpen && (
-        <AddOrEditWitnessDialog
-          open={addWitnessDialogOpen}
-          onClose={() => {
-            setAddWitnessDialogOpen(false);
-            setSelectedWitness(null);
-          }}
-          onSubmit={(data) => {
-            if (selectedWitness) {
-              setValue("witnesses", [
-                ...(witnessesWatch ?? []).map((item) => {
-                  if (item.employeeId === selectedWitness.employeeId) {
-                    return data;
-                  }
-                  return item;
-                }),
-              ]);
-            } else {
-              setValue("witnesses", [...(witnessesWatch ?? []), data]);
-            }
-            setAddWitnessDialogOpen(false);
-            setSelectedWitness(null);
-          }}
-          defaultValues={selectedWitness}
+      {addTopicDialogOpen && (
+        <AddNewTopicDialog
+          open={addTopicDialogOpen}
+          setOpen={setAddTopicDialogOpen}
         />
-      )} */}
-      {/* {openAddOrEditPersonDialog && (
-        <AddOrEditPersonDialog
-          open={openAddOrEditPersonDialog}
-          handleClose={() => setOpenAddOrEditPersonDialog(false)}
+      )}
+      {addSubmissionDialog && (
+        <AddNewSubmissionDialog
+          open={addSubmissionDialog}
+          setOpen={setAddSubmissionDialog}
+        />
+      )}
+      {addRespondentDialogOpen && (
+        <AddOrEditRespondentDialog
+          open={addRespondentDialogOpen}
+          onClose={() => setAddRespondentDialogOpen(false)}
+          grievanceId={defaultValues?.id || null}
           onSubmit={(data) => {
-            if (selectedPerson) {
-              setValue("effectedIndividuals", [
-                ...(effectedIndividualsWatch ?? []).map((item) => {
-                  if (item.employeeId === selectedPerson.employeeId) {
+            if (selectedRespondent) {
+              setValue("respondentDetails", [
+                ...(respondentWatch ?? []).map((item) => {
+                  if (item.respondentId === selectedRespondent.respondentId) {
                     return data;
                   }
                   return item;
                 }),
               ]);
             } else {
-              setValue("effectedIndividuals", [
-                ...(effectedIndividualsWatch ?? []),
+              setValue("respondentDetails", [...(respondentWatch ?? []), data]);
+            }
+            setAddRespondentDialogOpen(false);
+          }}
+          defaultValues={selectedRespondent}
+        />
+      )}
+      {addCommitteeMemberDialogOpen && (
+        <AddOrEditCommitteeMemberDialog
+          open={addCommitteeMemberDialogOpen}
+          onClose={() => setAddCommitteeMemberDialogOpen(false)}
+          grievanceId={defaultValues?.id || null}
+          onSubmit={(data) => {
+            if (selectedCommitteeMember) {
+              setValue("committeeMemberDetails", [
+                ...(committeeMemberWatch ?? []).map((item) => {
+                  if (item.memberId === selectedCommitteeMember.memberId) {
+                    return data;
+                  }
+                  return item;
+                }),
+              ]);
+            } else {
+              setValue("committeeMemberDetails", [
+                ...(committeeMemberWatch ?? []),
                 data,
               ]);
             }
-            setOpenAddOrEditPersonDialog(false);
-            setSelectedPerson(null);
+            setAddCommitteeMemberDialogOpen(false);
           }}
-          defaultValues={selectedPerson}
+          defaultValues={selectedCommitteeMember}
         />
-      )} */}
+      )}
+      {addNomineeDialogOpen && (
+        <AddOrEditNomineeDialog
+          open={addNomineeDialogOpen}
+          grievanceId={defaultValues?.id || null}
+          onClose={() => setAddNomineeDialogOpen(false)}
+          onSubmit={(data) => {
+            if (selectedNominee) {
+              setValue("nomineeDetails", [
+                ...(nomineeWatch ?? []).map((item) => {
+                  if (item.nomineeId === selectedNominee.nomineeId) {
+                    return data;
+                  }
+                  return item;
+                }),
+              ]);
+            } else {
+              setValue("nomineeDetails", [...(nomineeWatch ?? []), data]);
+            }
+            setAddNomineeDialogOpen(false);
+          }}
+          defaultValues={selectedNominee}
+        />
+      )}
+      <AddOrEditLegalAdvisorDialog
+        open={addLegalAdvisorDialogOpen}
+        grievanceId={defaultValues?.id || null}
+        onClose={() => setAddLegalAdvisorDialogOpen(false)}
+        onSubmit={(data) => {
+          if (selectedLegalAdvisor) {
+            setValue("legalAdvisorDetails", [
+              ...(legalAdvisorWatch ?? []).map((item) => {
+                if (
+                  item.legalAdvisorId === selectedLegalAdvisor.legalAdvisorId
+                ) {
+                  return data;
+                }
+                return item;
+              }),
+            ]);
+          } else {
+            setValue("legalAdvisorDetails", [
+              ...(legalAdvisorWatch ?? []),
+              data,
+            ]);
+          }
+          setAddLegalAdvisorDialogOpen(false);
+        }}
+        defaultValues={selectedLegalAdvisor}
+      />
     </>
   );
 }

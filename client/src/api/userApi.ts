@@ -249,6 +249,11 @@ export async function fetchExternalAuditAssignee() {
   return res.data;
 }
 
+export async function fetchGrievanceAssignee() {
+  const res = await axios.get("/api/grievance-record-assignee");
+  return res.data;
+}
+
 export async function updateUserProfileImage({
   id,
   imageFile,
