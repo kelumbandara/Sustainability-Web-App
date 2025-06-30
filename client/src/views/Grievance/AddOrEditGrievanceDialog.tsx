@@ -408,7 +408,8 @@ export default function AddOrEditGrievanceDialog({
         fullScreen={true}
         PaperProps={{
           style: {
-            backgroundColor: grey[50],
+            maxHeight: "100vh",
+            overflowY: "hidden",
           },
           component: "form",
         }}
