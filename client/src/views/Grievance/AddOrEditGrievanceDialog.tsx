@@ -2144,7 +2144,7 @@ export default function AddOrEditGrievanceDialog({
                   </Box>
                 )}
               <Box sx={{ margin: "0.5rem" }}>
-                {defaultValues.isAnonymous ? (
+                {defaultValues?.isAnonymous ? (
                   <Alert severity="info">This is an anonymous grievance.</Alert>
                 ) : (
                   <Controller
