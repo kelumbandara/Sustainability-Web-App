@@ -79,9 +79,10 @@ function DocumentTable() {
   );
 
   const { data: attritionData, isFetching: isAttritionDataFetching } = useQuery({
-    queryKey: ["attrition-data"],
-    queryFn: fetchAttritionRecord,
-  });
+      queryKey: ["attrition-data"],
+      queryFn: fetchAttritionRecord,
+    }
+  );
   const { mutate: deleteAttritionMutation } = useMutation({
     mutationFn: deleteAttritionRecord,
     onSuccess: () => {
@@ -100,16 +101,16 @@ function DocumentTable() {
     },
   });
 
-    const paginatedAttritionData = useMemo(() => {
-      if (!attritionData) return [];
-      if (rowsPerPage === -1) {
-        return attritionData;
-      }
-      return attritionData.slice(
-        page * rowsPerPage,
-        page * rowsPerPage + rowsPerPage
-      );
-    }, [attritionData, page, rowsPerPage]);
+  const paginatedAttritionData = useMemo(() => {
+    if (!attritionData) return [];
+    if (rowsPerPage === -1) {
+      return attritionData;
+    }
+    return attritionData.slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage
+    );
+  }, [attritionData, page, rowsPerPage]);
 
   return (
     <Stack>

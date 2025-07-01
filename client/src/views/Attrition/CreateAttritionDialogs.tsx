@@ -21,11 +21,8 @@ import queryClient from "../../state/queryClient";
 import CloseIcon from "@mui/icons-material/Close";
 import {
   Attrition,
-  Country,
   createAttritionDesignation,
   CreateAttritionResignation,
-  createDesignation,
-  createState,
 } from "../../api/Attrition/attritionApi";
 
 export const AddNewDesignationDialog = ({
@@ -40,16 +37,16 @@ export const AddNewDesignationDialog = ({
   const { isMobile } = useIsMobile();
 
   const handleCreateDesignation = (data: { designation: string }) => {
-    createAttritionDesignation(data.designation);
+    createDesignationMutation(data.designation);
   };
   const {
     mutate: createDesignationMutation,
     isPending: isDesignationCreating,
   } = useMutation({
-    mutationFn: createDesignation,
+    mutationFn: createAttritionDesignation,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["designation"],
+        queryKey: ["designation-data"],
       });
       enqueueSnackbar("Designation Created Successfully!", {
         variant: "success",
@@ -161,10 +158,10 @@ export const AddNewResignationTypeDialog = ({
   };
   const { mutate: createResignationMutation, isPending: isFunctionCreating } =
     useMutation({
-      mutationFn: CreateAttritionResignation, //change this
+      mutationFn: CreateAttritionResignation,
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ["resignation"],
+          queryKey: ["resignation-data"],
         });
         enqueueSnackbar("Resignation Type Created Successfully!", {
           variant: "success",
@@ -252,240 +249,6 @@ export const AddNewResignationTypeDialog = ({
           onClick={handleSubmit(handleCreateFunction)}
         >
           Add New Resignation
-        </CustomButton>
-      </DialogActions>
-    </Dialog>
-  );
-};
-
-export const AddNewCountryDialog = ({
-  open,
-  setOpen,
-}: {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-}) => {
-  const { enqueueSnackbar } = useSnackbar();
-  const { register, handleSubmit, reset } = useForm<Country>();
-  const { isMobile } = useIsMobile();
-
-  const handleCreateCountry = (data: { countryName: string }) => {
-    //   createCountryMutation(data.countryName);
-  };
-  const { mutate: createCountryMutation, isPending: isCountryCreating } =
-    useMutation({
-      mutationFn: createDesignation, //change this
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: ["country"],
-        });
-        enqueueSnackbar("Country Created Successfully!", {
-          variant: "success",
-        });
-        reset();
-        setOpen(false);
-      },
-      onError: () => {
-        enqueueSnackbar(`Country Create Failed`, {
-          variant: "error",
-        });
-      },
-    });
-
-  return (
-    <Dialog
-      open={open}
-      onClose={() => setOpen(false)}
-      fullScreen={isMobile}
-      fullWidth
-      maxWidth="md"
-      PaperProps={{
-        style: {
-          backgroundColor: grey[50],
-        },
-        component: "form",
-      }}
-    >
-      <DialogTitle
-        sx={{
-          paddingY: "1rem",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Typography variant="h6" component="div">
-          Add New Country
-        </Typography>
-        <IconButton
-          aria-label="open drawer"
-          onClick={() => setOpen(false)}
-          edge="start"
-          sx={{
-            color: "#024271",
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <Divider />
-      <DialogContent>
-        <Stack
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <TextField
-            {...register("countryName", { required: true })}
-            required
-            id="countryName"
-            label="Country Name"
-            size="small"
-            fullWidth
-            sx={{ marginBottom: "0.5rem" }}
-          />
-        </Stack>
-      </DialogContent>
-      <DialogActions sx={{ padding: "1rem" }}>
-        <Button
-          onClick={() => setOpen(false)}
-          sx={{ color: "var(--pallet-blue)" }}
-        >
-          Cancel
-        </Button>
-        <CustomButton
-          variant="contained"
-          sx={{
-            backgroundColor: "var(--pallet-blue)",
-          }}
-          size="medium"
-          disabled={isCountryCreating}
-          endIcon={isCountryCreating ? <CircularProgress size={20} /> : null}
-          onClick={handleSubmit(handleCreateCountry)}
-        >
-          Add Country
-        </CustomButton>
-      </DialogActions>
-    </Dialog>
-  );
-};
-
-export const AddNewStateDialog = ({
-  open,
-  setOpen,
-  countryId,
-}: {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  countryId: number;
-}) => {
-  const { enqueueSnackbar } = useSnackbar();
-  const { register, handleSubmit, reset } = useForm<Attrition>();
-  const { isMobile } = useIsMobile();
-
-  const handleCreateState = (data: { state: string }) => {
-    const parsedId = Number(countryId);
-    createStateMutation({
-      countryId: parsedId,
-      stateName: data.state,
-    });
-  };
-
-  const { mutate: createStateMutation, isPending: isStateCreating } =
-    useMutation({
-      mutationFn: createState,
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: ["state-data"],
-        });
-        enqueueSnackbar("State Created Successfully!", {
-          variant: "success",
-        });
-        reset();
-        setOpen(false);
-      },
-      onError: () => {
-        enqueueSnackbar(`State Create Failed`, {
-          variant: "error",
-        });
-      },
-    });
-
-  return (
-    <Dialog
-      open={open}
-      onClose={() => setOpen(false)}
-      fullScreen={isMobile}
-      fullWidth
-      maxWidth="md"
-      PaperProps={{
-        style: {
-          backgroundColor: grey[50],
-        },
-        component: "form",
-      }}
-    >
-      <DialogTitle
-        sx={{
-          paddingY: "1rem",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Typography variant="h6" component="div">
-          Add New State
-        </Typography>
-        <IconButton
-          aria-label="open drawer"
-          onClick={() => setOpen(false)}
-          edge="start"
-          sx={{
-            color: "#024271",
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <Divider />
-      <DialogContent>
-        <Stack
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <TextField
-            {...register("state", { required: true })}
-            required
-            id="stateName"
-            name="stateName"
-            label="State"
-            size="small"
-            fullWidth
-            sx={{ marginBottom: "0.5rem" }}
-          />
-        </Stack>
-      </DialogContent>
-      <DialogActions sx={{ padding: "1rem" }}>
-        <Button
-          onClick={() => setOpen(false)}
-          sx={{ color: "var(--pallet-blue)" }}
-        >
-          Cancel
-        </Button>
-        <CustomButton
-          variant="contained"
-          sx={{
-            backgroundColor: "var(--pallet-blue)",
-          }}
-          size="medium"
-          disabled={isStateCreating}
-          endIcon={isStateCreating ? <CircularProgress size={20} /> : null}
-          onClick={handleSubmit(handleCreateState)}
-        >
-          Add State
         </CustomButton>
       </DialogActions>
     </Dialog>

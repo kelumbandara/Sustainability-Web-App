@@ -34,39 +34,21 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../api/divisionApi";
 import { fetchDepartmentData } from "../../api/departmentApi";
-// import {
-//   CountryData,
-//   DesignationData,
-//   EmployeeTypeData,
-//   EmploymentTypeData,
-//   FunctionData,
-//   RAG,
-//   SourceOfHiring,
-//   StateData,
-// } from "../../api/RAG/ragApi";
 import {
-  AddNewCountryDialog,
   AddNewDesignationDialog,
   AddNewResignationTypeDialog,
-  AddNewStateDialog,
 } from "./CreateAttritionDialogs";
 import AccessibilityNewOutlinedIcon from "@mui/icons-material/AccessibilityNewOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import {
   Attrition,
-  CountryData,
   createAttritionReport,
-  DesignationData,
+  fetchAttritionDesignationNames,
   fetchAttritionEmployment,
   fetchAttritionResignation,
   fetchCountryNames,
-  fetchRagDesignationNames,
-  fetchRagEmployee,
-  fetchRagFunction,
-  fetchRagSource,
   fetchStateNames,
   genderData,
-  StateData,
   tenureSplitData,
   updateAttritionRecord,
 } from "../../api/Attrition/attritionApi";
@@ -157,22 +139,7 @@ export default function AddOrEditRAGDialog({
 
   const { data: designationData } = useQuery({
     queryKey: ["designation-data"],
-    queryFn: fetchRagDesignationNames,
-  });
-
-  const { data: functionData } = useQuery({
-    queryKey: ["function-data"],
-    queryFn: fetchRagFunction,
-  });
-
-  const { data: sourceData } = useQuery({
-    queryKey: ["source-data"],
-    queryFn: fetchRagSource,
-  });
-
-  const { data: ragEmployeeData } = useQuery({
-    queryKey: ["employee-data"],
-    queryFn: fetchRagEmployee,
+    queryFn: fetchAttritionDesignationNames,
   });
 
   const { data: countryData } = useQuery({
@@ -343,8 +310,6 @@ export default function AddOrEditRAGDialog({
     useState(false);
   const [openAddNewResignationTypeDialog, setOpenAddNewResignationTypeDialog] =
     useState(false);
-  const [openAddNewCountryDialog, setOpenAddNewCountryDialog] = useState(false);
-  const [openAddNewStateDialog, setOpenAddNewStateDialog] = useState(false);
   const AddNewDesignationButton = (props) => (
     <li
       {...props}
@@ -393,54 +358,6 @@ export default function AddOrEditRAGDialog({
       </Typography>
     </li>
   );
-  const AddNewCountryButton = (props) => (
-    <li
-      {...props}
-      variant="contained"
-      style={{
-        backgroundColor: "var(--pallet-lighter-blue)",
-        color: "var(--pallet-blue)",
-        textTransform: "none",
-        margin: "0.5rem",
-        borderRadius: "0.3rem",
-        display: "flex",
-        flexDirection: "row",
-      }}
-      size="small"
-      onMouseDown={() => {
-        setOpenAddNewCountryDialog(true);
-      }}
-    >
-      <AddIcon />
-      <Typography variant="body2" component="div">
-        Add New Country
-      </Typography>
-    </li>
-  );
-  const AddNewStateButton = (props) => (
-    <li
-      {...props}
-      variant="contained"
-      style={{
-        backgroundColor: "var(--pallet-lighter-blue)",
-        color: "var(--pallet-blue)",
-        textTransform: "none",
-        margin: "0.5rem",
-        borderRadius: "0.3rem",
-        display: "flex",
-        flexDirection: "row",
-      }}
-      size="small"
-      onMouseDown={() => {
-        setOpenAddNewStateDialog(true);
-      }}
-    >
-      <AddIcon />
-      <Typography variant="body2" component="div">
-        Add New State
-      </Typography>
-    </li>
-  );
 
   return (
     <>
@@ -465,15 +382,6 @@ export default function AddOrEditRAGDialog({
         <AddNewResignationTypeDialog
           open={openAddNewResignationTypeDialog}
           setOpen={setOpenAddNewResignationTypeDialog}
-        />
-        <AddNewCountryDialog
-          open={openAddNewCountryDialog}
-          setOpen={setOpenAddNewCountryDialog}
-        />
-        <AddNewStateDialog
-          open={openAddNewStateDialog}
-          setOpen={setOpenAddNewStateDialog}
-          countryId={countryId}
         />
         <DialogTitle
           sx={{
@@ -729,7 +637,7 @@ export default function AddOrEditRAGDialog({
                     <Controller
                       name="countryName"
                       control={control}
-                      rules={{ required: "required" }}
+                      {...register("countryName", { required: true })}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -754,6 +662,7 @@ export default function AddOrEditRAGDialog({
                           renderInput={(params) => (
                             <TextField
                               {...params}
+                              required
                               error={!!errors.countryName}
                               label="Country"
                             />
@@ -765,34 +674,29 @@ export default function AddOrEditRAGDialog({
                       <Controller
                         name="state"
                         control={control}
-                        rules={{ required: "required" }}
                         defaultValue={defaultValues?.state ?? ""}
+                        {...register("state", { required: true })}
                         render={({ field }) => (
                           <Autocomplete
                             {...field}
-                            onChange={(_, value) => field.onChange(value)}
-                            value={field.value || ""}
-                            size="small"
-                            noOptionsText={
-                              <Typography
-                                variant="body2"
-                                color="inherit"
-                                gutterBottom
-                              >
-                                No matching Items
-                              </Typography>
+                            onChange={(event, newValue) =>
+                              field.onChange(newValue)
                             }
-                            options={[
-                              ...(stateData?.length
+                            size="small"
+                            options={
+                              stateData?.length
                                 ? stateData.map((state) => state.stateName)
-                                : []),
-                            ]}
+                                : []
+                            }
                             sx={{ flex: 1, margin: "0.5rem" }}
                             renderInput={(params) => (
                               <TextField
                                 {...params}
+                                required
                                 error={!!errors.state}
+                                helperText={errors.state && "Required"}
                                 label="State"
+                                name="state"
                               />
                             )}
                           />
@@ -894,8 +798,8 @@ export default function AddOrEditRAGDialog({
                             </Typography>
                           }
                           options={[
-                            ...(DesignationData?.length
-                              ? DesignationData.map(
+                            ...(designationData?.length
+                              ? designationData.map(
                                   (designation) => designation.designationName
                                 )
                               : []),
@@ -1022,7 +926,8 @@ export default function AddOrEditRAGDialog({
                           options={
                             employmentData?.length
                               ? employmentData.map(
-                                  (employee) => employee.employmentClassificationName
+                                  (employee) =>
+                                    employee.employmentClassificationName
                                 )
                               : []
                           }
@@ -1057,7 +962,8 @@ export default function AddOrEditRAGDialog({
                           options={
                             employmentData?.length
                               ? employmentData.map(
-                                  (employee) => employee.employmentClassificationName
+                                  (employee) =>
+                                    employee.employmentClassificationName
                                 )
                               : []
                           }
@@ -1261,9 +1167,7 @@ export default function AddOrEditRAGDialog({
                         size="small"
                         options={
                           tenureSplitData?.length
-                            ? tenureSplitData.map(
-                                (split) => split.tenureSplit
-                              )
+                            ? tenureSplitData.map((split) => split.tenureSplit)
                             : []
                         }
                         sx={{ flex: 1, margin: "0.5rem" }}
