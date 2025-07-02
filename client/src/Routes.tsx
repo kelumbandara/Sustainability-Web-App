@@ -154,6 +154,9 @@ const EnvironmentDashBoard = React.lazy(
 const GrievanceTable = React.lazy(
   () => import("./views/Grievance/GrievanceTable")
 );
+const GrievanceDashboard = React.lazy(
+  () => import("./views/Grievance/Dashboard")
+);
 
 function withLayout(Layout: any, Component: any, restrictAccess = false) {
   return (
@@ -714,7 +717,7 @@ const AppRoutes = () => {
           element={withLayout(
             MainLayout,
             () => (
-              <UnderDevelopment pageName="Grievance > Dashboard" />
+              <GrievanceDashboard />
             ),
             !userPermissionObject?.[PermissionKeys.GRIEVANCE_REGISTER_VIEW]
           )}

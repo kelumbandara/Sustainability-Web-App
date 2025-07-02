@@ -416,3 +416,74 @@ export const deleteGrievance = async (id: number) => {
   const res = await axios.delete(`/api/grievance-record/${id}/delete`);
   return res.data;
 };
+
+//dashboard API s
+export const categoryData = [
+  {
+    id: "1",
+    name: "others",
+  },
+  {
+    id: "2",
+    name: "production",
+  },
+  {
+    id: "3",
+    name: "hse",
+  },
+  {
+    id: "4",
+    name: "labor relations",
+  },
+  {
+    id: "5",
+    name: "hr management",
+  },
+];
+
+export async function getGrievancesStatusSummary(
+  startDate: string,
+  endDate: string,
+  businessUnit: string,
+  category: string
+) {
+  const res = await axios.get(
+    `/api/grievance-dashboard/${startDate}/${endDate}/${businessUnit}/${category}/status-summary`
+  );
+  return res.data;
+}
+
+export async function getGrievancesMonthlyStatusSummary(
+  startDate: string,
+  endDate: string,
+  businessUnit: string,
+  category: string
+) {
+  const res = await axios.get(
+    `/api/grievance-dashboard/${startDate}/${endDate}/${businessUnit}/${category}/monthly-status-summary`
+  );
+  return res.data;
+}
+
+export async function getTypeOfGrievancesSummary(
+  startDate: string,
+  endDate: string,
+  businessUnit: string,
+  category: string
+) {
+  const res = await axios.get(
+    `/api/grievance-dashboard/${startDate}/${endDate}/${businessUnit}/${category}/type-of-grievance`
+  );
+  return res.data;
+}
+
+export async function getCategoryOfGrievancesSummary(
+  startDate: string,
+  endDate: string,
+  businessUnit: string,
+) {
+  const res = await axios.get(
+    `/api/grievance-dashboard/${startDate}/${endDate}/${businessUnit}/category-summary`
+  );
+  return res.data;
+}
