@@ -460,7 +460,7 @@ export async function getGrievancesMonthlyStatusSummary(
   category: string
 ) {
   const res = await axios.get(
-    `/api/grievance-dashboard/${startDate}/${endDate}/${businessUnit}/${category}/monthly-status-summary`
+    `/api/grievance-dashboard/${startDate}/${endDate}/${businessUnit}/${category}/monthly-type-summary`
   );
   return res.data;
 }
@@ -480,10 +480,82 @@ export async function getTypeOfGrievancesSummary(
 export async function getCategoryOfGrievancesSummary(
   startDate: string,
   endDate: string,
-  businessUnit: string,
+  businessUnit: string
 ) {
   const res = await axios.get(
     `/api/grievance-dashboard/${startDate}/${endDate}/${businessUnit}/category-summary`
+  );
+  return res.data;
+}
+
+export async function getCategoryDepartment(
+  startDate: string,
+  endDate: string,
+  businessUnit: string,
+  category: string
+) {
+  const res = await axios.get(
+    `/api/grievance-dashboard/${startDate}/${endDate}/${businessUnit}/${category}/department-summary`
+  );
+  return res.data;
+}
+
+export async function getCategoryTopic(
+  startDate: string,
+  endDate: string,
+  businessUnit: string,
+  category: string
+) {
+  const res = await axios.get(
+    `/api/grievance-dashboard/${startDate}/${endDate}/${businessUnit}/${category}/topic-summary`
+  );
+  return res.data;
+}
+
+export async function getChannelSummery(
+  startDate: string,
+  endDate: string,
+  businessUnit: string,
+  category: string
+) {
+  const res = await axios.get(
+    `/api/grievance-dashboard/${startDate}/${endDate}/${businessUnit}/${category}/channel-summary`
+  );
+  return res.data;
+}
+
+export async function getStarsSummery(
+  startDate: string,
+  endDate: string,
+  businessUnit: string,
+  category: string
+) {
+  const res = await axios.get(
+    `/api/grievance-dashboard/${startDate}/${endDate}/${businessUnit}/${category}/stars-summary`
+  );
+  return res.data;
+}
+
+export async function getAnonymousSummery(
+  startDate: string,
+  endDate: string,
+  businessUnit: string,
+  category: string
+) {
+  const res = await axios.get(
+    `/api/grievance-dashboard/${startDate}/${endDate}/${businessUnit}/${category}/anonymous-summary`
+  );
+  return res.data;
+}
+
+export async function getSeverityScoreSummery(
+  startDate: string,
+  endDate: string,
+  businessUnit: string,
+  category: string
+) {
+  const res = await axios.get(
+    `/api/grievance-dashboard/${startDate}/${endDate}/${businessUnit}/${category}/severity-score-summary`
   );
   return res.data;
 }
