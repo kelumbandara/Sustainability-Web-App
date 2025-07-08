@@ -259,13 +259,13 @@ export default function AddOrEditExternalAuditDialog({
     const { register, handleSubmit, reset } = useForm();
     const { isMobile } = useIsMobile();
 
-    const handleCreateAuditFirm = (data: { audiFirm: string }) => {
+    const handleCreateAuditFirm = (data: { auditFirmName: string }) => {
       const submitData = {
-        auditFirm: data.audiFirm,
+        auditFirmName: data.auditFirmName,
       };
+      console.log("adding", submitData);
       createAuditFirmMutation(submitData);
     };
-    
 
     const {
       mutate: createAuditFirmMutation,
@@ -274,7 +274,7 @@ export default function AddOrEditExternalAuditDialog({
       mutationFn: createAuditFirm,
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ["audit-data"],
+          queryKey: ["audit-firms"],
         });
         enqueueSnackbar("Audit Firm Created Successfully!", {
           variant: "success",
@@ -334,9 +334,9 @@ export default function AddOrEditExternalAuditDialog({
             }}
           >
             <TextField
-              {...register("auditFirm", { required: true })}
+              {...register("auditFirmName", { required: true })}
               required
-              id="auditFirm"
+              id="auditFirmName"
               label="Audit Firm"
               size="small"
               fullWidth
@@ -363,7 +363,7 @@ export default function AddOrEditExternalAuditDialog({
             }
             onClick={handleSubmit(handleCreateAuditFirm)}
           >
-            Add AuditFirm
+            Add Audit Firm
           </CustomButton>
         </DialogActions>
       </Dialog>
@@ -386,6 +386,10 @@ export default function AddOrEditExternalAuditDialog({
           component: "form",
         }}
       >
+        <AddNewAuditFirmDialog
+          open={addNewContactDialogOpen}
+          setOpen={setAddNewContactDialogOpen}
+        />
         <DialogTitle
           sx={{
             paddingY: "1rem",
@@ -704,38 +708,6 @@ export default function AddOrEditExternalAuditDialog({
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
-                          onChange={(event, newValue) =>
-                            field.onChange(newValue)
-                          }
-                          size="small"
-                          options={
-                            auditFirms?.length
-                              ? auditFirms.map((firm) => firm.auditFirmName)
-                              : []
-                          }
-                          sx={{ flex: 1, margin: "0.5rem" }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              required
-                              error={!!errors.auditFirm}
-                              helperText={errors.auditFirm && "Required"}
-                              label="Audit Firm"
-                              name="auditFirm"
-                            />
-                          )}
-                        />
-                      )}
-                    />
-
-                    <Controller
-                      name="auditFirm"
-                      control={control}
-                      defaultValue={defaultValues?.auditFirm ?? ""}
-                      {...register("auditFirm", { required: true })}
-                      render={({ field }) => (
-                        <Autocomplete
-                          {...field}
                           onChange={(_, value) => field.onChange(value)}
                           value={field.value || ""}
                           size="small"
@@ -750,7 +722,7 @@ export default function AddOrEditExternalAuditDialog({
                           }
                           options={[
                             ...(auditFirms?.length
-                              ? auditFirms.map((fun) => fun.functionName)
+                              ? auditFirms.map((audit) => audit.auditFirmName)
                               : []),
                             "$ADD_NEW_ITEM",
                           ]}
@@ -767,6 +739,7 @@ export default function AddOrEditExternalAuditDialog({
                           renderInput={(params) => (
                             <TextField
                               {...params}
+                              helperText={errors.auditFirm && "Required"}
                               error={!!errors.auditFirm}
                               label="Audit Firm"
                             />

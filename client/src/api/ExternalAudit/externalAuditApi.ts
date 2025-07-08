@@ -211,8 +211,8 @@ export async function deleteExternalActionPlan({ id }: { id: string }) {
   return res.data;
 }
 
-export const createAuditFirm = async (data: { auditFirm: string }) => {
-  const res = await axios.post("/api/rag-designation-names", data);
+export const createAuditFirm = async (data: { auditFirmName: string }) => {
+  const res = await axios.post("/api/external-audit-firm", data);
   console.log(data);
   return res.data;
 };
