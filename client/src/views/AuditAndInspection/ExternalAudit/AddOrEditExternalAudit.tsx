@@ -256,14 +256,14 @@ export default function AddOrEditExternalAuditDialog({
     setOpen: (open: boolean) => void;
   }) => {
     const { enqueueSnackbar } = useSnackbar();
-    const { register, handleSubmit, reset } = useForm<ExternalAudit>();
+    const { register, handleSubmit, reset } = useForm();
     const { isMobile } = useIsMobile();
 
     const handleCreateAuditFirm = (data: { audiFirm: string }) => {
       const submitData = {
-        auditFirm: data.audiFirm, // fix property name here
+        auditFirm: data.audiFirm,
       };
-      createAuditFirmMutation(submitData); // pass inside `data` key
+      createAuditFirmMutation(submitData);
     };
     
 
@@ -274,16 +274,16 @@ export default function AddOrEditExternalAuditDialog({
       mutationFn: createAuditFirm,
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ["designation-data"],
+          queryKey: ["audit-data"],
         });
-        enqueueSnackbar("Designation Created Successfully!", {
+        enqueueSnackbar("Audit Firm Created Successfully!", {
           variant: "success",
         });
         reset();
         setOpen(false);
       },
       onError: () => {
-        enqueueSnackbar(`Designation Create Failed`, {
+        enqueueSnackbar(`Audit Firm Create Failed`, {
           variant: "error",
         });
       },
@@ -363,7 +363,7 @@ export default function AddOrEditExternalAuditDialog({
             }
             onClick={handleSubmit(handleCreateAuditFirm)}
           >
-            Add Designation
+            Add AuditFirm
           </CustomButton>
         </DialogActions>
       </Dialog>
