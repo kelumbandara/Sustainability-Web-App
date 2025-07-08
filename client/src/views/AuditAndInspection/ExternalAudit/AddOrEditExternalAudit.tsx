@@ -52,6 +52,7 @@ import UserAutoComplete from "../../../components/UserAutoComplete";
 import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import ListIcon from "@mui/icons-material/List";
 import Diversity3Icon from "@mui/icons-material/Diversity3";
+import AddIcon from "@mui/icons-material/Add";
 
 type DialogProps = {
   open: boolean;
@@ -215,6 +216,34 @@ export default function AddOrEditExternalAuditDialog({
     }
     setActiveTab(newValue);
   };
+
+  const [addNewContactDialogOpen, setAddNewContactDialogOpen] = useState(false);
+
+  const AddNewAuditFirmButton = (props) => (
+    <li
+      {...props}
+      variant="contained"
+      style={{
+        backgroundColor: "var(--pallet-lighter-blue)",
+        color: "var(--pallet-blue)",
+        textTransform: "none",
+        margin: "0.5rem",
+        borderRadius: "0.3rem",
+        display: "flex",
+        flexDirection: "row",
+      }}
+      size="small"
+      // onClick closes the menu
+      onMouseDown={() => {
+        setAddNewContactDialogOpen(true);
+      }}
+    >
+      <AddIcon />
+      <Typography variant="body2" component="div">
+        Add a Audit Firm
+      </Typography>
+    </li>
+  );
 
   return (
     <>
@@ -568,6 +597,53 @@ export default function AddOrEditExternalAuditDialog({
                               helperText={errors.auditFirm && "Required"}
                               label="Audit Firm"
                               name="auditFirm"
+                            />
+                          )}
+                        />
+                      )}
+                    />
+
+                    <Controller
+                      name="auditFirm"
+                      control={control}
+                      defaultValue={defaultValues?.auditFirm ?? ""}
+                      {...register("auditFirm", { required: true })}
+                      render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          onChange={(_, value) => field.onChange(value)}
+                          value={field.value || ""}
+                          size="small"
+                          noOptionsText={
+                            <Typography
+                              variant="body2"
+                              color="inherit"
+                              gutterBottom
+                            >
+                              No matching Items
+                            </Typography>
+                          }
+                          options={[
+                            ...(auditFirms?.length
+                              ? auditFirms.map((fun) => fun.functionName)
+                              : []),
+                            "$ADD_NEW_ITEM",
+                          ]}
+                          renderOption={(props, option) =>
+                            option === "$ADD_NEW_ITEM" ? (
+                              <AddNewAuditFirmButton {...props} />
+                            ) : (
+                              <li {...props} key={option}>
+                                {option}
+                              </li>
+                            )
+                          }
+                          sx={{ flex: 1, margin: "0.5rem" }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              error={!!errors.auditFirm}
+                              label="Audit Firm"
                             />
                           )}
                         />

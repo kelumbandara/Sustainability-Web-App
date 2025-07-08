@@ -32,14 +32,12 @@ import UserAutoComplete from "../../../components/UserAutoComplete";
 import { fetchInternalAuditAssignee } from "../../../api/userApi";
 import RichTextComponent from "../../../components/RichTextComponent";
 import theme from "../../../theme";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   createExternalActionPlan,
   ScheduledExternalAuditActionPlan,
   updateExternalActionPlan,
 } from "../../../api/ExternalAudit/externalAuditApi";
-import AddIcon from "@mui/icons-material/Add";
-
 
 export const AddOrEditActionPlan = ({
   open,
@@ -138,34 +136,6 @@ export const AddOrEditActionPlan = ({
         });
       },
     });
-
-    const [addNewContactDialogOpen, setAddNewContactDialogOpen] = useState(false);
-    
-      const AddNewAuditFirmButton = (props) => (
-        <li
-          {...props}
-          variant="contained"
-          style={{
-            backgroundColor: "var(--pallet-lighter-blue)",
-            color: "var(--pallet-blue)",
-            textTransform: "none",
-            margin: "0.5rem",
-            borderRadius: "0.3rem",
-            display: "flex",
-            flexDirection: "row",
-          }}
-          size="small"
-          // onClick closes the menu
-          onMouseDown={() => {
-            setAddNewContactDialogOpen(true);
-          }}
-        >
-          <AddIcon />
-          <Typography variant="body2" component="div">
-            Add a Audit Firm
-          </Typography>
-        </li>
-      );
 
   return (
     <Dialog
