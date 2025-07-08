@@ -2,22 +2,10 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  AppBar,
   Autocomplete,
   Box,
   Button,
-  CircularProgress,
-  Divider,
-  Paper,
   Stack,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
   TextField,
   Typography,
 } from "@mui/material";
@@ -40,8 +28,7 @@ import {
   Bar,
   Cell,
 } from "recharts";
-import React, { useMemo, useState } from "react";
-import CircularProgressWithLabel from "../../components/CircularProgress";
+import { useMemo } from "react";
 
 import PaidOutlinedIcon from "@mui/icons-material/PaidOutlined";
 
@@ -50,29 +37,13 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchDivision } from "../../api/divisionApi";
 import { dateFormatter } from "../../util/dateFormat.util";
 import CustomPieChart from "../../components/CustomPieChart";
-import { format } from "date-fns";
 
 import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
-import {
-  fetchChemicalClassification,
-  fetchChemicalDashboardAllSummary,
-  fetchChemicalHighestStock,
-  fetchChemicalInventoryInsights,
-  fetchChemicalMonthlyDelivery,
-  fetchChemicalMonthlyLatestRecord,
-  fetchChemicalStatusSummery,
-  fetchChemicalStockAmount,
-  fetchChemicalThreshold,
-  fetchChemicalTransactionLatestRecord,
-  fetchMsdsCount,
-} from "../../api/ChemicalManagement/chemicalDashboardApi";
-import UpcomingOutlinedIcon from "@mui/icons-material/UpcomingOutlined";
-import FilterListOutlinedIcon from "@mui/icons-material/FilterListOutlined";
-import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
-import RadialStrokeBarChart from "../../components/RadialStrokedBarChart";
+
 import {
   categoryData,
+  getAllGrievanceSummery,
   getAnonymousSummery,
   getCategoryDepartment,
   getCategoryOfGrievancesSummary,
@@ -83,57 +54,12 @@ import {
   getSeverityScoreSummery,
   getStarsSummery,
   getTypeOfGrievancesSummary,
-  GrievanceCategory,
-} from "../../api/Grievance/grievanceApi";
+} from "../../api/Grievance/grievanceDashboardApi";
 
 const breadcrumbItems = [
   { title: "Home", href: "/home" },
   { title: "Grievance Management" },
 ];
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  dir?: string;
-  index: number;
-  value: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`full-width-tabpanel-${index}`}
-      aria-labelledby={`full-width-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-}
-
-function a11yProps(index: number) {
-  return {
-    id: `full-width-tab-${index}`,
-    "aria-controls": `full-width-tabpanel-${index}`,
-  };
-}
-
-function a11yProps2(indexTwo: number) {
-  return {
-    id: `full-width-tab-${indexTwo}`,
-    "aria-controls": `full-width-TabPanelTwo-${indexTwo}`,
-  };
-}
-
-function a11yProps3(indexTwo: number) {
-  return {
-    id: `full-width-tab-${indexTwo}`,
-    "aria-controls": `full-width-TabPanelTwo-${indexTwo}`,
-  };
-}
 
 function GrievanceDashboard() {
   const { isMobile, isTablet } = useIsMobile();
@@ -144,12 +70,10 @@ function GrievanceDashboard() {
     reset,
     control,
     formState: { errors },
-    setValue,
   } = useForm();
 
   const year = watch("year");
 
-  const auditType = watch("auditType");
   const division = watch("division");
   const category = watch("category");
 
@@ -158,31 +82,6 @@ function GrievanceDashboard() {
 
   const dateRangeTo = watch("dateRangeTo");
   const formattedDateTo = dateFormatter(dateRangeTo);
-
-  const [activeTab, setActiveTab] = useState(0);
-  const [activeTabTwo, setActiveTabTwo] = useState(0);
-  const [activeTabThree, setActiveTabThree] = useState(0);
-
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    console.log("event", event);
-    setActiveTab(newValue);
-  };
-
-  const handleChangeTabTwo = (
-    eventTwo: React.SyntheticEvent,
-    newValueTwo: number
-  ) => {
-    console.log("event", eventTwo);
-    setActiveTabTwo(newValueTwo);
-  };
-
-  const handleChangeTabThree = (
-    eventTwo: React.SyntheticEvent,
-    newValueTwo: number
-  ) => {
-    console.log("event", eventTwo);
-    setActiveTabThree(newValueTwo);
-  };
 
   const { data: divisionData, isFetching: isDivisionDataFetching } = useQuery({
     queryKey: ["divisions"],
@@ -394,6 +293,12 @@ function GrievanceDashboard() {
     enabled: false,
   });
 
+  const { data: grievanceAllSummery, isFetching: isGrievanceAllSummery } =
+    useQuery({
+      queryKey: ["grievance-all-summary", new Date().getFullYear()],
+      queryFn: () => getAllGrievanceSummery(new Date().getFullYear()),
+    });
+
   const topicChartData = useMemo(() => {
     return (
       grievanceTopicSummary?.topics?.map((topic) => ({
@@ -403,6 +308,24 @@ function GrievanceDashboard() {
       })) || []
     );
   }, [grievanceTopicSummary]);
+
+  const topicChartAllData = useMemo(() => {
+    if (!grievanceAllSummery?.topicSummary) return [];
+
+    return Object.entries(grievanceAllSummery.topicSummary).map(
+      ([topic, value]) => {
+        const { count, percentage } = value as {
+          count: number;
+          percentage: number;
+        };
+        return {
+          name: topic,
+          count,
+          percentage,
+        };
+      }
+    );
+  }, [grievanceAllSummery]);
 
   const pieAnonymousChartData = useMemo(() => {
     const summary = grievanceAnonymousSummary?.anonymousSummary;
@@ -421,6 +344,23 @@ function GrievanceDashboard() {
     ];
   }, [grievanceAnonymousSummary]);
 
+  const pieAnonymousChartAllData = useMemo(() => {
+    const summary = grievanceAllSummery?.anonymousSummary;
+
+    if (!summary) return [];
+
+    return [
+      {
+        name: "Anonymous",
+        value: summary.anonymous?.count ?? 0,
+      },
+      {
+        name: "Non-Anonymous",
+        value: summary.nonAnonymous?.count ?? 0,
+      },
+    ];
+  }, [grievanceAllSummery]);
+
   const starChartData = useMemo(() => {
     const summary = grievanceStarsSummary?.starsSummary;
 
@@ -437,6 +377,23 @@ function GrievanceDashboard() {
     });
   }, [grievanceStarsSummary]);
 
+  const starAllChartData = useMemo(() => {
+    const stars = grievanceAllSummery?.starsSummary;
+    if (!stars) return [];
+
+    return Object.entries(stars).map(([label, value]) => {
+      const { count, percentage } = value as {
+        count: number;
+        percentage: number;
+      };
+      return {
+        name: label,
+        count,
+        percentage,
+      };
+    });
+  }, [grievanceAllSummery]);
+
   const departmentChartData = useMemo(() => {
     return (
       grievanceDepartmentSummary?.responsibleDepartment?.map((dept) => ({
@@ -446,6 +403,20 @@ function GrievanceDashboard() {
       })) || []
     );
   }, [grievanceDepartmentSummary]);
+
+  const departmentAllChartData = useMemo(() => {
+    if (!grievanceAllSummery?.departmentSummary) return [];
+
+    return Object.entries(grievanceAllSummery.departmentSummary).map(
+      ([name, value]) => {
+        const { count, percentage } = value as {
+          count: number;
+          percentage: number;
+        };
+        return { name, count, percentage };
+      }
+    );
+  }, [grievanceAllSummery]);
 
   const pieChartDataChannel = useMemo(() => {
     if (
@@ -461,6 +432,20 @@ function GrievanceDashboard() {
     }));
   }, [grievanceChannelSummary]);
 
+  const pieChartAllDataChannel = useMemo(() => {
+    if (!grievanceAllSummery?.channelSummary) return [];
+
+    return Object.entries(grievanceAllSummery.channelSummary).map(
+      ([channel, value]) => {
+        const { count } = value as { count: number };
+        return {
+          name: channel,
+          value: count,
+        };
+      }
+    );
+  }, [grievanceAllSummery]);
+
   const pieChartDataCategory = useMemo(() => {
     if (
       !grievanceCategorySummary ||
@@ -475,9 +460,27 @@ function GrievanceDashboard() {
     }));
   }, [grievanceCategorySummary]);
 
+  const pieChartAllDataCategory = useMemo(() => {
+    if (!grievanceAllSummery?.categorySummary) return [];
+
+    return Object.entries(grievanceAllSummery.categorySummary).map(
+      ([category, value]) => {
+        const { count } = value as { count: number };
+        return {
+          name: category,
+          value: count,
+        };
+      }
+    );
+  }, [grievanceAllSummery]);
+
   const statusSummeryMemo = useMemo(() => {
     return grievanceStatusSummary || {};
   }, [grievanceStatusSummary]);
+
+  const statusAllSummeryMemo = useMemo(() => {
+    return grievanceAllSummery || {};
+  }, [grievanceAllSummery]);
 
   const chartData = useMemo(() => {
     const types = [
@@ -501,6 +504,28 @@ function GrievanceDashboard() {
     });
   }, [grievanceMonthlyStatusSummary]);
 
+  const chartAllData = useMemo(() => {
+    const types = [
+      "grievance",
+      "complaint",
+      "appreciation",
+      "suggestion",
+      "question",
+    ];
+
+    const monthlyData = grievanceAllSummery?.monthlyTypeCount || [];
+
+    return monthlyData.map((entry) => {
+      const row = { name: entry.month };
+
+      types.forEach((type) => {
+        row[type] = entry.types?.[type] || 0;
+      });
+
+      return row;
+    });
+  }, [grievanceAllSummery]);
+
   const pieChartData = useMemo(() => {
     if (!grievanceTypeSummary || !grievanceTypeSummary.types) return [];
 
@@ -516,421 +541,16 @@ function GrievanceDashboard() {
     ];
   }, [grievanceTypeSummary]);
 
-  const {
-    data: chemicalStockAmountData,
-    refetch: refetchChemicalStockAmount,
-    isFetching: isChemicalStockAmountData,
-  } = useQuery({
-    queryKey: [
-      "stock-amount",
-      formattedDateFrom,
-      formattedDateTo,
-      division,
-      auditType,
-    ],
-    queryFn: () =>
-      fetchChemicalStockAmount(formattedDateFrom, formattedDateTo, division),
-    enabled: false,
-  });
+  const pieChartAllData = useMemo(() => {
+    if (!grievanceAllSummery || !grievanceAllSummery.typeSummary) return [];
 
-  const {
-    data: chemicalMonthlyDeliveryData,
-    refetch: refetchChemicalMonthlyDelivery,
-    isFetching: isChemicalMonthlyDeliveryData,
-  } = useQuery({
-    queryKey: [
-      "monthly-delivery",
-      formattedDateFrom,
-      formattedDateTo,
-      division,
-      auditType,
-    ],
-    queryFn: () =>
-      fetchChemicalMonthlyDelivery(
-        formattedDateFrom,
-        formattedDateTo,
-        division
-      ),
-    enabled: false,
-  });
-
-  const {
-    data: chemicalLatestDeliveryData,
-    refetch: refetchChemicalMonthlyLatestRecord,
-    isFetching: isChemicalLatestDeliveryData,
-  } = useQuery({
-    queryKey: [
-      "latest-record",
-      formattedDateFrom,
-      formattedDateTo,
-      division,
-      auditType,
-    ],
-    queryFn: () =>
-      fetchChemicalMonthlyLatestRecord(
-        formattedDateFrom,
-        formattedDateTo,
-        division
-      ),
-    enabled: false,
-  });
-
-  const {
-    data: chemicalLatestTransactionData,
-    refetch: refetchChemicalTransactionLatestRecord,
-    isFetching: isChemicalLatestTransactionData,
-  } = useQuery({
-    queryKey: [
-      "latest-transaction-record",
-      formattedDateFrom,
-      formattedDateTo,
-      division,
-      auditType,
-    ],
-    queryFn: () =>
-      fetchChemicalTransactionLatestRecord(
-        formattedDateFrom,
-        formattedDateTo,
-        division
-      ),
-    enabled: false,
-  });
-
-  const {
-    data: chemicalThresholdData,
-    refetch: refetchChemicalThreshold,
-    isFetching: isChemicalThresholdData,
-  } = useQuery({
-    queryKey: [
-      "chemical-threshold",
-      formattedDateFrom,
-      formattedDateTo,
-      division,
-      auditType,
-    ],
-    queryFn: () =>
-      fetchChemicalThreshold(formattedDateFrom, formattedDateTo, division),
-    enabled: false,
-  });
-
-  const {
-    data: chemicalHighestData,
-    refetch: refetchChemicalHighestStock,
-    isFetching: isChemicalHighestData,
-  } = useQuery({
-    queryKey: [
-      "highest-chemical",
-      formattedDateFrom,
-      formattedDateTo,
-      division,
-      auditType,
-    ],
-    queryFn: () =>
-      fetchChemicalHighestStock(formattedDateFrom, formattedDateTo, division),
-    enabled: false,
-  });
-
-  const {
-    data: chemicalStatusSummeryData,
-    refetch: refetchChemicalStatusSummery,
-    isFetching: isChemicalStatusSummeryData,
-  } = useQuery({
-    queryKey: [
-      "chemical-status-summery",
-      formattedDateFrom,
-      formattedDateTo,
-      division,
-      auditType,
-    ],
-    queryFn: () =>
-      fetchChemicalStatusSummery(formattedDateFrom, formattedDateTo, division),
-    enabled: false,
-  });
-
-  const {
-    data: chemicalInsightData,
-    refetch: refetchChemicalInventoryInsights,
-    isFetching: isChemicalInsightData,
-  } = useQuery({
-    queryKey: [
-      "chemical-insight",
-      formattedDateFrom,
-      formattedDateTo,
-      division,
-      auditType,
-    ],
-    queryFn: () =>
-      fetchChemicalInventoryInsights(
-        formattedDateFrom,
-        formattedDateTo,
-        division
-      ),
-    enabled: false,
-  });
-
-  const {
-    data: chemicalClassificationData,
-    refetch: refetchChemicalClassification,
-    isFetching: isChemicalClassificationData,
-  } = useQuery({
-    queryKey: [
-      "chemical-classification",
-      formattedDateFrom,
-      formattedDateTo,
-      division,
-      auditType,
-    ],
-    queryFn: () =>
-      fetchChemicalClassification(formattedDateFrom, formattedDateTo, division),
-    enabled: false,
-  });
-
-  const {
-    data: chemicalMsdsData,
-    refetch: refetchMsdsCount,
-    isFetching: isChemicalMsdsData,
-  } = useQuery({
-    queryKey: [
-      "chemical-msds",
-      formattedDateFrom,
-      formattedDateTo,
-      division,
-      auditType,
-    ],
-    queryFn: () => fetchMsdsCount(formattedDateFrom, formattedDateTo, division),
-    enabled: false,
-  });
-
-  //Dashboard useMemo
-  const chemicalMsdsDataMemo = useMemo(() => {
-    return chemicalMsdsData?.percentage || [];
-  }, [chemicalMsdsData]);
-
-  const chemicalClassificationHazardTypeSummaryMemo = useMemo(() => {
-    return chemicalClassificationData?.hazardTypeSummary || [];
-  }, [chemicalClassificationData]);
-
-  const chemicalGhsClassificationHazardTypeSummaryMemo = useMemo(() => {
-    return chemicalClassificationData?.ghsClassificationSummary || [];
-  }, [chemicalClassificationData]);
-
-  const chemicalZdhcClassificationHazardTypeSummaryMemo = useMemo(() => {
-    return chemicalClassificationData?.zdhcLevelSummary || [];
-  }, [chemicalClassificationData]);
-
-  const chemicalInsightTopSuppliersDataMemo = useMemo(() => {
-    return chemicalInsightData?.topSuppliers || [];
-  }, [chemicalInsightData]);
-  const chemicalInsightPositiveListDataMemo = useMemo(() => {
-    return chemicalInsightData?.positiveList || [];
-  }, [chemicalInsightData]);
-  const chemicalInsightMsdsListDataMemo = useMemo(() => {
-    return chemicalInsightData?.msdsExpiries || [];
-  }, [chemicalInsightData]);
-  const chemicalInsightChemicalExpiryListDataMemo = useMemo(() => {
-    return chemicalInsightData?.chemicalExpiry || [];
-  }, [chemicalInsightData]);
-  const chemicalInsightCertificateExpiryListDataMemo = useMemo(() => {
-    return chemicalInsightData?.certificateExpiry || [];
-  }, [chemicalInsightData]);
-
-  const chemicalStatusSummeryDataMemo = useMemo(() => {
-    return (
-      chemicalStatusSummeryData?.data?.map(
-        (item: { status: string; count: number }) => ({
-          name: item.status,
-          value: item.count,
-        })
-      ) || []
+    return Object.entries(grievanceAllSummery.typeSummary).map(
+      ([key, value]: [string, { count: number }]) => ({
+        name: key,
+        value: value.count,
+      })
     );
-  }, [chemicalStatusSummeryData]);
-
-  const chemicalHighestDataMemo = useMemo(() => {
-    return chemicalHighestData || [];
-  }, [chemicalHighestData]);
-
-  const chemicalThresholdDataMemo = useMemo(() => {
-    return chemicalThresholdData || [];
-  }, [chemicalThresholdData]);
-  console.log(chemicalThresholdDataMemo.length);
-
-  const chemicalMonthlyDeliveryDataMemo = useMemo(() => {
-    if (
-      !chemicalMonthlyDeliveryData ||
-      !Array.isArray(chemicalMonthlyDeliveryData.data)
-    ) {
-      return [];
-    }
-
-    const groupedByMonth: Record<string, Record<string, any>> = {};
-
-    chemicalMonthlyDeliveryData.data.forEach((entry) => {
-      const { month, chemical, quantity } = entry;
-
-      if (!groupedByMonth[month]) {
-        groupedByMonth[month] = { month };
-      }
-
-      groupedByMonth[month][chemical] = quantity;
-    });
-
-    return Object.values(groupedByMonth);
-  }, [chemicalMonthlyDeliveryData]);
-
-  const chemicalKeys = useMemo(() => {
-    const set = new Set<string>();
-    chemicalMonthlyDeliveryData?.data?.forEach((entry) =>
-      set.add(entry.chemical)
-    );
-    return Array.from(set);
-  }, [chemicalMonthlyDeliveryData]);
-
-  const chemicalLatestTransactionDataMemo = useMemo(() => {
-    return chemicalLatestTransactionData || [];
-  }, [chemicalLatestTransactionData]);
-
-  const chemicalLatestDeliveryDataMemo = useMemo(() => {
-    return chemicalLatestDeliveryData || [];
-  }, [chemicalLatestDeliveryData]);
-
-  const chemicalStockAmountDataMemo = useMemo(() => {
-    return chemicalStockAmountData || {};
-  }, [chemicalStockAmountData]);
-
-  //Dashboard All Summary API
-  const {
-    data: chemicalDashboardSummeryData,
-    isFetching: isChemicalDashboardSummeryData,
-  } = useQuery({
-    queryKey: ["chemical-dashboard-data", new Date().getFullYear()],
-    queryFn: () => fetchChemicalDashboardAllSummary(new Date().getFullYear()),
-  });
-
-  //Dashboard All Summary useMemo
-  const msdsPercentageMemo = useMemo(() => {
-    return chemicalDashboardSummeryData?.msdsSummary?.percentage || 0;
-  }, [chemicalDashboardSummeryData]);
-
-  console.log("summary", msdsPercentageMemo);
-
-  const chemicalAllStatusSummeryDataMemo = useMemo(() => {
-    return (
-      chemicalDashboardSummeryData?.statusSummary?.map(
-        (item: { status: string; count: number }) => ({
-          name: item.status,
-          value: item.count,
-        })
-      ) || []
-    );
-  }, [chemicalDashboardSummeryData]);
-  console.log(chemicalAllStatusSummeryDataMemo);
-
-  const chemicalAllZdhcClassificationHazardTypeSummaryMemo = useMemo(() => {
-    return (
-      chemicalDashboardSummeryData?.categoryClassificationSummary
-        ?.zdhcLevelSummary || []
-    );
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalAllClassificationHazardTypeSummaryMemo = useMemo(() => {
-    return (
-      chemicalDashboardSummeryData?.categoryClassificationSummary
-        ?.hazardTypeSummary || []
-    );
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalAllGhsClassificationHazardTypeSummaryMemo = useMemo(() => {
-    return (
-      chemicalDashboardSummeryData?.categoryClassificationSummary
-        ?.ghsClassificationSummary || []
-    );
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalDashboardSummeryTopSuppliersDataMemo = useMemo(() => {
-    return (
-      chemicalDashboardSummeryData?.chemicalInventoryInsights?.topSuppliers ||
-      []
-    );
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalDashboardSummeryPositiveListDataMemo = useMemo(() => {
-    return (
-      chemicalDashboardSummeryData?.chemicalInventoryInsights?.positiveList ||
-      []
-    );
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalDashboardSummeryMsdsExpiriesDataMemo = useMemo(() => {
-    return (
-      chemicalDashboardSummeryData?.chemicalInventoryInsights?.msdsExpiries ||
-      []
-    );
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalDashboardSummeryChemicalExpiryDataMemo = useMemo(() => {
-    return (
-      chemicalDashboardSummeryData?.chemicalInventoryInsights?.chemicalExpiry ||
-      []
-    );
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalDashboardSummeryCertificateExpiryDataMemo = useMemo(() => {
-    return (
-      chemicalDashboardSummeryData?.chemicalInventoryInsights
-        ?.certificateExpiry || []
-    );
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalDashboardSummeryDataMemo = useMemo(() => {
-    return chemicalDashboardSummeryData || {};
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalAllMonthlyDeliveryDataMemo = useMemo(() => {
-    if (
-      !chemicalDashboardSummeryData ||
-      !Array.isArray(chemicalDashboardSummeryData.monthlyDelivery)
-    ) {
-      return [];
-    }
-
-    const groupedByMonth: Record<string, Record<string, any>> = {};
-
-    chemicalDashboardSummeryData.monthlyDelivery.forEach((entry) => {
-      const { month, chemical, quantity } = entry;
-
-      if (!groupedByMonth[month]) {
-        groupedByMonth[month] = { month };
-      }
-
-      groupedByMonth[month][chemical] = quantity;
-    });
-
-    return Object.values(groupedByMonth);
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalAllKeys = useMemo(() => {
-    const set = new Set<string>();
-    chemicalDashboardSummeryData?.monthlyDelivery?.forEach((entry) =>
-      set.add(entry.chemical)
-    );
-    return Array.from(set);
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalAllThresholdDataMemo = useMemo(() => {
-    return chemicalDashboardSummeryData || [];
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalAllHighestDataMemo = useMemo(() => {
-    return chemicalDashboardSummeryData || [];
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalAllLatestDeliveryDataMemo = useMemo(() => {
-    return chemicalDashboardSummeryData?.latestRecords || [];
-  }, [chemicalDashboardSummeryData]);
-
-  const chemicalAllLatestTransactionDataMemo = useMemo(() => {
-    return chemicalDashboardSummeryData?.latestTransactions || [];
-  }, [chemicalDashboardSummeryData]);
+  }, [grievanceAllSummery]);
 
   const handleFetch = () => {
     refetchGrievanceStatusSummary();
@@ -1144,7 +764,11 @@ function GrievanceDashboard() {
           <DashboardCard
             title="Reported"
             titleIcon={<ScienceOutlinedIcon fontSize="large" />}
-            value={statusSummeryMemo?.filteredRecords}
+            value={
+              statusSummeryMemo?.filteredRecords
+                ? statusSummeryMemo?.filteredRecords
+                : statusAllSummeryMemo?.statusSummary?.filteredRecords
+            }
             subDescription="All Reported Grievance"
           />
         </Box>
@@ -1159,7 +783,10 @@ function GrievanceDashboard() {
           <DashboardCard
             title="Open"
             titleIcon={<ScienceOutlinedIcon fontSize="large" />}
-            value={statusSummeryMemo?.statusSummary?.draft?.count || 0}
+            value={
+              statusSummeryMemo?.statusSummary?.draft?.count ||
+              statusAllSummeryMemo?.statusSummary?.statusCounts?.draft?.count
+            }
             subDescription="All Open Grievance"
           />
         </Box>
@@ -1174,7 +801,11 @@ function GrievanceDashboard() {
           <DashboardCard
             title="In Progress"
             titleIcon={<ScienceOutlinedIcon fontSize="large" />}
-            value={statusSummeryMemo?.statusSummary?.inprogress?.count || 0}
+            value={
+              statusSummeryMemo?.statusSummary?.inprogress?.count ||
+              statusAllSummeryMemo?.statusSummary?.statusCounts?.inprogress
+                ?.count
+            }
             subDescription="All In Progress Grievance"
           />
         </Box>
@@ -1189,7 +820,11 @@ function GrievanceDashboard() {
           <DashboardCard
             title="Completed"
             titleIcon={<PaidOutlinedIcon fontSize="large" />}
-            value={statusSummeryMemo?.status_summary?.completed?.count || 0}
+            value={
+              statusSummeryMemo?.statusSummary?.completed?.count ||
+              statusAllSummeryMemo?.statusSummary?.statusCounts?.completed
+                ?.count
+            }
             subDescription="All Completed Grievance"
           />
         </Box>
@@ -1204,7 +839,10 @@ function GrievanceDashboard() {
           <DashboardCard
             title="Feedback"
             titleIcon={<LocalShippingOutlinedIcon fontSize="large" />}
-            value={statusSummeryMemo?.feedbackSummary?.count || 0}
+            value={
+              statusSummeryMemo?.feedbackSummary?.count ||
+              statusAllSummeryMemo?.statusSummary?.feedbackSummary?.count
+            }
             subDescription="Employee Feedback Count"
           />
         </Box>
@@ -1240,7 +878,7 @@ function GrievanceDashboard() {
           </Box>
 
           <ResponsiveContainer width="100%" height={500}>
-            <BarChart data={chartData}>
+            <BarChart data={chartData.length > 0 ? chartData : chartAllData}>
               <XAxis dataKey="name" angle={25} />
               <YAxis fontSize={12} />
               <Tooltip />
@@ -1291,7 +929,7 @@ function GrievanceDashboard() {
           <ResponsiveContainer width="100%" height={500}>
             <>
               <CustomPieChart
-                data={pieChartData}
+                data={pieChartData.length > 0 ? pieChartData : pieChartAllData}
                 title="Grievance Type BreakDown"
                 centerLabel="Status"
               />
@@ -1327,11 +965,17 @@ function GrievanceDashboard() {
                 textAlign: "center",
               }}
             >
-              Latest Inventory Transaction
+              Department BreakDown
             </Typography>
           </Box>
           <ResponsiveContainer width="100%" height={500}>
-            <BarChart data={departmentChartData}>
+            <BarChart
+              data={
+                departmentChartData.length > 0
+                  ? departmentChartData
+                  : departmentAllChartData
+              }
+            >
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
@@ -1362,7 +1006,11 @@ function GrievanceDashboard() {
           >
             <>
               <CustomPieChart
-                data={pieChartDataCategory}
+                data={
+                  pieChartDataCategory.length > 0
+                    ? pieChartDataCategory
+                    : pieChartAllDataCategory
+                }
                 title="Category BreakDown"
                 centerLabel="Status"
               />
@@ -1397,7 +1045,7 @@ function GrievanceDashboard() {
                 textAlign: "center",
               }}
             >
-              Chemical Inventory Insights
+              Star Rating Deviation
             </Typography>
           </Box>
 
@@ -1409,12 +1057,17 @@ function GrievanceDashboard() {
               scrollbarWidth: "none",
             }}
           >
-            <BarChart data={starChartData}>
+            <BarChart
+              data={starChartData.length > 0 ? starChartData : starAllChartData}
+            >
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
               <Bar dataKey="count" barSize={20}>
-                {starChartData.map((entry, index) => {
+                {(starChartData.length > 0
+                  ? starChartData
+                  : starAllChartData
+                ).map((entry, index) => {
                   let fillColor = "#8884d8";
                   switch (entry.name) {
                     case "0 stars":
@@ -1461,8 +1114,12 @@ function GrievanceDashboard() {
           <ResponsiveContainer width="100%" height={500}>
             <>
               <CustomPieChart
-                data={pieChartDataChannel}
-                title="Chemical Status Summary"
+                data={
+                  pieChartDataChannel.length > 0
+                    ? pieChartDataChannel
+                    : pieChartAllDataChannel
+                }
+                title="Channel Summary"
                 centerLabel="Status"
               />
             </>
@@ -1496,7 +1153,7 @@ function GrievanceDashboard() {
                 textAlign: "center",
               }}
             >
-              Chemical Inventory Insights
+              Topic Insights
             </Typography>
           </Box>
 
@@ -1508,11 +1165,15 @@ function GrievanceDashboard() {
               scrollbarWidth: "none",
             }}
           >
-            <BarChart data={topicChartData}>
+            <BarChart
+              data={
+                topicChartData.length > 0 ? topicChartData : topicChartAllData
+              }
+            >
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="count" fill="#8884d8" barSize={15}/>
+              <Bar dataKey="count" fill="#8884d8" barSize={15} />
             </BarChart>
           </ResponsiveContainer>
         </Box>
@@ -1534,8 +1195,12 @@ function GrievanceDashboard() {
           <ResponsiveContainer width="100%" height={500}>
             <>
               <CustomPieChart
-                data={pieAnonymousChartData}
-                title="Chemical Status Summary"
+                data={
+                  pieAnonymousChartData.length > 0
+                    ? pieAnonymousChartData
+                    : pieAnonymousChartAllData
+                }
+                title="Anonymous Vs Non-Anonymous"
                 centerLabel="Status"
               />
             </>
