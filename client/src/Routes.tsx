@@ -605,22 +605,14 @@ const AppRoutes = () => {
             ]
           )}
         />
-        {/* <Route
+        <Route
           path="/rag/dashboard"
           element={withLayout(
             MainLayout,
             RAGDashBoard,
             !userPermissionObject?.[PermissionKeys.RAG_DASHBOARD_VIEW]
           )}
-        /> */}
-
-        <Route
-          path="/rag/dashboard"
-          element={withLayout(MainLayout, () => (
-            <UnderDevelopment pageName="RAG System > RAG Management" />
-          ))}
         />
-
         <Route
           path="/rag/register"
           element={withLayout(
