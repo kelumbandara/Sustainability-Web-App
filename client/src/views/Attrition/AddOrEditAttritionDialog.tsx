@@ -1228,21 +1228,6 @@ export default function AddOrEditRAGDialog({
                   >
                     Previous
                   </CustomButton>
-                  <CustomButton
-                    variant="contained"
-                    sx={{
-                      backgroundColor: "var(--pallet-blue)",
-                      marginLeft: isMobile ? "" : "0.5rem",
-                      width: isMobile ? "100%" : "full",
-                    }}
-                    size="medium"
-                    onClick={() => {
-                      handleTabChange(null, 3);
-                    }}
-                    endIcon={<ArrowForwardIcon />}
-                  >
-                    Next
-                  </CustomButton>
                 </Box>
               </TabPanel>
             </Box>
