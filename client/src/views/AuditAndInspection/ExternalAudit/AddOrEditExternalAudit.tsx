@@ -30,6 +30,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {
   Announcement,
+  createAuditFirm,
   ExternalAudit,
   fetchAuditApprover,
   fetchAuditCategory,
@@ -42,7 +43,7 @@ import useIsMobile from "../../../customHooks/useIsMobile";
 import theme from "../../../theme";
 import CustomButton from "../../../components/CustomButton";
 import { fetchDivision } from "../../../api/divisionApi";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import RichTextComponent from "../../../components/RichTextComponent";
 import { ExistingFileItemsEdit } from "../../../components/ExistingFileItemsEdit";
 import DropzoneComponent from "../../../components/DropzoneComponent";
@@ -53,6 +54,8 @@ import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import ListIcon from "@mui/icons-material/List";
 import Diversity3Icon from "@mui/icons-material/Diversity3";
 import AddIcon from "@mui/icons-material/Add";
+import { useSnackbar } from "notistack";
+import queryClient from "../../../state/queryClient";
 
 type DialogProps = {
   open: boolean;
@@ -244,6 +247,128 @@ export default function AddOrEditExternalAuditDialog({
       </Typography>
     </li>
   );
+
+  const AddNewAuditFirmDialog = ({
+    open,
+    setOpen,
+  }: {
+    open: boolean;
+    setOpen: (open: boolean) => void;
+  }) => {
+    const { enqueueSnackbar } = useSnackbar();
+    const { register, handleSubmit, reset } = useForm<ExternalAudit>();
+    const { isMobile } = useIsMobile();
+
+    const handleCreateAuditFirm = (data: { audiFirm: string }) => {
+      const submitData = {
+        auditFirm: data.audiFirm, // fix property name here
+      };
+      createAuditFirmMutation(submitData); // pass inside `data` key
+    };
+    
+
+    const {
+      mutate: createAuditFirmMutation,
+      isPending: isDesignationCreating,
+    } = useMutation({
+      mutationFn: createAuditFirm,
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["designation-data"],
+        });
+        enqueueSnackbar("Designation Created Successfully!", {
+          variant: "success",
+        });
+        reset();
+        setOpen(false);
+      },
+      onError: () => {
+        enqueueSnackbar(`Designation Create Failed`, {
+          variant: "error",
+        });
+      },
+    });
+
+    return (
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        fullScreen={isMobile}
+        fullWidth
+        maxWidth="md"
+        PaperProps={{
+          style: {
+            backgroundColor: grey[50],
+          },
+          component: "form",
+        }}
+      >
+        <DialogTitle
+          sx={{
+            paddingY: "1rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Typography variant="h6" component="div">
+            Add New Audit Firm
+          </Typography>
+          <IconButton
+            aria-label="open drawer"
+            onClick={() => setOpen(false)}
+            edge="start"
+            sx={{
+              color: "#024271",
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <Divider />
+        <DialogContent>
+          <Stack
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <TextField
+              {...register("auditFirm", { required: true })}
+              required
+              id="auditFirm"
+              label="Audit Firm"
+              size="small"
+              fullWidth
+              sx={{ marginBottom: "0.5rem" }}
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ padding: "1rem" }}>
+          <Button
+            onClick={() => setOpen(false)}
+            sx={{ color: "var(--pallet-blue)" }}
+          >
+            Cancel
+          </Button>
+          <CustomButton
+            variant="contained"
+            sx={{
+              backgroundColor: "var(--pallet-blue)",
+            }}
+            size="medium"
+            disabled={isDesignationCreating}
+            endIcon={
+              isDesignationCreating ? <CircularProgress size={20} /> : null
+            }
+            onClick={handleSubmit(handleCreateAuditFirm)}
+          >
+            Add Designation
+          </CustomButton>
+        </DialogActions>
+      </Dialog>
+    );
+  };
 
   return (
     <>

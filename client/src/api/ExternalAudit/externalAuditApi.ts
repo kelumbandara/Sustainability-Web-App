@@ -210,3 +210,8 @@ export async function deleteExternalActionPlan({ id }: { id: string }) {
   );
   return res.data;
 }
+
+export async function createAuditFirm({ data }: { data: { auditFirm: string } }) {
+  const res = await axios.post('/api/external-audit-firm', data); // fixed URL and payload
+  return res.data;
+}
