@@ -150,6 +150,9 @@ const EnvironmentDashBoard = React.lazy(
   () => import("./views/Environment/Dashboard")
 );
 
+const AttritionTable = React.lazy(
+  () => import("./views/Attrition/AttritionTable")
+);
 
 //RAG
 const RAGDashBoard = React.lazy(() => import("./views/RAG/Dashboard"));
@@ -527,6 +530,17 @@ const AppRoutes = () => {
             //   PermissionKeys
             //     .OCCUPATIONAL_HEALTH_CLINICAL_SUITE_PHARMACY_QUEUE_VIEW
             // ]
+          )}
+        />
+        <Route
+          path="/attrition/history"
+          element={withLayout(
+            MainLayout,
+            AttritionTable,
+            !userPermissionObject?.[
+              PermissionKeys
+                .ATTRITION_REGISTER_VIEW
+            ]
           )}
         />
         {/* Medicine Inventory */}
