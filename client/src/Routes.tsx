@@ -150,11 +150,18 @@ const EnvironmentDashBoard = React.lazy(
   () => import("./views/Environment/Dashboard")
 );
 
+
 //RAG
 const RAGDashBoard = React.lazy(() => import("./views/RAG/Dashboard"));
 const RAGRegisterTable = React.lazy(
   () => import("./views/RAG/RagRegisterTable")
 );
+
+// Grievance
+const GrievanceTable = React.lazy(
+  () => import("./views/Grievance/GrievanceTable")
+);
+
 function withLayout(Layout: any, Component: any, restrictAccess = false) {
   return (
     <Layout>
@@ -673,57 +680,91 @@ const AppRoutes = () => {
             ]
           )}
         />
+        <Route
+          path="/audit-inspection/external-audit/assigned-tasks"
+          element={withLayout(
+            MainLayout,
+            () => (
+              <ExternalAuditTable
+                isAssignedTasks={true}
+                isCorrectiveAction={false}
+                isAuditQueue={false}
+              />
+            ),
+            false
+            // !userPermissionObject?.[
+            //   PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_TASK_VIEW
+            // ]
+          )}
+        />
+        <Route
+          path="/audit-inspection/external-audit/audit-queue"
+          element={withLayout(
+            MainLayout,
+            () => (
+              <ExternalAuditTable
+                isAssignedTasks={false}
+                isCorrectiveAction={false}
+                isAuditQueue={true}
+              />
+            ),
+            !userPermissionObject?.[
+              PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_VIEW
+            ]
+          )}
+        />
+        <Route
+          path="/audit-inspection/external-audit/corrective-action"
+          element={withLayout(
+            MainLayout,
+            () => (
+              <ExternalAuditTable
+                isAssignedTasks={false}
+                isCorrectiveAction={true}
+                isAuditQueue={false}
+              />
+            ),
+            !userPermissionObject?.[
+              PermissionKeys
+                .AUDIT_INSPECTION_EXTERNAL_AUDIT_CORRECTIVE_ACTION_VIEW
+            ]
+          )}
+        />
+
+        {/* Grievance */}
+        <Route
+          path="/grievance/dashboard"
+          element={withLayout(
+            MainLayout,
+            () => (
+              <UnderDevelopment pageName="Grievance > Dashboard" />
+            ),
+            !userPermissionObject?.[PermissionKeys.GRIEVANCE_REGISTER_VIEW]
+          )}
+        />
+        <Route
+          path="/grievance/register"
+          element={withLayout(
+            MainLayout,
+            () => (
+              <GrievanceTable isAssignedTasks={false} />
+            ),
+            !userPermissionObject?.[PermissionKeys.GRIEVANCE_REGISTER_VIEW]
+          )}
+        />
+        <Route
+          path="/grievance/assigned-tasks"
+          element={withLayout(
+            MainLayout,
+            () => (
+              <GrievanceTable isAssignedTasks={true} />
+            ),
+            !userPermissionObject?.[
+              PermissionKeys.GRIEVANCE_ASSIGNED_TASKS_VIEW
+            ]
+          )}
+        />
       </Route>
-      <Route
-        path="/audit-inspection/external-audit/assigned-tasks"
-        element={withLayout(
-          MainLayout,
-          () => (
-            <ExternalAuditTable
-              isAssignedTasks={true}
-              isCorrectiveAction={false}
-              isAuditQueue={false}
-            />
-          ),
-          false
-          // !userPermissionObject?.[
-          //   PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_TASK_VIEW
-          // ]
-        )}
-      />
-      <Route
-        path="/audit-inspection/external-audit/audit-queue"
-        element={withLayout(
-          MainLayout,
-          () => (
-            <ExternalAuditTable
-              isAssignedTasks={false}
-              isCorrectiveAction={false}
-              isAuditQueue={true}
-            />
-          ),
-          !userPermissionObject?.[
-            PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_VIEW
-          ]
-        )}
-      />
-      <Route
-        path="/audit-inspection/external-audit/corrective-action"
-        element={withLayout(
-          MainLayout,
-          () => (
-            <ExternalAuditTable
-              isAssignedTasks={false}
-              isCorrectiveAction={true}
-              isAuditQueue={false}
-            />
-          ),
-          !userPermissionObject?.[
-            PermissionKeys
-              .AUDIT_INSPECTION_EXTERNAL_AUDIT_CORRECTIVE_ACTION_VIEW
-          ]
-        )}
-      />
     </Routes>
   );
 };

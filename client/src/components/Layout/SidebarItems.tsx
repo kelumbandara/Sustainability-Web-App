@@ -510,7 +510,6 @@ export const sidebarItems: Array<SidebarItem> = [
     title: "Grievance",
     href: "/grievance",
     icon: <ErrorOutlineOutlinedIcon fontSize="small" />,
-    disabled: true,
     nestedItems: [
       {
         title: "Dashboard",

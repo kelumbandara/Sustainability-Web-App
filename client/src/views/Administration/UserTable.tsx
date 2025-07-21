@@ -20,11 +20,16 @@ import {
 import theme from "../../theme";
 import PageTitle from "../../components/PageTitle";
 import Breadcrumb from "../../components/BreadCrumb";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ViewDataDrawer, { DrawerHeader } from "../../components/ViewDataDrawer";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
-import { fetchAllUsers, updateUserType, User } from "../../api/userApi";
+import {
+  fetchAllUsers,
+  searchUser,
+  updateUserType,
+  User,
+} from "../../api/userApi";
 import ViewUserContent from "./ViewUserContent";
 import EditUserRoleDialog from "./EditUserRoleDialog";
 import { PermissionKeys } from "./SectionList";
@@ -32,6 +37,8 @@ import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { green, grey } from "@mui/material/colors";
 import queryClient from "../../state/queryClient";
+import SearchBar from "../../components/SearchBar";
+import { useDebounce } from "../../util/useDebounce";
 
 function UserTable() {
   const { enqueueSnackbar } = useSnackbar();
@@ -63,25 +70,46 @@ function UserTable() {
     { title: "Users" },
   ];
 
-  const { data: usersData, isFetching: isUserDataFetching } = useQuery({
-    queryKey: ["users"],
-    queryFn: fetchAllUsers,
-  });
-
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("md")
   );
 
-  const paginatedUsersData = useMemo(() => {
-    if (!usersData) return [];
-    if (rowsPerPage === -1) {
-      return usersData; // If 'All' is selected, return all data
+  const [searchQuery, setSearchQuery] = useState("");
+  const debouncedQuery = useDebounce(searchQuery, 2000);
+
+  const {
+    data: searchedUserData,
+    refetch: researchUser,
+    isFetching: isSearchingUser,
+  } = useQuery({
+    queryKey: ["users", debouncedQuery],
+    queryFn: ({ queryKey }) => searchUser({ query: queryKey[1] }),
+  });
+
+  // useEffect(() => {
+  //   researchUser();
+  // }, [debouncedQuery]);
+
+  const handleSearch = async (query: string) => {
+    console.log("Searching for:", query);
+    setSearchQuery(query);
+    try {
+      await researchUser();
+    } catch (error) {
+      console.error("Search failed:", error);
     }
-    return usersData.slice(
+  };
+
+  const paginatedUsersData = useMemo(() => {
+    if (!searchedUserData) return [];
+    if (rowsPerPage === -1) {
+      return searchedUserData;
+    }
+    return searchedUserData.slice(
       page * rowsPerPage,
       page * rowsPerPage + rowsPerPage
     );
-  }, [usersData, page, rowsPerPage]);
+  }, [searchedUserData, page, rowsPerPage]);
 
   const { mutate: updateUserRoleMutation, isPending } = useMutation({
     mutationFn: updateUserType,
@@ -113,6 +141,17 @@ function UserTable() {
         <PageTitle title="Users" />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
+
+      <Box mb={2} display="flex" justifyContent="flex-end">
+        <SearchBar
+          placeholder="Search Users..."
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onSearch={handleSearch}
+          isSearching={isSearchingUser}
+        />
+      </Box>
+
       <Stack sx={{ alignItems: "center" }}>
         <TableContainer
           component={Paper}
@@ -122,7 +161,7 @@ function UserTable() {
             maxWidth: isMobile ? "88vw" : "100%",
           }}
         >
-          {isUserDataFetching && <LinearProgress sx={{ width: "100%" }} />}
+          {isSearchingUser && <LinearProgress sx={{ width: "100%" }} />}
           <Table aria-label="simple table">
             <TableHead sx={{ backgroundColor: "var(--pallet-lighter-blue)" }}>
               <TableRow>
@@ -179,7 +218,11 @@ function UserTable() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={11} align="center">
-                    <Typography variant="body2">No Users found</Typography>
+                    {isSearchingUser ? (
+                      <Typography variant="body2">Looking For Users</Typography>
+                    ) : (
+                      <Typography variant="body2">No Users found</Typography>
+                    )}
                   </TableCell>
                 </TableRow>
               )}
@@ -189,7 +232,7 @@ function UserTable() {
                 <TablePagination
                   rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
                   colSpan={100}
-                  count={usersData?.length}
+                  count={searchedUserData?.length}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   showFirstButton={true}

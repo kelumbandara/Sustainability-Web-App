@@ -249,6 +249,11 @@ export async function fetchExternalAuditAssignee() {
   return res.data;
 }
 
+export async function fetchGrievanceAssignee() {
+  const res = await axios.get("/api/grievance-record-assignee");
+  return res.data;
+}
+
 export async function updateUserProfileImage({
   id,
   imageFile,
@@ -326,5 +331,10 @@ export async function resetProfileEmailConfirm({
   const res = await axios.post(`/api/user/${id}/email-change-confirm`, {
     newEmail,
   });
+  return res.data;
+}
+
+export async function searchUser({ query }: { query: string }) {
+  const res = await axios.get(`/api/users/search?keyword=${query}`)
   return res.data;
 }
