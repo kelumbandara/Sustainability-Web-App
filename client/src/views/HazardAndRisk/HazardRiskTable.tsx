@@ -37,6 +37,7 @@ import {
   updateHazardRisk,
   deleteHazardRisk,
   getAssignedHazardRiskList,
+  getApprovedHazardOrRiskList,
 } from "../../api/hazardRiskApi";
 import ViewHazardOrRiskContent from "./ViewHazardRiskContent";
 import { PermissionKeys } from "../Administration/SectionList";
@@ -44,7 +45,13 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import queryClient from "../../state/queryClient";
 import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
 
-function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
+function HazardRiskTable({
+  isAssignedTasks,
+  isApprovedTasks,
+}: {
+  isAssignedTasks: boolean;
+  isApprovedTasks: boolean;
+}) {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<HazardAndRisk>(null);
@@ -71,7 +78,11 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
-    { title: `${isAssignedTasks ? "Assigned " : ""}Hazard & Risk Management` },
+    {
+      title: `${
+        isAssignedTasks ? "Assigned " : isApprovedTasks ? "Approved" : ""
+      } Hazard & Risk Management`,
+    },
   ];
 
   const isMobile = useMediaQuery((theme: Theme) =>
@@ -89,6 +100,11 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
       queryFn: getAssignedHazardRiskList,
     });
 
+  const { data: approvedRiskData, isFetching: isApprovedRiskDataFetching } =
+    useQuery({
+      queryKey: ["approved-hazardRisks"],
+      queryFn: getApprovedHazardOrRiskList,
+    });
   const paginatedRiskData = useMemo(() => {
     if (isAssignedTasks) {
       if (!assignedRiskData) return [];
@@ -96,6 +112,15 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
         return assignedRiskData;
       }
       return assignedRiskData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
+    } else if (isApprovedTasks) {
+      if (!approvedRiskData) return [];
+      if (rowsPerPage === -1) {
+        return approvedRiskData;
+      }
+      return approvedRiskData.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
@@ -109,13 +134,22 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
         page * rowsPerPage + rowsPerPage
       );
     }
-  }, [isAssignedTasks, assignedRiskData, page, rowsPerPage, riskData]);
+  }, [
+    isAssignedTasks,
+    isApprovedTasks,
+    approvedRiskData,
+    assignedRiskData,
+    page,
+    rowsPerPage,
+    riskData,
+  ]);
 
   const { mutate: createHazardRiskMutation } = useMutation({
     mutationFn: createHazardRisk,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["hazardRisks"] });
       queryClient.invalidateQueries({ queryKey: ["assigned-hazardRisks"] });
+      queryClient.invalidateQueries({ queryKey: ["approved-hazardRisks"] });
       enqueueSnackbar("Hazard Risk Report Created Successfully!", {
         variant: "success",
       });
@@ -186,6 +220,9 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   const isRiskAssignDeleteDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.HAZARD_RISK_ASSIGNED_TASKS_DELETE
   );
+  const isRiskApprovedDeleteDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.HAZARD_RISK_APPROVED_TASKS_DELETE
+  );
 
   return (
     <Stack>
@@ -214,32 +251,33 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
             maxWidth: isMobile ? "88vw" : "100%",
           }}
         >
-          {!isAssignedTasks && (
-            <Box
-              sx={{
-                padding: theme.spacing(2),
-                display: "flex",
-                justifyContent: "flex-end",
-              }}
-            >
-              <Button
-                variant="contained"
-                sx={{ backgroundColor: "var(--pallet-blue)" }}
-                startIcon={<AddIcon />}
-                onClick={() => {
-                  setSelectedRow(null);
-                  setOpenAddOrEditDialog(true);
+          {!isAssignedTasks ||
+            (!isApprovedTasks && (
+              <Box
+                sx={{
+                  padding: theme.spacing(2),
+                  display: "flex",
+                  justifyContent: "flex-end",
                 }}
-                disabled={
-                  isAssignedTasks
-                    ? isRiskAssignCreateDisabled
-                    : isRiskCreateDisabled
-                }
               >
-                Report a Hazard or Risk
-              </Button>
-            </Box>
-          )}
+                <Button
+                  variant="contained"
+                  sx={{ backgroundColor: "var(--pallet-blue)" }}
+                  startIcon={<AddIcon />}
+                  onClick={() => {
+                    setSelectedRow(null);
+                    setOpenAddOrEditDialog(true);
+                  }}
+                  disabled={
+                    isAssignedTasks
+                      ? isRiskAssignCreateDisabled
+                      : isRiskCreateDisabled
+                  }
+                >
+                  Report a Hazard or Risk
+                </Button>
+              </Box>
+            ))}
           {(isRiskDataFetching || isAssignedRiskDataFetching) && (
             <LinearProgress sx={{ width: "100%" }} />
           )}
@@ -389,8 +427,8 @@ function HazardRiskTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
               }}
               onDelete={() => setDeleteDialogOpen(true)}
               disableDelete={
-                isAssignedTasks
-                  ? isRiskAssignDeleteDisabled
+                isAssignedTasks || isApprovedTasks
+                  ? isRiskAssignDeleteDisabled || isRiskApprovedDeleteDisabled
                   : isRiskDeleteDisabled
               }
             />

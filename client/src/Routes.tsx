@@ -371,7 +371,10 @@ const AppRoutes = () => {
           element={withLayout(
             MainLayout,
             () => (
-              <HazardRiskTable isAssignedTasks={false} />
+              <HazardRiskTable
+                isAssignedTasks={false}
+                isApprovedTasks={false}
+              />
             ),
             !userPermissionObject?.[PermissionKeys.HAZARD_RISK_REGISTER_VIEW]
           )}
@@ -381,10 +384,22 @@ const AppRoutes = () => {
           element={withLayout(
             MainLayout,
             () => (
-              <HazardRiskTable isAssignedTasks={true} />
+              <HazardRiskTable isAssignedTasks={true} isApprovedTasks={false} />
             ),
             !userPermissionObject?.[
               PermissionKeys.HAZARD_RISK_ASSIGNED_TASKS_VIEW
+            ]
+          )}
+        />
+        <Route
+          path="/hazard-risk/approved-tasks"
+          element={withLayout(
+            MainLayout,
+            () => (
+              <HazardRiskTable isAssignedTasks={false} isApprovedTasks={true} />
+            ),
+            !userPermissionObject?.[
+              PermissionKeys.HAZARD_RISK_APPROVED_TASKS_VIEW
             ]
           )}
         />
@@ -540,10 +555,7 @@ const AppRoutes = () => {
           element={withLayout(
             MainLayout,
             AttritionTable,
-            !userPermissionObject?.[
-              PermissionKeys
-                .ATTRITION_REGISTER_VIEW
-            ]
+            !userPermissionObject?.[PermissionKeys.ATTRITION_REGISTER_VIEW]
           )}
         />
         {/* Medicine Inventory */}
