@@ -7,7 +7,7 @@ import MultiDrawerContent from "../../components/MultiDrawerContent";
 import ProfileImage from "../../components/ProfileImageComponent";
 
 function ViewUserContent({ selectedUser }: { selectedUser: User }) {
-  const { isTablet } = useIsMobile();
+  const { isTablet, isMobile } = useIsMobile();
   const [image, setImage] = useState(null);
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -27,9 +27,9 @@ function ViewUserContent({ selectedUser }: { selectedUser: User }) {
     <Stack
       sx={{
         display: "flex",
-        marginY: 5,
+        marginY: 1,
         flexDirection: isTablet ? "column" : "row",
-        p: "3rem",
+        p: "1rem",
       }}
       gap={4}
     >
@@ -40,7 +40,7 @@ function ViewUserContent({ selectedUser }: { selectedUser: User }) {
           justifyContent: "center",
           alignItems: "center",
           flexDirection: "column",
-          p: "3rem",
+          p: "1rem",
           boxShadow: 3,
         }}
         gap={2}
@@ -90,7 +90,7 @@ function ViewUserContent({ selectedUser }: { selectedUser: User }) {
         <Stack
           sx={{
             display: "flex",
-            flexDirection: "row",
+            flexDirection: isMobile ? "column" : "row",
             backgroundColor: "#fff",
             flex: 1,
           }}
@@ -110,7 +110,7 @@ function ViewUserContent({ selectedUser }: { selectedUser: User }) {
         <Stack
           sx={{
             display: "flex",
-            flexDirection: "row",
+            flexDirection: isMobile ? "column" : "row",
             backgroundColor: "#fff",
             flex: 1,
           }}
@@ -130,7 +130,7 @@ function ViewUserContent({ selectedUser }: { selectedUser: User }) {
         <Stack
           sx={{
             display: "flex",
-            flexDirection: "row",
+            flexDirection: isMobile ? "column" : "row",
             backgroundColor: "#fff",
             flex: 1,
           }}
@@ -149,7 +149,7 @@ function ViewUserContent({ selectedUser }: { selectedUser: User }) {
         <Stack
           sx={{
             display: "flex",
-            flexDirection: "row",
+            flexDirection: isMobile ? "column" : "row",
             backgroundColor: "#fff",
             flex: 1,
           }}
@@ -168,7 +168,7 @@ function ViewUserContent({ selectedUser }: { selectedUser: User }) {
         <Stack
           sx={{
             display: "flex",
-            flexDirection: "row",
+            flexDirection: isMobile ? "column" : "row",
             backgroundColor: "#fff",
             flex: 1,
           }}
@@ -182,7 +182,7 @@ function ViewUserContent({ selectedUser }: { selectedUser: User }) {
         <Stack
           sx={{
             display: "flex",
-            flexDirection: "row",
+            flexDirection: isMobile ? "column" : "row",
             backgroundColor: "#fff",
             flex: 1,
           }}

@@ -362,7 +362,14 @@ const EditOrganizationDialog = ({
           alignItems="center"
           alignContent="center"
         >
-          <Box>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              alignContent: "center",
+            }}
+          >
             <SingleImagePreview
               image={insightUrl}
               onRemove={(fileToRemove) => {
