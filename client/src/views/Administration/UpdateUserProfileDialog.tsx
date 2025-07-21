@@ -20,10 +20,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
 import CustomButton from "../../components/CustomButton";
 import useIsMobile from "../../customHooks/useIsMobile";
-import {
-  updateUserProfileDetails,
-  User,
-} from "../../api/userApi";
+import { updateUserProfileDetails, User } from "../../api/userApi";
 import queryClient from "../../state/queryClient";
 import { genderOptions } from "../../constants/accidentConstants";
 
@@ -39,7 +36,7 @@ export default function UpdateUserProfile({
   defaultValues,
 }: DialogProps) {
   const { enqueueSnackbar } = useSnackbar();
-  const { isTablet } = useIsMobile();
+  const { isMobile } = useIsMobile();
 
   const {
     handleSubmit,
@@ -97,10 +94,12 @@ export default function UpdateUserProfile({
         resetForm();
         handleClose();
       }}
+      fullWidth
+      fullScreen={isMobile}
+      maxWidth={"sm"}
       PaperProps={{
         style: {
           backgroundColor: grey[50],
-          minWidth: "500px",
         },
         component: "form",
       }}

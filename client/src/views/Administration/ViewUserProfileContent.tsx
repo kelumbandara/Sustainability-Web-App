@@ -2,6 +2,7 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Alert,
   Badge,
   Box,
   Button,
@@ -28,12 +29,17 @@ import PasswordResetDialog from "./OpenPasswordResetDiaolg";
 import ResetEmailDialog from "./OpenEmailResetDialog";
 import CustomButton from "../../components/CustomButton";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import { useNavigate } from "react-router";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 function ViewUserContent({ selectedUser }: { selectedUser: User }) {
-  const { isTablet } = useIsMobile();
+  const { isTablet, isMobile } = useIsMobile();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const { user } = useCurrentUser();
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -89,7 +95,7 @@ function ViewUserContent({ selectedUser }: { selectedUser: User }) {
           justifyContent: "center",
           alignItems: "center",
           flexDirection: "column",
-          p: "3rem",
+          p: "2rem",
         }}
         gap={2}
       >
@@ -158,46 +164,51 @@ function ViewUserContent({ selectedUser }: { selectedUser: User }) {
           )}
         </Box>
       </Box>
-
       <Stack
         sx={{
           display: "flex",
           flexDirection: "column",
           backgroundColor: "#fff",
           flex: 2,
-          p: "3rem",
+          p: "1rem",
         }}
       >
-        <Stack
-          mb={4}
+        <Box
           sx={{
             display: "flex",
-            alignItems: "flex-end",
+            justifyContent: "flex-end",
+            flexDirection: isMobile ? "column" : "row",
+            gap: 1,
+            width: "100%",
+            mt: 2,
+            mb: 4,
           }}
         >
-          <Box>
-            <>
-              {isTablet ? (
-                <IconButton
-                  aria-label="edit"
-                  onClick={() => setOpenEditUserRoleDialog(true)}
-                >
-                  <EditOutlinedIcon sx={{ color: "var(--pallet-blue)" }} />
-                </IconButton>
-              ) : (
-                <CustomButton
-                  variant="contained"
-                  sx={{ backgroundColor: "var(--pallet-blue)" }}
-                  size="medium"
-                  onClick={() => setOpenEditUserRoleDialog(true)}
-                  startIcon={<EditOutlinedIcon />}
-                >
-                  Edit My Profile
-                </CustomButton>
-              )}
-            </>
-          </Box>
-        </Stack>
+          <CustomButton
+            variant="contained"
+            sx={{ backgroundColor: "var(--pallet-blue)" }}
+            size="medium"
+            fullWidth={isMobile}
+            onClick={() => setOpenEditUserRoleDialog(true)}
+            startIcon={<EditOutlinedIcon />}
+          >
+            Edit My Profile
+          </CustomButton>
+
+          <CustomButton
+            variant="contained"
+            sx={{
+              backgroundColor: "var(--pallet-orange)",
+              minWidth: "10rem",
+            }}
+            size="medium"
+            fullWidth={isMobile}
+            startIcon={<LogoutIcon />}
+            onClick={() => setLogoutDialogOpen(true)}
+          >
+            Log out
+          </CustomButton>
+        </Box>
         <Stack direction={isTablet ? "column" : "row"}>
           <DrawerContentItem
             label="Employee Id"
@@ -290,7 +301,6 @@ function ViewUserContent({ selectedUser }: { selectedUser: User }) {
           </Accordion>
         </Stack>
       </Stack>
-
       {openEditUserRoleDialog && (
         <UpdateUserProfile
           open={openEditUserRoleDialog}
@@ -320,6 +330,37 @@ function ViewUserContent({ selectedUser }: { selectedUser: User }) {
             setOpenEditUserRoleDialog(false);
           }}
           defaultValues={user}
+        />
+      )}{" "}
+      {logoutDialogOpen && (
+        <DeleteConfirmationModal
+          open={logoutDialogOpen}
+          title="Log Out Confirmation"
+          customDeleteButtonText="Log Out Now"
+          customDeleteButtonIon={<LogoutIcon />}
+          content={
+            <>
+              Are you sure you want to log out of the application?
+              <Alert severity="warning" style={{ marginTop: "1rem" }}>
+                You will be logged out of the application and will need to log
+                in with credentials again to access your account.
+              </Alert>
+            </>
+          }
+          handleClose={() => setLogoutDialogOpen(false)}
+          deleteFunc={async () => {
+            localStorage.removeItem("token");
+            navigate("/");
+          }}
+          onSuccess={() => {
+            setLogoutDialogOpen(false);
+            enqueueSnackbar("Logged Out Successfully!", {
+              variant: "success",
+            });
+          }}
+          handleReject={() => {
+            setLogoutDialogOpen(false);
+          }}
         />
       )}
     </Stack>

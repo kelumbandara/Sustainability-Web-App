@@ -510,7 +510,6 @@ export const sidebarItems: Array<SidebarItem> = [
     title: "Grievance",
     href: "/grievance",
     icon: <ErrorOutlineOutlinedIcon fontSize="small" />,
-    disabled: true,
     nestedItems: [
       {
         title: "Dashboard",
@@ -536,7 +535,7 @@ export const sidebarItems: Array<SidebarItem> = [
     title: "RAG",
     href: "/rag",
     icon: <SentimentSatisfiedAltOutlinedIcon fontSize="small" />,
-    disabled: true,
+    disabled: false,
     nestedItems: [
       {
         title: "Dashboard",
@@ -570,7 +569,7 @@ export const sidebarItems: Array<SidebarItem> = [
     title: "Attrition",
     href: "/attrition",
     icon: <PersonRemoveOutlinedIcon fontSize="small" />,
-    disabled: true,
+    disabled: false,
     nestedItems: [
       {
         title: "History",

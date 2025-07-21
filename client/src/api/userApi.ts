@@ -22,10 +22,11 @@ export const userTypeSchema = z.object({
 });
 
 export const userLevelSchema = z.object({
-  id: z.string(),
-  levelId: z.string(),
+  id: z.number(),
+  levelId: z.number(),
   levelName: z.string().optional(),
   created_at: z.string(),
+  updated_at: z.string(),
 });
 
 export type UserLevel = z.infer<typeof userLevelSchema>;
@@ -57,7 +58,7 @@ export const userSchema = z.object({
   assignedFactory: z.array(z.string()),
   employeeNumber: z.string(),
   jobPosition: z.string(),
-  assigneeLevel: z.string(),
+  assigneeLevel: z.number(),
   permissionObject: PermissionKeysObjectSchema,
 });
 
@@ -190,7 +191,7 @@ export async function updateUserType({
 }: {
   id: number;
   userTypeId: number;
-  assigneeLevel: string;
+  assigneeLevel: number;
   department: string;
   availability: boolean;
   jobPosition: string;
@@ -248,6 +249,11 @@ export async function fetchExternalAuditAssignee() {
   return res.data;
 }
 
+export async function fetchGrievanceAssignee() {
+  const res = await axios.get("/api/grievance-record-assignee");
+  return res.data;
+}
+
 export async function updateUserProfileImage({
   id,
   imageFile,
@@ -289,27 +295,46 @@ export async function updateUserProfileDetails({
   return res.data;
 }
 
-export async function resetProfileEmail({ currentEmail,id }: { currentEmail: string, id: number }) {
+export async function resetProfileEmail({
+  currentEmail,
+  id,
+}: {
+  currentEmail: string;
+  id: number;
+}) {
   const res = await axios.post(`/api/user/${id}/email-change`, {
     currentEmail,
   });
   return res.data;
 }
 
-export async function resetProfileEmailVerification({ otp,id }: { otp: string, id: number }) {
+export async function resetProfileEmailVerification({
+  otp,
+  id,
+}: {
+  otp: string;
+  id: number;
+}) {
   const res = await axios.post(`/api/user/${id}/email-change-verify`, {
     otp,
   });
   return res.data;
 }
 
-export async function resetProfileEmailConfirm({ newEmail,id }: { newEmail: string, id: number }) {
+export async function resetProfileEmailConfirm({
+  newEmail,
+  id,
+}: {
+  newEmail: string;
+  id: number;
+}) {
   const res = await axios.post(`/api/user/${id}/email-change-confirm`, {
     newEmail,
   });
   return res.data;
 }
 
-
-
-
+export async function searchUser({ query }: { query: string }) {
+  const res = await axios.get(`/api/users/search?keyword=${query}`)
+  return res.data;
+}

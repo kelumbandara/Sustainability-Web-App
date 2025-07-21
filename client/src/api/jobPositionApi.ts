@@ -12,3 +12,12 @@ export async function fetchJobPositionData() {
     const res = await axios.get("/api/job-positions");
     return res.data;
 }
+
+export async function createNewJobPosition(jobPosition: string) {
+  const res = await axios.post('/api/job-positions', { jobPosition });
+  return res.data;
+}
+export async function createNewDepartment(department: string) {
+  const res = await axios.post('/api/departments', { department });
+  return res.data;
+}
