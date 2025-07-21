@@ -25,7 +25,7 @@ function OrganizationSettings() {
   });
 
   return (
-    <Stack>
+    <Stack sx={{ padding: 0 }}>
       <Box
         sx={{
           padding: theme.spacing(2),

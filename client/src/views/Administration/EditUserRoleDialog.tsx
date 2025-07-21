@@ -155,8 +155,7 @@ export default function EditUserRoleDialog({
       <Dialog
         open={addNewContactDialogOpen}
         onClose={() => setAddNewContactDialogOpen(false)}
-        fullWidth
-        maxWidth="sm"
+        fullScreen
         PaperProps={{
           style: {
             backgroundColor: grey[50],
@@ -421,7 +420,6 @@ export default function EditUserRoleDialog({
       PaperProps={{
         style: {
           backgroundColor: grey[50],
-          minWidth: "500px",
         },
         component: "form",
       }}

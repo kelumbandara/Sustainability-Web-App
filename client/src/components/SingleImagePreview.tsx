@@ -8,6 +8,7 @@ import {
   Badge,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import useIsMobile from "../customHooks/useIsMobile";
 
 type StorageFile = {
   signedUrl?: string;
@@ -50,35 +51,29 @@ const SingleImagePreview: React.FC<Props> = ({
   const resolvedImage = Array.isArray(image) ? image[0] : image;
   const imageUrl = resolvedImage ? getPreviewUrl(resolvedImage) : null;
   const fileName = resolvedImage ? getFileName(resolvedImage) : "";
-
+  const { isMobile } = useIsMobile();
   if (!imageUrl || !resolvedImage) return null;
 
   return (
-    <Box sx={{ mt: 2, position: "relative", display: "inline-block" }}>
-      <Badge
-        overlap="circular"
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      >
-        <Card
-          sx={{
-            width: "50%",
-            height: "50%",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          <CardMedia
-            component="img"
-            image={imageUrl}
-            alt={fileName}
-            sx={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-            }}
-          />
-        </Card>
-      </Badge>
+    <Box
+      sx={{
+        position: "relative",
+        display: "flex",
+        flex: 1,
+        justifyContent: "center",
+      }}
+    >
+      <img
+        src={imageUrl}
+        alt={fileName}
+        style={{
+          maxWidth: isMobile ? 300 : "50vw",
+          maxHeight: isMobile ? 300 : "50vh",
+          objectFit: "contain",
+          boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+          padding: "1rem",
+        }}
+      />
     </Box>
   );
 };

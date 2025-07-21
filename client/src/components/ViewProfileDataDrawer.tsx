@@ -1,5 +1,4 @@
 import {
-  Alert,
   Box,
   Drawer,
   IconButton,
@@ -9,21 +8,10 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import useIsMobile from "../customHooks/useIsMobile";
 import CustomButton from "./CustomButton";
-import PasswordResetDialog from "../views/Administration/OpenPasswordResetDiaolg";
-import ResetEmailDialog from "../views/Administration/OpenEmailResetDialog";
-import { useState } from "react";
-import { User } from "../api/userApi";
-import LockIcon from "@mui/icons-material/Lock";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
-import LogoutIcon from "@mui/icons-material/Logout";
-import { enqueueSnackbar } from "notistack";
-import DeleteConfirmationModal from "./DeleteConfirmationModal";
-import { useNavigate } from "react-router";
 
 function ViewProfileDataDrawer({
   open,
@@ -100,120 +88,53 @@ export function DrawerProfileHeader({
 export function DrawerUpdateButtons({
   onResetEmail,
   onResetPassword,
-  disableEdit,
 }: {
   onResetEmail: () => void;
   onResetPassword: () => void;
-  disableEdit?: boolean;
 }) {
-  const { isTablet } = useIsMobile();
-  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
-  const navigate = useNavigate();
-
+  const { isMobile } = useIsMobile();
   return (
     <>
       <Box
         sx={{
           display: "flex",
-          justifyContent: isTablet ? "space-between" : "flex-end",
+          justifyContent: "flex-end",
           gap: 1,
+          flexDirection: isMobile ? "column" : "row",
           flexWrap: "wrap",
           marginTop: 2,
         }}
       >
-        {onResetPassword &&
-          (isTablet ? (
-            <Box>
-              <IconButton
-                aria-label="edit"
-                onClick={onResetPassword}
-                disabled={disableEdit}
-              >
-                <VpnKeyOutlinedIcon sx={{ color: "var(--pallet-blue)" }} />
-              </IconButton>
-            </Box>
-          ) : (
-            <Box>
-              <CustomButton
-                variant="contained"
-                sx={{ backgroundColor: "var(--pallet-blue)" }}
-                size="medium"
-                startIcon={<VpnKeyOutlinedIcon />}
-                onClick={onResetPassword}
-              >
-                Reset Password
-              </CustomButton>
-            </Box>
-          ))}
+        {onResetPassword && (
+          <Box>
+            <CustomButton
+              variant="contained"
+              sx={{ backgroundColor: "var(--pallet-blue)" }}
+              size="medium"
+              fullWidth={isMobile}
+              startIcon={<VpnKeyOutlinedIcon />}
+              onClick={onResetPassword}
+            >
+              Reset Password
+            </CustomButton>
+          </Box>
+        )}
 
-        {onResetEmail &&
-          (isTablet ? (
-            <Box>
-              <IconButton
-                aria-label="reset-email"
-                onClick={onResetEmail}
-                disabled={disableEdit}
-              >
-                <EmailOutlinedIcon sx={{ color: "var(--pallet-blue)" }} />
-              </IconButton>
-            </Box>
-          ) : (
-            <Box>
-              <CustomButton
-                variant="contained"
-                sx={{ backgroundColor: "var(--pallet-blue)" }}
-                size="medium"
-                onClick={onResetEmail}
-                startIcon={<EmailOutlinedIcon />}
-              >
-                Reset Email
-              </CustomButton>
-            </Box>
-          ))}
-        <CustomButton
-          variant="contained"
-          sx={{
-            backgroundColor: "var(--pallet-orange)",
-            width: "10rem",
-          }}
-          size="medium"
-          startIcon={<LogoutIcon />}
-          onClick={() => setLogoutDialogOpen(true)}
-        >
-          Log out
-        </CustomButton>
+        {onResetEmail && (
+          <Box>
+            <CustomButton
+              variant="contained"
+              sx={{ backgroundColor: "var(--pallet-blue)" }}
+              size="medium"
+              fullWidth={isMobile}
+              onClick={onResetEmail}
+              startIcon={<EmailOutlinedIcon />}
+            >
+              Reset Email
+            </CustomButton>
+          </Box>
+        )}
       </Box>
-      {logoutDialogOpen && (
-        <DeleteConfirmationModal
-          open={logoutDialogOpen}
-          title="Log Out Confirmation"
-          customDeleteButtonText="Log Out Now"
-          customDeleteButtonIon={<LogoutIcon />}
-          content={
-            <>
-              Are you sure you want to log out of the application?
-              <Alert severity="warning" style={{ marginTop: "1rem" }}>
-                You will be logged out of the application and will need to log
-                in with credentials again to access your account.
-              </Alert>
-            </>
-          }
-          handleClose={() => setLogoutDialogOpen(false)}
-          deleteFunc={async () => {
-            localStorage.removeItem("token");
-            navigate("/");
-          }}
-          onSuccess={() => {
-            setLogoutDialogOpen(false);
-            enqueueSnackbar("Logged Out Successfully!", {
-              variant: "success",
-            });
-          }}
-          handleReject={() => {
-            setLogoutDialogOpen(false);
-          }}
-        />
-      )}
     </>
   );
 }

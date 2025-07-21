@@ -70,38 +70,18 @@ function OrganizationGeneralDetails({
             justifyContent: "center",
           }}
         >
-          {/* <Badge
-            overlap="circular"
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-            badgeContent={
-              <IconButton
-                sx={{
-                  backgroundColor: "var(--pallet-light-blue)",
-                  borderRadius: "50%",
-                }}
-              >
-                <DownloadOutlinedIcon
-                  fontSize="medium"
-                  sx={{
-                    color: "#fff",
-                  }}
-                />
-              </IconButton>
-            }
-          > */}
           <img
             src={logo.signedUrl}
             alt="Organization Logo"
             style={{
-              width: 300,
-              height: 300,
+              maxWidth: 300,
+              maxHeight: 300,
               borderRadius: "50%",
               objectFit: "contain",
               boxShadow: "0 0 10px rgba(0,0,0,0.1)",
               padding: "1rem",
             }}
           />
-          {/* </Badge> */}
         </Box>
       )}
 
