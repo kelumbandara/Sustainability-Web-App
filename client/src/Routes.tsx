@@ -150,6 +150,13 @@ const EnvironmentDashBoard = React.lazy(
   () => import("./views/Environment/Dashboard")
 );
 
+
+//RAG
+const RAGDashBoard = React.lazy(() => import("./views/RAG/Dashboard"));
+const RAGRegisterTable = React.lazy(
+  () => import("./views/RAG/RagRegisterTable")
+);
+
 // Grievance
 const GrievanceTable = React.lazy(
   () => import("./views/Grievance/GrievanceTable")
@@ -603,6 +610,22 @@ const AppRoutes = () => {
             !userPermissionObject?.[
               PermissionKeys.SUSTAINABILITY_SDG_REPORTING_CREATE
             ]
+          )}
+        />
+        <Route
+          path="/rag/dashboard"
+          element={withLayout(
+            MainLayout,
+            RAGDashBoard,
+            !userPermissionObject?.[PermissionKeys.RAG_DASHBOARD_VIEW]
+          )}
+        />
+        <Route
+          path="/rag/register"
+          element={withLayout(
+            MainLayout,
+            RAGRegisterTable,
+            !userPermissionObject?.[PermissionKeys.RAG_REGISTER_VIEW]
           )}
         />
         <Route

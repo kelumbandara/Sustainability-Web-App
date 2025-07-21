@@ -535,7 +535,7 @@ export const sidebarItems: Array<SidebarItem> = [
     title: "RAG",
     href: "/rag",
     icon: <SentimentSatisfiedAltOutlinedIcon fontSize="small" />,
-    disabled: true,
+    disabled: false,
     nestedItems: [
       {
         title: "Dashboard",
