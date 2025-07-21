@@ -28,6 +28,7 @@ import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
 import {
   Accident,
+  AccidentStatus,
   createAccident,
   deleteAccident,
   getAccidentsAssignedTaskList,
@@ -41,7 +42,13 @@ import queryClient from "../../state/queryClient";
 import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
 import { PermissionKeys } from "../Administration/SectionList";
 
-function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
+function AccidentTable({
+  isAssignedTasks,
+  isApprovedTasks,
+}: {
+  isAssignedTasks: boolean;
+  isApprovedTasks: boolean;
+}) {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<Accident>(null);
@@ -81,6 +88,14 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
     isFetching: isAccidentAssignedTaskData,
   } = useQuery({
     queryKey: ["accidents-assigned-task"],
+    queryFn: getAccidentsAssignedTaskList,
+  });
+
+  const {
+    data: accidentApprovedTaskData,
+    isFetching: isAccidentApprovedTaskData,
+  } = useQuery({
+    queryKey: ["accidents-approved-task"],
     queryFn: getAccidentsAssignedTaskList,
   });
 
@@ -350,8 +365,10 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
               }}
               disableEdit={
                 isAssignedTasks
-                  ? isAccidentAssignedTaskEditDisabled
-                  : isAccidentEditDisabled
+                  ? isAccidentAssignedTaskEditDisabled ||
+                    selectedRow?.status === AccidentStatus.APPROVED
+                  : isAccidentEditDisabled ||
+                    selectedRow?.status === AccidentStatus.APPROVED
               }
               onDelete={() => setDeleteDialogOpen(true)}
               disableDelete={
@@ -363,7 +380,10 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
 
             {selectedRow && (
               <Stack>
-                <ViewAccidentContent accident={selectedRow} />
+                <ViewAccidentContent
+                  accident={selectedRow}
+                  handleCloseDrawer={() => setOpenViewDrawer(false)}
+                />
               </Stack>
             )}
           </Stack>

@@ -199,6 +199,13 @@ export const IncidentSchema = z.object({
 
 export type Incident = z.infer<typeof IncidentSchema>;
 
+export enum AccidentStatus {
+  OPEN = "Open",
+  DRAFT = "draft",
+  PUBLISHED = "Published",
+  APPROVED = "Approved",
+}
+
 export async function getAccidentsList() {
   const res = await axios.get("/api/accidents");
   return res.data;
@@ -392,3 +399,8 @@ export const deleteIncident = async (id: string) => {
   const res = await axios.delete(`/api/incidents/${id}/delete`);
   return res.data;
 }; //push
+
+export async function approveAccidents(id: string) {
+  const res = await axios.post(`api/accidents/${id}/update-status-to-approved`);
+  return res.data;
+}
