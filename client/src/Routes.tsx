@@ -540,10 +540,7 @@ const AppRoutes = () => {
           element={withLayout(
             MainLayout,
             AttritionTable,
-            !userPermissionObject?.[
-              PermissionKeys
-                .ATTRITION_REGISTER_VIEW
-            ]
+            !userPermissionObject?.[PermissionKeys.ATTRITION_REGISTER_VIEW]
           )}
         />
         {/* Medicine Inventory */}
@@ -676,6 +673,18 @@ const AppRoutes = () => {
           )}
         />
         <Route
+          path="/environment/approved-tasks/target-setting"
+          element={withLayout(
+            MainLayout,
+            () => (
+              <TargetSettingsTable isAssignedTasks={true} />
+            ),
+            !userPermissionObject?.[
+              PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_TARGET_SETTING_VIEW
+            ]
+          )}
+        />
+        <Route
           path="/environment/history/consumption"
           element={withLayout(
             MainLayout,
@@ -690,7 +699,25 @@ const AppRoutes = () => {
           element={withLayout(
             MainLayout,
             () => (
-              <EnvironmentTable isAssignedTasks={true} />
+              <EnvironmentTable
+                isAssignedTasks={true}
+                isApprovedTasks={false}
+              />
+            ),
+            !userPermissionObject?.[
+              PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_CONSUMPTION_VIEW
+            ]
+          )}
+        />
+        <Route
+          path="/environment/approved-tasks/consumption"
+          element={withLayout(
+            MainLayout,
+            () => (
+              <EnvironmentTable
+                isAssignedTasks={false}
+                isApprovedTasks={true}
+              />
             ),
             !userPermissionObject?.[
               PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_CONSUMPTION_VIEW
