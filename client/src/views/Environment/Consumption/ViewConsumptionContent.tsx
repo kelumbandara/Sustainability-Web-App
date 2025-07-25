@@ -248,10 +248,10 @@ function ViewConsumptionContent({
       {approveDialogOpen && (
         <ApproveConfirmationModal
           open={approveDialogOpen}
-          title="Approve Hazard/Risk Confirmation"
+          title="Approve Consumption Report Confirmation"
           content={
             <>
-              Are you sure you want to approve this hazard/risk?
+              Are you sure you want to approve this Consumption Report?
               <Alert severity="warning" style={{ marginTop: "1rem" }}>
                 This action is not reversible.
               </Alert>

@@ -1,4 +1,13 @@
-import { AppBar, Box, Stack, Tab, Tabs, Typography } from "@mui/material";
+import {
+  Alert,
+  AppBar,
+  Box,
+  CircularProgress,
+  Stack,
+  Tab,
+  Tabs,
+  Typography,
+} from "@mui/material";
 import { DrawerContentItem } from "../../../components/ViewDataDrawer";
 import { useState } from "react";
 import theme from "../../../theme";
@@ -7,9 +16,19 @@ import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import { format } from "date-fns";
 import { FileItemsViewer } from "../../../components/FileItemsViewer";
 import { StorageFile } from "../../../utils/StorageFiles.util";
-import { TargetSettings } from "../../../api/TargetSettings/targetSettingsApi";
+import {
+  approveTargetSettingsReport,
+  Status,
+  TargetSettings,
+} from "../../../api/TargetSettings/targetSettingsApi";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import AdsClickIcon from "@mui/icons-material/AdsClick";
+import useCurrentUser from "../../../hooks/useCurrentUser";
+import CustomButton from "../../../components/CustomButton";
+import { useMutation } from "@tanstack/react-query";
+import queryClient from "../../../state/queryClient";
+import { enqueueSnackbar } from "notistack";
+import ApproveConfirmationModal from "../../OccupationalHealth/MedicineInventory/MedicineRequest/ApproveConfirmationModal";
 interface TabPanelProps {
   children?: React.ReactNode;
   dir?: string;
@@ -42,11 +61,39 @@ function a11yProps(index: number) {
 
 function ViewTargetSettingsContent({
   targetSettings,
+  handleCloseDrawer,
 }: {
   targetSettings: TargetSettings;
+  handleCloseDrawer: () => void;
 }) {
   const [activeTab, setActiveTab] = useState(0);
   const { isTablet } = useIsMobile();
+  const { user } = useCurrentUser();
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false);
+
+  const {
+    mutate: approveTargetSettingsMutation,
+    isPending: isConsumptionApproving,
+  } = useMutation({
+    mutationFn: approveTargetSettingsReport,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["targetSettings"] });
+      queryClient.invalidateQueries({
+        queryKey: ["approved-targetSettings"],
+      });
+      queryClient.invalidateQueries({ queryKey: ["assigned-targetSettings"] });
+      enqueueSnackbar("Target Settings Report Approved Successfully!", {
+        variant: "success",
+      });
+      setApproveDialogOpen(false);
+      handleCloseDrawer();
+    },
+    onError: () => {
+      enqueueSnackbar(`Target Settings Report Approval Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     console.log("event", event);
@@ -323,7 +370,59 @@ function ViewTargetSettingsContent({
           value={targetSettings.approver?.name}
           sx={{ flex: 1 }}
         />
+        {targetSettings.status === Status.DRAFT &&
+          user.userLevel.id === 5 &&
+          targetSettings.approver.id === user.id && (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                marginTop: "1rem",
+                objectFit: "contain",
+              }}
+            >
+              <CustomButton
+                variant="contained"
+                sx={{
+                  backgroundColor: "var(--pallet-blue)",
+                  marginTop: "1rem",
+                  marginX: "0.5rem",
+                }}
+                size="medium"
+                disabled={isConsumptionApproving}
+                endIcon={
+                  isConsumptionApproving ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : null
+                }
+                onClick={() => setApproveDialogOpen(true)}
+              >
+                Approve Target Settings Report
+              </CustomButton>
+            </Box>
+          )}
       </Box>
+      {approveDialogOpen && (
+        <ApproveConfirmationModal
+          open={approveDialogOpen}
+          title="Approve Target Settings Report Confirmation"
+          content={
+            <>
+              Are you sure you want to approve this Approve Target Settings?
+              <Alert severity="warning" style={{ marginTop: "1rem" }}>
+                This action is not reversible.
+              </Alert>
+            </>
+          }
+          handleClose={() => setApproveDialogOpen(false)}
+          approveFunc={async () => {
+            await approveTargetSettingsMutation(targetSettings.id);
+          }}
+          onSuccess={() => {}}
+          handleReject={() => {}}
+        />
+      )}
     </Stack>
   );
 }

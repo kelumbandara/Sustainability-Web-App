@@ -665,7 +665,10 @@ const AppRoutes = () => {
           element={withLayout(
             MainLayout,
             () => (
-              <TargetSettingsTable isAssignedTasks={true} />
+              <TargetSettingsTable
+                isAssignedTasks={true}
+                isApprovedTasks={false}
+              />
             ),
             !userPermissionObject?.[
               PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_TARGET_SETTING_VIEW
@@ -677,10 +680,13 @@ const AppRoutes = () => {
           element={withLayout(
             MainLayout,
             () => (
-              <TargetSettingsTable isAssignedTasks={true} />
+              <TargetSettingsTable
+                isAssignedTasks={false}
+                isApprovedTasks={true}
+              />
             ),
             !userPermissionObject?.[
-              PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_TARGET_SETTING_VIEW
+              PermissionKeys.ENVIRONMENT_APPROVED_TASKS_TARGET_SETTING_VIEW
             ]
           )}
         />

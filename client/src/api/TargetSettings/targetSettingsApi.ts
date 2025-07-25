@@ -158,3 +158,13 @@ export async function fetchOpportunity(subCategoryName: string) {
   );
   return res.data;
 }
+
+export async function fetchApprovedTaskTargetSettings() {
+  const res = await axios.get("api/target-setting-assign-task-approved");
+  return res.data;
+}
+
+export async function approveTargetSettingsReport(id: string) {
+  const res = await axios.post(`api/target-setting/${id}/approve`);
+  return res.data;
+}
