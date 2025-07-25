@@ -141,6 +141,12 @@ export const sidebarItems: Array<SidebarItem> = [
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
             accessKey: PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_TASK_VIEW,
           },
+          {
+            title: "Approved Audit",
+            href: "/audit-inspection/external-audit/approved",
+            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey: PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_APPROVED_VIEW,
+          },
           // {
           //   title: "External Audit Queue",
           //   href: "/audit-inspection/external-audit/audit-queue",

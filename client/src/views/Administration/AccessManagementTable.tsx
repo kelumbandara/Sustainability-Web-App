@@ -83,8 +83,9 @@ function AccessManagementTable() {
   const { mutate: updateAccessRoleMutation } = useMutation({
     mutationFn: updateAccessRole,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["access-roles"] });
-      enqueueSnackbar("Accident Report Updated Successfully!", {
+      queryClient.invalidateQueries({ queryKey: ["access-roles"] });  
+      queryClient.invalidateQueries({ queryKey: ["current-user"] });
+      enqueueSnackbar("Access Role Updated Successfully!", {
         variant: "success",
       });
       setSelectedRole(null);

@@ -2,6 +2,7 @@ import {
   Alert,
   AppBar,
   Box,
+  CircularProgress,
   IconButton,
   Stack,
   Tab,
@@ -21,6 +22,7 @@ import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import ListIcon from "@mui/icons-material/List";
 import Diversity3Icon from "@mui/icons-material/Diversity3";
 import {
+  approveExternalAudit,
   deleteExternalActionPlan,
   ExternalAudit,
   getExternalAuditData,
@@ -38,6 +40,8 @@ import { ScheduledInternalAuditActionPlan } from "../../../api/AuditAndInspectio
 import { AddOrEditActionPlan } from "./AddOrEditActionPlan";
 import queryClient from "../../../state/queryClient";
 import { enqueueSnackbar } from "notistack";
+import useCurrentUser from "../../../hooks/useCurrentUser";
+import ApproveConfirmationModal from "../../OccupationalHealth/MedicineInventory/MedicineRequest/ApproveConfirmationModal";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -78,6 +82,8 @@ function ViewExternalAuditContent({
 }) {
   const [activeTab, setActiveTab] = useState(0);
   const { isTablet } = useIsMobile();
+  const { user } = useCurrentUser();
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false);
 
   const { data: externalAuditData, isFetching: isExternalAuditDataFetching } =
     useQuery({
@@ -85,25 +91,46 @@ function ViewExternalAuditContent({
       queryFn: getExternalAuditData,
     });
 
-    const { mutate: deleteActionItemMutation } = useMutation({
-        mutationFn: deleteExternalActionPlan,
-        onSuccess: () => {
-          queryClient.invalidateQueries({
-            queryKey: ["external-audit"],
-          });
-          enqueueSnackbar("Action Item Deleted Successfully!", {
-            variant: "success",
-          });
-          setOpenDeleteActionItemModal(false);
-          setSelectedActionItem(null);
-        },
-        onError: () => {
-          enqueueSnackbar
-          (`Action Item Delete Failed`, {
-            variant: "error",
-          });
-        },
+  const { mutate: deleteActionItemMutation } = useMutation({
+    mutationFn: deleteExternalActionPlan,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["external-audit"],
       });
+      enqueueSnackbar("Action Item Deleted Successfully!", {
+        variant: "success",
+      });
+      setOpenDeleteActionItemModal(false);
+      setSelectedActionItem(null);
+    },
+    onError: () => {
+      enqueueSnackbar(`Action Item Delete Failed`, {
+        variant: "error",
+      });
+    },
+  });
+
+  const {
+    mutate: approveExternalAuditMutation,
+    isPending: isExternalAuditApproving,
+  } = useMutation({
+    mutationFn: approveExternalAudit,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["external-audit"],
+      });
+      enqueueSnackbar("External Audit Approved Successfully!", {
+        variant: "success",
+      });
+      setApproveDialogOpen(false);
+      handleClose();
+    },
+    onError: () => {
+      enqueueSnackbar(`External Audit Approval Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     console.log("event", event);
@@ -418,7 +445,7 @@ function ViewExternalAuditContent({
                       id: selectedActionItem.actionPlanId,
                     });
                   }
-                  console.log(selectedActionItem)
+                  console.log(selectedActionItem);
                 }}
                 onSuccess={() => {
                   setOpenDeleteActionItemModal(false);
@@ -468,18 +495,70 @@ function ViewExternalAuditContent({
               : "N/A"
           }
         />
-      </Box>
-      <AddOrEditActionPlan
-              open={openActionItemDialog}
-              setOpen={setOpenActionItemDialog}
-              handleClose={() => {
-                setSelectedActionItem(null);
-                setOpenActionItemDialog(false);
-                handleClose();
+        {audit.status === Status.DRAFT &&
+          user.userLevel.id === 5 &&
+          user.id === audit.approver.id && (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                marginTop: "1rem",
+                objectFit: "contain",
               }}
-              selectedActionItem={selectedActionItem}
-              auditId={audit.id}
-            />
+            >
+              <CustomButton
+                variant="contained"
+                sx={{
+                  backgroundColor: "var(--pallet-blue)",
+                  marginTop: "1rem",
+                  marginX: "0.5rem",
+                }}
+                size="medium"
+                disabled={isExternalAuditApproving}
+                endIcon={
+                  isExternalAuditApproving ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : null
+                }
+                onClick={() => setApproveDialogOpen(true)}
+              >
+                Approve External Audit
+              </CustomButton>
+            </Box>
+          )}
+      </Box>
+      {approveDialogOpen && (
+        <ApproveConfirmationModal
+          open={approveDialogOpen}
+          title="Approve External Audit Confirmation"
+          content={
+            <>
+              Are you sure you want to approve this External Audit?
+              <Alert severity="warning" style={{ marginTop: "1rem" }}>
+                This action is not reversible.
+              </Alert>
+            </>
+          }
+          handleClose={() => setApproveDialogOpen(false)}
+          approveFunc={async () => {
+            await approveExternalAuditMutation(audit.id);
+          }}
+          onSuccess={() => {}}
+          handleReject={() => {}}
+        />
+      )}
+      <AddOrEditActionPlan
+        open={openActionItemDialog}
+        setOpen={setOpenActionItemDialog}
+        handleClose={() => {
+          setSelectedActionItem(null);
+          setOpenActionItemDialog(false);
+          handleClose();
+        }}
+        selectedActionItem={selectedActionItem}
+        auditId={audit.id}
+      />
     </Stack>
   );
 }

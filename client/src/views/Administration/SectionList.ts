@@ -88,9 +88,19 @@ export const PermissionSectionsMap: PermissionSection[] = [
           DELETE: true,
         },
       },
+      {
+        name: "Internal Audit > Assigned Task",
+        key: "AUDIT_INSPECTION_INTERNAL_AUDIT_TASK",
+        permissionsExists: {
+          VIEW: true,
+          CREATE: true,
+          EDIT: true,
+          DELETE: true,
+        },
+      },
       // {
-      //   name: "Internal Audit > Task",
-      //   key: "AUDIT_INSPECTION_INTERNAL_AUDIT_TASK",
+      //   name: "Internal Audit > Approved Audit",
+      //   key: "AUDIT_INSPECTION_INTERNAL_AUDIT_APPROVED",
       //   permissionsExists: {
       //     VIEW: true,
       //     CREATE: true,
@@ -151,6 +161,16 @@ export const PermissionSectionsMap: PermissionSection[] = [
       {
         name: "External Audit > Corrective Action",
         key: "AUDIT_INSPECTION_EXTERNAL_AUDIT_CORRECTIVE_ACTION",
+        permissionsExists: {
+          VIEW: true,
+          CREATE: true,
+          EDIT: true,
+          DELETE: true,
+        },
+      },
+      {
+        name: "External Audit > Approved Audit",
+        key: "AUDIT_INSPECTION_EXTERNAL_AUDIT_APPROVED",
         permissionsExists: {
           VIEW: true,
           CREATE: true,
@@ -655,6 +675,10 @@ export enum PermissionKeys {
   AUDIT_INSPECTION_EXTERNAL_AUDIT_TASK_CREATE = "AUDIT_INSPECTION_EXTERNAL_AUDIT_TASK_CREATE",
   AUDIT_INSPECTION_EXTERNAL_AUDIT_TASK_EDIT = "AUDIT_INSPECTION_EXTERNAL_AUDIT_TASK_EDIT",
   AUDIT_INSPECTION_EXTERNAL_AUDIT_TASK_DELETE = "AUDIT_INSPECTION_EXTERNAL_AUDIT_TASK_DELETE",
+  AUDIT_INSPECTION_EXTERNAL_AUDIT_APPROVED_VIEW = "AUDIT_INSPECTION_EXTERNAL_AUDIT_APPROVED_VIEW",
+  AUDIT_INSPECTION_EXTERNAL_AUDIT_APPROVED_CREATE = "AUDIT_INSPECTION_EXTERNAL_AUDIT_APPROVED_CREATE",
+  AUDIT_INSPECTION_EXTERNAL_AUDIT_APPROVED_EDIT = "AUDIT_INSPECTION_EXTERNAL_AUDIT_APPROVED_EDIT",
+  AUDIT_INSPECTION_EXTERNAL_AUDIT_APPROVED_DELETE = "AUDIT_INSPECTION_EXTERNAL_AUDIT_APPROVED_DELETE",
   AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_VIEW = "AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_VIEW",
   AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_CREATE = "AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_CREATE",
   AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_EDIT = "AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_EDIT",

@@ -706,6 +706,7 @@ const AppRoutes = () => {
                 isAssignedTasks={true}
                 isCorrectiveAction={false}
                 isAuditQueue={false}
+                isAuditApprove={false}
               />
             ),
             false
@@ -722,6 +723,7 @@ const AppRoutes = () => {
               <ExternalAuditTable
                 isAssignedTasks={false}
                 isCorrectiveAction={false}
+                isAuditApprove={false}
                 isAuditQueue={true}
               />
             ),
@@ -739,11 +741,30 @@ const AppRoutes = () => {
                 isAssignedTasks={false}
                 isCorrectiveAction={true}
                 isAuditQueue={false}
+                isAuditApprove={false}
               />
             ),
             !userPermissionObject?.[
               PermissionKeys
                 .AUDIT_INSPECTION_EXTERNAL_AUDIT_CORRECTIVE_ACTION_VIEW
+            ]
+          )}
+        />
+        <Route
+          path="/audit-inspection/external-audit/approved"
+          element={withLayout(
+            MainLayout,
+            () => (
+              <ExternalAuditTable
+                isAssignedTasks={false}
+                isCorrectiveAction={true}
+                isAuditQueue={false}
+                isAuditApprove={true}
+              />
+            ),
+            !userPermissionObject?.[
+              PermissionKeys
+                .AUDIT_INSPECTION_EXTERNAL_AUDIT_APPROVED_VIEW
             ]
           )}
         />
