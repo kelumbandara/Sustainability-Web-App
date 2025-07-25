@@ -255,7 +255,7 @@ function ConsumptionTable({
             maxWidth: isMobile ? "88vw" : "100%",
           }}
         >
-          {!isAssignedTasks && (
+          {!isAssignedTasks && !isApprovedTasks && (
             <Box
               sx={{
                 padding: theme.spacing(2),
