@@ -85,7 +85,13 @@ function ViewIncidentContent({
       mutationFn: approveIncidents,
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ["accidents"],
+          queryKey: ["incidents"],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["incidents-assigned-tasks"],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["incidents-approved-tasks"],
         });
         enqueueSnackbar("Incident Report Approved Successfully!", {
           variant: "success",
