@@ -31,6 +31,7 @@ import {
   AccidentStatus,
   createAccident,
   deleteAccident,
+  getAccidentsApprovedTaskList,
   getAccidentsAssignedTaskList,
   getAccidentsList,
   updateAccident,
@@ -75,7 +76,11 @@ function AccidentTable({
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
-    { title: `${isAssignedTasks ? "Assigned " : ""}Accident Management` },
+    {
+      title: `${
+        isAssignedTasks ? "Assigned " : isApprovedTasks ? " Approved " : ""
+      }Accident Management`,
+    },
   ];
 
   const { data: accidentData, isFetching: isAccidentDataFetching } = useQuery({
@@ -96,7 +101,7 @@ function AccidentTable({
     isFetching: isAccidentApprovedTaskData,
   } = useQuery({
     queryKey: ["accidents-approved-task"],
-    queryFn: getAccidentsAssignedTaskList,
+    queryFn: getAccidentsApprovedTaskList,
   });
 
   const isMobile = useMediaQuery((theme: Theme) =>
@@ -177,6 +182,15 @@ function AccidentTable({
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
+    } else if (isApprovedTasks) {
+      if (!accidentApprovedTaskData) return [];
+      if (rowsPerPage === -1) {
+        return accidentApprovedTaskData; // If 'All' is selected, return all data
+      }
+      return accidentApprovedTaskData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
     } else {
       if (!accidentData) return [];
       if (rowsPerPage === -1) {
@@ -204,6 +218,7 @@ function AccidentTable({
   const isAccidentDeleteDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.INCIDENT_ACCIDENT_REGISTER_ACCIDENT_DELETE
   );
+
   const isAccidentAssignedTaskListDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_ACCIDENT_CREATE
   );
@@ -212,6 +227,16 @@ function AccidentTable({
   );
   const isAccidentAssignedTaskDeleteDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_ACCIDENT_DELETE
+  );
+
+  const isAccidentApprovedTaskCreateDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_APPROVED_TASKS_ACCIDENT_CREATE
+  );
+  const isAccidentApprovedTaskEditDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_APPROVED_TASKS_ACCIDENT_EDIT
+  );
+  const isAccidentApprovedTaskDeleteDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_APPROVED_TASKS_ACCIDENT_DELETE
   );
 
   return (
@@ -246,24 +271,29 @@ function AccidentTable({
               justifyContent: "flex-end",
             }}
           >
-            <Button
-              variant="contained"
-              sx={{ backgroundColor: "var(--pallet-blue)" }}
-              startIcon={<AddIcon />}
-              onClick={() => {
-                setSelectedRow(null);
-                setOpenAddOrEditDialog(true);
-              }}
-              disabled={
-                isAssignedTasks
-                  ? isAccidentAssignedTaskListDisabled
-                  : isAccidentCreateDisabled
-              }
-            >
-              Report an accident
-            </Button>
+            {!isApprovedTasks && (
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: "var(--pallet-blue)" }}
+                startIcon={<AddIcon />}
+                onClick={() => {
+                  setSelectedRow(null);
+                  setOpenAddOrEditDialog(true);
+                }}
+                disabled={
+                  isAssignedTasks
+                    ? isAccidentAssignedTaskListDisabled ||
+                      isAccidentApprovedTaskCreateDisabled
+                    : isAccidentCreateDisabled
+                }
+              >
+                Report an accident
+              </Button>
+            )}
           </Box>
-          {(isAccidentDataFetching || isAccidentAssignedTaskData) && (
+          {(isAccidentDataFetching ||
+            isAccidentAssignedTaskData ||
+            isAccidentApprovedTaskData) && (
             <LinearProgress sx={{ width: "100%" }} />
           )}
           <Table aria-label="simple table">
@@ -366,6 +396,7 @@ function AccidentTable({
               disableEdit={
                 isAssignedTasks
                   ? isAccidentAssignedTaskEditDisabled ||
+                    isAccidentApprovedTaskEditDisabled ||
                     selectedRow?.status === AccidentStatus.APPROVED
                   : isAccidentEditDisabled ||
                     selectedRow?.status === AccidentStatus.APPROVED
@@ -373,7 +404,8 @@ function AccidentTable({
               onDelete={() => setDeleteDialogOpen(true)}
               disableDelete={
                 isAssignedTasks
-                  ? isAccidentAssignedTaskDeleteDisabled
+                  ? isAccidentAssignedTaskDeleteDisabled ||
+                    isAccidentApprovedTaskDeleteDisabled
                   : isAccidentDeleteDisabled
               }
             />
