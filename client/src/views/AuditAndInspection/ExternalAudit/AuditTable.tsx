@@ -41,6 +41,7 @@ import {
   Status,
   createExternalAudit,
   deleteExternalAudit,
+  getApprovedExternalAuditList,
   getExternalAssignedAudit,
   getExternalAuditData,
   updateExternalAudit,
@@ -50,10 +51,12 @@ function ExternalAuditTable({
   isAssignedTasks,
   isCorrectiveAction,
   isAuditQueue,
+  isAuditApprove,
 }: {
   isAssignedTasks: boolean;
   isCorrectiveAction: boolean;
   isAuditQueue: boolean;
+  isAuditApprove: boolean;
 }) {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
@@ -89,6 +92,8 @@ function ExternalAuditTable({
           ? "Corrective Action "
           : isAuditQueue
           ? "Queue "
+          : isAuditApprove
+          ? "Approved "
           : ""
       }Audit Management`,
     },
@@ -99,6 +104,14 @@ function ExternalAuditTable({
       queryKey: ["external-audit"],
       queryFn: getExternalAuditData,
     });
+
+  const {
+    data: externalAuditApproveData,
+    isFetching: isExternalAuditApproveDataFetching,
+  } = useQuery({
+    queryKey: ["external-approved-audit"],
+    queryFn: getApprovedExternalAuditList,
+  });
 
   const {
     data: externalAuditTaskData,
@@ -223,6 +236,15 @@ function ExternalAuditTable({
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
+    } else if (isAuditApprove) {
+      if (!externalAuditApproveData) return [];
+      if (rowsPerPage === -1) {
+        return externalAuditApproveData; // If 'All' is selected, return all data
+      }
+      return externalAuditApproveData?.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
     } else {
       if (!externalAuditData) return [];
       if (rowsPerPage === -1) {
@@ -240,10 +262,12 @@ function ExternalAuditTable({
     externalAuditTaskData,
     externalAuditCorrectiveData,
     externalAuditQueueData,
+    externalAuditApproveData,
 
     isAssignedTasks,
     isCorrectiveAction,
     isAuditQueue,
+    isAuditApprove,
   ]);
 
   const isExternalAuditCreateDisabled = !useCurrentUserHaveAccess(
@@ -286,6 +310,16 @@ function ExternalAuditTable({
     PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_QUEUE_DELETE
   );
 
+  const isExternalAuditApproveCreateDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_APPROVED_CREATE
+  );
+  const isExternalAuditApproveEditDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_APPROVED_EDIT
+  );
+  const isExternalAuditApproveDeleteDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_APPROVED_DELETE
+  );
+
   return (
     <Stack>
       <Box
@@ -326,24 +360,26 @@ function ExternalAuditTable({
               justifyContent: "flex-end",
             }}
           >
-            <Button
-              variant="contained"
-              sx={{ backgroundColor: "var(--pallet-blue)" }}
-              startIcon={<AddIcon />}
-              onClick={() => {
-                setSelectedRow(null);
-                setOpenAddOrEditDialog(true);
-              }}
-              disabled={
-                isAssignedTasks || isCorrectiveAction || isAuditQueue
-                  ? isExternalAuditTaskListDisabled ||
-                    isExternalAuditCorrectiveCreateDisabled ||
-                    isExternalAuditQueueCreateDisabled
-                  : isExternalAuditCreateDisabled
-              }
-            >
-              Report External Audit
-            </Button>
+            {!isAuditApprove && (
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: "var(--pallet-blue)" }}
+                startIcon={<AddIcon />}
+                onClick={() => {
+                  setSelectedRow(null);
+                  setOpenAddOrEditDialog(true);
+                }}
+                disabled={
+                  isAssignedTasks || isCorrectiveAction || isAuditQueue
+                    ? isExternalAuditTaskListDisabled ||
+                      isExternalAuditCorrectiveCreateDisabled ||
+                      isExternalAuditQueueCreateDisabled
+                    : isExternalAuditCreateDisabled
+                }
+              >
+                Report External Audit
+              </Button>
+            )}
           </Box>
           {(isExternalAuditDataFetching ||
             isExternalAudiAssignedTaskData ||
@@ -450,18 +486,26 @@ function ExternalAuditTable({
               disableEdit={
                 selectedRow?.status === Status.COMPLETE
                   ? true
-                  : isAssignedTasks || isCorrectiveAction || isAuditQueue
+                  : isAssignedTasks ||
+                    isCorrectiveAction ||
+                    isAuditQueue ||
+                    isAuditApprove
                   ? isExternalAuditTaskEditDisabled ||
                     isExternalAuditCorrectiveEditDisabled ||
-                    isExternalAuditQueueEditDisabled
+                    isExternalAuditQueueEditDisabled ||
+                    isExternalAuditApproveEditDisabled
                   : isExternalAuditEditDisabled
               }
               onDelete={() => setDeleteDialogOpen(true)}
               disableDelete={
-                isAssignedTasks || isCorrectiveAction || isAuditQueue
+                isAssignedTasks ||
+                isCorrectiveAction ||
+                isAuditQueue ||
+                isAuditApprove
                   ? isExternalAuditTaskDeleteDisabled ||
                     isExternalAuditCorrectiveDeleteDisabled ||
-                    isExternalAuditQueueDeleteDisabled
+                    isExternalAuditQueueDeleteDisabled ||
+                    isExternalAuditApproveDeleteDisabled
                   : isExternalAuditDeleteDisabled
               }
             />

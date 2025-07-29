@@ -205,3 +205,13 @@ export async function deleteExternalActionPlan({ id }: { id: string }) {
   );
   return res.data;
 }
+
+export async function approveExternalAudit(id: number) {
+  const res = await axios.post(`api/external-audit/${id}/approve`);
+  return res.data;
+}
+
+export async function getApprovedExternalAuditList() {
+  const res = await axios.get("api/external-audit-assign-task-approved");
+  return res.data;
+}
