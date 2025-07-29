@@ -33,6 +33,8 @@ import {
   updateConsumption,
   deleteConsumption,
   getConsumptionAssignedList,
+  fetchConsumptionApprovedTasks,
+  Status,
 } from "../../../api/Environment/environmentApi";
 import ViewConsumptionContent from "./ViewConsumptionContent";
 import DeleteConfirmationModal from "../../../components/DeleteConfirmationModal";
@@ -42,7 +44,13 @@ import queryClient from "../../../state/queryClient";
 import useCurrentUserHaveAccess from "../../../hooks/useCurrentUserHaveAccess";
 import { PermissionKeys } from "../../Administration/SectionList";
 
-function ConsumptionTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
+function ConsumptionTable({
+  isAssignedTasks,
+  isApprovedTasks,
+}: {
+  isAssignedTasks: boolean;
+  isApprovedTasks: boolean;
+}) {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<Environment>(null);
@@ -68,7 +76,11 @@ function ConsumptionTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
-    { title: `${isAssignedTasks ? "Assigned " : ""}Consumption Management` },
+    {
+      title: `${
+        isAssignedTasks ? "Assigned " : isApprovedTasks ? "Approved " : ""
+      }Consumption Management`,
+    },
   ];
 
   const isMobile = useMediaQuery((theme: Theme) =>
@@ -80,6 +92,14 @@ function ConsumptionTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
       queryKey: ["consumptionRecords"],
       queryFn: getConsumptionList,
     });
+
+  const {
+    data: consumptionApprovedData,
+    isFetching: isConsumptionApprovedDataFetching,
+  } = useQuery({
+    queryKey: ["consumption-approved"],
+    queryFn: fetchConsumptionApprovedTasks,
+  });
 
   const {
     data: assignedConsumptionData,
@@ -153,6 +173,15 @@ function ConsumptionTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
+    } else if (isApprovedTasks) {
+      if (!consumptionApprovedData) return [];
+      if (rowsPerPage === -1) {
+        return consumptionApprovedData; // If 'All' is selected, return all data
+      }
+      return consumptionApprovedData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
     } else {
       if (!consumptionData) return [];
       if (rowsPerPage === -1) {
@@ -165,6 +194,8 @@ function ConsumptionTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
     }
   }, [
     isAssignedTasks,
+    isApprovedTasks,
+    consumptionApprovedData,
     assignedConsumptionData,
     page,
     rowsPerPage,
@@ -180,6 +211,7 @@ function ConsumptionTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   const isConsumptionDeleteDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.ENVIRONMENT_HISTORY_CONSUMPTION_DELETE
   );
+
   const isConsumptionAssignCreateDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_CONSUMPTION_CREATE
   );
@@ -188,6 +220,16 @@ function ConsumptionTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   );
   const isConsumptionAssignDeleteDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_CONSUMPTION_DELETE
+  );
+
+  const isConsumptionApprovedCreateDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.ENVIRONMENT_APPROVED_TASKS_CONSUMPTION_CREATE
+  );
+  const isConsumptionApprovedEditDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.ENVIRONMENT_APPROVED_TASKS_CONSUMPTION_EDIT
+  );
+  const isConsumptionApprovedDeleteDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.ENVIRONMENT_APPROVED_TASKS_CONSUMPTION_DELETE
   );
 
   return (
@@ -213,7 +255,7 @@ function ConsumptionTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
             maxWidth: isMobile ? "88vw" : "100%",
           }}
         >
-          {!isAssignedTasks && (
+          {!isAssignedTasks && !isApprovedTasks && (
             <Box
               sx={{
                 padding: theme.spacing(2),
@@ -337,21 +379,28 @@ function ConsumptionTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
                 setOpenAddOrEditDialog(true);
               }}
               disableEdit={
-                isAssignedTasks
-                  ? isConsumptionAssignEditDisabled
-                  : isConsumptionEditDisabled
+                isAssignedTasks || isApprovedTasks
+                  ? isConsumptionAssignEditDisabled ||
+                    selectedRow?.status === Status.APPROVED ||
+                    isConsumptionApprovedEditDisabled
+                  : isConsumptionEditDisabled ||
+                    selectedRow?.status === Status.APPROVED
               }
               onDelete={() => setDeleteDialogOpen(true)}
               disableDelete={
                 isAssignedTasks
-                  ? isConsumptionAssignDeleteDisabled
+                  ? isConsumptionAssignDeleteDisabled ||
+                    isConsumptionApprovedDeleteDisabled
                   : isConsumptionDeleteDisabled
               }
             />
 
             {selectedRow && (
               <Stack>
-                <ViewConsumptionContent consumption={selectedRow} />
+                <ViewConsumptionContent
+                  consumption={selectedRow}
+                  handleCloseDrawer={() => setOpenViewDrawer(false)}
+                />
               </Stack>
             )}
           </Stack>

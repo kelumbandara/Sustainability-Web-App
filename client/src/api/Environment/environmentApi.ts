@@ -188,3 +188,13 @@ export async function fetchConsumptionAssignee() {
   const res = await axios.get(`/api/environment-record-assignee`);
   return res.data;
 }
+
+export async function fetchConsumptionApprovedTasks() {
+  const res = await axios.get(`/api/environment-record-assign-task-approved`);
+  return res.data;
+}
+
+export async function approveConsumptinReport(id: string) {
+  const res = await axios.post(`api/environment-record/${id}/approve`);
+  return res.data;
+}

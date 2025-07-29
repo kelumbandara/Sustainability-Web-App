@@ -1,5 +1,7 @@
 import {
+  Alert,
   Box,
+  CircularProgress,
   Divider,
   Stack,
   Table,
@@ -12,10 +14,53 @@ import {
 import { DrawerContentItem } from "../../../components/ViewDataDrawer";
 import { format } from "date-fns";
 import useIsMobile from "../../../customHooks/useIsMobile";
-import { Environment } from "../../../api/Environment/environmentApi";
+import {
+  approveConsumptinReport,
+  Environment,
+  Status,
+} from "../../../api/Environment/environmentApi";
+import useCurrentUser from "../../../hooks/useCurrentUser";
+import CustomButton from "../../../components/CustomButton";
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import queryClient from "../../../state/queryClient";
+import { enqueueSnackbar } from "notistack";
+import ApproveConfirmationModal from "../../OccupationalHealth/MedicineInventory/MedicineRequest/ApproveConfirmationModal";
 
-function ViewConsumptionContent({ consumption }: { consumption: Environment }) {
+function ViewConsumptionContent({
+  consumption,
+  handleCloseDrawer,
+}: {
+  consumption: Environment;
+  handleCloseDrawer: () => void;
+}) {
   const { isTablet } = useIsMobile();
+  const { user } = useCurrentUser();
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false);
+
+  const {
+    mutate: approveConsumptionMutation,
+    isPending: isConsumptionApproving,
+  } = useMutation({
+    mutationFn: approveConsumptinReport,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["consumptionRecords"] });
+      queryClient.invalidateQueries({
+        queryKey: ["assigned-consumptionRecords"],
+      });
+      queryClient.invalidateQueries({ queryKey: ["consumption-approved"] });
+      enqueueSnackbar("Consumption Report Approved Successfully!", {
+        variant: "success",
+      });
+      setApproveDialogOpen(false);
+      handleCloseDrawer();
+    },
+    onError: () => {
+      enqueueSnackbar(`Consumption Report Approval Failed`, {
+        variant: "error",
+      });
+    },
+  });
 
   return (
     <Stack
@@ -167,7 +212,59 @@ function ViewConsumptionContent({ consumption }: { consumption: Environment }) {
           value={consumption?.reviewer.name}
           sx={{ flex: 1 }}
         />
+        {consumption.status === Status.DRAFT &&
+          user.userLevel.id === 5 &&
+          consumption.reviewer.id === user.id && (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                marginTop: "1rem",
+                objectFit: "contain",
+              }}
+            >
+              <CustomButton
+                variant="contained"
+                sx={{
+                  backgroundColor: "var(--pallet-blue)",
+                  marginTop: "1rem",
+                  marginX: "0.5rem",
+                }}
+                size="medium"
+                disabled={isConsumptionApproving}
+                endIcon={
+                  isConsumptionApproving ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : null
+                }
+                onClick={() => setApproveDialogOpen(true)}
+              >
+                Approve Consumption Report
+              </CustomButton>
+            </Box>
+          )}
       </Box>
+      {approveDialogOpen && (
+        <ApproveConfirmationModal
+          open={approveDialogOpen}
+          title="Approve Consumption Report Confirmation"
+          content={
+            <>
+              Are you sure you want to approve this Consumption Report?
+              <Alert severity="warning" style={{ marginTop: "1rem" }}>
+                This action is not reversible.
+              </Alert>
+            </>
+          }
+          handleClose={() => setApproveDialogOpen(false)}
+          approveFunc={async () => {
+            await approveConsumptionMutation(consumption.id);
+          }}
+          onSuccess={() => {}}
+          handleReject={() => {}}
+        />
+      )}
     </Stack>
   );
 }

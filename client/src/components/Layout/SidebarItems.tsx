@@ -232,6 +232,28 @@ export const sidebarItems: Array<SidebarItem> = [
           },
         ],
       },
+      {
+        title: "Approved Tasks",
+        href: "/environment/approved-tasks",
+        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+        disabled: false,
+        nestedItems: [
+          {
+            title: "Consumption",
+            href: "/environment/approved-tasks/consumption",
+            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey:
+              PermissionKeys.ENVIRONMENT_APPROVED_TASKS_CONSUMPTION_VIEW,
+          },
+          {
+            title: "Target Setting",
+            href: "/environment/approved-tasks/target-setting",
+            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey:
+              PermissionKeys.ENVIRONMENT_APPROVED_TASKS_TARGET_SETTING_VIEW,
+          },
+        ],
+      },
     ],
   },
   {

@@ -680,10 +680,28 @@ const AppRoutes = () => {
           element={withLayout(
             MainLayout,
             () => (
-              <TargetSettingsTable isAssignedTasks={true} />
+              <TargetSettingsTable
+                isAssignedTasks={true}
+                isApprovedTasks={false}
+              />
             ),
             !userPermissionObject?.[
               PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_TARGET_SETTING_VIEW
+            ]
+          )}
+        />
+        <Route
+          path="/environment/approved-tasks/target-setting"
+          element={withLayout(
+            MainLayout,
+            () => (
+              <TargetSettingsTable
+                isAssignedTasks={false}
+                isApprovedTasks={true}
+              />
+            ),
+            !userPermissionObject?.[
+              PermissionKeys.ENVIRONMENT_APPROVED_TASKS_TARGET_SETTING_VIEW
             ]
           )}
         />
@@ -702,7 +720,25 @@ const AppRoutes = () => {
           element={withLayout(
             MainLayout,
             () => (
-              <EnvironmentTable isAssignedTasks={true} />
+              <EnvironmentTable
+                isAssignedTasks={true}
+                isApprovedTasks={false}
+              />
+            ),
+            !userPermissionObject?.[
+              PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_CONSUMPTION_VIEW
+            ]
+          )}
+        />
+        <Route
+          path="/environment/approved-tasks/consumption"
+          element={withLayout(
+            MainLayout,
+            () => (
+              <EnvironmentTable
+                isAssignedTasks={false}
+                isApprovedTasks={true}
+              />
             ),
             !userPermissionObject?.[
               PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_CONSUMPTION_VIEW

@@ -35,9 +35,11 @@ import queryClient from "../../../state/queryClient";
 import useCurrentUserHaveAccess from "../../../hooks/useCurrentUserHaveAccess";
 import AddOrEditTargetSettingsDialog from "./AddOrEditTargetSettingsDialog";
 import {
+  Status,
   TargetSettings,
   createTargetSettings,
   deleteTargetSettings,
+  fetchApprovedTaskTargetSettings,
   getAssignedTargetSettings,
   getTargetSettings,
   updateTargetSettings,
@@ -45,8 +47,10 @@ import {
 
 function TargetSettingsTable({
   isAssignedTasks,
+  isApprovedTasks,
 }: {
   isAssignedTasks: boolean;
+  isApprovedTasks: boolean;
 }) {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
@@ -74,7 +78,9 @@ function TargetSettingsTable({
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
     {
-      title: `${isAssignedTasks ? "Assigned " : ""}Target Settings Management`,
+      title: `${
+        isAssignedTasks ? "Assigned " : isApprovedTasks ? "Approved" : ""
+      }Target Settings Management`,
     },
   ];
 
@@ -87,6 +93,14 @@ function TargetSettingsTable({
       queryKey: ["targetSettings"],
       queryFn: getTargetSettings,
     });
+
+  const {
+    data: targetSettingsApproveData,
+    isFetching: isTargetSettingsApproveData,
+  } = useQuery({
+    queryKey: ["approved-targetSettings"],
+    queryFn: fetchApprovedTaskTargetSettings,
+  });
 
   const {
     data: assignedTargetSettingsData,
@@ -106,6 +120,15 @@ function TargetSettingsTable({
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
+    } else if (isApprovedTasks) {
+      if (!targetSettingsApproveData) return [];
+      if (rowsPerPage === -1) {
+        return targetSettingsApproveData; // If 'All' is selected, return all data
+      }
+      return targetSettingsApproveData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
     } else {
       if (!targetSettingsData) return [];
       if (rowsPerPage === -1) {
@@ -118,6 +141,8 @@ function TargetSettingsTable({
     }
   }, [
     isAssignedTasks,
+    isApprovedTasks,
+    targetSettingsApproveData,
     assignedTargetSettingsData,
     page,
     rowsPerPage,
@@ -190,6 +215,7 @@ function TargetSettingsTable({
   const isTargetSettingsDeleteDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_TARGET_SETTING_DELETE
   );
+
   const isTargetSettingsAssignCreateDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_TARGET_SETTING_CREATE
   );
@@ -198,6 +224,16 @@ function TargetSettingsTable({
   );
   const isTargetSettingsAssignDeleteDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.ENVIRONMENT_ASSIGNED_TASKS_TARGET_SETTING_DELETE
+  );
+
+  const isTargetSettingsApprovedCreateDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.ENVIRONMENT_APPROVED_TASKS_TARGET_SETTING_CREATE
+  );
+  const isTargetSettingsApprovedEditDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.ENVIRONMENT_APPROVED_TASKS_TARGET_SETTING_EDIT
+  );
+  const isTargetSettingsApprovedDeleteDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.ENVIRONMENT_APPROVED_TASKS_TARGET_SETTING_DELETE
   );
 
   return (
@@ -338,9 +374,12 @@ function TargetSettingsTable({
               title="Target Settings Details"
               handleClose={() => setOpenViewDrawer(false)}
               disableEdit={
-                isAssignedTasks
-                  ? isTargetSettingsAssignEditDisabled
-                  : isTargetSettingsEditDisabled
+                isAssignedTasks || isApprovedTasks
+                  ? isTargetSettingsAssignEditDisabled ||
+                    isTargetSettingsApprovedEditDisabled ||
+                    selectedRow?.status === Status.APPROVED
+                  : isTargetSettingsEditDisabled ||
+                    selectedRow?.status === Status.APPROVED
               }
               onEdit={() => {
                 setSelectedRow(selectedRow);
@@ -349,14 +388,18 @@ function TargetSettingsTable({
               onDelete={() => setDeleteDialogOpen(true)}
               disableDelete={
                 isAssignedTasks
-                  ? isTargetSettingsAssignDeleteDisabled
+                  ? isTargetSettingsAssignDeleteDisabled ||
+                    isTargetSettingsApprovedDeleteDisabled
                   : isTargetSettingsDeleteDisabled
               }
             />
 
             {selectedRow && (
               <Stack>
-                <ViewTargetSettingsContent targetSettings={selectedRow} />
+                <ViewTargetSettingsContent
+                  targetSettings={selectedRow}
+                  handleCloseDrawer={() => setOpenViewDrawer(false)}
+                />
               </Stack>
             )}
           </Stack>
