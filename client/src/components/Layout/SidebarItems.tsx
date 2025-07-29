@@ -290,6 +290,12 @@ export const sidebarItems: Array<SidebarItem> = [
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
         accessKey: PermissionKeys.HAZARD_RISK_ASSIGNED_TASKS_VIEW,
       },
+      {
+        title: "Approved Tasks",
+        href: "/hazard-risk/approved-tasks",
+        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+        accessKey: PermissionKeys.HAZARD_RISK_APPROVED_TASKS_VIEW,
+      },
     ],
   },
   {
