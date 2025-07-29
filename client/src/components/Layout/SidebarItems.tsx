@@ -591,6 +591,12 @@ export const sidebarItems: Array<SidebarItem> = [
         icon: <SubdirectoryArrowRightIcon fontSize="small" />,
         accessKey: PermissionKeys.GRIEVANCE_ASSIGNED_TASKS_VIEW,
       },
+      {
+        title: "Completed Tasks",
+        href: "/grievance/completed-tasks",
+        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+        accessKey: PermissionKeys.GRIEVANCE_COMPLETED_TASKS_VIEW,
+      },
     ],
   },
   {

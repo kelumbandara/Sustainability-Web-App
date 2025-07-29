@@ -254,6 +254,11 @@ export async function getGrievancesAssignedTaskList() {
   return res.data;
 }
 
+export async function getGrievancesCompletedList() {
+  const res = await axios.get(`/api/grievance-record-assign-task-complete`);
+  return res.data;
+}
+
 export const createGrievance = async (grievance: Grievance) => {
   const formData = new FormData();
 
