@@ -419,7 +419,12 @@ const AppRoutes = () => {
           element={withLayout(
             MainLayout,
             () => {
-              return <AccidentTable isAssignedTasks={false} />;
+              return (
+                <AccidentTable
+                  isAssignedTasks={false}
+                  isApprovedTasks={false}
+                />
+              );
             },
             !userPermissionObject?.[
               PermissionKeys.INCIDENT_ACCIDENT_REGISTER_ACCIDENT_VIEW
@@ -431,7 +436,12 @@ const AppRoutes = () => {
           element={withLayout(
             MainLayout,
             () => {
-              return <IncidentTable isAssignedTasks={false} />;
+              return (
+                <IncidentTable
+                  isAssignedTasks={false}
+                  isApprovedTasks={false}
+                />
+              );
             },
             !userPermissionObject?.[
               PermissionKeys.INCIDENT_ACCIDENT_REGISTER_INCIDENT_VIEW
@@ -456,7 +466,9 @@ const AppRoutes = () => {
           element={withLayout(
             MainLayout,
             () => {
-              return <AccidentTable isAssignedTasks={true} />;
+              return (
+                <AccidentTable isAssignedTasks={true} isApprovedTasks={false} />
+              );
             },
             !userPermissionObject?.[
               PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_ACCIDENT_VIEW
@@ -468,7 +480,9 @@ const AppRoutes = () => {
           element={withLayout(
             MainLayout,
             () => {
-              return <IncidentTable isAssignedTasks={true} />;
+              return (
+                <IncidentTable isAssignedTasks={true} isApprovedTasks={false} />
+              );
             },
             !userPermissionObject?.[
               PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_INCIDENT_VIEW
@@ -486,6 +500,36 @@ const AppRoutes = () => {
             //   PermissionKeys
             //     .INCIDENT_ACCIDENT_ASSIGNED_TASKS_CORRECTIVE_ACTION_VIEW
             // ]
+          )}
+        />
+
+        {/* Approved Tasks */}
+        <Route
+          path="/accident-incident/assigned-tasks/accident-approved"
+          element={withLayout(
+            MainLayout,
+            () => {
+              return (
+                <AccidentTable isAssignedTasks={false} isApprovedTasks={true} />
+              );
+            },
+            !userPermissionObject?.[
+              PermissionKeys.INCIDENT_ACCIDENT_APPROVED_TASKS_ACCIDENT_VIEW
+            ]
+          )}
+        />
+        <Route
+          path="/accident-incident/assigned-tasks/incident-approved"
+          element={withLayout(
+            MainLayout,
+            () => {
+              return (
+                <IncidentTable isAssignedTasks={false} isApprovedTasks={true} />
+              );
+            },
+            !userPermissionObject?.[
+              PermissionKeys.INCIDENT_ACCIDENT_APPROVED_TASKS_INCIDENT_VIEW
+            ]
           )}
         />
 

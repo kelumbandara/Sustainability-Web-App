@@ -199,6 +199,20 @@ export const IncidentSchema = z.object({
 
 export type Incident = z.infer<typeof IncidentSchema>;
 
+export enum AccidentStatus {
+  OPEN = "Open",
+  DRAFT = "draft",
+  PUBLISHED = "Published",
+  APPROVED = "Approved",
+}
+
+export enum IncidentStatus {
+  OPEN = "Open",
+  DRAFT = "draft",
+  PUBLISHED = "Published",
+  APPROVED = "Approved",
+}
+
 export async function getAccidentsList() {
   const res = await axios.get("/api/accidents");
   return res.data;
@@ -206,6 +220,11 @@ export async function getAccidentsList() {
 
 export async function getAccidentsAssignedTaskList() {
   const res = await axios.get("/api/accidents-assign-task");
+  return res.data;
+}
+
+export async function getAccidentsApprovedTaskList() {
+  const res = await axios.get("/api/accidents-assign-task-approved");
   return res.data;
 }
 
@@ -305,6 +324,11 @@ export async function getIncidentsAssignedTaskList() {
   return res.data;
 }
 
+export async function getIncidentsApprovedTaskList() {
+  const res = await axios.get("/api/incidents-assign-task-approved");
+  return res.data;
+}
+
 export const createIncidents = async (incidents: Incident) => {
   const formData = new FormData();
 
@@ -392,3 +416,13 @@ export const deleteIncident = async (id: string) => {
   const res = await axios.delete(`/api/incidents/${id}/delete`);
   return res.data;
 }; //push
+
+export async function approveAccidents(id: string) {
+  const res = await axios.post(`api/accidents/${id}/update-status-to-approved`);
+  return res.data;
+}
+
+export async function approveIncidents(id: string) {
+  const res = await axios.post(`api/incidents/${id}/update-status-to-approved`);
+  return res.data;
+}

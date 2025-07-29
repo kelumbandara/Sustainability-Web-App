@@ -382,13 +382,41 @@ export const sidebarItems: Array<SidebarItem> = [
             accessKey:
               PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_INCIDENT_VIEW,
           },
+          // {
+          //   title: "Corrective Action",
+          //   href: "/accident-incident/assigned-tasks/corrective-action",
+          //   icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+          //   accessKey:
+          //     PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_CORRECTIVE_ACTION_VIEW,
+          // },
+        ],
+      },
+      {
+        title: "Approved Tasks",
+        href: "/accident-incident/approved-tasks",
+        icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+        nestedItems: [
           {
-            title: "Corrective Action",
-            href: "/accident-incident/assigned-tasks/corrective-action",
+            title: "Accident Approved",
+            href: "/accident-incident/assigned-tasks/accident-approved",
             icon: <SubdirectoryArrowRightIcon fontSize="small" />,
             accessKey:
-              PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_CORRECTIVE_ACTION_VIEW,
+              PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_ACCIDENT_VIEW,
           },
+          {
+            title: "Incident Approved",
+            href: "/accident-incident/assigned-tasks/incident-approved",
+            icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+            accessKey:
+              PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_INCIDENT_VIEW,
+          },
+          // {
+          //   title: "Corrective Action",
+          //   href: "/accident-incident/assigned-tasks/corrective-action",
+          //   icon: <SubdirectoryArrowRightIcon fontSize="small" />,
+          //   accessKey:
+          //     PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_CORRECTIVE_ACTION_VIEW,
+          // },
         ],
       },
     ],

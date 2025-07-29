@@ -28,8 +28,10 @@ import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import { useSnackbar } from "notistack";
 import {
   Accident,
+  AccidentStatus,
   createAccident,
   deleteAccident,
+  getAccidentsApprovedTaskList,
   getAccidentsAssignedTaskList,
   getAccidentsList,
   updateAccident,
@@ -41,7 +43,13 @@ import queryClient from "../../state/queryClient";
 import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
 import { PermissionKeys } from "../Administration/SectionList";
 
-function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
+function AccidentTable({
+  isAssignedTasks,
+  isApprovedTasks,
+}: {
+  isAssignedTasks: boolean;
+  isApprovedTasks: boolean;
+}) {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<Accident>(null);
@@ -68,7 +76,11 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
-    { title: `${isAssignedTasks ? "Assigned " : ""}Accident Management` },
+    {
+      title: `${
+        isAssignedTasks ? "Assigned " : isApprovedTasks ? " Approved " : ""
+      }Accident Management`,
+    },
   ];
 
   const { data: accidentData, isFetching: isAccidentDataFetching } = useQuery({
@@ -82,6 +94,14 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   } = useQuery({
     queryKey: ["accidents-assigned-task"],
     queryFn: getAccidentsAssignedTaskList,
+  });
+
+  const {
+    data: accidentApprovedTaskData,
+    isFetching: isAccidentApprovedTaskData,
+  } = useQuery({
+    queryKey: ["accidents-approved-task"],
+    queryFn: getAccidentsApprovedTaskList,
   });
 
   const isMobile = useMediaQuery((theme: Theme) =>
@@ -162,6 +182,15 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
+    } else if (isApprovedTasks) {
+      if (!accidentApprovedTaskData) return [];
+      if (rowsPerPage === -1) {
+        return accidentApprovedTaskData; // If 'All' is selected, return all data
+      }
+      return accidentApprovedTaskData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
     } else {
       if (!accidentData) return [];
       if (rowsPerPage === -1) {
@@ -189,6 +218,7 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   const isAccidentDeleteDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.INCIDENT_ACCIDENT_REGISTER_ACCIDENT_DELETE
   );
+
   const isAccidentAssignedTaskListDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_ACCIDENT_CREATE
   );
@@ -197,6 +227,16 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   );
   const isAccidentAssignedTaskDeleteDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_ACCIDENT_DELETE
+  );
+
+  const isAccidentApprovedTaskCreateDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_APPROVED_TASKS_ACCIDENT_CREATE
+  );
+  const isAccidentApprovedTaskEditDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_APPROVED_TASKS_ACCIDENT_EDIT
+  );
+  const isAccidentApprovedTaskDeleteDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_APPROVED_TASKS_ACCIDENT_DELETE
   );
 
   return (
@@ -231,24 +271,29 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
               justifyContent: "flex-end",
             }}
           >
-            <Button
-              variant="contained"
-              sx={{ backgroundColor: "var(--pallet-blue)" }}
-              startIcon={<AddIcon />}
-              onClick={() => {
-                setSelectedRow(null);
-                setOpenAddOrEditDialog(true);
-              }}
-              disabled={
-                isAssignedTasks
-                  ? isAccidentAssignedTaskListDisabled
-                  : isAccidentCreateDisabled
-              }
-            >
-              Report an accident
-            </Button>
+            {!isApprovedTasks && (
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: "var(--pallet-blue)" }}
+                startIcon={<AddIcon />}
+                onClick={() => {
+                  setSelectedRow(null);
+                  setOpenAddOrEditDialog(true);
+                }}
+                disabled={
+                  isAssignedTasks
+                    ? isAccidentAssignedTaskListDisabled ||
+                      isAccidentApprovedTaskCreateDisabled
+                    : isAccidentCreateDisabled
+                }
+              >
+                Report an accident
+              </Button>
+            )}
           </Box>
-          {(isAccidentDataFetching || isAccidentAssignedTaskData) && (
+          {(isAccidentDataFetching ||
+            isAccidentAssignedTaskData ||
+            isAccidentApprovedTaskData) && (
             <LinearProgress sx={{ width: "100%" }} />
           )}
           <Table aria-label="simple table">
@@ -350,20 +395,27 @@ function AccidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
               }}
               disableEdit={
                 isAssignedTasks
-                  ? isAccidentAssignedTaskEditDisabled
-                  : isAccidentEditDisabled
+                  ? isAccidentAssignedTaskEditDisabled ||
+                    isAccidentApprovedTaskEditDisabled ||
+                    selectedRow?.status === AccidentStatus.APPROVED
+                  : isAccidentEditDisabled ||
+                    selectedRow?.status === AccidentStatus.APPROVED
               }
               onDelete={() => setDeleteDialogOpen(true)}
               disableDelete={
                 isAssignedTasks
-                  ? isAccidentAssignedTaskDeleteDisabled
+                  ? isAccidentAssignedTaskDeleteDisabled ||
+                    isAccidentApprovedTaskDeleteDisabled
                   : isAccidentDeleteDisabled
               }
             />
 
             {selectedRow && (
               <Stack>
-                <ViewAccidentContent accident={selectedRow} />
+                <ViewAccidentContent
+                  accident={selectedRow}
+                  handleCloseDrawer={() => setOpenViewDrawer(false)}
+                />
               </Stack>
             )}
           </Stack>

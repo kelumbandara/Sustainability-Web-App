@@ -33,6 +33,7 @@ import {
   updateIncident,
   deleteIncident,
   getIncidentsAssignedTaskList,
+  getIncidentsApprovedTaskList,
 } from "../../api/accidentAndIncidentApi";
 import AddOrEditIncidentDialog from "./AddOrEditIncidentDialog";
 import ViewIncidentContent from "./ViewIncidentContent";
@@ -41,7 +42,13 @@ import queryClient from "../../state/queryClient";
 import useCurrentUserHaveAccess from "../../hooks/useCurrentUserHaveAccess";
 import { PermissionKeys } from "../Administration/SectionList";
 
-function IncidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
+function IncidentTable({
+  isAssignedTasks,
+  isApprovedTasks,
+}: {
+  isAssignedTasks: boolean;
+  isApprovedTasks: boolean;
+}) {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<Incident>(null);
@@ -68,7 +75,11 @@ function IncidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
-    { title: `${isAssignedTasks ? "Assigned " : ""}Incident Management` },
+    {
+      title: `${
+        isAssignedTasks ? "Assigned " : isApprovedTasks ? " Approved " : ""
+      }Incident Management`,
+    },
   ];
 
   const isMobile = useMediaQuery((theme: Theme) =>
@@ -86,6 +97,14 @@ function IncidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   } = useQuery({
     queryKey: ["incidents-assigned-tasks"],
     queryFn: getIncidentsAssignedTaskList,
+  });
+
+  const {
+    data: incidentApprovedTaskData,
+    isFetching: isIncidentApprovedTaskDataFetching,
+  } = useQuery({
+    queryKey: ["incidents-approved-tasks"],
+    queryFn: getIncidentsApprovedTaskList,
   });
 
   const { mutate: createIncidentMutation, isPending: isIncidentCreating } =
@@ -161,6 +180,15 @@ function IncidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
+    } else if (isApprovedTasks) {
+      if (!incidentApprovedTaskData) return [];
+      if (rowsPerPage === -1) {
+        return incidentApprovedTaskData; // If 'All' is selected, return all data
+      }
+      return incidentApprovedTaskData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
     } else {
       if (!incidentData) return [];
       if (rowsPerPage === -1) {
@@ -188,6 +216,7 @@ function IncidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   const isIncidentDeleteDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.INCIDENT_ACCIDENT_REGISTER_INCIDENT_DELETE
   );
+
   const isIncidentAssignedTaskListDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_INCIDENT_CREATE
   );
@@ -196,6 +225,16 @@ function IncidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   );
   const isIncidentAssignedTaskDeleteDisabled = !useCurrentUserHaveAccess(
     PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_INCIDENT_DELETE
+  );
+
+  const isIncidentApprovedTaskCreateDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_APPROVED_TASKS_INCIDENT_CREATE
+  );
+  const isIncidentApprovedTaskEditDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_APPROVED_TASKS_INCIDENT_EDIT
+  );
+  const isIncidentApprovedTaskDeleteDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.INCIDENT_ACCIDENT_APPROVED_TASKS_INCIDENT_DELETE
   );
 
   return (
@@ -230,24 +269,29 @@ function IncidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
               justifyContent: "flex-end",
             }}
           >
-            <Button
-              variant="contained"
-              sx={{ backgroundColor: "var(--pallet-blue)" }}
-              startIcon={<AddIcon />}
-              onClick={() => {
-                setSelectedRow(null);
-                setOpenAddOrEditDialog(true);
-              }}
-              disabled={
-                isAssignedTasks
-                  ? isIncidentAssignedTaskListDisabled
-                  : isIncidentCreateDisabled
-              }
-            >
-              Report an incident
-            </Button>
+            {!isApprovedTasks && (
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: "var(--pallet-blue)" }}
+                startIcon={<AddIcon />}
+                onClick={() => {
+                  setSelectedRow(null);
+                  setOpenAddOrEditDialog(true);
+                }}
+                disabled={
+                  isAssignedTasks
+                    ? isIncidentAssignedTaskListDisabled ||
+                      isIncidentApprovedTaskCreateDisabled
+                    : isIncidentCreateDisabled
+                }
+              >
+                Report an incident
+              </Button>
+            )}
           </Box>
-          {(isIncidentDataFetching || isIncidentAssignedDataFetching) && (
+          {(isIncidentDataFetching ||
+            isIncidentAssignedDataFetching ||
+            isIncidentApprovedTaskDataFetching) && (
             <LinearProgress sx={{ width: "100%" }} />
           )}
           <Table aria-label="simple table">
@@ -315,6 +359,8 @@ function IncidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
                   count={
                     isAssignedTasks
                       ? incidentAssignedTaskData?.length
+                      : isApprovedTasks
+                      ? incidentApprovedTaskData?.length
                       : incidentData?.length
                   }
                   rowsPerPage={rowsPerPage}
@@ -345,19 +391,26 @@ function IncidentTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
               disableEdit={
                 isAssignedTasks
                   ? isIncidentAssignedTaskEditDisabled
+                  : isApprovedTasks
+                  ? isIncidentApprovedTaskEditDisabled
                   : isIncidentEditDisabled
               }
               onDelete={() => setDeleteDialogOpen(true)}
               disableDelete={
                 isAssignedTasks
                   ? isIncidentAssignedTaskDeleteDisabled
+                  : isApprovedTasks
+                  ? isIncidentApprovedTaskDeleteDisabled
                   : isIncidentDeleteDisabled
               }
             />
 
             {selectedRow && (
               <Stack>
-                <ViewIncidentContent incident={selectedRow} />
+                <ViewIncidentContent
+                  incident={selectedRow}
+                  handleCloseDrawer={() => setOpenViewDrawer(false)}
+                />
               </Stack>
             )}
           </Stack>

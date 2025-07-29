@@ -1,6 +1,8 @@
 import {
+  Alert,
   AppBar,
   Box,
+  CircularProgress,
   Stack,
   Tab,
   Table,
@@ -17,12 +19,22 @@ import theme from "../../theme";
 import useIsMobile from "../../customHooks/useIsMobile";
 import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import FireExtinguisherIcon from "@mui/icons-material/FireExtinguisher";
-import { Accident } from "../../api/accidentAndIncidentApi";
+import {
+  Accident,
+  AccidentStatus,
+  approveAccidents,
+} from "../../api/accidentAndIncidentApi";
 import WarningIcon from "@mui/icons-material/Warning";
 import { formatDate } from "date-fns";
 import { format, parseISO } from "date-fns";
 import { FileItemsViewer } from "../../components/FileItemsViewer";
 import { StorageFile } from "../../utils/StorageFiles.util";
+import useCurrentUser from "../../hooks/useCurrentUser";
+import { useMutation } from "@tanstack/react-query";
+import queryClient from "../../state/queryClient";
+import { enqueueSnackbar } from "notistack";
+import ApproveConfirmationModal from "../OccupationalHealth/MedicineInventory/MedicineRequest/ApproveConfirmationModal";
+import CustomButton from "../../components/CustomButton";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -54,9 +66,37 @@ function a11yProps(index: number) {
   };
 }
 
-function ViewAccidentContent({ accident }: { accident: Accident }) {
+function ViewAccidentContent({
+  accident,
+  handleCloseDrawer,
+}: {
+  accident: Accident;
+  handleCloseDrawer: () => void;
+}) {
   const [activeTab, setActiveTab] = useState(0);
   const { isTablet } = useIsMobile();
+  const { user } = useCurrentUser();
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false);
+
+  const { mutate: approveAccidentsMutation, isPending: isAccidentsApproving } =
+    useMutation({
+      mutationFn: approveAccidents,
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["accidents"],
+        });
+        enqueueSnackbar("Accident Report Approved Successfully!", {
+          variant: "success",
+        });
+        setApproveDialogOpen(false);
+        handleCloseDrawer();
+      },
+      onError: () => {
+        enqueueSnackbar(`Accident Report Approval Failed`, {
+          variant: "error",
+        });
+      },
+    });
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -422,7 +462,59 @@ function ViewAccidentContent({ accident }: { accident: Accident }) {
           label="Date reported to ESI"
           value={accident.esiReported_date}
         />
+        {accident.status !== AccidentStatus.APPROVED &&
+          user.userLevel.id === 5 &&
+          user.id === accident.assignee.id && (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                marginTop: "1rem",
+                objectFit: "contain",
+              }}
+            >
+              <CustomButton
+                variant="contained"
+                sx={{
+                  backgroundColor: "var(--pallet-blue)",
+                  marginTop: "1rem",
+                  marginX: "0.5rem",
+                }}
+                size="medium"
+                disabled={isAccidentsApproving}
+                endIcon={
+                  isAccidentsApproving ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : null
+                }
+                onClick={() => setApproveDialogOpen(true)}
+              >
+                Approve Accident Report
+              </CustomButton>
+            </Box>
+          )}
       </Box>
+      {approveDialogOpen && (
+        <ApproveConfirmationModal
+          open={approveDialogOpen}
+          title="Approve Accident Report Confirmation"
+          content={
+            <>
+              Are you sure you want to approve this Accident Report?
+              <Alert severity="warning" style={{ marginTop: "1rem" }}>
+                This action is not reversible.
+              </Alert>
+            </>
+          }
+          handleClose={() => setApproveDialogOpen(false)}
+          approveFunc={async () => {
+            await approveAccidentsMutation(accident.id);
+          }}
+          onSuccess={() => {}}
+          handleReject={() => {}}
+        />
+      )}
     </Stack>
   );
 }
