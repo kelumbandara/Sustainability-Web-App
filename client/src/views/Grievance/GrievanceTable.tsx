@@ -39,6 +39,7 @@ import {
   createGrievance,
   deleteGrievance,
   getGrievancesAssignedTaskList,
+  getGrievancesCompletedList,
   getGrievancesList,
   Grievance,
   GrievanceStatus,
@@ -50,7 +51,13 @@ import ViewGrievanceContent from "./ViewGrievanceContent";
 import AddOrEditGrievanceDialog from "./AddOrEditGrievanceDialog";
 import { getSeverityLevel } from "./GrievanceUtils";
 
-function GrievanceTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
+function GrievanceTable({
+  isAssignedTasks,
+  isCompletedTasks,
+}: {
+  isAssignedTasks: boolean;
+  isCompletedTasks: boolean;
+}) {
   const { enqueueSnackbar } = useSnackbar();
   const [openViewDrawer, setOpenViewDrawer] = useState(false);
   const [selectedRow, setSelectedRow] = useState<Grievance>(null);
@@ -79,7 +86,11 @@ function GrievanceTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
 
   const breadcrumbItems = [
     { title: "Home", href: "/home" },
-    { title: `${isAssignedTasks ? "Assigned " : ""}Grievance Management` },
+    {
+      title: `${
+        isAssignedTasks ? "Assigned " : isCompletedTasks ? "Completed " : ""
+      }Grievance Management`,
+    },
   ];
 
   const { data: grievanceData, isFetching: isGrievanceDataFetching } = useQuery(
@@ -97,6 +108,14 @@ function GrievanceTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   } = useQuery({
     queryKey: ["grievances-assigned-task"],
     queryFn: getGrievancesAssignedTaskList,
+  });
+
+  const {
+    data: grievanceCompletedTaskData,
+    isFetching: isGrievanceCompletedTaskData,
+  } = useQuery({
+    queryKey: ["grievances-completed-task"],
+    queryFn: getGrievancesCompletedList,
   });
 
   const isMobile = useMediaQuery((theme: Theme) =>
@@ -177,6 +196,15 @@ function GrievanceTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
+    } else if (isCompletedTasks) {
+      if (!grievanceCompletedTaskData) return [];
+      if (rowsPerPage === -1) {
+        return grievanceCompletedTaskData; // If 'All' is selected, return all data
+      }
+      return grievanceCompletedTaskData.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
     } else {
       if (!grievanceData) return [];
       if (rowsPerPage === -1) {
@@ -196,24 +224,34 @@ function GrievanceTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
   ]);
 
   const isGrievanceCreateDisabled = !useCurrentUserHaveAccess(
-    PermissionKeys.INCIDENT_ACCIDENT_REGISTER_ACCIDENT_CREATE
+    PermissionKeys.GRIEVANCE_REGISTER_CREATE
   );
   const isGrievanceEditDisabled = !useCurrentUserHaveAccess(
-    PermissionKeys.INCIDENT_ACCIDENT_REGISTER_ACCIDENT_EDIT
+    PermissionKeys.GRIEVANCE_REGISTER_EDIT
   );
   const isGrievanceDeleteDisabled = !useCurrentUserHaveAccess(
-    PermissionKeys.INCIDENT_ACCIDENT_REGISTER_ACCIDENT_DELETE
-  );
-  const isGrievanceAssignedTaskListDisabled = !useCurrentUserHaveAccess(
-    PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_ACCIDENT_CREATE
-  );
-  const isGrievanceAssignedTaskEditDisabled = !useCurrentUserHaveAccess(
-    PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_ACCIDENT_EDIT
-  );
-  const isGrievanceAssignedTaskDeleteDisabled = !useCurrentUserHaveAccess(
-    PermissionKeys.INCIDENT_ACCIDENT_ASSIGNED_TASKS_ACCIDENT_DELETE
+    PermissionKeys.GRIEVANCE_REGISTER_DELETE
   );
 
+  const isGrievanceAssignedTaskListDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.GRIEVANCE_ASSIGNED_TASKS_CREATE
+  );
+  const isGrievanceAssignedTaskEditDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.GRIEVANCE_ASSIGNED_TASKS_EDIT
+  );
+  const isGrievanceAssignedTaskDeleteDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.GRIEVANCE_ASSIGNED_TASKS_DELETE
+  );
+
+  const isGrievanceCompletedTaskListDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.GRIEVANCE_COMPLETED_TASKS_CREATE
+  );
+  const isGrievanceCompletedTaskEditDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.GRIEVANCE_COMPLETED_TASKS_EDIT
+  );
+  const isGrievanceCompletedTaskDeleteDisabled = !useCurrentUserHaveAccess(
+    PermissionKeys.GRIEVANCE_COMPLETED_TASKS_DELETE
+  );
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
   const handleMenuButtonClick = (
@@ -237,7 +275,9 @@ function GrievanceTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
         }}
       >
         <PageTitle
-          title={`${isAssignedTasks ? "Assigned " : ""}Grievance Management`}
+          title={`${
+            isAssignedTasks ? "Assigned " : isCompletedTasks ? "Completed " : ""
+          }Grievance Management`}
         />
         <Breadcrumb breadcrumbs={breadcrumbItems} />
       </Box>
@@ -257,19 +297,21 @@ function GrievanceTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
               justifyContent: "flex-end",
             }}
           >
-            <Button
-              variant="contained"
-              sx={{ backgroundColor: "var(--pallet-blue)" }}
-              startIcon={<AddIcon />}
-              onClick={handleMenuButtonClick}
-              disabled={
-                isAssignedTasks
-                  ? isGrievanceAssignedTaskListDisabled
-                  : isGrievanceCreateDisabled
-              }
-            >
-              Report a grievance
-            </Button>
+            {!isCompletedTasks && (
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: "var(--pallet-blue)" }}
+                startIcon={<AddIcon />}
+                onClick={handleMenuButtonClick}
+                disabled={
+                  isAssignedTasks
+                    ? isGrievanceAssignedTaskListDisabled
+                    : isGrievanceCreateDisabled
+                }
+              >
+                Report a grievance
+              </Button>
+            )}
             <MenuList>
               <Menu
                 id="basic-menu"
@@ -424,6 +466,8 @@ function GrievanceTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
                   count={
                     isAssignedTasks
                       ? grievanceAssignedTaskData?.length
+                      : isCompletedTasks
+                      ? grievanceCompletedTaskData?.length
                       : grievanceData?.length
                   }
                   rowsPerPage={rowsPerPage}
@@ -458,6 +502,9 @@ function GrievanceTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
                 isAssignedTasks
                   ? isGrievanceAssignedTaskEditDisabled ||
                     selectedRow?.status === GrievanceStatus.completed
+                  : isCompletedTasks
+                  ? isGrievanceCompletedTaskEditDisabled ||
+                    selectedRow?.status === GrievanceStatus.completed
                   : isGrievanceEditDisabled ||
                     selectedRow?.status === GrievanceStatus.completed
               }
@@ -465,6 +512,8 @@ function GrievanceTable({ isAssignedTasks }: { isAssignedTasks: boolean }) {
               disableDelete={
                 isAssignedTasks
                   ? isGrievanceAssignedTaskDeleteDisabled
+                  : isCompletedTasks
+                  ? isGrievanceCompletedTaskDeleteDisabled
                   : isGrievanceDeleteDisabled
               }
             />

@@ -811,8 +811,7 @@ const AppRoutes = () => {
               />
             ),
             !userPermissionObject?.[
-              PermissionKeys
-                .AUDIT_INSPECTION_EXTERNAL_AUDIT_APPROVED_VIEW
+              PermissionKeys.AUDIT_INSPECTION_EXTERNAL_AUDIT_APPROVED_VIEW
             ]
           )}
         />
@@ -833,7 +832,10 @@ const AppRoutes = () => {
           element={withLayout(
             MainLayout,
             () => (
-              <GrievanceTable isAssignedTasks={false} />
+              <GrievanceTable
+                isAssignedTasks={false}
+                isCompletedTasks={false}
+              />
             ),
             !userPermissionObject?.[PermissionKeys.GRIEVANCE_REGISTER_VIEW]
           )}
@@ -843,10 +845,22 @@ const AppRoutes = () => {
           element={withLayout(
             MainLayout,
             () => (
-              <GrievanceTable isAssignedTasks={true} />
+              <GrievanceTable isAssignedTasks={true} isCompletedTasks={false} />
             ),
             !userPermissionObject?.[
               PermissionKeys.GRIEVANCE_ASSIGNED_TASKS_VIEW
+            ]
+          )}
+        />
+        <Route
+          path="/grievance/completed-tasks"
+          element={withLayout(
+            MainLayout,
+            () => (
+              <GrievanceTable isAssignedTasks={false} isCompletedTasks={true} />
+            ),
+            !userPermissionObject?.[
+              PermissionKeys.GRIEVANCE_COMPLETED_TASKS_VIEW
             ]
           )}
         />

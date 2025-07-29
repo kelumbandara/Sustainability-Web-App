@@ -116,6 +116,9 @@ function ViewGrievanceContent({
       queryClient.invalidateQueries({
         queryKey: ["grievances"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["grievances-completed-task"],
+      });
       enqueueSnackbar("Grievance Completed Successfully!", {
         variant: "success",
       });
